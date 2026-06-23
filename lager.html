@@ -588,43 +588,11 @@ function closeSidebar(){ document.getElementById('sidebar').classList.remove('op
 function toggleSubMenu(btn){ btn.closest('.nav-item').classList.toggle('open') }
 function toggleUserDropdown(){ document.getElementById('user-dropdown').classList.toggle('show'); document.addEventListener('click',function h(e){ if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){ document.getElementById('user-dropdown').classList.remove('show'); document.removeEventListener('click',h); } }); }
 
-// ── LOAD DATA ──
-async function loadData(){
-  showSpinner();
-  const lager = document.getElementById('sel-lager').value;
-  const zeit  = document.getElementById('sel-zeitraum').value;
-  currentLager = lager; currentZeitraum = zeit;
-
-  // Determine months to query
-  let months = [];
-  if(zeit.length === 7){ months = [zeit]; }
-  else { const yr=zeit; for(let m=1;m<=12;m++) months.push(yr+'-'+(m<10?'0':'')+m); }
-
-  // Load Wareneingang
-  wareneingangs = [];
-  try {
-    for(const mo of months){
-      const q = query(collection(db,'wareneingang'), where('lager','==',lager), where('monat','==',mo));
-      const snap = await getDocs(q);
-      snap.forEach(d=>wareneingangs.push({id:d.id,...d.data()}));
-    }
-  } catch(e){ console.error(e); }
-
-  // Load Anfangsbestand
-  anfangsbestand = {};
-  try {
-    const abDoc = await getDoc(doc(db,'anfangsbestand', lager+'_'+currentZeitraum));
-    if(abDoc.exists()) anfangsbestand = abDoc.data();
-  } catch(e){}
-
-  hideSpinner();
-  renderTable();
-}
-
-// ── RENDER TABLE ──
+// ── RENDER TABLE (called by select onchange) ──
 function renderTable(){
-  loadData(); return; // call loadData which calls renderTableActual
+  loadData();
 }
+
 function renderTableActual(){
   const isZentral = currentLager === 'zentrallager';
   const thead = document.getElementById('lager-thead');
@@ -687,7 +655,8 @@ function renderTableActual(){
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
       // Anfangsbestand
-      tbHTML += `<td class="num-cell editable" onclick="openAnfangsbestandModal('${prod.id}','${prod.name.replace(/'/g,'\\'')}')">
+      const safeName = prod.name.replace(/'/g,'&apos;');
+      tbHTML += `<td class="num-cell editable" onclick="openAnfangsbestandModal('${prod.id}','${safeName}')">
         <span class="edit-val">${ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>'}</span></td>`;
       // Einkäufe / Lieferungen Gesamt
       tbHTML += `<td class="num-cell">${totalEink||'—'}</td>`;
