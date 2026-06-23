@@ -275,6 +275,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .prod-name{font-size:.78rem}
   .prod-icon{width:28px;height:28px;font-size:.9rem}
 }
+.neon-cyan-small{color:var(--neon-cyan);font-family:'Orbitron',sans-serif;font-size:.78rem}
+.text-dim-small{color:var(--text-dim);font-size:.72rem}
 </style>
 </head>
 <body>
@@ -559,23 +561,7 @@ let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // {productId: value}
 let currentAbProdId = null;
 
-// ── EXPOSE ──
-window.toggleSidebar      = toggleSidebar;
-window.closeSidebar       = closeSidebar;
-window.toggleUserDropdown = toggleUserDropdown;
-window.toggleSubMenu      = toggleSubMenu;
-window.renderTable        = renderTable;
-window.openWareneingang   = openWareneingang;
-window.closeWareneingang  = closeWareneingang;
-window.addShopRow         = addShopRow;
-window.buildConfirm       = buildConfirm;
-window.confirmWareneingang= confirmWareneingang;
-window.backToEdit         = backToEdit;
-window.saveAnfangsbestand = saveAnfangsbestand;
-window.toggleCategory     = toggleCategory;
-window.toggleDetailCols   = toggleDetailCols;
-window.openEditWareneingang = openEditWareneingang;
-window.openAnfangsbestandModal = openAnfangsbestandModal;
+// ── EXPOSE (assigned after function definitions below) ──
 
 // ── SPINNER ──
 function showSpinner(){ document.getElementById('spinner').classList.add('show') }
@@ -613,7 +599,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th" data-date="${d}" onclick="openEditWareneingang('${d}')" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
     thHTML += '<th class="num-cell">Lieferungen Gesamt</th>';
   } else {
@@ -624,7 +610,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th" data-date="${d}" onclick="openEditWareneingang('${d}')" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
   }
   thHTML += '<th class="num-cell">Bestand</th>';
@@ -658,10 +644,12 @@ function renderTableActual(){
       </div></td>`;
       // Anfangsbestand
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}">
+      const safeProdName = prod.name.replace(/"/g, '&quot;');
+      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeProdName}">
         <span class="edit-val">${abDisplay}</span></td>`;
       // Einkäufe / Lieferungen Gesamt
-      tbHTML += `<td class="num-cell">${totalEink||'—'}</td>`;
+      const einkVal = totalEink || '—';
+      tbHTML += `<td class="num-cell">${einkVal}</td>`;
       // Detail date cols
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
@@ -822,7 +810,9 @@ function updateSelectedPreview(){
     catObj.items.forEach(prod=>{
       if(ids.includes(prod.id)){
         if(catObj.cat!==lastCat){ html+=`<div class="selected-cat-label">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        html+=`<div class="selected-item"><span>${prod.icon} ${prod.name}</span><span style="color:var(--neon-cyan);font-family:'Orbitron',sans-serif;font-size:.78rem">${weSelectedItems[prod.id]||0} ${prod.unit||''}</span></div>`;
+        const selQty = weSelectedItems[prod.id]||0;
+        const selUnit = prod.unit||'';
+        html+=`<div class="selected-item"><span>${prod.icon} ${prod.name}</span><span class="neon-cyan-small">${selQty} ${selUnit}</span></div>`;
       }
     });
   });
@@ -869,7 +859,9 @@ window.buildConfirm = function(){
     catObj.items.forEach(prod=>{
       if(ids.includes(prod.id)){
         if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} <span style="color:var(--text-dim);font-size:.72rem">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
+        const unitSpan = prod.unit ? `<span class="text-dim-small">${prod.unit}</span>` : '';
+        const qty = weSelectedItems[prod.id]||0;
+        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} ${unitSpan}</span><span class="ci-qty">${qty}</span></div>`;
       }
     });
   });
@@ -934,11 +926,33 @@ window.openEditWareneingang = function(date){
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',()=>{
+  // Expose all functions to window after they are defined
+  window.toggleSidebar         = toggleSidebar;
+  window.closeSidebar          = closeSidebar;
+  window.toggleUserDropdown    = toggleUserDropdown;
+  window.toggleSubMenu         = toggleSubMenu;
+  window.renderTable           = renderTable;
+  window.toggleCategory        = toggleCategory;
+  window.toggleDetailCols      = toggleDetailCols;
+  window.openAnfangsbestandModal = openAnfangsbestandModal;
+  window.saveAnfangsbestand    = saveAnfangsbestand;
+  window.openWareneingang      = openWareneingang;
+  window.closeWareneingang     = closeWareneingang;
+  window.addShopRow            = addShopRow;
+  window.buildConfirm          = buildConfirm;
+  window.confirmWareneingang   = confirmWareneingang;
+  window.backToEdit            = backToEdit;
+  window.openEditWareneingang  = openEditWareneingang;
+
   loadData();
-  // Event delegation for Anfangsbestand cells
+
   document.getElementById('lager-tbody').addEventListener('click', e=>{
     const cell = e.target.closest('.ab-cell');
     if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
+  });
+  document.getElementById('lager-thead').addEventListener('click', e=>{
+    const th = e.target.closest('.we-date-th');
+    if(th) openEditWareneingang(th.dataset.date);
   });
 });
 </script>
