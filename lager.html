@@ -636,7 +636,8 @@ function renderTableActual(){
   const firstCat = true;
   PRODUCTS.forEach((catObj, ci)=>{
     const isFirst = ci === 0;
-    tbHTML += `<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}">
+    const catOpen = isFirst ? 'open' : '';
+    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td colspan="99"><div class="cat-label">
         <span class="cat-arrow">▶</span>
         ${catObj.cat}
@@ -649,14 +650,16 @@ function renderTableActual(){
       const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const ab = anfangsbestand[prod.id] ?? '';
 
-      tbHTML += `<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}" data-prod="${prod.id}">`;
+      const prodHidden = isFirst ? '' : 'hidden';
+      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
       // Anfangsbestand
+      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}">
-        <span class="edit-val">${ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>'}</span></td>`;
+        <span class="edit-val">${abDisplay}</span></td>`;
       // Einkäufe / Lieferungen Gesamt
       tbHTML += `<td class="num-cell">${totalEink||'—'}</td>`;
       // Detail date cols
