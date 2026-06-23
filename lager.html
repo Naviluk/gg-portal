@@ -655,8 +655,7 @@ function renderTableActual(){
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
       // Anfangsbestand
-      const safeName = prod.name.replace(/'/g,'&apos;');
-      tbHTML += `<td class="num-cell editable" onclick="openAnfangsbestandModal('${prod.id}','${safeName}')">
+      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}">
         <span class="edit-val">${ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>'}</span></td>`;
       // Einkäufe / Lieferungen Gesamt
       tbHTML += `<td class="num-cell">${totalEink||'—'}</td>`;
@@ -931,7 +930,14 @@ window.openEditWareneingang = function(date){
 }
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded',()=>{ loadData(); });
+document.addEventListener('DOMContentLoaded',()=>{
+  loadData();
+  // Event delegation for Anfangsbestand cells
+  document.getElementById('lager-tbody').addEventListener('click', e=>{
+    const cell = e.target.closest('.ab-cell');
+    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
+  });
+});
 </script>
 </body>
 </html>
