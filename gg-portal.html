@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>GAME GALAXY Betriebsportal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #050510;
+    --bg2: #0a0a1a;
+    --neon-cyan: #00f5ff;
+    --neon-magenta: #ff00cc;
+    --neon-yellow: #ffee00;
+    --neon-green: #00ff88;
+    --glass: rgba(255,255,255,0.04);
+    --glass-border: rgba(0,245,255,0.15);
+    --text: #e0e8ff;
+    --text-dim: #7080a0;
+    --header-h: 64px;
+    --header-h-mob: 56px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ─── NEON GRID BACKGROUND ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(255,0,204,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,245,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ─── PAGES ─── */
+  .page { display: none; position: relative; z-index: 1; min-height: 100vh; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* ════════════════════════════════════════
+     WELCOME PAGE
+  ════════════════════════════════════════ */
+  #page-welcome {
+    align-items: center; justify-content: center;
+    padding: 2rem 1rem 6rem;
+  }
+  .welcome-wrap {
+    width: 100%; max-width: 480px;
+    display: flex; flex-direction: column; align-items: center; gap: 2.5rem;
+  }
+  .logo-block { text-align: center; }
+  .logo-block .logo-main {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 18px rgba(0,245,255,0.5));
+    line-height: 1.1;
+  }
+  .logo-block .logo-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem; letter-spacing: 0.35em;
+    color: var(--neon-yellow); opacity: 0.8;
+    margin-top: 0.4rem; text-transform: uppercase;
+  }
+  .neon-star {
+    display: inline-block; animation: pulse-star 2s ease-in-out infinite;
+  }
+  @keyframes pulse-star {
+    0%,100%{filter:drop-shadow(0 0 6px var(--neon-cyan))}
+    50%{filter:drop-shadow(0 0 20px var(--neon-magenta))}
+  }
+
+  /* Card */
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    backdrop-filter: blur(12px);
+  }
+  .card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem; letter-spacing: 0.2em;
+    color: var(--neon-cyan); text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  /* Form elements */
+  label.field-label {
+    display: block; font-size: 0.8rem; letter-spacing: 0.1em;
+    color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.4rem;
+  }
+  select, input[type=password], input[type=text] {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    padding: 0.65rem 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none; -webkit-appearance: none;
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2300f5ff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 1rem center;
+    padding-right: 2.5rem; cursor: pointer;
+  }
+  select option { background: #0a0a1a; color: var(--text); }
+  select:focus, input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 0 2px rgba(0,245,255,0.15);
+  }
+  .field { margin-bottom: 1.2rem; }
+
+  /* PIN input */
+  .pin-row { display: flex; gap: 0.5rem; justify-content: center; }
+  .pin-dot {
+    width: 48px; height: 56px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif; font-size: 1.4rem;
+    color: var(--neon-cyan); text-align: center;
+    outline: none; caret-color: var(--neon-cyan);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .pin-dot:focus { border-color: var(--neon-cyan); box-shadow: 0 0 0 2px rgba(0,245,255,0.2); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Orbitron', sans-serif; font-size: 0.75rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    border: none; border-radius: 6px; cursor: pointer;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s; width: 100%;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--neon-cyan), #0088cc);
+    color: #000; font-weight: 700;
+    box-shadow: 0 0 20px rgba(0,245,255,0.3);
+  }
+  .btn-primary:hover { box-shadow: 0 0 30px rgba(0,245,255,0.6); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent; color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-family: 'Rajdhani', sans-serif; font-size: 0.85rem;
+  }
+  .btn-ghost:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+  .btn-danger {
+    background: linear-gradient(135deg, #ff0066, #cc0044);
+    color: #fff; font-weight: 700;
+    box-shadow: 0 0 16px rgba(255,0,102,0.3);
+  }
+
+  /* Error / info messages */
+  .msg { font-size: 0.85rem; padding: 0.6rem 0.9rem; border-radius: 6px; margin-top: 0.8rem; display: none; }
+  .msg.show { display: block; }
+  .msg.error { background: rgba(255,0,100,0.12); border: 1px solid rgba(255,0,100,0.3); color: #ff6699; }
+  .msg.info  { background: rgba(0,245,255,0.08); border: 1px solid rgba(0,245,255,0.2); color: var(--neon-cyan); }
+
+  /* Admin link */
+  .admin-link-wrap {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 10;
+  }
+  .admin-link {
+    font-family: 'Orbitron', sans-serif; font-size: 0.6rem;
+    letter-spacing: 0.2em; color: rgba(255,255,255,0.15);
+    cursor: pointer; text-transform: uppercase;
+    transition: color 0.2s;
+    border: none; background: transparent;
+  }
+  .admin-link:hover { color: var(--neon-magenta); }
+
+  /* ════════════════════════════════════════
+     HEADER
+  ════════════════════════════════════════ */
+  .app-header {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: rgba(5,5,16,0.9);
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    display: flex; align-items: center;
+    padding: 0 1.2rem; gap: 1rem;
+    z-index: 100;
+  }
+  .hdr-left { display: flex; align-items: center; }
+  .hdr-center { flex: 1; text-align: center; }
+  .hdr-right { display: flex; align-items: center; gap: 0.5rem; }
+
+  .hdr-org {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(0.6rem, 1.5vw, 0.85rem);
+    letter-spacing: 0.12em;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 6px rgba(0,245,255,0.4));
+    line-height: 1.1;
+  }
+  .hdr-page {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.2em;
+    color: var(--text-dim); text-transform: uppercase;
+    margin-top: 0.1rem;
+  }
+  .hdr-user {
+    font-family: 'Rajdhani', sans-serif; font-size: 0.9rem;
+    color: var(--neon-cyan); cursor: pointer;
+    display: flex; align-items: center; gap: 0.3rem;
+    white-space: nowrap;
+  }
+  .hdr-user svg { width: 14px; height: 14px; fill: none; stroke: var(--neon-cyan); stroke-width: 2; }
+  .hdr-user:hover .hdr-chevron { transform: rotate(180deg); }
+  .hdr-chevron { transition: transform 0.2s; }
+
+  /* Burger */
+  .burger {
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 4px;
+  }
+  .burger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--neon-cyan);
+    border-radius: 2px;
+    transition: all 0.25s;
+    box-shadow: 0 0 6px var(--neon-cyan);
+  }
+  .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .burger.open span:nth-child(2) { opacity: 0; }
+  .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ─── MOBILE HEADER ─── */
+  @media(max-width: 640px) {
+    .app-header {
+      height: auto; min-height: var(--header-h-mob);
+      flex-wrap: wrap; padding: 0.4rem 1rem;
+      align-items: flex-start;
+    }
+    .hdr-mob-top {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 0.3rem 0;
+    }
+    .hdr-mob-org-user {
+      display: flex; flex-direction: column; align-items: flex-end;
+    }
+    .hdr-center { display: none; }
+    .hdr-right { display: none; }
+  }
+
+  /* ─── SIDEBAR MENU ─── */
+  .sidebar {
+    position: fixed; top: 0; left: -280px; bottom: 0;
+    width: 260px;
+    background: rgba(5,5,20,0.97);
+    border-right: 1px solid var(--glass-border);
+    z-index: 200;
+    padding-top: var(--header-h);
+    transition: left 0.3s cubic-bezier(.4,0,.2,1);
+    backdrop-filter: blur(20px);
+  }
+  .sidebar.open { left: 0; }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.5);
+  }
+  .sidebar-overlay.show { display: block; }
+
+  .nav-list { list-style: none; padding: 1rem 0; }
+  .nav-item > .nav-link {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    font-family: 'Orbitron', sans-serif; font-size: 0.68rem;
+    letter-spacing: 0.15em; color: var(--text-dim);
+    text-transform: uppercase; cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item > .nav-link:hover, .nav-item > .nav-link.active {
+    color: var(--neon-cyan);
+    background: rgba(0,245,255,0.06);
+  }
+  .nav-item > .nav-link .nav-arrow {
+    width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 2;
+    transition: transform 0.2s;
+  }
+  .nav-item.open > .nav-link .nav-arrow { transform: rotate(90deg); }
+
+  .nav-sub {
+    display: none; list-style: none; padding: 0;
+    background: rgba(0,0,0,0.2);
+  }
+  .nav-item.open > .nav-sub { display: block; }
+  .nav-sub li a {
+    display: block; padding: 0.55rem 1.5rem 0.55rem 2.5rem;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.85rem;
+    color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+  .nav-sub li a:hover { color: var(--neon-magenta); }
+  .nav-divider { height: 1px; background: var(--glass-border); margin: 0.5rem 1.5rem; }
+
+  /* ─── DROPDOWN user menu ─── */
+  .user-dropdown {
+    position: absolute; top: calc(var(--header-h) + 4px); right: 1.2rem;
+    background: rgba(5,5,20,0.97);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px; overflow: hidden;
+    display: none; z-index: 300;
+    min-width: 180px;
+    backdrop-filter: blur(16px);
+  }
+  .user-dropdown.show { display: block; }
+  .user-dropdown button {
+    display: block; width: 100%;
+    padding: 0.7rem 1.2rem; text-align: left;
+    background: none; border: none; cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.9rem;
+    color: var(--text-dim); letter-spacing: 0.05em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .user-dropdown button:hover { background: rgba(0,245,255,0.08); color: var(--neon-cyan); }
+  .user-dropdown button.danger:hover { background: rgba(255,0,102,0.1); color: #ff6699; }
+
+  /* ════════════════════════════════════════
+     MAIN CONTENT AREA
+  ════════════════════════════════════════ */
+  .main-content {
+    margin-top: var(--header-h);
+    flex: 1; padding: 2rem 1.5rem;
+    position: relative; z-index: 1;
+  }
+  @media(max-width: 640px) {
+    .main-content { margin-top: calc(var(--header-h-mob) + 20px); }
+  }
+  .page-title-mob {
+    display: none;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem; letter-spacing: 0.1em;
+    color: var(--neon-cyan);
+    margin-bottom: 1.5rem;
+  }
+  @media(max-width: 640px) { .page-title-mob { display: block; } }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1rem;
+    height: 50vh; color: var(--text-dim); text-align: center;
+  }
+  .empty-state .es-icon {
+    font-size: 3rem; opacity: 0.3;
+  }
+  .empty-state p {
+    font-family: 'Rajdhani', sans-serif; font-size: 1rem;
+    letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.4;
+  }
+
+  /* ════════════════════════════════════════
+     MODAL
+  ════════════════════════════════════════ */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,10,0.85);
+    z-index: 500; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; padding: 2rem;
+    width: 100%; max-width: 400px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,245,255,0.1);
+  }
+  .modal-title {
+    font-family: 'Orbitron', sans-serif; font-size: 0.8rem;
+    letter-spacing: 0.15em; color: var(--neon-cyan);
+    text-transform: uppercase; margin-bottom: 1.5rem;
+  }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 1.2rem; cursor: pointer; line-height: 1;
+  }
+  .modal-close:hover { color: var(--neon-magenta); }
+
+  /* ════════════════════════════════════════
+     LOADING SPINNER
+  ════════════════════════════════════════ */
+  .spinner-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(5,5,16,0.8);
+    z-index: 999; align-items: center; justify-content: center;
+  }
+  .spinner-overlay.show { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(0,245,255,0.2);
+    border-top-color: var(--neon-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ════════════════════════════════════════
+     UTILITIES
+  ════════════════════════════════════════ */
+  .mt1 { margin-top: 0.5rem; }
+  .mt2 { margin-top: 1rem; }
+  .mt3 { margin-top: 1.5rem; }
+  .text-center { text-align: center; }
+  .text-dim { color: var(--text-dim); }
+  .neon-text { color: var(--neon-cyan); }
+
+  /* Scanline effect subtle */
+  .app-header::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    animation: scan 3s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0%,100%{opacity:0.3} 50%{opacity:1}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SPINNER
+══════════════════════════════════════════ -->
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: WELCOME
+══════════════════════════════════════════ -->
+<div class="page active" id="page-welcome">
+  <div class="welcome-wrap">
+
+    <div class="logo-block">
+      <div class="logo-main">
+        <span class="neon-star">✦</span> GAME GALAXY <span class="neon-star">✦</span>
+      </div>
+      <div class="logo-sub">Betriebsportal</div>
+    </div>
+
+    <!-- Step 1: Standort wählen -->
+    <div class="card" id="step-org">
+      <div class="card-title">Standort auswählen</div>
+      <div class="field">
+        <label class="field-label">Filiale</label>
+        <select id="sel-org">
+          <option value="">— Bitte wählen —</option>
+          <option value="nettetal">GAME GALAXY NETTETAL</option>
+          <option value="brüggen">GAME GALAXY BRÜGGEN</option>
+          <option value="viersen">GAME GALAXY VIERSEN</option>
+          <option value="köln">GAME GALAXY KÖLN</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="handleOrgSelect()">Weiter</button>
+      <div class="msg error" id="err-org"></div>
+    </div>
+
+    <!-- Step 2: Org-Passwort -->
+    <div class="card" id="step-orgpw" style="display:none">
+      <div class="card-title" id="step-orgpw-title">Filiale — Zugang</div>
+      <div class="field">
+        <label class="field-label">Organisations-Passwort (6-stellig)</label>
+        <div class="pin-row" id="pin-org-row">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="msg error" id="err-orgpw"></div>
+      </div>
+      <button class="btn btn-primary mt2" onclick="handleOrgPassword()">Anmelden</button>
+      <button class="btn btn-ghost mt1" onclick="backToOrgSelect()">← Zurück</button>
+    </div>
+
+  </div>
+
+  <!-- Admin link -->
+  <div class="admin-link-wrap">
+    <button class="admin-link" onclick="openAdminModal()">Admin</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: MITARBEITER (Thekenverkauf etc.)
+══════════════════════════════════════════ -->
+<div class="page" id="page-staff">
+  <!-- HEADER TYPE 2 (Org-Login) -->
+  <header class="app-header" id="hdr-staff">
+    <!-- Desktop -->
+    <div class="hdr-left">
+      <button class="burger" id="burger-staff" onclick="toggleSidebar('staff')" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-org" id="hdr-staff-org">GAME GALAXY</div>
+      <div class="hdr-page" id="hdr-staff-page">Thekenverkauf</div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-user" id="hdr-staff-user" onclick="toggleUserDropdown('staff')">
+        <span id="hdr-staff-username">—</span>
+        <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+      </div>
+    </div>
+    <!-- Mobile top bar -->
+    <div class="hdr-mob-top" style="display:none" id="hdr-staff-mob">
+      <button class="burger" onclick="toggleSidebar('staff')" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="hdr-mob-org-user">
+        <div class="hdr-org" style="font-size:0.55rem" id="hdr-staff-org-mob">GAME GALAXY</div>
+        <div class="hdr-user" onclick="toggleUserDropdown('staff')" style="font-size:0.8rem">
+          <span id="hdr-staff-username-mob">—</span>
+          <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="user-dropdown" id="dropdown-staff">
+    <button onclick="openStaffSwitch()">Benutzer wechseln</button>
+    <button class="danger" onclick="logoutStaff()">Abmelden</button>
+    <button class="danger" onclick="leaveOrg()">Filiale verlassen</button>
+  </div>
+
+  <div class="main-content">
+    <div class="page-title-mob" id="mob-title-staff">Thekenverkauf</div>
+    <div class="empty-state">
+      <div class="es-icon">🎮</div>
+      <p>Thekenverkauf — Inhalt folgt</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE: ADMIN / Statistik
+══════════════════════════════════════════ -->
+<div class="page" id="page-admin">
+  <!-- HEADER TYPE 3 (Admin-Login) -->
+  <header class="app-header" id="hdr-admin">
+    <div class="hdr-left">
+      <button class="burger" id="burger-admin" onclick="toggleSidebar('admin')" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-org">GAME GALAXY Betriebsportal</div>
+      <div class="hdr-page" id="hdr-admin-page">Statistik</div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-user" id="hdr-admin-user" onclick="toggleUserDropdown('admin')">
+        <span id="hdr-admin-username">—</span>
+        <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+      </div>
+    </div>
+    <!-- Mobile -->
+    <div class="hdr-mob-top" style="display:none" id="hdr-admin-mob">
+      <button class="burger" onclick="toggleSidebar('admin')" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="hdr-mob-org-user">
+        <div class="hdr-org" style="font-size:0.55rem">GAME GALAXY Betriebsportal</div>
+        <div class="hdr-user" onclick="toggleUserDropdown('admin')" style="font-size:0.8rem">
+          <span id="hdr-admin-username-mob">—</span>
+          <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="user-dropdown" id="dropdown-admin">
+    <button onclick="logoutAdmin()">Abmelden</button>
+  </div>
+
+  <div class="main-content">
+    <div class="page-title-mob" id="mob-title-admin">Statistik</div>
+    <div class="empty-state">
+      <div class="es-icon">📊</div>
+      <p>Statistik — Inhalt folgt</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SIDEBARS
+══════════════════════════════════════════ -->
+<div class="sidebar-overlay" id="overlay-staff" onclick="closeSidebar('staff')"></div>
+<nav class="sidebar" id="sidebar-staff">
+  <ul class="nav-list">
+    <li class="nav-item">
+      <button class="nav-link" onclick="navigateTo('thekenverkauf','staff')">Thekenverkauf</button>
+    </li>
+    <li class="nav-item" id="nav-getranke-staff">
+      <button class="nav-link" onclick="navigateTo('getränke','staff')">Getränke</button>
+    </li>
+  </ul>
+</nav>
+
+<div class="sidebar-overlay" id="overlay-admin" onclick="closeSidebar('admin')"></div>
+<nav class="sidebar" id="sidebar-admin">
+  <ul class="nav-list">
+    <li class="nav-item" id="nav-lager">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Lager
+        <svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="#" onclick="navigateTo('bestände','admin');return false">Bestände</a></li>
+        <li><a href="#" onclick="navigateTo('nachfüllungen','admin');return false">Nachfüllungen</a></li>
+        <li><a href="#" onclick="navigateTo('einkäufe','admin');return false">Einkäufe</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="navigateTo('inventur','admin')">Inventur</button></li>
+    <li class="nav-item"><button class="nav-link active" onclick="navigateTo('statistik','admin')">Statistik</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="navigateTo('rechnungen','admin')">Rechnungen</button></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item" id="nav-theken-admin">
+      <button class="nav-link" onclick="navigateTo('thekenverkauf','admin')">Thekenverkauf</button>
+    </li>
+    <li class="nav-item" id="nav-getr-admin">
+      <button class="nav-link" onclick="navigateTo('getränke','admin')">Getränke</button>
+    </li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     MODAL: ADMIN LOGIN
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-admin">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAdminModal()">✕</button>
+    <div class="modal-title">Admin-Bereich</div>
+
+    <!-- Step A: Name -->
+    <div id="admin-step-name">
+      <div class="field">
+        <label class="field-label">Benutzername</label>
+        <input type="text" id="admin-name-input" placeholder="Name eingeben" autocomplete="off"
+               onkeydown="if(event.key==='Enter')handleAdminName()">
+      </div>
+      <button class="btn btn-primary" onclick="handleAdminName()">Weiter</button>
+      <div class="msg error" id="err-admin-name"></div>
+    </div>
+
+    <!-- Step B: Password -->
+    <div id="admin-step-pw" style="display:none">
+      <div class="field">
+        <label class="field-label" id="admin-pw-label">Passwort für —</label>
+        <div class="pin-row" id="pin-admin-row">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="msg error" id="err-admin-pw"></div>
+      </div>
+      <button class="btn btn-primary mt2" onclick="handleAdminPassword()">Anmelden</button>
+      <button class="btn btn-ghost mt1" onclick="backToAdminName()">← Zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: MITARBEITER SWITCH (persistent)
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-staff-switch">
+  <div class="modal">
+    <div class="modal-title">Mitarbeiter anmelden</div>
+    <div class="field">
+      <label class="field-label">Mitarbeiter auswählen</label>
+      <select id="sel-staff">
+        <option value="">— Bitte wählen —</option>
+      </select>
+    </div>
+    <div id="staff-pw-block" style="display:none">
+      <div class="field">
+        <label class="field-label">PIN (4-stellig)</label>
+        <div class="pin-row" id="pin-staff-row">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+          <input class="pin-dot" maxlength="1" type="password" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="msg error" id="err-staff-pw"></div>
+      </div>
+      <button class="btn btn-primary mt2" onclick="handleStaffLogin()">Anmelden</button>
+    </div>
+    <div id="msg-no-staff" class="msg info">Keine Mitarbeiter für diese Filiale gefunden.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FIREBASE + APP LOGIC
+══════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs }
+  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut }
+  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+// ── FIREBASE CONFIG ──
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// ── STATE ──
+let currentOrg     = null;  // e.g. "brüggen"
+let currentStaff   = null;  // { name, role }
+let currentAdmin   = null;  // { name, role }
+let adminNameInput = '';
+
+// ── EXPOSE TO WINDOW (for onclick handlers) ──
+window.handleOrgSelect      = handleOrgSelect;
+window.handleOrgPassword    = handleOrgPassword;
+window.backToOrgSelect      = backToOrgSelect;
+window.openAdminModal       = openAdminModal;
+window.closeAdminModal      = closeAdminModal;
+window.handleAdminName      = handleAdminName;
+window.handleAdminPassword  = handleAdminPassword;
+window.backToAdminName      = backToAdminName;
+window.toggleSidebar        = toggleSidebar;
+window.closeSidebar         = closeSidebar;
+window.toggleSubMenu        = toggleSubMenu;
+window.toggleUserDropdown   = toggleUserDropdown;
+window.navigateTo           = navigateTo;
+window.openStaffSwitch      = openStaffSwitch;
+window.logoutStaff          = logoutStaff;
+window.leaveOrg             = leaveOrg;
+window.logoutAdmin          = logoutAdmin;
+window.handleStaffLogin     = handleStaffLogin;
+
+// ── SPINNER ──
+function showSpinner(){ document.getElementById('spinner').classList.add('show'); }
+function hideSpinner(){ document.getElementById('spinner').classList.remove('show'); }
+
+// ── SHOW PAGE ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+}
+
+// ── MOBILE HEADER SWITCH ──
+function applyMobileHeader(type){
+  const isMob = window.innerWidth <= 640;
+  if(type==='staff'){
+    document.getElementById('hdr-staff').querySelector('.hdr-left').style.display = isMob?'none':'';
+    document.getElementById('hdr-staff').querySelector('.hdr-center').style.display = isMob?'none':'';
+    document.getElementById('hdr-staff').querySelector('.hdr-right').style.display = isMob?'none':'';
+    document.getElementById('hdr-staff-mob').style.display = isMob?'flex':'none';
+  } else {
+    document.getElementById('hdr-admin').querySelector('.hdr-left').style.display = isMob?'none':'';
+    document.getElementById('hdr-admin').querySelector('.hdr-center').style.display = isMob?'none':'';
+    document.getElementById('hdr-admin').querySelector('.hdr-right').style.display = isMob?'none':'';
+    document.getElementById('hdr-admin-mob').style.display = isMob?'flex':'none';
+  }
+}
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('page-staff').classList.contains('active')) applyMobileHeader('staff');
+  if(document.getElementById('page-admin').classList.contains('active')) applyMobileHeader('admin');
+});
+
+// ══════════════════════════════════════════
+// ORGANISATION LOGIN
+// ══════════════════════════════════════════
+function handleOrgSelect(){
+  const sel = document.getElementById('sel-org');
+  const val = sel.value;
+  if(!val){ showErr('err-org','Bitte wählen Sie eine Filiale aus.'); return; }
+  clearErr('err-org');
+
+  // Check if device already has saved org session
+  const saved = localStorage.getItem('gg_org');
+  if(saved === val){
+    currentOrg = val;
+    enterOrgPortal();
+    return;
+  }
+
+  currentOrg = val;
+  document.getElementById('step-orgpw-title').textContent =
+    'GAME GALAXY ' + val.toUpperCase() + ' — Zugang';
+  document.getElementById('step-org').style.display = 'none';
+  document.getElementById('step-orgpw').style.display = 'block';
+  clearPinRow('pin-org-row');
+  focusFirstPin('pin-org-row');
+}
+
+async function handleOrgPassword(){
+  const pin = getPinValue('pin-org-row');
+  if(pin.length < 6){ showErr('err-orgpw','Bitte alle 6 Stellen eingeben.'); return; }
+  showSpinner();
+  try {
+    const snap = await getDoc(doc(db, 'organisations', currentOrg));
+    if(!snap.exists()){ hideSpinner(); showErr('err-orgpw','Filiale nicht gefunden. Bitte Admin kontaktieren.'); return; }
+    const data = snap.data();
+    if(data.password !== pin){ hideSpinner(); showErr('err-orgpw','Falsches Passwort. Bitte erneut versuchen.'); clearPinRow('pin-org-row'); focusFirstPin('pin-org-row'); return; }
+    // Save to localStorage
+    localStorage.setItem('gg_org', currentOrg);
+    hideSpinner();
+    enterOrgPortal();
+  } catch(e){ hideSpinner(); showErr('err-orgpw','Verbindungsfehler. Bitte erneut versuchen.'); }
+}
+
+function enterOrgPortal(){
+  // Update header
+  const orgLabel = 'GAME GALAXY ' + currentOrg.toUpperCase();
+  document.getElementById('hdr-staff-org').textContent = orgLabel;
+  document.getElementById('hdr-staff-org-mob').textContent = orgLabel;
+  setStaffPageTitle('Thekenverkauf');
+  showPage('staff');
+  applyMobileHeader('staff');
+  openStaffSwitch(true); // mandatory login
+}
+
+function backToOrgSelect(){
+  document.getElementById('step-org').style.display = 'block';
+  document.getElementById('step-orgpw').style.display = 'none';
+  clearErr('err-orgpw');
+}
+
+// ══════════════════════════════════════════
+// STAFF SWITCH MODAL
+// ══════════════════════════════════════════
+async function openStaffSwitch(mandatory=false){
+  closeDropdown('staff');
+  const modal = document.getElementById('modal-staff-switch');
+  if(!mandatory){
+    // add close button if not mandatory
+    let cb = modal.querySelector('.modal-close');
+    if(!cb){
+      cb = document.createElement('button');
+      cb.className='modal-close'; cb.textContent='✕';
+      cb.onclick=()=>{ if(currentStaff) modal.classList.remove('show'); };
+      modal.querySelector('.modal').prepend(cb);
+    } else { cb.style.display=''; }
+  } else {
+    let cb = modal.querySelector('.modal-close');
+    if(cb) cb.style.display='none';
+  }
+  modal.classList.add('show');
+  document.getElementById('staff-pw-block').style.display='none';
+  clearErr('err-staff-pw');
+
+  // Load staff for this org
+  const sel = document.getElementById('sel-staff');
+  sel.innerHTML = '<option value="">— Bitte wählen —</option>';
+  document.getElementById('msg-no-staff').classList.remove('show');
+  try {
+    const q = query(collection(db,'users'), where('org','==',currentOrg), where('role','in',['Mitarbeiter','MitarbeiterPlus']));
+    const snap = await getDocs(q);
+    if(snap.empty){ document.getElementById('msg-no-staff').classList.add('show'); return; }
+    snap.forEach(d=>{ const opt=document.createElement('option'); opt.value=d.id; opt.textContent=d.data().name; sel.appendChild(opt); });
+  } catch(e){ document.getElementById('msg-no-staff').classList.add('show'); }
+
+  sel.onchange = ()=>{
+    if(sel.value){
+      document.getElementById('staff-pw-block').style.display='block';
+      clearPinRow('pin-staff-row');
+      focusFirstPin('pin-staff-row');
+    } else {
+      document.getElementById('staff-pw-block').style.display='none';
+    }
+  };
+}
+
+async function handleStaffLogin(){
+  const sel   = document.getElementById('sel-staff');
+  const uid   = sel.value;
+  const pin   = getPinValue('pin-staff-row');
+  if(!uid){ showErr('err-staff-pw','Bitte Mitarbeiter auswählen.'); return; }
+  if(pin.length < 4){ showErr('err-staff-pw','Bitte 4-stelligen PIN eingeben.'); return; }
+  showSpinner();
+  try {
+    const snap = await getDoc(doc(db,'users',uid));
+    const data = snap.data();
+    if(data.pin !== pin){ hideSpinner(); showErr('err-staff-pw','Falscher PIN.'); clearPinRow('pin-staff-row'); focusFirstPin('pin-staff-row'); return; }
+    currentStaff = { name: data.name, role: data.role, uid };
+    document.getElementById('hdr-staff-username').textContent = data.name;
+    document.getElementById('hdr-staff-username-mob').textContent = data.name;
+    // MitarbeiterPlus sees Getränke
+    document.getElementById('nav-getranke-staff').style.display = data.role==='MitarbeiterPlus'?'':'none';
+    hideSpinner();
+    document.getElementById('modal-staff-switch').classList.remove('show');
+  } catch(e){ hideSpinner(); showErr('err-staff-pw','Verbindungsfehler.'); }
+}
+
+function logoutStaff(){
+  closeDropdown('staff');
+  currentStaff = null;
+  document.getElementById('hdr-staff-username').textContent = '—';
+  document.getElementById('hdr-staff-username-mob').textContent = '—';
+  openStaffSwitch(true);
+}
+
+function leaveOrg(){
+  localStorage.removeItem('gg_org');
+  currentOrg   = null;
+  currentStaff = null;
+  document.getElementById('modal-staff-switch').classList.remove('show');
+  // reset welcome
+  document.getElementById('sel-org').value = '';
+  document.getElementById('step-org').style.display='block';
+  document.getElementById('step-orgpw').style.display='none';
+  showPage('welcome');
+}
+
+// ══════════════════════════════════════════
+// ADMIN LOGIN
+// ══════════════════════════════════════════
+// Allowed roles for admin login
+const ADMIN_ROLES = ['Admin','Einkaufsleiter','Kollege'];
+
+function openAdminModal(){
+  document.getElementById('modal-admin').classList.add('show');
+  document.getElementById('admin-step-name').style.display='block';
+  document.getElementById('admin-step-pw').style.display='none';
+  document.getElementById('admin-name-input').value='';
+  clearErr('err-admin-name');
+  clearErr('err-admin-pw');
+  adminNameInput='';
+  setTimeout(()=>document.getElementById('admin-name-input').focus(),100);
+}
+
+function closeAdminModal(){
+  document.getElementById('modal-admin').classList.remove('show');
+}
+
+async function handleAdminName(){
+  const name = document.getElementById('admin-name-input').value.trim();
+  if(!name){ showErr('err-admin-name','Bitte Benutzernamen eingeben.'); return; }
+  showSpinner();
+  try {
+    // Search user by name in admin roles
+    const q = query(collection(db,'users'), where('name','==',name), where('role','in',ADMIN_ROLES));
+    const snap = await getDocs(q);
+    if(snap.empty){ hideSpinner(); showErr('err-admin-name','Benutzername nicht gefunden oder keine Berechtigung.'); return; }
+    adminNameInput = name;
+    hideSpinner();
+    document.getElementById('admin-step-name').style.display='none';
+    document.getElementById('admin-step-pw').style.display='block';
+    document.getElementById('admin-pw-label').textContent = 'PIN für ' + name;
+    clearPinRow('pin-admin-row');
+    focusFirstPin('pin-admin-row');
+  } catch(e){ hideSpinner(); showErr('err-admin-name','Verbindungsfehler. Bitte erneut versuchen.'); }
+}
+
+async function handleAdminPassword(){
+  const pin = getPinValue('pin-admin-row');
+  if(pin.length < 4){ showErr('err-admin-pw','Bitte 4-stelligen PIN eingeben.'); return; }
+  showSpinner();
+  try {
+    const q = query(collection(db,'users'), where('name','==',adminNameInput), where('role','in',ADMIN_ROLES));
+    const snap = await getDocs(q);
+    let found = null;
+    snap.forEach(d=>{ if(d.data().pin===pin) found=d.data(); });
+    if(!found){ hideSpinner(); showErr('err-admin-pw','Falscher PIN. Bitte erneut versuchen.'); clearPinRow('pin-admin-row'); focusFirstPin('pin-admin-row'); return; }
+    currentAdmin = { name: found.name, role: found.role };
+    document.getElementById('hdr-admin-username').textContent = found.name;
+    document.getElementById('hdr-admin-username-mob').textContent = found.name;
+    // Apply role-based menu visibility
+    applyAdminRoleMenu(found.role);
+    hideSpinner();
+    closeAdminModal();
+    setAdminPageTitle('Statistik');
+    showPage('admin');
+    applyMobileHeader('admin');
+  } catch(e){ hideSpinner(); showErr('err-admin-pw','Verbindungsfehler.'); }
+}
+
+function backToAdminName(){
+  document.getElementById('admin-step-name').style.display='block';
+  document.getElementById('admin-step-pw').style.display='none';
+  clearErr('err-admin-pw');
+}
+
+function applyAdminRoleMenu(role){
+  const showLager      = ['Admin','Einkaufsleiter'].includes(role);
+  const showTheken     = ['Admin','Einkaufsleiter'].includes(role);
+  document.getElementById('nav-lager').style.display      = showLager?'':'none';
+  document.getElementById('nav-theken-admin').style.display = showTheken?'':'none';
+  document.getElementById('nav-getr-admin').style.display   = showTheken?'':'none';
+}
+
+function logoutAdmin(){
+  closeDropdown('admin');
+  currentAdmin = null;
+  showPage('welcome');
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function navigateTo(page, type){
+  closeSidebar(type);
+  const titles = {
+    'thekenverkauf':'Thekenverkauf','getränke':'Getränke',
+    'bestände':'Bestände','nachfüllungen':'Nachfüllungen','einkäufe':'Einkäufe',
+    'inventur':'Inventur','statistik':'Statistik','rechnungen':'Rechnungen'
+  };
+  const t = titles[page] || page;
+  if(type==='staff'){ setStaffPageTitle(t); }
+  else { setAdminPageTitle(t); }
+  // Update active nav
+  document.querySelectorAll('#sidebar-'+type+' .nav-link').forEach(el=>el.classList.remove('active'));
+}
+
+function setStaffPageTitle(t){
+  document.getElementById('hdr-staff-page').textContent = t;
+  document.getElementById('mob-title-staff').textContent = t;
+  // Update empty state text
+  const es = document.querySelector('#page-staff .empty-state p');
+  if(es) es.textContent = t + ' — Inhalt folgt';
+}
+function setAdminPageTitle(t){
+  document.getElementById('hdr-admin-page').textContent = t;
+  document.getElementById('mob-title-admin').textContent = t;
+  const es = document.querySelector('#page-admin .empty-state p');
+  if(es) es.textContent = t + ' — Inhalt folgt';
+}
+
+// ══════════════════════════════════════════
+// SIDEBAR / DROPDOWN
+// ══════════════════════════════════════════
+function toggleSidebar(type){
+  const sb  = document.getElementById('sidebar-'+type);
+  const ov  = document.getElementById('overlay-'+type);
+  const bg  = document.getElementById('burger-'+type);
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+  if(bg) bg.classList.toggle('open');
+}
+function closeSidebar(type){
+  document.getElementById('sidebar-'+type).classList.remove('open');
+  document.getElementById('overlay-'+type).classList.remove('show');
+  const bg = document.getElementById('burger-'+type);
+  if(bg) bg.classList.remove('open');
+}
+function toggleSubMenu(btn){
+  btn.closest('.nav-item').classList.toggle('open');
+}
+function toggleUserDropdown(type){
+  const dd = document.getElementById('dropdown-'+type);
+  dd.classList.toggle('show');
+  // Close on outside click
+  const handler = e=>{
+    if(!dd.contains(e.target) && !e.target.closest('.hdr-user')){
+      dd.classList.remove('show');
+      document.removeEventListener('click',handler);
+    }
+  };
+  if(dd.classList.contains('show')) setTimeout(()=>document.addEventListener('click',handler),0);
+}
+function closeDropdown(type){
+  document.getElementById('dropdown-'+type).classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// AUTO LOGOUT at 01:15 and 15:30
+// ══════════════════════════════════════════
+function scheduleAutoLogout(){
+  const now  = new Date();
+  const targets = [{h:1,m:15},{h:15,m:30}];
+  targets.forEach(({h,m})=>{
+    const t = new Date();
+    t.setHours(h,m,0,0);
+    if(t <= now) t.setDate(t.getDate()+1);
+    const diff = t - now;
+    setTimeout(()=>{
+      if(currentStaff){
+        currentStaff=null;
+        document.getElementById('hdr-staff-username').textContent='—';
+        document.getElementById('hdr-staff-username-mob').textContent='—';
+        if(document.getElementById('page-staff').classList.contains('active')){
+          openStaffSwitch(true);
+        }
+      }
+      scheduleAutoLogout(); // reschedule
+    }, diff);
+  });
+}
+scheduleAutoLogout();
+
+// ══════════════════════════════════════════
+// PIN HELPERS
+// ══════════════════════════════════════════
+function getPinValue(rowId){
+  return [...document.getElementById(rowId).querySelectorAll('.pin-dot')]
+    .map(i=>i.value).join('');
+}
+function clearPinRow(rowId){
+  document.getElementById(rowId).querySelectorAll('.pin-dot').forEach(i=>i.value='');
+}
+function focusFirstPin(rowId){
+  const first = document.getElementById(rowId).querySelector('.pin-dot');
+  if(first) setTimeout(()=>first.focus(),80);
+}
+
+// Auto-advance PIN inputs
+document.querySelectorAll('.pin-dot').forEach((inp,i,arr)=>{
+  inp.addEventListener('input',()=>{
+    if(inp.value && i < arr.length-1) arr[i+1].focus();
+  });
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Backspace' && !inp.value && i > 0) arr[i-1].focus();
+  });
+});
+
+// ══════════════════════════════════════════
+// ERROR HELPERS
+// ══════════════════════════════════════════
+function showErr(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+function clearErr(id){ const el=document.getElementById(id); if(el){ el.textContent=''; el.classList.remove('show'); } }
+
+// ══════════════════════════════════════════
+// ON LOAD: Check saved org session
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  const saved = localStorage.getItem('gg_org');
+  if(saved){
+    currentOrg = saved;
+    document.getElementById('sel-org').value = saved;
+    enterOrgPortal();
+  }
+});
+
+</script>
+</body>
+</html>
