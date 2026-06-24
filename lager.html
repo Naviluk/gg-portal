@@ -106,35 +106,47 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
     white-space:normal;text-align:center;max-width:80px}
 }
 
-/* ── TABLE WRAPPER ── */
-.table-wrap{overflow-x:auto;position:relative;border-radius:8px;border:1px solid var(--glass-border)}
+/* ── TABLE CONTAINER ── */
+.table-container{display:flex;border-radius:8px;border:1px solid var(--glass-border);overflow:hidden}
+.table-left{flex-shrink:0}
+.table-right{overflow-x:auto;flex:1}
 
-/* ── DESKTOP / TABLET ── */
-.lager-table{border-collapse:collapse;width:100%;min-width:700px}
+/* ── TABLES ── */
+.lager-table{border-collapse:collapse;width:100%}
 .lager-table th{background:rgba(0,0,0,.5);font-family:'Orbitron',sans-serif;font-size:.6rem;
   letter-spacing:.12em;color:var(--neon-cyan);text-transform:uppercase;padding:.7rem .9rem;
   border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center}
-.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
+.lager-table-left th{text-align:left;border-right:1px solid var(--glass-border)}
+.lager-table-left td{border-right:1px solid rgba(0,245,255,.1)}
+.lager-table-right{min-width:400px}
+.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem;white-space:nowrap}
 .lager-table tr:last-child td{border-bottom:none}
-.lager-table tr:hover td{background:rgba(0,245,255,.03)}
+.lager-table-left tr:hover td,.lager-table-right tr:hover td{background:rgba(0,245,255,.03)}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
 .th-text{display:inline}
 
+/* ── DESKTOP: merge back into one scrollable ── */
+@media(min-width:641px){
+  .table-container{display:block;overflow-x:auto}
+  .table-left{display:none}
+  .table-right{overflow-x:visible;flex:none}
+  .lager-table-right{min-width:700px;width:100%}
+}
+
 /* ── MOBILE TABLE ── */
 @media(max-width:640px){
-  /* Table wider than screen — scrolls horizontally in .table-wrap */
-  /* Visible without scroll: Artikel(130px) + Bestand(46px) + Einkäufe(46px) = ~222px < screen width */
-  /* Anfangsbestand and detail cols scroll right */
-  .lager-table{min-width:320px;width:max-content}
+  .table-left{width:130px;min-width:130px}
+  .lager-table-left{width:130px}
+  .lager-table-left th,.lager-table-left td{width:130px;min-width:130px;max-width:130px;
+    padding:.4rem .3rem;white-space:normal;word-break:break-word}
 
-  .lager-table th{font-size:.46rem;letter-spacing:.02em;padding:.4rem .15rem;
-    line-height:1.25;white-space:normal;text-align:center}
-  .lager-table td{padding:.38rem .15rem;font-size:.8rem}
+  .lager-table-right th{font-size:.46rem;letter-spacing:.02em;padding:.4rem .2rem;
+    line-height:1.2;white-space:normal;word-break:break-word}
+  .lager-table-right td{padding:.38rem .2rem;font-size:.8rem}
 
-  .th-col-artikel{width:130px;min-width:130px;max-width:130px;text-align:left}
-  .th-col-bestand{width:46px;min-width:46px}
+  .th-col-bestand{width:50px;min-width:50px}
   .th-col-einkauf{width:46px;min-width:46px}
   .th-col-liefer{width:46px;min-width:46px}
   .th-col-anfang{width:50px;min-width:50px}
@@ -143,20 +155,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
   .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.9rem}
 
-  /* Bestand/Anfangsbestand: text only */
+  /* Bestand/Anfangsbestand: text */
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.42rem}
 
   .num-cell{font-size:.72rem}
-  .prod-name{font-size:.78rem;white-space:normal;word-break:break-word}
-  .prod-unit{font-size:.65rem}
   .prod-icon{width:26px;height:26px;font-size:.82rem}
   .prod-info{gap:.28rem}
   .main-content{padding:1rem .35rem}
 }
-
-/* Remove sticky classes — not needed */
-.td-sticky-0,.td-sticky-1,.td-sticky-2{}
 
 /* category row */
 .cat-row td{background:rgba(0,0,0,.4);padding:.4rem .9rem;cursor:pointer;user-select:none}
@@ -430,11 +437,22 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 
   <!-- Table -->
-  <div class="table-wrap">
-    <table class="lager-table" id="lager-table">
-      <thead id="lager-thead"></thead>
-      <tbody id="lager-tbody"></tbody>
-    </table>
+  <!-- Table wrapper: left fixed + right scrollable -->
+  <div class="table-container">
+    <!-- LEFT: fixed Artikel column -->
+    <div class="table-left" id="table-left">
+      <table class="lager-table lager-table-left" id="lager-table-left">
+        <thead id="lager-thead-left"></thead>
+        <tbody id="lager-tbody-left"></tbody>
+      </table>
+    </div>
+    <!-- RIGHT: scrollable columns -->
+    <div class="table-right" id="table-right">
+      <table class="lager-table lager-table-right" id="lager-table">
+        <thead id="lager-thead"></thead>
+        <tbody id="lager-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -651,15 +669,20 @@ function renderTable(){
 
 function renderTableActual(){
   const isZentral = currentLager === 'zentrallager';
+  const isMobile = window.innerWidth <= 640;
+
   const thead = document.getElementById('lager-thead');
   const tbody = document.getElementById('lager-tbody');
+  const theadL = document.getElementById('lager-thead-left');
+  const tbodyL = document.getElementById('lager-tbody-left');
 
-  // Build date columns from wareneingangs
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
-  // Build header — Artikel | Bestand | Einkäufe/Lieferungen | [dates] | [Lieferungen] | Anfangsbestand
+  // ── LEFT TABLE HEADER (mobile only: Artikel column) ──
+  theadL.innerHTML = `<tr><th style="text-align:left;width:130px;min-width:130px">Artikel</th></tr>`;
+
+  // ── RIGHT TABLE HEADER ──
   let thHTML = '<tr>';
-  thHTML += '<th class="th-col-artikel" style="text-align:left">Artikel</th>';
   if(isZentral){
     thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
@@ -688,43 +711,44 @@ function renderTableActual(){
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
-  // Build body
+  // ── BODY ──
+  let tbLeftHTML = '';
   let tbHTML = '';
-  const firstCat = true;
+
   PRODUCTS.forEach((catObj, ci)=>{
     const isFirst = ci === 0;
     const catOpen = isFirst ? 'open' : '';
-    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td colspan="99"><div class="cat-label">
-        <span class="cat-arrow">▶</span>
-        ${catObj.cat}
-        <span class="cat-items-count">(${catObj.items.length})</span>
-      </div></td></tr>`;
+
+    // Left: category row
+    tbLeftHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+      <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
+    // Right: category row (empty, just for height sync)
+    tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" data-cat="${ci}"><td colspan="99"></td></tr>`;
 
     catObj.items.forEach(prod=>{
-      // Calc totals
-      const prodWE   = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
+      const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
       const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const ab = anfangsbestand[prod.id] ?? '';
-
       const prodHidden = isFirst ? '' : 'hidden';
-      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
-      tbHTML += `<td><div class="prod-info">
-        <div class="prod-icon">${prod.icon||'📦'}</div>
-        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
-      </div></td>`;
-      tbHTML += `<td class="num-cell">—</td>`;
+
+      // Left: Artikel cell
+      tbLeftHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">
+        <td><div class="prod-info">
+          <div class="prod-icon">${prod.icon||'📦'}</div>
+          <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
+        </div></td></tr>`;
+
+      // Right: data cells
       const einkVal = totalEink || '—';
+      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
+      tbHTML += `<td class="num-cell">—</td>`;
       tbHTML += `<td class="num-cell">${einkVal}</td>`;
-      // Detail date cols
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-col detail-td">${qty}</td>`;
       });
-      // Lieferungen Gesamt (only zentral) — not sticky, scrolls right
       if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
-      // Anfangsbestand (last column) — not sticky, scrolls off right
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const safeProdName = prod.name.replace(/"/g, '&quot;');
       tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeProdName}">
@@ -732,10 +756,34 @@ function renderTableActual(){
       tbHTML += `</tr>`;
     });
   });
+
+  tbodyL.innerHTML = tbLeftHTML;
   tbody.innerHTML = tbHTML;
 
-  // Restore detail cols if expanded
   if(detailExpanded) applyDetailCols(true);
+
+  // Sync row heights between left and right tables (mobile)
+  if(isMobile) syncRowHeights();
+}
+
+function syncRowHeights(){
+  const leftRows = document.querySelectorAll('#lager-tbody-left tr');
+  const rightRows = document.querySelectorAll('#lager-tbody tr');
+  // Also sync header
+  const leftH = document.querySelector('#lager-thead-left tr');
+  const rightH = document.querySelector('#lager-thead tr');
+  if(leftH && rightH){
+    const h = Math.max(leftH.offsetHeight, rightH.offsetHeight);
+    leftH.style.height = h+'px';
+    rightH.style.height = h+'px';
+  }
+  leftRows.forEach((row, i)=>{
+    if(rightRows[i]){
+      const h = Math.max(row.offsetHeight, rightRows[i].offsetHeight);
+      row.style.height = h+'px';
+      rightRows[i].style.height = h+'px';
+    }
+  });
 }
 
 // called after data loads
@@ -766,13 +814,18 @@ async function loadData(){
 }
 
 // ── CATEGORY TOGGLE ──
-window.toggleCategory = function(row){
-  row.classList.toggle('open');
+window.toggleCategory = function(row, side){
   const ci = row.dataset.cat;
-  const isOpen = row.classList.contains('open');
-  document.querySelectorAll(`.prod-row[data-cat="${ci}"]`).forEach(r=>{
-    r.classList.toggle('hidden',!isOpen);
+  const isOpen = row.classList.toggle('open');
+  // Toggle both left and right tables
+  document.querySelectorAll(`#lager-tbody-left .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
+  document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
+  // Sync cat-row open state in both tables
+  document.querySelectorAll(`.cat-row[data-cat="${ci}"]`).forEach(r=>{
+    if(isOpen) r.classList.add('open'); else r.classList.remove('open');
   });
+  // Resync row heights
+  if(window.innerWidth<=640) setTimeout(syncRowHeights, 50);
 }
 
 // ── DETAIL COLS TOGGLE ──
@@ -1045,6 +1098,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const th = e.target.closest('.we-date-th');
     if(th) openEditWareneingang(th.dataset.date);
   });
+  window.addEventListener('resize', ()=>{ if(window.innerWidth<=640) syncRowHeights(); });
 });
 </script>
 </body>
