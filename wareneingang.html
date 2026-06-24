@@ -835,13 +835,17 @@ function renderTableActual(){
     wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
 
     if(allShops.size > 0){
-      // Separator + Shops header — magenta color
-      const shopCatStyle = 'color:var(--neon-magenta);border-top:1px solid rgba(255,0,204,.3);margin-top:.2rem';
+      // Single separator line spanning full table width
+      tbLeftHTML += `<tr class="shops-separator-left"><td style="padding:0;height:0;border-top:2px solid rgba(255,0,204,.4)"></td></tr>`;
+      tbHTML += `<tr class="shops-separator-right"><td colspan="99" style="padding:0;height:0;border-top:2px solid rgba(255,0,204,.4)"></td></tr>`;
+
+      // Shops header
+      const shopCatStyle = 'color:var(--neon-magenta)';
       tbLeftHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
-        <td style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
+        <td><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
       tbHTML += `<tr class="cat-row cat-row-r open shops-cat-row" onclick="toggleShopsSection()">
-        <td class="td-artikel-desktop" style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
-        <td class="cat-label-cell" colspan="99" style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r2" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
+        <td class="td-artikel-desktop"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
+        <td class="cat-label-cell" colspan="99"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r2" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
 
       // Track grand total per date
       const dateGrandTotals = {};
@@ -910,9 +914,9 @@ function renderTableActual(){
 }
 
 window.toggleShopsSection = function(){
-  document.querySelectorAll('.shop-row-item').forEach(r=>r.classList.toggle('hidden'));
+  document.querySelectorAll('.shop-row-item, .shops-separator-left, .shops-separator-right').forEach(r=>r.classList.toggle('hidden'));
   document.querySelectorAll('.shops-cat-row').forEach(r=>r.classList.toggle('open'));
-  if(window.innerWidth<=640) setTimeout(syncRowHeights, 50);
+  if(window.innerWidth<=640) requestAnimationFrame(()=>requestAnimationFrame(syncRowHeights));
 }
 
 function syncRowHeights(){
@@ -966,15 +970,12 @@ async function loadData(){
 window.toggleCategory = function(row, side){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
-  // Toggle both left and right tables
   document.querySelectorAll(`#lager-tbody-left .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
   document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
-  // Sync cat-row open state in both tables
   document.querySelectorAll(`.cat-row[data-cat="${ci}"]`).forEach(r=>{
     if(isOpen) r.classList.add('open'); else r.classList.remove('open');
   });
-  // Resync row heights
-  if(window.innerWidth<=640) setTimeout(syncRowHeights, 50);
+  if(window.innerWidth<=640) requestAnimationFrame(()=>requestAnimationFrame(syncRowHeights));
 }
 
 // ── DETAIL COLS TOGGLE ──
