@@ -118,40 +118,42 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .lager-table tr:last-child td{border-bottom:none}
 .lager-table tr:hover td{background:rgba(0,245,255,.03)}
 
-/* Desktop icons hidden, text shown */
+/* Desktop: icons hidden, text shown */
 .th-icon{display:none}
 .th-text{display:inline}
 
 /* ── MOBILE TABLE ── */
 @media(max-width:640px){
+  /* On mobile: table has no min-width, overflows via .table-wrap scroll */
   .lager-table{min-width:0;width:100%}
-
-  .lager-table th{font-size:.48rem;letter-spacing:.03em;padding:.45rem .2rem;
+  .lager-table th{font-size:.46rem;letter-spacing:.02em;padding:.4rem .15rem;
     line-height:1.2;white-space:normal;word-break:break-word;text-align:center}
-  .lager-table td{padding:.4rem .2rem}
+  .lager-table td{padding:.38rem .12rem;font-size:.8rem}
 
-  /* 3 sticky visible columns: Artikel, Bestand, Einkäufe/Lieferungen */
-  .th-col-artikel{width:110px;min-width:110px;position:sticky;left:0;z-index:15;background:var(--bg2)}
-  .th-col-bestand{width:50px;min-width:50px;position:sticky;left:110px;z-index:14;background:var(--bg2)}
-  .th-col-einkauf{width:52px;min-width:52px;position:sticky;left:160px;z-index:13;background:var(--bg2)}
-  .th-col-liefer{width:52px;min-width:52px;position:sticky;left:160px;z-index:13;background:var(--bg2)}
-  /* everything after scrolls right */
-  .th-col-anfang{width:52px;min-width:52px}
+  /* Sticky th columns — header row */
+  .th-col-artikel{position:sticky;left:0;z-index:15;background:#0a0a1a;width:115px;min-width:115px}
+  .th-col-bestand{position:sticky;left:115px;z-index:14;background:#0a0a1a;width:48px;min-width:48px}
+  .th-col-einkauf{position:sticky;left:163px;z-index:13;background:#0a0a1a;width:48px;min-width:48px}
+  .th-col-liefer{position:sticky;left:163px;z-index:13;background:#0a0a1a;width:48px;min-width:48px}
+  .th-col-anfang{width:50px;min-width:50px} /* not sticky - scrolls right */
 
-  /* Einkäufe/Lieferungen: icon only on mobile */
+  /* Mobile icon rules */
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.95rem}
-
-  /* Bestand/Anfangsbestand: text only */
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.9rem}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
-  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.45rem}
+  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.42rem}
 
-  .num-cell{font-size:.72rem;padding:.4rem .1rem}
-  .prod-name{font-size:.76rem}
+  /* Sticky td cells — set via JS class below */
+  .td-sticky-0{position:sticky;left:0;z-index:3;background:#0a0a1a}
+  .td-sticky-1{position:sticky;left:115px;z-index:3;background:#0a0a1a}
+  .td-sticky-2{position:sticky;left:163px;z-index:3;background:#0a0a1a}
+
+  .num-cell{font-size:.72rem}
+  .prod-name{font-size:.78rem}
   .prod-unit{font-size:.65rem}
-  .prod-icon{width:24px;height:24px;font-size:.78rem}
-  .prod-info{gap:.25rem}
-  .main-content{padding:1rem .4rem}
+  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  .prod-info{gap:.28rem}
+  .main-content{padding:1rem .35rem}
 }
 
 /* category row */
@@ -705,16 +707,16 @@ function renderTableActual(){
 
       const prodHidden = isFirst ? '' : 'hidden';
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
-      // Col1: Artikel — sticky left:0
-      tbHTML += `<td style="position:sticky;left:0;z-index:3;background:var(--bg2)"><div class="prod-info">
+      // Col1: Artikel — sticky-0
+      tbHTML += `<td class="td-sticky-0"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
-      // Col2: Bestand — sticky left:110px
-      tbHTML += `<td class="num-cell" style="position:sticky;left:110px;z-index:3;background:var(--bg2)">—</td>`;
-      // Col3: Einkäufe/Lieferungen Gesamt — sticky left:160px (last fixed column)
+      // Col2: Bestand — sticky-1
+      tbHTML += `<td class="num-cell td-sticky-1">—</td>`;
+      // Col3: Einkäufe/Lieferungen — sticky-2 (last fixed)
       const einkVal = totalEink || '—';
-      tbHTML += `<td class="num-cell" style="position:sticky;left:160px;z-index:3;background:var(--bg2)">${einkVal}</td>`;
+      tbHTML += `<td class="num-cell td-sticky-2">${einkVal}</td>`;
       // Detail date cols
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
