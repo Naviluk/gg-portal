@@ -108,29 +108,56 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 
 /* ── TABLE WRAPPER ── */
 .table-wrap{overflow-x:auto;position:relative;border-radius:8px;border:1px solid var(--glass-border)}
-.lager-table{border-collapse:collapse;width:100%;min-width:0}
+.lager-table{border-collapse:collapse;table-layout:fixed;width:100%}
 .lager-table th{background:rgba(0,0,0,.5);font-family:'Orbitron',sans-serif;font-size:.6rem;
   letter-spacing:.12em;color:var(--neon-cyan);text-transform:uppercase;padding:.7rem .9rem;
-  border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;z-index:10}
+  border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;z-index:10;
+  text-align:center}
 
-/* icon in desktop header */
-.th-icon{font-size:1rem;display:block;margin-bottom:.2rem}
+/* Desktop/tablet: no icons, text only */
+.th-icon{display:none}
 .th-text{display:inline}
 
-/* Mobile: show only icons in column headers, compact columns */
+/* Desktop column widths */
+.th-col-artikel{width:auto;min-width:180px;text-align:left!important}
+.th-col-bestand,.th-col-einkauf,.th-col-liefer{width:120px}
+.th-col-anfang{width:110px}
+
+/* ── MOBILE TABLE ── */
 @media(max-width:640px){
-  .lager-table{min-width:0;width:100%}
-  .lager-table th{white-space:normal;word-break:break-word;font-size:.5rem;
-    letter-spacing:.04em;padding:.5rem .3rem;line-height:1.2;text-align:center}
-  .th-text{display:none} /* hide text, show only icon on mobile */
-  .th-icon{font-size:1.1rem;margin-bottom:0}
-  /* compact data columns */
-  .th-col-bestand,.th-col-einkauf,.th-col-liefer{width:44px;min-width:44px;max-width:44px}
-  .th-col-anfang{min-width:44px;width:44px}
-  .th-col-artikel{min-width:120px}
-  .num-cell{font-size:.72rem;padding:.4rem .2rem}
-  .lager-table td{padding:.4rem .3rem}
+  /* Table fills 100% with 4 visible columns: Artikel + Bestand + Einkäufe + Lieferungen */
+  /* Anfangsbestand overflows right and is accessible by scrolling */
+  .lager-table{table-layout:fixed;width:100%}
+
+  .lager-table th,.lager-table td{padding:.45rem .25rem}
+  .lager-table th{font-size:.48rem;letter-spacing:.03em;line-height:1.2;white-space:normal;word-break:break-word}
+
+  /* Artikel column: flexible, takes remaining space */
+  .th-col-artikel{width:auto;min-width:100px}
+
+  /* Bestand: text label, width = 3-digit number */
+  .th-col-bestand{width:52px;min-width:52px;max-width:52px}
+
+  /* Einkäufe: icon only on mobile */
+  .th-col-einkauf{width:46px;min-width:46px;max-width:46px}
+  .th-col-einkauf .th-text{display:none}
+  .th-col-einkauf .th-icon{display:inline;font-size:.95rem}
+
+  /* Lieferungen: icon only on mobile */
+  .th-col-liefer{width:46px;min-width:46px;max-width:46px}
+  .th-col-liefer .th-text{display:none}
+  .th-col-liefer .th-icon{display:inline;font-size:.95rem}
+
+  /* Anfangsbestand: text label, hidden off-screen (scroll to see) */
+  .th-col-anfang{width:52px;min-width:52px;max-width:52px}
+
+  .num-cell{font-size:.75rem;padding:.4rem .2rem}
+  .prod-name{font-size:.78rem}
+  .prod-unit{font-size:.68rem}
+  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  .prod-info{gap:.3rem}
 }
+
 .lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
 .lager-table tr:last-child td{border-bottom:none}
 .lager-table tr:hover td{background:rgba(0,245,255,.03)}
@@ -160,14 +187,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(0,245,255,.4);padding-bottom:1px}
 
-/* Einkäufe header cell with arrow */
+/* Lieferungen/Einkäufe header with expand arrow */
 .col-einkauf-header{position:relative}
 .expand-arrow{display:inline-flex;align-items:center;justify-content:center;
-  width:20px;height:20px;border-radius:50%;background:rgba(0,245,255,.15);
-  border:1px solid var(--neon-cyan);cursor:pointer;margin-left:.4rem;
-  font-size:.6rem;transition:all .2s;vertical-align:middle;flex-shrink:0}
-.expand-arrow:hover{background:rgba(0,245,255,.3);box-shadow:0 0 8px var(--neon-cyan)}
-.col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.3rem}
+  width:14px;height:14px;border-radius:3px;background:none;border:none;
+  cursor:pointer;margin-left:.3rem;font-size:.65rem;
+  color:var(--neon-magenta);transition:color .2s;vertical-align:middle;flex-shrink:0;
+  line-height:1}
+.expand-arrow:hover{color:#fff}
+.expand-arrow.expanded{color:var(--neon-green)}
+.col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
 
 /* detail date columns */
 .detail-col{display:none}
@@ -320,14 +349,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* mobile table */
-@media(max-width:640px){
-  .main-content{padding:1rem .4rem}
-  .prod-name{font-size:.78rem}
-  .prod-icon{width:26px;height:26px;font-size:.85rem}
-  .prod-info{gap:.4rem}
-  .lager-table td{padding:.4rem .3rem}
-}
+/* utility */
 .neon-cyan-small{color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.78rem;font-weight:700}
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
 </style>
@@ -640,35 +662,34 @@ function renderTableActual(){
   // Build date columns from wareneingangs
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
-  // Build header — column order: Artikel | Bestand | Einkäufe/Lieferungen | [dates] | [Lieferungen] | Anfangsbestand
-  // Icons: Bestand=📦📦📦, Einkäufe=🛒, Lieferungen=🚚, Anfangsbestand=📦
+  // Build header — Artikel | Bestand | Einkäufe/Lieferungen | [dates] | [Lieferungen] | Anfangsbestand
   let thHTML = '<tr>';
-  thHTML += '<th class="th-col-artikel" style="text-align:left"><span class="th-text">Artikel</span></th>';
+  thHTML += '<th class="th-col-artikel" style="text-align:left">Artikel</th>';
   if(isZentral){
     thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
       <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🛒</span><span class="th-text">Einkäufe<br>Gesamt</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()">▶</span>
+        <span><span class="th-icon">🛒</span><span class="th-text">Einkäufe Gesamt</span></span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
-    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen<br>Gesamt</span></th>';
+    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen Gesamt</span></th>';
   } else {
     thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer">
       <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🚚</span><span class="th-text">Lieferungen<br>Gesamt</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()">▶</span>
+        <span><span class="th-icon">🚚</span><span class="th-text">Lieferungen Gesamt</span></span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
   }
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangsbestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -769,7 +790,10 @@ window.toggleDetailCols = function(){
 function applyDetailCols(show){
   document.querySelectorAll('.detail-col').forEach(el=>el.classList.toggle('visible',show));
   const btn = document.getElementById('expand-arrow-btn');
-  if(btn) btn.textContent = show ? '◀' : '▶';
+  if(btn){
+    btn.textContent = show ? '◀' : '▶';
+    btn.classList.toggle('expanded', show);
+  }
 }
 
 // ── ANFANGSBESTAND MODAL ──
