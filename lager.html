@@ -181,9 +181,26 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .cat-row:hover td{background:rgba(0,245,255,.05)}
 .cat-label{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.15em;
   color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
-.cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
-.cat-row.open .cat-arrow{transform:rotate(90deg)}
+.cat-arrow,.cat-arrow-r,.cat-arrow-r2{font-size:.7rem;transition:transform .2s;display:inline-block}
+.cat-row.open .cat-arrow,.cat-row.open .cat-arrow-r,.cat-row.open .cat-arrow-r2{transform:rotate(90deg)}
 .cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+
+/* Desktop: category label in Artikel cell, hide separate label cell */
+@media(min-width:641px){
+  .cat-row-r .td-artikel-desktop{
+    display:table-cell!important;
+    padding:.4rem .9rem;
+    background:rgba(0,0,0,.4);
+  }
+  .cat-row-r .cat-label-cell{display:none}
+}
+
+/* Mobile: cat-label-cell visible (spans all), right table overflow for detail cols */
+@media(max-width:640px){
+  .cat-row-r .cat-label-cell{display:table-cell}
+  .table-right{overflow-x:auto}
+  .lager-table-right{width:max-content;min-width:0}
+}
 
 /* product row */
 .prod-row{transition:background .15s}
@@ -749,11 +766,11 @@ function renderTableActual(){
     // Left: category row
     tbLeftHTML += `<tr class="cat-row cat-row-left ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
-    // Right table category row: on desktop Artikel cell is first, category label in next cell
-    // On mobile: td-artikel-desktop is hidden so category takes full width
+    // Right table category row: cat-label goes in td-artikel-desktop cell on desktop
+    // On mobile td-artikel-desktop is hidden, cat-label-cell spans all
     tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td class="td-artikel-desktop" style="background:rgba(0,0,0,.4)"></td>
-      <td colspan="99" style="background:rgba(0,0,0,.4)"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
+      <td class="td-artikel-desktop"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
+      <td class="cat-label-cell" colspan="99"><div class="cat-label"><span class="cat-arrow cat-arrow-r2">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
 
     catObj.items.forEach(prod=>{
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
