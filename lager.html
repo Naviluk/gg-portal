@@ -158,31 +158,31 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   .lager-table-left{width:100%}
   .lager-table-left th,.lager-table-left td{
     padding:.4rem .4rem;white-space:normal;word-break:break-word}
-  .lager-table-left th{font-size:1rem;letter-spacing:.04em;text-align:left;
+  .lager-table-left th{font-size:.75rem;letter-spacing:.03em;text-align:left;
     font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif}
 
-  /* Right columns: narrow, fixed widths */
+  /* Right columns */
   .lager-table-right{white-space:nowrap}
-  .lager-table-right th{font-size:1rem;letter-spacing:.02em;padding:.4rem .25rem;
+  .lager-table-right th{font-size:.75rem;letter-spacing:.02em;padding:.4rem .2rem;
     line-height:1.2;white-space:normal;word-break:break-word;text-align:center;
     font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif}
   .lager-table-right td{padding:.38rem .25rem;font-size:.8rem;text-align:center}
 
-  /* Column widths in right table — +10% more */
-  .th-col-bestand{width:66px;min-width:66px;max-width:66px}
-  .th-col-einkauf{width:57px;min-width:57px;max-width:57px}
-  .th-col-liefer{width:57px;min-width:57px;max-width:57px}
-  .th-col-anfang{width:66px;min-width:66px;max-width:66px}
-  /* Detail date columns */
-  .detail-th,.detail-td{width:44px;min-width:44px;max-width:44px}
+  /* Column widths */
+  .th-col-bestand{width:72px;min-width:72px;max-width:72px}
+  .th-col-einkauf{width:50px;min-width:50px;max-width:50px}
+  .th-col-liefer{width:50px;min-width:50px;max-width:50px}
+  .th-col-anfang{width:72px;min-width:72px;max-width:72px}
+  /* Detail date columns — wide enough for DD.MM. on one line */
+  .detail-th,.detail-td{width:58px;min-width:58px;max-width:58px}
 
   /* Einkäufe/Lieferungen: icon only */
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.88rem}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1.1rem}
 
-  /* Bestand/Anfangsbestand: text only, same large size */
+  /* Bestand/Anfangsbestand: text, same size as other headers */
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
-  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.9rem}
+  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.75rem}
 
   .num-cell{font-size:.72rem}
   .prod-name{font-size:.78rem;white-space:normal;word-break:break-word}
