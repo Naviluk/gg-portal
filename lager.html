@@ -369,6 +369,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .td-artikel-desktop{display:table-cell;text-align:left;padding:.55rem .9rem;
     width:22%;min-width:180px;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle}
   #th-artikel-desktop{display:table-cell!important;padding:.7rem .9rem;white-space:nowrap;text-align:left}
+  /* Desktop: hide left table category rows (right table has them with Artikel cell) */
+  .cat-row-left{display:none!important}
+}
+@media(max-width:640px){
+  /* Mobile: hide right table category rows (left table shows them) */
+  .cat-row-r{display:none!important}
 }
 .neon-cyan-small{color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.78rem;font-weight:700}
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
@@ -741,12 +747,13 @@ function renderTableActual(){
     const catOpen = isFirst ? 'open' : '';
 
     // Left: category row
-    tbLeftHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+    tbLeftHTML += `<tr class="cat-row cat-row-left ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
-    // Right: category row (with Artikel cell for desktop)
+    // Right table category row: on desktop Artikel cell is first, category label in next cell
+    // On mobile: td-artikel-desktop is hidden so category takes full width
     tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td class="td-artikel-desktop"></td>
-      <td colspan="99"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
+      <td class="td-artikel-desktop" style="background:rgba(0,0,0,.4)"></td>
+      <td colspan="99" style="background:rgba(0,0,0,.4)"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
 
     catObj.items.forEach(prod=>{
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
