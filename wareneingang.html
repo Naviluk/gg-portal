@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>LAGER – GAME GALAXY</title>
+<title>WARENEINGANG – GAME GALAXY</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
@@ -442,7 +442,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div class="hdr-center">
     <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">LAGER – Bestände</div>
+    <div class="hdr-page">LAGER – Wareneingang</div>
   </div>
   <div class="hdr-right">
     <div class="hdr-user" onclick="toggleUserDropdown()">
@@ -466,8 +466,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="lager.html" style="color:var(--neon-cyan)">Bestände</a></li>
-        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="wareneingang.html" style="color:var(--neon-cyan)">Wareneingang</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -762,39 +762,26 @@ function renderTableActual(){
 
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
-  // ── LEFT TABLE HEADER (mobile only: Artikel column) ──
+  // ── LEFT TABLE HEADER ──
   theadL.innerHTML = `<tr><th style="text-align:left;width:130px;min-width:130px">Artikel</th></tr>`;
 
   // ── RIGHT TABLE HEADER ──
-  // On desktop: include Artikel column in right table (left table hidden)
-  // On mobile: Artikel is in left table only
+  // Wareneingang: Artikel | [date cols always visible] | Alle Einkäufe/Lieferungen (sum)
   let thHTML = '<tr>';
   thHTML += '<th class="th-col-artikel" style="text-align:left;display:none" id="th-artikel-desktop">Artikel</th>';
   if(isZentral){
-    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
-    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
-      <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
-      </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+    });
+    thHTML += '<th class="num-cell th-col-einkauf"><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></th>';
+  } else {
+    dates.forEach(d=>{
+      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+      thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
     thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></th>';
-  } else {
-    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
-    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer">
-      <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
-      </div></th>`;
-    dates.forEach(d=>{
-      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
-    });
   }
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangsbestand</span><span class="th-text-mob">Anfangs-<br>bestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -806,11 +793,8 @@ function renderTableActual(){
     const isFirst = ci === 0;
     const catOpen = isFirst ? 'open' : '';
 
-    // Left: category row
     tbLeftHTML += `<tr class="cat-row cat-row-left ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
-    // Right table category row: cat-label goes in td-artikel-desktop cell on desktop
-    // On mobile td-artikel-desktop is hidden, cat-label-cell spans all
     tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td class="td-artikel-desktop"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
       <td class="cat-label-cell" colspan="99"><div class="cat-label"><span class="cat-arrow cat-arrow-r2">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
@@ -818,47 +802,87 @@ function renderTableActual(){
     catObj.items.forEach(prod=>{
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
       const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
-      const ab = anfangsbestand[prod.id] ?? '';
       const prodHidden = isFirst ? '' : 'hidden';
 
-      // Left: Artikel cell
+      // Left: Artikel
       tbLeftHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">
         <td><div class="prod-info">
           <div class="prod-icon">${prod.icon||'📦'}</div>
           <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
         </div></td></tr>`;
 
-      // Right: data cells
-      const einkVal = totalEink || '—';
+      // Right: date cells + sum
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
-      // Artikel cell for desktop (hidden on mobile via JS)
       tbHTML += `<td class="td-artikel-desktop"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
-      tbHTML += `<td class="num-cell">—</td>`;
-      tbHTML += `<td class="num-cell">${einkVal}</td>`;
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-col detail-td">${qty}</td>`;
+        tbHTML += `<td class="num-cell detail-td">${qty}</td>`;
       });
-      if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
-      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      const safeProdName = prod.name.replace(/"/g, '&quot;');
-      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeProdName}">
-        <span class="edit-val">${abDisplay}</span></td>`;
+      // Sum column
+      const sumVal = totalEink || '—';
+      tbHTML += `<td class="num-cell" style="color:var(--neon-cyan);font-weight:700">${sumVal}</td>`;
       tbHTML += `</tr>`;
     });
   });
 
+  // ── SHOPS SECTION (Zentrallager only) ──
+  if(isZentral){
+    // Get all shops from wareneingangs
+    const allShops = new Set();
+    wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
+
+    if(allShops.size > 0){
+      // Shops category header
+      tbLeftHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
+        <td><div class="cat-label"><span class="cat-arrow">▶</span>Shops</div></td></tr>`;
+      tbHTML += `<tr class="cat-row cat-row-r open shops-cat-row" onclick="toggleShopsSection()">
+        <td class="td-artikel-desktop"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>Shops</div></td>
+        <td class="cat-label-cell" colspan="99"><div class="cat-label"><span class="cat-arrow cat-arrow-r2">▶</span>Shops</div></td></tr>`;
+
+      allShops.forEach(shop=>{
+        // Left
+        tbLeftHTML += `<tr class="prod-row shop-row-item">
+          <td><div class="prod-info" style="gap:.4rem">
+            <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
+            <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
+          </div></td></tr>`;
+
+        // Right: amount per date
+        tbHTML += `<tr class="prod-row shop-row-item">`;
+        tbHTML += `<td class="td-artikel-desktop"><div class="prod-info" style="gap:.4rem">
+          <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
+          <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
+        </div></td>`;
+        let shopTotal = 0;
+        dates.forEach(d=>{
+          const we = wareneingangs.find(w=>w.datum===d);
+          let amt = '—';
+          if(we&&we.shops){
+            const shopEntry = we.shops.find(s=>s.shop===shop);
+            if(shopEntry&&shopEntry.betrag){ amt = parseFloat(shopEntry.betrag).toFixed(2)+' €'; shopTotal += parseFloat(shopEntry.betrag)||0; }
+          }
+          tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-size:.78rem">${amt}</td>`;
+        });
+        const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+' €' : '—';
+        tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700;font-size:.82rem">${shopTotalStr}</td>`;
+        tbHTML += `</tr>`;
+      });
+    }
+  }
+
   tbodyL.innerHTML = tbLeftHTML;
   tbody.innerHTML = tbHTML;
 
-  if(detailExpanded) applyDetailCols(true);
-
-  // Sync row heights between left and right tables (mobile)
   if(isMobile) syncRowHeights();
+}
+
+window.toggleShopsSection = function(){
+  document.querySelectorAll('.shop-row-item').forEach(r=>r.classList.toggle('hidden'));
+  document.querySelectorAll('.shops-cat-row').forEach(r=>r.classList.toggle('open'));
 }
 
 function syncRowHeights(){

@@ -638,27 +638,37 @@
 <div class="sidebar-overlay" id="overlay-admin" onclick="closeSidebar('admin')"></div>
 <nav class="sidebar" id="sidebar-admin">
   <ul class="nav-list">
-    <li class="nav-item" id="nav-lager">
+    <li class="nav-item open" id="nav-lager">
       <button class="nav-link" onclick="toggleSubMenu(this)">
         Lager
         <svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="#" onclick="navigateTo('bestände','admin');return false">Bestände</a></li>
-        <li><a href="#" onclick="navigateTo('nachfüllungen','admin');return false">Nachfüllungen</a></li>
-        <li><a href="#" onclick="navigateTo('einkäufe','admin');return false">Einkäufe</a></li>
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
-    <li class="nav-item"><button class="nav-link" onclick="navigateTo('inventur','admin')">Inventur</button></li>
-    <li class="nav-item"><button class="nav-link active" onclick="navigateTo('statistik','admin')">Statistik</button></li>
-    <li class="nav-item"><button class="nav-link" onclick="navigateTo('rechnungen','admin')">Rechnungen</button></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel
+        <svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html">Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='inventur.html'">Inventur</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
     <li class="nav-divider"></li>
     <li class="nav-item" id="nav-theken-admin">
-      <button class="nav-link" onclick="navigateTo('thekenverkauf','admin')">Thekenverkauf</button>
+      <button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button>
     </li>
     <li class="nav-item" id="nav-getr-admin">
-      <button class="nav-link" onclick="navigateTo('getränke','admin')">Getränke</button>
+      <button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button>
     </li>
   </ul>
 </nav>
