@@ -204,22 +204,24 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .modal-cat.open .modal-cat-items{display:block}
 
 /* product checkbox row in modal */
-.modal-prod-row{display:flex;align-items:center;gap:.6rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s}
+.modal-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s;overflow:hidden}
 .modal-prod-row:hover{background:rgba(0,245,255,.04)}
 .prod-checkbox{width:18px;height:18px;border:2px solid var(--glass-border);border-radius:4px;
   cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
   transition:all .2s;background:rgba(0,0,0,.3)}
 .prod-checkbox.checked{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
 .prod-checkbox.checked::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
-/* qty input — compact, fixed width so it doesn't push product name */
-.qty-input{width:60px;flex-shrink:0;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:4px;
-  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;padding:.3rem .4rem;
-  text-align:center;outline:none;display:none;transition:border-color .2s}
+/* qty input — fixed ~12% width, right-anchored, never expands */
+.qty-input{width:56px;min-width:56px;max-width:56px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;
+  padding:.3rem .3rem;text-align:center;outline:none;display:none;transition:border-color .2s}
 .qty-input.show{display:block}
 .qty-input:focus{border-color:var(--neon-cyan)}
-/* product name in modal row — truncate so qty input doesn't push it */
-.modal-prod-name{flex:1;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.modal-prod-unit{font-size:.72rem;color:var(--text-dim);flex-shrink:0}
+/* product name block — takes remaining space, name + unit stacked */
+.modal-prod-name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem;overflow:hidden}
+.modal-prod-name{font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-prod-unit{font-size:.7rem;color:var(--text-dim)}
 
 /* selected list */
 .selected-list{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
@@ -802,8 +804,10 @@ window.openWareneingang = function(prefillDate){
       html += `<div class="modal-prod-row" id="we-row-${prod.id}">
         <div class="prod-checkbox" id="we-cb-${prod.id}" onclick="toggleWeProd('${prod.id}')"></div>
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <span class="modal-prod-name">${prod.name}</span>
-        <span class="modal-prod-unit">${unitStr}</span>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>
+          ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
+        </div>
         <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
       </div>`;
     });
@@ -903,10 +907,10 @@ window.buildConfirm = function(){
   });
   document.getElementById('confirm-list').innerHTML=html;
 
-  // Shops
+  // Shops — show in confirm view whenever shops were entered
   const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
   const cs=document.getElementById('confirm-shops');
-  if(activeShops.length&&currentLager==='zentrallager'){
+  if(activeShops.length){
     cs.style.display='block';
     cs.innerHTML='<div class="confirm-shops-title">Shops / Einkaufsorte</div>'+
       activeShops.map(s=>{
