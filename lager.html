@@ -127,7 +127,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .lager-table{border-collapse:collapse;width:100%}
 .lager-table th{background:rgba(0,0,0,.5);
   font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
-  font-size:1rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
+  font-size:.78rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
   padding:.7rem .9rem;border-bottom:1px solid var(--glass-border);
   white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center}
 .lager-table-left th{text-align:left;border-right:2px solid rgba(0,245,255,.2)}
@@ -411,8 +411,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   /* Mobile: hide right table category rows (left table shows them) */
   .cat-row-r{display:none!important}
 }
-.mob-br{display:none}
-@media(max-width:640px){.mob-br{display:block}}
+.th-text-mob{display:none}
+@media(max-width:640px){
+  .th-text-mob{display:inline}
+  .th-col-anfang .th-text{display:none}
+}
 /* Button text spans */
 .btn-line1{display:inline}
 .btn-line2{display:inline}
@@ -779,7 +782,7 @@ function renderTableActual(){
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
   }
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangsbestand</span></th>';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangsbestand</span><span class="th-text-mob">Anfangs-<br>bestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
