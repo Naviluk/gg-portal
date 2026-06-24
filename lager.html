@@ -124,35 +124,33 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 
 /* ── MOBILE TABLE ── */
 @media(max-width:640px){
-  /* Remove min-width so table fits screen */
   .lager-table{min-width:0;width:100%}
-
-  /* Column widths: Artikel flexible, Bestand/Einkäufe/Lieferungen fixed, Anfangsbestand fixed but overflows */
-  /* Total: Artikel(auto) + Bestand(54px) + Einkäufe(40px) + Lieferungen(40px) = 100% */
-  /* Anfangsbestand(54px) overflows and is reachable by scrolling */
-  .th-col-artikel{width:auto}
-  .th-col-bestand{width:54px;min-width:54px}
-  .th-col-einkauf{width:40px;min-width:40px}
-  .th-col-liefer{width:40px;min-width:40px}
-  .th-col-anfang{width:54px;min-width:54px}
 
   .lager-table th{font-size:.48rem;letter-spacing:.03em;padding:.45rem .2rem;
     line-height:1.2;white-space:normal;word-break:break-word;text-align:center}
   .lager-table td{padding:.4rem .2rem}
 
-  /* Einkäufe and Lieferungen: show only icon on mobile */
-  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
+  /* Sticky columns: Artikel, Bestand, Einkäufe, Lieferungen — fixed on screen */
+  /* Left positions: Artikel=0, Bestand=110px, Einkäufe=160px, Lieferungen=198px */
+  .th-col-artikel{width:110px;min-width:110px;left:0;position:sticky;z-index:15;background:var(--bg2)}
+  .th-col-bestand{width:50px;min-width:50px;left:110px;position:sticky;z-index:14;background:var(--bg2)}
+  .th-col-einkauf{width:38px;min-width:38px;left:160px;position:sticky;z-index:13;background:var(--bg2)}
+  .th-col-liefer{width:38px;min-width:38px;left:198px;position:sticky;z-index:12;background:var(--bg2)}
+  .th-col-anfang{width:52px;min-width:52px} /* scrolls off right, not sticky */
 
-  /* Bestand and Anfangsbestand: keep text, no icon */
+  /* Einkäufe/Lieferungen: icon only on mobile */
+  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.95rem}
+
+  /* Bestand/Anfangsbestand: text only */
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.45rem}
 
-  .num-cell{font-size:.72rem;padding:.4rem .15rem}
+  .num-cell{font-size:.72rem;padding:.4rem .1rem}
   .prod-name{font-size:.76rem}
   .prod-unit{font-size:.65rem}
-  .prod-icon{width:26px;height:26px;font-size:.8rem}
-  .prod-info{gap:.3rem}
+  .prod-icon{width:24px;height:24px;font-size:.78rem}
+  .prod-info{gap:.25rem}
   .main-content{padding:1rem .4rem}
 }
 
@@ -707,24 +705,25 @@ function renderTableActual(){
 
       const prodHidden = isFirst ? '' : 'hidden';
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
-      tbHTML += `<td><div class="prod-info">
+      // Col1: Artikel — sticky left:0
+      tbHTML += `<td style="position:sticky;left:0;z-index:3;background:var(--bg2)"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
-      // Bestand (second column)
-      tbHTML += `<td class="num-cell">—</td>`;
-      // Einkäufe / Lieferungen Gesamt
+      // Col2: Bestand — sticky left:110px
+      tbHTML += `<td class="num-cell" style="position:sticky;left:110px;z-index:3;background:var(--bg2)">—</td>`;
+      // Col3: Einkäufe/Lieferungen Gesamt — sticky left:160px
       const einkVal = totalEink || '—';
-      tbHTML += `<td class="num-cell">${einkVal}</td>`;
+      tbHTML += `<td class="num-cell" style="position:sticky;left:160px;z-index:3;background:var(--bg2)">${einkVal}</td>`;
       // Detail date cols
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-col detail-td">${qty}</td>`;
       });
-      // Lieferungen Gesamt (only zentral)
-      if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
-      // Anfangsbestand (last column)
+      // Lieferungen Gesamt (only zentral) — sticky left:198px
+      if(isZentral) tbHTML += `<td class="num-cell" style="position:sticky;left:198px;z-index:3;background:var(--bg2)">—</td>`;
+      // Anfangsbestand (last column) — not sticky, scrolls off right
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const safeProdName = prod.name.replace(/"/g, '&quot;');
       tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeProdName}">
