@@ -116,10 +116,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .lager-table th{background:rgba(0,0,0,.5);font-family:'Orbitron',sans-serif;font-size:.6rem;
   letter-spacing:.12em;color:var(--neon-cyan);text-transform:uppercase;padding:.7rem .9rem;
   border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center}
-.lager-table-left th{text-align:left;border-right:1px solid var(--glass-border)}
-.lager-table-left td{border-right:1px solid rgba(0,245,255,.1)}
-.lager-table-right{min-width:400px}
-.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem;white-space:nowrap}
+.lager-table-left th{text-align:left;border-right:2px solid rgba(0,245,255,.2)}
+.lager-table-left td{border-right:2px solid rgba(0,245,255,.08)}
+.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
 .lager-table tr:last-child td{border-bottom:none}
 .lager-table-left tr:hover td,.lager-table-right tr:hover td{background:rgba(0,245,255,.03)}
 
@@ -127,39 +126,51 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .th-icon{display:none}
 .th-text{display:inline}
 
-/* ── DESKTOP: merge back into one scrollable ── */
+/* ── DESKTOP / TABLET: single table with Artikel column ── */
 @media(min-width:641px){
   .table-container{display:block;overflow-x:auto}
   .table-left{display:none}
-  .table-right{overflow-x:visible;flex:none}
-  .lager-table-right{min-width:700px;width:100%}
+  .table-right{overflow-x:visible;flex:none;width:100%}
+  .lager-table-right{width:100%}
+  /* Add Artikel column back in desktop via thead/tbody having it */
+  /* Desktop min-width so table doesn't collapse */
+  .lager-table-right{min-width:650px}
 }
 
 /* ── MOBILE TABLE ── */
 @media(max-width:640px){
-  .table-left{width:130px;min-width:130px}
-  .lager-table-left{width:130px}
-  .lager-table-left th,.lager-table-left td{width:130px;min-width:130px;max-width:130px;
-    padding:.4rem .3rem;white-space:normal;word-break:break-word}
+  /* Left column: 50% of screen width */
+  .table-left{width:50vw;min-width:50vw;max-width:50vw}
+  .lager-table-left{width:100%}
+  .lager-table-left th,.lager-table-left td{
+    padding:.4rem .4rem;white-space:normal;word-break:break-word}
+  .lager-table-left th{font-size:.46rem;letter-spacing:.04em;text-align:left}
 
-  .lager-table-right th{font-size:.46rem;letter-spacing:.02em;padding:.4rem .2rem;
-    line-height:1.2;white-space:normal;word-break:break-word}
-  .lager-table-right td{padding:.38rem .2rem;font-size:.8rem}
+  /* Right columns: narrow, fixed widths */
+  .lager-table-right{white-space:nowrap}
+  .lager-table-right th{font-size:.46rem;letter-spacing:.02em;padding:.4rem .25rem;
+    line-height:1.2;white-space:normal;word-break:break-word;text-align:center}
+  .lager-table-right td{padding:.38rem .25rem;font-size:.8rem;text-align:center}
 
-  .th-col-bestand{width:50px;min-width:50px}
-  .th-col-einkauf{width:46px;min-width:46px}
-  .th-col-liefer{width:46px;min-width:46px}
-  .th-col-anfang{width:50px;min-width:50px}
+  /* Column widths in right table */
+  .th-col-bestand{width:46px;min-width:46px;max-width:46px}
+  .th-col-einkauf{width:40px;min-width:40px;max-width:40px}
+  .th-col-liefer{width:40px;min-width:40px;max-width:40px}
+  .th-col-anfang{width:46px;min-width:46px;max-width:46px}
+  /* Detail date columns: same narrow width */
+  .detail-th,.detail-td{width:36px;min-width:36px;max-width:36px}
 
   /* Einkäufe/Lieferungen: icon only */
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.9rem}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:.88rem}
 
-  /* Bestand/Anfangsbestand: text */
+  /* Bestand/Anfangsbestand: text only */
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.42rem}
 
   .num-cell{font-size:.72rem}
+  .prod-name{font-size:.78rem;white-space:normal;word-break:break-word}
+  .prod-unit{font-size:.65rem}
   .prod-icon{width:26px;height:26px;font-size:.82rem}
   .prod-info{gap:.28rem}
   .main-content{padding:1rem .35rem}
@@ -351,7 +362,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* utility */
+/* Desktop Artikel column in right table */
+.td-artikel-desktop{display:none}
+#th-artikel-desktop{display:none}
+@media(min-width:641px){
+  .td-artikel-desktop{display:table-cell;text-align:left;padding:.55rem .9rem;
+    width:22%;min-width:180px;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle}
+  #th-artikel-desktop{display:table-cell!important;padding:.7rem .9rem;white-space:nowrap;text-align:left}
+}
 .neon-cyan-small{color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.78rem;font-weight:700}
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
 </style>
@@ -682,7 +700,10 @@ function renderTableActual(){
   theadL.innerHTML = `<tr><th style="text-align:left;width:130px;min-width:130px">Artikel</th></tr>`;
 
   // ── RIGHT TABLE HEADER ──
+  // On desktop: include Artikel column in right table (left table hidden)
+  // On mobile: Artikel is in left table only
   let thHTML = '<tr>';
+  thHTML += '<th class="th-col-artikel" style="text-align:left;display:none" id="th-artikel-desktop">Artikel</th>';
   if(isZentral){
     thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
@@ -722,8 +743,10 @@ function renderTableActual(){
     // Left: category row
     tbLeftHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
-    // Right: category row (empty, just for height sync)
-    tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" data-cat="${ci}"><td colspan="99"></td></tr>`;
+    // Right: category row (with Artikel cell for desktop)
+    tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+      <td class="td-artikel-desktop"></td>
+      <td colspan="99"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
 
     catObj.items.forEach(prod=>{
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
@@ -741,6 +764,11 @@ function renderTableActual(){
       // Right: data cells
       const einkVal = totalEink || '—';
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
+      // Artikel cell for desktop (hidden on mobile via JS)
+      tbHTML += `<td class="td-artikel-desktop"><div class="prod-info">
+        <div class="prod-icon">${prod.icon||'📦'}</div>
+        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
+      </div></td>`;
       tbHTML += `<td class="num-cell">—</td>`;
       tbHTML += `<td class="num-cell">${einkVal}</td>`;
       dates.forEach(d=>{
