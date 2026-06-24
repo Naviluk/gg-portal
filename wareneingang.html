@@ -118,78 +118,48 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   }
 }
 
-/* ── TABLE CONTAINER ── */
-.table-container{display:flex;border-radius:8px;border:1px solid var(--glass-border);overflow:hidden}
-.table-left{flex-shrink:0}
-.table-right{overflow-x:auto;flex:1}
+/* ── TABLE WRAPPER ── */
+.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border)}
 
-/* ── TABLES ── */
-.lager-table{border-collapse:collapse;width:100%}
-.lager-table th{background:rgba(0,0,0,.5);
+/* ── SINGLE TABLE with sticky first column ── */
+.lager-table{border-collapse:separate;border-spacing:0;min-width:400px;width:100%}
+.lager-table th{
   font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
   font-size:.78rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
   padding:.7rem .9rem;border-bottom:1px solid var(--glass-border);
-  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center}
-.lager-table-left th{text-align:left;border-right:2px solid rgba(0,245,255,.2)}
-.lager-table-left td{border-right:2px solid rgba(0,245,255,.08)}
+  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
+  background:#07071a}
 .lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
 .lager-table tr:last-child td{border-bottom:none}
-.lager-table-left tr:hover td,.lager-table-right tr:hover td{background:rgba(0,245,255,.03)}
+.lager-table tr:hover td{background:rgba(0,245,255,.03)}
+
+/* Sticky Artikel column — works with border-separate */
+.col-artikel{
+  position:sticky;left:0;z-index:5;
+  background:#07071a;
+  text-align:left!important;
+  border-right:1px solid rgba(0,245,255,.15)!important;
+  min-width:160px;
+}
+.lager-table th.col-artikel{z-index:20;background:#07071a}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
 .th-text{display:inline}
 
-/* ── DESKTOP / TABLET: single table with Artikel column ── */
-@media(min-width:641px){
-  .table-container{display:block;overflow-x:auto}
-  .table-left{display:none}
-  .table-right{overflow-x:visible;flex:none;width:100%}
-  .lager-table-right{width:100%}
-  /* Add Artikel column back in desktop via thead/tbody having it */
-  /* Desktop min-width so table doesn't collapse */
-  .lager-table-right{min-width:650px}
-}
-
-/* ── MOBILE TABLE ── */
 @media(max-width:640px){
-  /* Left column: 50% of screen width */
-  .table-left{width:50vw;min-width:50vw;max-width:50vw}
-  .lager-table-left{width:100%}
-  .lager-table-left th,.lager-table-left td{
-    padding:.4rem .4rem;white-space:normal;word-break:break-word}
-  .lager-table-left th{font-size:.55rem;letter-spacing:.03em;text-align:left;
-    font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif}
-
-  /* Right columns */
-  .lager-table-right{white-space:nowrap}
-  .lager-table-right th{font-size:.55rem;letter-spacing:.02em;padding:.4rem .2rem;
-    line-height:1.2;white-space:normal;word-break:break-word;text-align:center;
-    font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif}
-  .lager-table-right td{padding:.38rem .25rem;font-size:.8rem;text-align:center}
-
-  /* Column widths */
-  .th-col-bestand{width:72px;min-width:72px;max-width:72px}
-  .th-col-einkauf{width:50px;min-width:50px;max-width:50px}
-  .th-col-liefer{width:50px;min-width:50px;max-width:50px}
-  .th-col-anfang{width:72px;min-width:72px;max-width:72px}
-  /* Detail date columns — wide enough for DD.MM. on one line */
-  .detail-th,.detail-td{width:58px;min-width:58px;max-width:58px}
-
-  /* Einkäufe/Lieferungen: icon only */
-  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1.1rem}
-
-  /* Bestand/Anfangsbestand: text, same size as other headers */
-  .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
-  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.55rem}
-
-  .num-cell{font-size:.72rem}
+  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
+  .lager-table th{font-size:.55rem;letter-spacing:.02em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
+  .lager-table td{padding:.38rem .2rem;font-size:.8rem}
+  .num-cell{font-size:.72rem;text-align:center}
   .prod-name{font-size:.78rem;white-space:normal;word-break:break-word}
   .prod-unit{font-size:.65rem}
   .prod-icon{width:26px;height:26px;font-size:.82rem}
   .prod-info{gap:.28rem}
   .main-content{padding:1rem .35rem}
+  /* Data columns: fixed width so they don't shift */
+  .lager-table th:not(.col-artikel){min-width:62px;width:62px}
+  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
 }
 
 /* category row */
@@ -522,21 +492,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
   <!-- Table -->
   <!-- Table wrapper: left fixed + right scrollable -->
-  <div class="table-container">
-    <!-- LEFT: fixed Artikel column -->
-    <div class="table-left" id="table-left">
-      <table class="lager-table lager-table-left" id="lager-table-left">
-        <thead id="lager-thead-left"></thead>
-        <tbody id="lager-tbody-left"></tbody>
-      </table>
-    </div>
-    <!-- RIGHT: scrollable columns -->
-    <div class="table-right" id="table-right">
-      <table class="lager-table lager-table-right" id="lager-table">
-        <thead id="lager-thead"></thead>
-        <tbody id="lager-tbody"></tbody>
-      </table>
-    </div>
+  <div class="table-wrap-single">
+    <table class="lager-table" id="lager-table">
+      <thead id="lager-thead"></thead>
+      <tbody id="lager-tbody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -753,67 +713,45 @@ function renderTable(){
 
 function renderTableActual(){
   const isZentral = currentLager === 'zentrallager';
-  const isMobile = window.innerWidth <= 640;
 
   const thead = document.getElementById('lager-thead');
   const tbody = document.getElementById('lager-tbody');
-  const theadL = document.getElementById('lager-thead-left');
-  const tbodyL = document.getElementById('lager-tbody-left');
 
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
-  // ── LEFT TABLE HEADER ──
-  theadL.innerHTML = `<tr><th style="text-align:left;width:130px;min-width:130px">Artikel</th></tr>`;
-
-  // ── RIGHT TABLE HEADER ──
-  // Wareneingang: Artikel | [date cols always visible] | Alle Einkäufe/Lieferungen (sum)
+  // ── HEADER ──
   let thHTML = '<tr>';
-  thHTML += '<th class="th-col-artikel" style="text-align:left;display:none" id="th-artikel-desktop">Artikel</th>';
+  thHTML += '<th class="col-artikel">Artikel</th>';
+  dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+  });
   if(isZentral){
-    dates.forEach(d=>{
-      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
-    });
-    thHTML += '<th class="num-cell th-col-einkauf"><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></th>';
+    thHTML += '<th class="num-cell"><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></th>';
   } else {
-    dates.forEach(d=>{
-      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
-    });
-    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></th>';
+    thHTML += '<th class="num-cell"><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></th>';
   }
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
   // ── BODY ──
-  let tbLeftHTML = '';
   let tbHTML = '';
 
   PRODUCTS.forEach((catObj, ci)=>{
     const isFirst = ci === 0;
     const catOpen = isFirst ? 'open' : '';
 
-    tbLeftHTML += `<tr class="cat-row cat-row-left ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
-    tbHTML += `<tr class="cat-row cat-row-r ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td class="td-artikel-desktop"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
-      <td class="cat-label-cell" colspan="99"><div class="cat-label"><span class="cat-arrow cat-arrow-r2">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td></tr>`;
+    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
+      <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
 
     catObj.items.forEach(prod=>{
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
       const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const prodHidden = isFirst ? '' : 'hidden';
 
-      // Left: Artikel
-      tbLeftHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">
-        <td><div class="prod-info">
-          <div class="prod-icon">${prod.icon||'📦'}</div>
-          <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
-        </div></td></tr>`;
-
-      // Right: date cells + sum
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
-      tbHTML += `<td class="td-artikel-desktop"><div class="prod-info">
+      tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
@@ -822,7 +760,6 @@ function renderTableActual(){
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-td">${qty}</td>`;
       });
-      // Sum column
       const sumVal = totalEink || '—';
       tbHTML += `<td class="num-cell" style="color:var(--neon-cyan);font-weight:700">${sumVal}</td>`;
       tbHTML += `</tr>`;
@@ -835,17 +772,11 @@ function renderTableActual(){
     wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
 
     if(allShops.size > 0){
-      // Single separator line spanning full table width
-      tbLeftHTML += `<tr class="shops-separator-left"><td style="padding:0;height:0;border-top:2px solid rgba(255,0,204,.4)"></td></tr>`;
-      tbHTML += `<tr class="shops-separator-right"><td colspan="99" style="padding:0;height:0;border-top:2px solid rgba(255,0,204,.4)"></td></tr>`;
-
-      // Shops header
-      const shopCatStyle = 'color:var(--neon-magenta)';
-      tbLeftHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
-        <td><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
-      tbHTML += `<tr class="cat-row cat-row-r open shops-cat-row" onclick="toggleShopsSection()">
-        <td class="td-artikel-desktop"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
-        <td class="cat-label-cell" colspan="99"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r2" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
+      // Separator + Shops header
+      tbHTML += `<tr class="shops-separator"><td colspan="999" style="padding:0;height:2px;background:rgba(255,0,204,.4)"></td></tr>`;
+      tbHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
+        <td class="col-artikel"><div class="cat-label" style="color:var(--neon-magenta)"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
+        <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
 
       // Track grand total per date
       const dateGrandTotals = {};
@@ -853,16 +784,9 @@ function renderTableActual(){
       let grandTotal = 0;
 
       allShops.forEach(shop=>{
-        // Left
-        tbLeftHTML += `<tr class="shop-row-item">
-          <td><div class="prod-info" style="gap:.4rem">
-            <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
-            <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
-          </div></td></tr>`;
-
-        // Right
+        // Single row per shop
         tbHTML += `<tr class="shop-row-item">`;
-        tbHTML += `<td class="td-artikel-desktop"><div class="prod-info" style="gap:.4rem">
+        tbHTML += `<td class="col-artikel"><div class="prod-info" style="gap:.4rem">
           <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
           <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
         </div></td>`;
@@ -889,13 +813,8 @@ function renderTableActual(){
 
       // Gesamt row
       const gesamtStyle = 'border-top:1px solid rgba(255,0,204,.3);background:rgba(255,0,204,.06)';
-      tbLeftHTML += `<tr class="shop-row-item">
-        <td style="${gesamtStyle}"><div class="prod-info" style="gap:.4rem;padding:.1rem 0">
-          <div style="width:26px"></div>
-          <div><div class="prod-name" style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta)">GESAMT</div></div>
-        </div></td></tr>`;
       tbHTML += `<tr class="shop-row-item">`;
-      tbHTML += `<td class="td-artikel-desktop" style="${gesamtStyle}"><div class="prod-name" style="font-family:Century Gothic,sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta)">GESAMT</div></td>`;
+      tbHTML += `<td class="col-artikel" style="${gesamtStyle}"><div class="prod-name" style="font-family:Century Gothic,sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta)">GESAMT</div></td>`;
       dates.forEach(d=>{
         const dtTotal = dateGrandTotals[d];
         const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+' €' : '—';
@@ -907,43 +826,20 @@ function renderTableActual(){
     }
   }
 
-  tbodyL.innerHTML = tbLeftHTML;
   tbody.innerHTML = tbHTML;
-
-  if(isMobile) syncRowHeights();
 }
 
 window.toggleShopsSection = function(){
-  document.querySelectorAll('.shop-row-item, .shops-separator-left, .shops-separator-right').forEach(r=>r.classList.toggle('hidden'));
+  document.querySelectorAll('.shop-row-item, .shops-separator').forEach(r=>r.classList.toggle('hidden'));
   document.querySelectorAll('.shops-cat-row').forEach(r=>r.classList.toggle('open'));
-  if(window.innerWidth<=640) requestAnimationFrame(()=>requestAnimationFrame(syncRowHeights));
 }
 
-function syncRowHeights(){
-  if(window.innerWidth > 640) return;
-  // Reset heights first
-  document.querySelectorAll('#lager-tbody-left tr, #lager-tbody tr, #lager-thead-left tr, #lager-thead tr').forEach(r=>r.style.height='');
-  // Re-measure and set
-  requestAnimationFrame(()=>{
-    const leftH = document.querySelector('#lager-thead-left tr');
-    const rightH = document.querySelector('#lager-thead tr');
-    if(leftH && rightH){
-      const h = Math.max(leftH.getBoundingClientRect().height, rightH.getBoundingClientRect().height);
-      leftH.style.height = h+'px'; rightH.style.height = h+'px';
-    }
-    const leftRows = [...document.querySelectorAll('#lager-tbody-left tr')];
-    const rightRows = [...document.querySelectorAll('#lager-tbody tr')];
-    leftRows.forEach((row,i)=>{
-      if(!rightRows[i]) return;
-      // Only sync visible rows
-      if(row.offsetParent === null || rightRows[i].offsetParent === null) return;
-      const h = Math.max(row.getBoundingClientRect().height, rightRows[i].getBoundingClientRect().height);
-      if(h > 0){ row.style.height = h+'px'; rightRows[i].style.height = h+'px'; }
-    });
-  });
+// ── CATEGORY TOGGLE ── single table version
+window.toggleCategory = function(row){
+  const ci = row.dataset.cat;
+  const isOpen = row.classList.toggle('open');
+  document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
 }
-
-// called after data loads
 async function loadData(){
   showSpinner();
   currentLager    = document.getElementById('sel-lager').value;
@@ -968,18 +864,6 @@ async function loadData(){
 
   hideSpinner();
   renderTableActual();
-}
-
-// ── CATEGORY TOGGLE ──
-window.toggleCategory = function(row, side){
-  const ci = row.dataset.cat;
-  const isOpen = row.classList.toggle('open');
-  document.querySelectorAll(`#lager-tbody-left .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
-  document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
-  document.querySelectorAll(`.cat-row[data-cat="${ci}"]`).forEach(r=>{
-    if(isOpen) r.classList.add('open'); else r.classList.remove('open');
-  });
-  if(window.innerWidth<=640) requestAnimationFrame(()=>requestAnimationFrame(syncRowHeights));
 }
 
 // ── DETAIL COLS TOGGLE ──
