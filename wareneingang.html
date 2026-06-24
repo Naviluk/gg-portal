@@ -831,28 +831,33 @@ function renderTableActual(){
 
   // ── SHOPS SECTION (Zentrallager only) ──
   if(isZentral){
-    // Get all shops from wareneingangs
     const allShops = new Set();
     wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
 
     if(allShops.size > 0){
-      // Shops category header
+      // Separator + Shops header — magenta color
+      const shopCatStyle = 'color:var(--neon-magenta);border-top:1px solid rgba(255,0,204,.3);margin-top:.2rem';
       tbLeftHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
-        <td><div class="cat-label"><span class="cat-arrow">▶</span>Shops</div></td></tr>`;
+        <td style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
       tbHTML += `<tr class="cat-row cat-row-r open shops-cat-row" onclick="toggleShopsSection()">
-        <td class="td-artikel-desktop"><div class="cat-label"><span class="cat-arrow cat-arrow-r">▶</span>Shops</div></td>
-        <td class="cat-label-cell" colspan="99"><div class="cat-label"><span class="cat-arrow cat-arrow-r2">▶</span>Shops</div></td></tr>`;
+        <td class="td-artikel-desktop" style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
+        <td class="cat-label-cell" colspan="99" style="border-top:2px solid rgba(255,0,204,.25)"><div class="cat-label" style="${shopCatStyle}"><span class="cat-arrow cat-arrow-r2" style="color:var(--neon-magenta)">▶</span>Shops</div></td></tr>`;
+
+      // Track grand total per date
+      const dateGrandTotals = {};
+      dates.forEach(d=>{ dateGrandTotals[d]=0; });
+      let grandTotal = 0;
 
       allShops.forEach(shop=>{
         // Left
-        tbLeftHTML += `<tr class="prod-row shop-row-item">
+        tbLeftHTML += `<tr class="shop-row-item">
           <td><div class="prod-info" style="gap:.4rem">
             <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
             <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
           </div></td></tr>`;
 
-        // Right: amount per date
-        tbHTML += `<tr class="prod-row shop-row-item">`;
+        // Right
+        tbHTML += `<tr class="shop-row-item">`;
         tbHTML += `<td class="td-artikel-desktop"><div class="prod-info" style="gap:.4rem">
           <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
           <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
@@ -863,14 +868,38 @@ function renderTableActual(){
           let amt = '—';
           if(we&&we.shops){
             const shopEntry = we.shops.find(s=>s.shop===shop);
-            if(shopEntry&&shopEntry.betrag){ amt = parseFloat(shopEntry.betrag).toFixed(2)+' €'; shopTotal += parseFloat(shopEntry.betrag)||0; }
+            if(shopEntry&&shopEntry.betrag){
+              const val = parseFloat(shopEntry.betrag)||0;
+              amt = val.toFixed(2)+' €';
+              shopTotal += val;
+              dateGrandTotals[d] += val;
+              grandTotal += val;
+            }
           }
           tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-size:.78rem">${amt}</td>`;
         });
         const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+' €' : '—';
-        tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700;font-size:.82rem">${shopTotalStr}</td>`;
+        tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700">${shopTotalStr}</td>`;
         tbHTML += `</tr>`;
       });
+
+      // Gesamt row
+      const gesamtStyle = 'border-top:1px solid rgba(255,238,0,.3);background:rgba(255,238,0,.04)';
+      tbLeftHTML += `<tr class="shop-row-item">
+        <td style="${gesamtStyle}"><div class="prod-info" style="gap:.4rem;padding:.1rem 0">
+          <div style="width:26px"></div>
+          <div><div class="prod-name" style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-yellow)">GESAMT</div></div>
+        </div></td></tr>`;
+      tbHTML += `<tr class="shop-row-item">`;
+      tbHTML += `<td class="td-artikel-desktop" style="${gesamtStyle}"><div class="prod-name" style="font-family:Century Gothic,sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-yellow)">GESAMT</div></td>`;
+      dates.forEach(d=>{
+        const dtTotal = dateGrandTotals[d];
+        const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+' €' : '—';
+        tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700;font-size:.82rem;${gesamtStyle}">${dtStr}</td>`;
+      });
+      const grandStr = grandTotal > 0 ? grandTotal.toFixed(2)+' €' : '—';
+      tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700;font-size:.9rem;${gesamtStyle}">${grandStr}</td>`;
+      tbHTML += `</tr>`;
     }
   }
 
@@ -883,6 +912,7 @@ function renderTableActual(){
 window.toggleShopsSection = function(){
   document.querySelectorAll('.shop-row-item').forEach(r=>r.classList.toggle('hidden'));
   document.querySelectorAll('.shops-cat-row').forEach(r=>r.classList.toggle('open'));
+  if(window.innerWidth<=640) setTimeout(syncRowHeights, 50);
 }
 
 function syncRowHeights(){
