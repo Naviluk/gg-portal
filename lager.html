@@ -97,23 +97,39 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .btn-wareneingang:hover{box-shadow:0 0 28px rgba(255,0,204,.7);transform:translateY(-1px)}
 @media(max-width:640px){
   .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
-  .ctrl-select{font-size:.75rem;padding:.4rem 1.8rem .4rem .5rem;background-position:right .4rem center;flex:1;min-width:0}
-  .btn-wareneingang{margin-left:auto;width:auto;font-size:.5rem;padding:.45rem .7rem;flex-shrink:0}
+  /* first select (Lager) gets more flex so Zentrallager fits */
+  .ctrl-select:first-child{flex:1.6;min-width:0}
+  .ctrl-select{font-size:.75rem;padding:.4rem 1.6rem .4rem .5rem;background-position:right .35rem center;flex:1;min-width:0}
+  /* button: smaller, right-aligned, text wraps to 2 lines */
+  .btn-wareneingang{margin-left:auto;width:auto;flex-shrink:0;
+    font-size:.46rem;padding:.35rem .55rem;line-height:1.25;
+    white-space:normal;text-align:center;max-width:80px}
 }
 
 /* ── TABLE WRAPPER ── */
 .table-wrap{overflow-x:auto;position:relative;border-radius:8px;border:1px solid var(--glass-border)}
-.lager-table{border-collapse:collapse;width:100%;min-width:600px}
+.lager-table{border-collapse:collapse;width:100%;min-width:0}
 .lager-table th{background:rgba(0,0,0,.5);font-family:'Orbitron',sans-serif;font-size:.6rem;
   letter-spacing:.12em;color:var(--neon-cyan);text-transform:uppercase;padding:.7rem .9rem;
   border-bottom:1px solid var(--glass-border);white-space:nowrap;position:sticky;top:0;z-index:10}
-/* Mobile: column headers wrap to 2 lines, compact */
+
+/* icon in desktop header */
+.th-icon{font-size:1rem;display:block;margin-bottom:.2rem}
+.th-text{display:inline}
+
+/* Mobile: show only icons in column headers, compact columns */
 @media(max-width:640px){
+  .lager-table{min-width:0;width:100%}
   .lager-table th{white-space:normal;word-break:break-word;font-size:.5rem;
-    letter-spacing:.06em;padding:.5rem .4rem;line-height:1.3}
-  .th-col-bestand,.th-col-einkauf,.th-col-liefer{width:22vw;min-width:60px;max-width:80px}
-  .th-col-artikel{min-width:130px}
-  .th-col-anfang{min-width:70px}
+    letter-spacing:.04em;padding:.5rem .3rem;line-height:1.2;text-align:center}
+  .th-text{display:none} /* hide text, show only icon on mobile */
+  .th-icon{font-size:1.1rem;margin-bottom:0}
+  /* compact data columns */
+  .th-col-bestand,.th-col-einkauf,.th-col-liefer{width:44px;min-width:44px;max-width:44px}
+  .th-col-anfang{min-width:44px;width:44px}
+  .th-col-artikel{min-width:120px}
+  .num-cell{font-size:.72rem;padding:.4rem .2rem}
+  .lager-table td{padding:.4rem .3rem}
 }
 .lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
 .lager-table tr:last-child td{border-bottom:none}
@@ -308,9 +324,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 @media(max-width:640px){
   .main-content{padding:1rem .4rem}
   .prod-name{font-size:.78rem}
-  .prod-icon{width:28px;height:28px;font-size:.9rem}
-  .lager-table td{padding:.4rem .4rem}
-  .num-cell{font-size:.72rem}
+  .prod-icon{width:26px;height:26px;font-size:.85rem}
+  .prod-info{gap:.4rem}
+  .lager-table td{padding:.4rem .3rem}
 }
 .neon-cyan-small{color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.78rem;font-weight:700}
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
@@ -625,25 +641,26 @@ function renderTableActual(){
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
   // Build header — column order: Artikel | Bestand | Einkäufe/Lieferungen | [dates] | [Lieferungen] | Anfangsbestand
+  // Icons: Bestand=📦📦📦, Einkäufe=🛒, Lieferungen=🚚, Anfangsbestand=📦
   let thHTML = '<tr>';
-  thHTML += '<th class="th-col-artikel" style="min-width:160px;text-align:left">Artikel</th>';
+  thHTML += '<th class="th-col-artikel" style="text-align:left"><span class="th-text">Artikel</span></th>';
   if(isZentral){
-    thHTML += '<th class="num-cell th-col-bestand">Bestand</th>';
+    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
       <div class="col-einkauf-wrap">
-        Einkäufe<br>Gesamt
+        <span><span class="th-icon">🛒</span><span class="th-text">Einkäufe<br>Gesamt</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
-    thHTML += '<th class="num-cell th-col-liefer">Lieferungen<br>Gesamt</th>';
+    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen<br>Gesamt</span></th>';
   } else {
-    thHTML += '<th class="num-cell th-col-bestand">Bestand</th>';
+    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer">
       <div class="col-einkauf-wrap">
-        Lieferungen<br>Gesamt
+        <span><span class="th-icon">🚚</span><span class="th-text">Lieferungen<br>Gesamt</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()">▶</span>
       </div></th>`;
     dates.forEach(d=>{
@@ -651,7 +668,7 @@ function renderTableActual(){
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
   }
-  thHTML += '<th class="num-cell th-col-anfang">Anfangs-<br>bestand</th>';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
