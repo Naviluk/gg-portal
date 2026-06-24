@@ -130,13 +130,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
     line-height:1.2;white-space:normal;word-break:break-word;text-align:center}
   .lager-table td{padding:.4rem .2rem}
 
-  /* Sticky columns: Artikel, Bestand, Einkäufe, Lieferungen — fixed on screen */
-  /* Left positions: Artikel=0, Bestand=110px, Einkäufe=160px, Lieferungen=198px */
-  .th-col-artikel{width:110px;min-width:110px;left:0;position:sticky;z-index:15;background:var(--bg2)}
-  .th-col-bestand{width:50px;min-width:50px;left:110px;position:sticky;z-index:14;background:var(--bg2)}
-  .th-col-einkauf{width:38px;min-width:38px;left:160px;position:sticky;z-index:13;background:var(--bg2)}
-  .th-col-liefer{width:38px;min-width:38px;left:198px;position:sticky;z-index:12;background:var(--bg2)}
-  .th-col-anfang{width:52px;min-width:52px} /* scrolls off right, not sticky */
+  /* 3 sticky visible columns: Artikel, Bestand, Einkäufe/Lieferungen */
+  .th-col-artikel{width:110px;min-width:110px;position:sticky;left:0;z-index:15;background:var(--bg2)}
+  .th-col-bestand{width:50px;min-width:50px;position:sticky;left:110px;z-index:14;background:var(--bg2)}
+  .th-col-einkauf{width:52px;min-width:52px;position:sticky;left:160px;z-index:13;background:var(--bg2)}
+  .th-col-liefer{width:52px;min-width:52px;position:sticky;left:160px;z-index:13;background:var(--bg2)}
+  /* everything after scrolls right */
+  .th-col-anfang{width:52px;min-width:52px}
 
   /* Einkäufe/Lieferungen: icon only on mobile */
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
@@ -712,7 +712,7 @@ function renderTableActual(){
       </div></td>`;
       // Col2: Bestand — sticky left:110px
       tbHTML += `<td class="num-cell" style="position:sticky;left:110px;z-index:3;background:var(--bg2)">—</td>`;
-      // Col3: Einkäufe/Lieferungen Gesamt — sticky left:160px
+      // Col3: Einkäufe/Lieferungen Gesamt — sticky left:160px (last fixed column)
       const einkVal = totalEink || '—';
       tbHTML += `<td class="num-cell" style="position:sticky;left:160px;z-index:3;background:var(--bg2)">${einkVal}</td>`;
       // Detail date cols
@@ -721,8 +721,8 @@ function renderTableActual(){
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-col detail-td">${qty}</td>`;
       });
-      // Lieferungen Gesamt (only zentral) — sticky left:198px
-      if(isZentral) tbHTML += `<td class="num-cell" style="position:sticky;left:198px;z-index:3;background:var(--bg2)">—</td>`;
+      // Lieferungen Gesamt (only zentral) — not sticky, scrolls right
+      if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
       // Anfangsbestand (last column) — not sticky, scrolls off right
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const safeProdName = prod.name.replace(/"/g, '&quot;');
