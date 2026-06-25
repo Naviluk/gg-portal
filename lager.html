@@ -666,7 +666,8 @@ let currentLager    = 'zentrallager';
 let currentZeitraum = '2026-06';
 let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
-let anfangsbestand  = {}; // {productId: value}
+let anfangsbestand  = {}; // from Inventur page
+let bestandData     = {}; // last inventur of period
 let currentAbProdId = null;
 
 // ── EXPOSE (assigned after function definitions below) ──
@@ -748,7 +749,9 @@ function renderTableActual(){
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
-      tbHTML += `<td class="num-cell">—</td>`;
+      const bestandVal = bestandData[prod.id] !== undefined ? bestandData[prod.id] : '—';
+      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-green)' : '';
+      tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       const einkVal = totalEink || '—';
       tbHTML += `<td class="num-cell">${einkVal}</td>`;
       dates.forEach(d=>{
@@ -759,8 +762,7 @@ function renderTableActual(){
       if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const safeProdName = prod.name.replace(/"/g, '&quot;');
-      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeProdName}">
-        <span class="edit-val">${abDisplay}</span></td>`;
+      tbHTML += `<td class="num-cell"><span class="edit-val">${abDisplay}</span></td>`;
       tbHTML += `</tr>`;
     });
   });
@@ -787,9 +789,20 @@ async function loadData(){
   } catch(e){}
 
   anfangsbestand={};
+  // Load Anfangsbestand from Inventur page (anfangsbestand collection)
   try {
     const abDoc=await getDoc(doc(db,'anfangsbestand',currentLager+'_'+currentZeitraum));
     if(abDoc.exists()) anfangsbestand=abDoc.data();
+  } catch(e){}
+
+  // Load Bestand from last inventur of current period
+  bestandData={};
+  try {
+    const invQ=query(collection(db,'inventur'),where('lager','==',currentLager),where('monat','==',currentZeitraum.length===7?currentZeitraum:currentZeitraum));
+    const invSnap=await getDocs(invQ);
+    let lastInvDate=null; let lastInvItems={};
+    invSnap.forEach(d=>{ const inv=d.data(); if(!lastInvDate||inv.datum>lastInvDate){lastInvDate=inv.datum;lastInvItems=inv.items||{};} });
+    bestandData=lastInvItems;
   } catch(e){}
 
   hideSpinner();
