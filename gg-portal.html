@@ -632,6 +632,9 @@
     <li class="nav-item" id="nav-getranke-staff">
       <button class="nav-link" onclick="navigateTo('getränke','staff')">Getränke</button>
     </li>
+    <li class="nav-item" id="nav-inventur-staff" style="display:none">
+      <button class="nav-link" onclick="window.location.href='%2Binventur.html'" style="color:var(--neon-magenta)">＋ Inventur</button>
+    </li>
   </ul>
 </nav>
 
@@ -937,8 +940,9 @@ async function handleStaffLogin(){
     currentStaff = { name: data.name, role: data.role, uid };
     document.getElementById('hdr-staff-username').textContent = data.name;
     document.getElementById('hdr-staff-username-mob').textContent = data.name;
-    // MitarbeiterPlus sees Getränke
+    // MitarbeiterPlus sees Getränke and + Inventur
     document.getElementById('nav-getranke-staff').style.display = data.role==='MitarbeiterPlus'?'':'none';
+    document.getElementById('nav-inventur-staff').style.display = data.role==='MitarbeiterPlus'?'':'none';
     hideSpinner();
     document.getElementById('modal-staff-switch').classList.remove('show');
   } catch(e){ hideSpinner(); showErr('err-staff-pw','Verbindungsfehler.'); }
