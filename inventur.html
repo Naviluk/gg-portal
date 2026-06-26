@@ -8,7 +8,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
-  --bg:#050510;--bg2:#0a0a1a;--bg3:#0d0d22;
+  --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
   --neon-cyan:#00f5ff;--neon-magenta:#ff00cc;--neon-yellow:#ffee00;--neon-green:#00ff88;
   --glass:rgba(255,255,255,0.04);--glass-border:rgba(0,245,255,0.15);
   --text:#e0e8ff;--text-dim:#7080a0;--header-h:64px;
@@ -46,7 +46,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* sidebar */
-.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:rgba(5,5,20,.97);
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:rgba(17,24,39,.97);
   border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
   transition:left .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px)}
 .sidebar.open{left:0}
@@ -68,7 +68,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 
 /* user dropdown */
 .user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
-  background:rgba(5,5,20,.97);border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
+  background:rgba(17,24,39,.97);border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
   display:none;z-index:300;min-width:180px;backdrop-filter:blur(16px)}
 .user-dropdown.show{display:block}
 .user-dropdown button{display:block;width:100%;padding:.7rem 1.2rem;text-align:left;background:none;border:none;
@@ -128,7 +128,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   font-size:.78rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
   padding:.7rem .9rem;border-bottom:1px solid var(--glass-border);
   white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
-  background:#07071a}
+  background:#111827}
 .lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
 .lager-table tr:last-child td{border-bottom:none}
 .lager-table tr:hover td{background:rgba(0,245,255,.03)}
@@ -136,13 +136,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 /* Sticky Artikel column — works with border-separate */
 .col-artikel{
   position:sticky;left:0;z-index:5;
-  background:#07071a;
+  background:#111827;
   text-align:left!important;
   border-right:1px solid rgba(0,245,255,.15)!important;
   min-width:200px;
   width:1%;
 }
-.lager-table th.col-artikel{z-index:20;background:#07071a}
+.lager-table th.col-artikel{z-index:20;background:#111827}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
@@ -363,7 +363,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 @keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 /* spinner */
-.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,16,.8);z-index:999;align-items:center;justify-content:center}
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.85);z-index:999;align-items:center;justify-content:center}
 .spinner-overlay.show{display:flex}
 .spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
