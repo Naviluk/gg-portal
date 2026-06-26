@@ -785,11 +785,8 @@ function renderTableActual(){
 function getPrevMonthLabel(){
   const zeit = currentZeitraum;
   if(zeit.length !== 7) return '—';
-  const [yr, mo] = zeit.split('-').map(Number);
-  const prevDate = new Date(yr, mo-2, 1);
-  const dd = String(prevDate.getDate()).padStart(2,'0');
-  const mm = String(prevDate.getMonth()+1).padStart(2,'0');
-  return `INV ${dd}.${mm}.`;
+  const mm = zeit.slice(5,7);
+  return `INV 01.${mm}.`;
 }
 
 window.toggleShopsSection = function(){}  // not used in inventur
