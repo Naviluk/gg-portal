@@ -797,7 +797,7 @@ async function loadArchive(){
       .get();
     const entries = [];
     snap.forEach(d=>entries.push({id:d.id,...d.data()}));
-    entries.sort((a,b)=>b.datum.localeCompare(a.datum));
+    entries.sort((a,b)=>(b.createdAt||b.datum).localeCompare(a.createdAt||a.datum));
     hideSpinner();
     if(entries.length===0){ emptyMsg.style.display='block'; return; }
     emptyMsg.style.display='none';
