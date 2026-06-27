@@ -8,7 +8,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
 :root{
-  --bg:#0f1520;--bg2:#162030;--bg3:#1c2a3e;--bg4:#223040;
+  --bg:#1e2228;--bg2:#252c35;--bg3:#2c343f;--bg4:#333c48;
   --accent:#00c8ff;--accent2:#ff3399;--accent3:#00e87a;
   --text:#dce8f5;--text-dim:#6a8aaa;--text-muted:#3a5a7a;
   --glass-border:rgba(0,200,255,.12);
@@ -27,7 +27,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 /* HEADER */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
-  background:rgba(12,18,30,.92);border-bottom:1px solid var(--glass-border);
+  background:rgba(28,32,38,.95);border-bottom:1px solid var(--glass-border);
   backdrop-filter:blur(20px);display:flex;align-items:center;padding:0 1.4rem;gap:1rem;z-index:200;
   box-shadow:0 2px 20px rgba(0,0,0,.4)}
 .burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:6px}
@@ -44,7 +44,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,10,30,.6);z-index:150;backdrop-filter:blur(2px)}
 .sidebar-overlay.open{display:block}
 .sidebar{position:fixed;top:0;left:-270px;width:270px;height:100%;
-  background:rgba(14,22,36,.97);border-right:1px solid var(--glass-border);
+  background:rgba(28,32,38,.97);border-right:1px solid var(--glass-border);
   z-index:160;transition:left .3s ease;overflow-y:auto;box-shadow:4px 0 30px rgba(0,0,0,.5)}
 .sidebar.open{left:0}
 .nav-list{list-style:none;padding:.5rem 0}
@@ -59,7 +59,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 /* USER DD */
 .user-dd{display:none;position:fixed;top:calc(var(--header-h) + .4rem);right:.8rem;
-  background:rgba(18,28,44,.97);border:1px solid var(--glass-border);border-radius:12px;
+  background:rgba(28,32,38,.97);border:1px solid var(--glass-border);border-radius:12px;
   padding:.5rem;z-index:300;min-width:190px;box-shadow:var(--shadow-lg);backdrop-filter:blur(20px)}
 .user-dd button{width:100%;background:none;border:none;color:var(--text);
   font-family:'Century Gothic',sans-serif;font-size:.92rem;padding:.65rem 1rem;
@@ -95,7 +95,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .g-table th{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;font-weight:700;
   letter-spacing:.06em;text-transform:uppercase;padding:.65rem .75rem;
   border-bottom:1px solid var(--glass-border);position:sticky;top:0;z-index:10;
-  white-space:nowrap;text-align:center;background:rgba(10,16,28,.95)}
+  white-space:nowrap;text-align:center;background:rgba(25,30,38,.95)}
 .g-table td{padding:.48rem .75rem;border-bottom:1px solid rgba(0,200,255,.05);
   vertical-align:middle;font-size:.9rem;text-align:center;font-weight:600}
 .g-table tr:hover td{background:rgba(0,200,255,.04)}
@@ -104,7 +104,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 /* Sticky artikel col */
 .col-artikel{position:sticky;left:0;z-index:5;background:var(--bg2);text-align:left!important;
   border-right:1px solid rgba(0,200,255,.1)!important;min-width:155px}
-.g-table th.col-artikel{z-index:15;background:rgba(10,16,28,.95);color:var(--accent);text-align:left!important}
+.g-table th.col-artikel{z-index:15;background:rgba(25,30,38,.95);color:var(--accent);text-align:left!important}
 
 /* Column type colors */
 .th-ab{color:var(--col-ab)}
@@ -171,7 +171,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .ges-val{font-weight:700;font-size:.9rem}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,20,.75);z-index:500;
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,12,18,.75);z-index:500;
   align-items:flex-start;justify-content:center;padding:1.2rem;overflow-y:auto;backdrop-filter:blur(6px)}
 .modal-overlay.show{display:flex}
 .modal{background:var(--bg3);border:1px solid var(--glass-border);border-radius:16px;
@@ -223,6 +223,10 @@ input[type=date]:focus{border-color:var(--accent)}
 .spinner-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,20,.7);z-index:999;
   align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .spinner-overlay.show{display:flex}
+.th-date-edit{cursor:pointer;font-size:.6rem;opacity:.5;margin-left:.2rem;vertical-align:middle}
+.th-date-edit:hover{opacity:1;color:var(--col-g)}
+.th-date-g:hover .th-date-edit{opacity:.9}
+.edit-modal-title{color:var(--col-g)}
 .spinner{width:42px;height:42px;border:3px solid rgba(0,200,255,.15);border-top-color:var(--accent);
   border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -281,7 +285,6 @@ input[type=date]:focus{border-color:var(--accent)}
       <option value="2026-09">September 2026</option><option value="2026-10">Oktober 2026</option>
       <option value="2026-11">November 2026</option><option value="2026-12">Dezember 2026</option>
     </select>
-    <button class="btn-action btn-einkauf" onclick="openModal('einkauf')">＋ Einkauf</button>
     <button class="btn-action btn-geraet" onclick="openModal('geraet')">⚙️ Gerätauffüllung</button>
     <button class="btn-action btn-gesamt" onclick="toggleGesamt()">📊 Gesamt</button>
   </div>
@@ -345,6 +348,7 @@ var bewegungen=[];
 var anfangsbestand={};
 var eExpanded=false;
 var gExpanded=false;
+var currentEditId=null;
 
 if(!currentLager||currentLager==="zentrallager"||!currentUser) window.location.href="gg-portal.html";
 
@@ -414,7 +418,9 @@ function renderTable(){
     </div></th>`;
   gDates.forEach(d=>{
     const lbl=d.slice(8)+"."+d.slice(5,7)+".";
-    th+=`<th class='th-date-g detail-col detail-g'>${lbl}</th>`;
+    const bid=bewegungen.find(b=>b.datum===d&&b.type==="geraet")?.id||"";
+    th+=`<th class='th-date-g detail-col detail-g' style='cursor:pointer' onclick='openEditGeraet("${d}","${bid}")' title='Klicken zum Bearbeiten'>
+      ${lbl} <span class='th-date-edit'>✏️</span></th>`;
   });
 
   // Theke + End
@@ -534,7 +540,40 @@ function openModal(type){
   document.getElementById("form-list").innerHTML=html;
   document.getElementById("modal-form").classList.add("show");
 }
-function closeModal(){document.getElementById("modal-form").classList.remove("show")}
+function openEditGeraet(datum, bid){
+  currentType="geraet";
+  currentEditId=bid||null;
+  document.getElementById("modal-title").textContent="🟠 Gerätauffüllung bearbeiten";
+  document.getElementById("modal-title").className="modal-title geraet";
+  document.getElementById("btn-submit").className="btn-submit geraet";
+  document.getElementById("form-date").value=datum;
+  document.getElementById("form-date").readOnly=true;
+
+  // Find existing record
+  const existing=bewegungen.find(b=>b.datum===datum&&b.type==="geraet");
+  const existItems=existing?.items||{};
+
+  let html="";
+  PRODUCTS.forEach((cat,ci)=>{
+    html+=`<div class="form-cat-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${cat.cat}</div><div>`;
+    cat.items.forEach(prod=>{
+      const val=existItems[prod.id]||"";
+      html+=`<div class="form-row">
+        <div class="form-icon">${prod.icon}</div>
+        <span class="form-name">${prod.name}</span>
+        <span class="form-unit">${prod.unit||""}</span>
+        <input class="form-qty geraet" type="number" min="0" placeholder="0" value="${val}" data-id="${prod.id}">
+      </div>`;
+    });
+    html+="</div>";
+  });
+  document.getElementById("form-list").innerHTML=html;
+  document.getElementById("modal-form").classList.add("show");
+}
+function closeModal(){
+  document.getElementById("modal-form").classList.remove("show");
+  document.getElementById("form-date").readOnly=false;
+}
 
 async function submitForm(){
   const date=document.getElementById("form-date").value;
@@ -544,10 +583,15 @@ async function submitForm(){
   if(!Object.keys(items).length){showToast("Keine Mengen eingegeben","#ffaa00");return}
   showSpinner();
   try{
-    await db.collection("getraenke_bewegung").add({
-      lager:currentLager,monat:currentZeitraum,datum:date,type:currentType,
-      items,mitarbeiter:currentUser,createdAt:new Date().toISOString()
-    });
+    if(currentEditId){
+      await db.collection("getraenke_bewegung").doc(currentEditId).update({items,mitarbeiter:currentUser,updatedAt:new Date().toISOString()});
+    } else {
+      await db.collection("getraenke_bewegung").add({
+        lager:currentLager,monat:currentZeitraum,datum:date,type:currentType,
+        items,mitarbeiter:currentUser,createdAt:new Date().toISOString()
+      });
+    }
+    currentEditId=null;
     hideSpinner();closeModal();
     showToast(currentType==="einkauf"?"Einkauf gespeichert ✓":"Gerätauffüllung gespeichert ✓");
     loadData();
