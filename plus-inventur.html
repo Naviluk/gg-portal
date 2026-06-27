@@ -604,7 +604,7 @@ function renderPhotosGrid(){
   const grid2 = document.getElementById('photos-grid2');
   const html = selectedPhotos.map((p,i)=>`
     <div class="photo-item">
-      <img src="${p.preview}" alt="Foto ${i+1}">
+      <img src="${p.preview||p.url}" alt="Foto ${i+1}">
       <button class="photo-remove" onclick="removePhoto(${i})">✕</button>
     </div>`).join('') +
     `<button class="add-more-btn" onclick="document.getElementById('file-input').click()">＋</button>`;
@@ -760,7 +760,32 @@ function sendEmailNotification(entry){
   console.log('Email notification: Neue Inventur von', entry.mitarbeiter, 'aus', entry.lager);
 }
 
-// ── ARCHIVE ──
+// ── OPEN EDIT (load existing data) ──
+function openEdit(inv){
+  currentInvId = inv.id;
+
+  // Restore state
+  photoDone = (inv.photos||[]).length > 0;
+  listDone  = Object.keys(inv.items||{}).length > 0;
+  listItems = inv.items || {};
+
+  // Restore photos as preview urls
+  selectedPhotos = (inv.photos||[]).map(url=>({file:null, preview:url, url}));
+
+  // Reset UI
+  document.getElementById('card-photo').classList.toggle('done', photoDone);
+  document.getElementById('card-list').classList.toggle('done', listDone);
+  document.getElementById('photos-grid').innerHTML='';
+  document.getElementById('photos-grid2').innerHTML='';
+  document.getElementById('photo-list-prompt').style.display = photoDone?'block':'none';
+  document.getElementById('list-photo-section').style.display = listDone&&photoDone?'block':'none';
+  document.getElementById('inv-date').value = inv.datum;
+
+  renderPhotosGrid();
+  updateSendSection();
+  showStep('step-choose');
+  document.getElementById('modal-create').classList.add('show');
+}
 async function loadArchive(){
   showSpinner();
   const section = document.getElementById('archive-section');
@@ -807,9 +832,14 @@ async function loadArchive(){
         </div>
         ${photosHtml||morePhotos ? `<div class="photos-preview">${photosHtml}${morePhotos}</div>` : ''}
         ${inv.status==='sent' ? `<div class="inv-actions">
-          <button class="btn-edit-card" onclick="openCreate(null,'${inv.id}')">✏️ Bearbeiten</button>
+          <button class="btn-edit-card" id="edit-btn-${inv.id}">✏️ Bearbeiten</button>
         </div>` : ''}`;
       section.appendChild(card);
+
+      // Attach edit handler with full inv data
+      if(inv.status==='sent'){
+        document.getElementById('edit-btn-'+inv.id).addEventListener('click', ()=>openEdit(inv));
+      }
     });
   } catch(e){
     hideSpinner();
@@ -823,6 +853,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ loadArchive(); });
 
 // ── Make all functions globally accessible ──
 window.openHelp = openHelp;
+window.openEdit = openEdit;
 window.closeModal = closeModal;
 window.openCreate = openCreate;
 window.startPhoto = startPhoto;
