@@ -82,20 +82,33 @@ body::before{content:'';position:fixed;inset:0;z-index:0;
 .col-artikel{position:sticky;left:0;z-index:5;background:#111827;text-align:left!important;
   border-right:1px solid rgba(0,245,255,.1)!important;min-width:155px}
 .g-table th.col-artikel{z-index:15;background:#0d1420;color:var(--neon-cyan)}
-.th-anfang{color:var(--col-anfang)}
-.th-einkauf{color:var(--col-einkauf)}
-.th-geraet{color:var(--col-geraet)}
-.th-theke{color:var(--col-theke);opacity:.6}
-.th-end{color:var(--col-end)}
-.th-ges-e{color:var(--col-einkauf);background:rgba(0,204,68,.06)!important}
-.th-ges-g{color:var(--col-geraet);background:rgba(68,136,255,.06)!important}
-.th-ges-t{color:var(--col-theke);background:rgba(255,102,102,.06)!important;opacity:.7}
-.val-einkauf{color:var(--col-einkauf);font-weight:600}
-.val-geraet{color:var(--col-geraet);font-weight:600}
-.val-theke{color:var(--col-theke);font-weight:600}
-.val-anfang{color:var(--col-anfang)}
-.val-end{color:var(--col-end);font-weight:700}
-.val-dim{color:var(--text-dim)}
+/* Excel-style column colors */
+/* Einkauf: green bg + green text */
+.th-einkauf{color:#1a7a1a;background:rgba(0,180,0,.12)!important}
+.td-einkauf{background:rgba(0,180,0,.07);color:#1a7a1a;font-weight:600}
+/* Gerät: orange bg + orange text */
+.th-geraet{color:#cc6600;background:rgba(255,140,0,.12)!important}
+.td-geraet{background:rgba(255,140,0,.08);color:#e07000;font-weight:600}
+/* Theke: pink/red bg + red text */
+.th-theke{color:#cc2200;background:rgba(220,60,0,.10)!important}
+.td-theke{background:rgba(220,60,0,.07);color:#cc2200;font-weight:600}
+/* Bestand: neutral */
+.th-bestand{color:var(--text);background:rgba(255,255,255,.04)!important;font-weight:700}
+.td-bestand{color:var(--text);font-weight:700}
+/* Anfangsbestand */
+.th-anfang{color:var(--neon-cyan)}
+.td-anfang{color:var(--neon-cyan);font-weight:700}
+/* Day group header */
+.th-day{color:var(--text);background:rgba(255,255,255,.06)!important;font-weight:700;border-left:2px solid rgba(255,255,255,.1)!important}
+/* Gesamt cols */
+.th-ges-e{color:#1a7a1a;background:rgba(0,180,0,.15)!important}
+.th-ges-g{color:#cc6600;background:rgba(255,140,0,.15)!important}
+.th-ges-t{color:#cc2200;background:rgba(220,60,0,.12)!important}
+.th-end{color:var(--neon-yellow);background:rgba(255,238,0,.08)!important;font-weight:700}
+.td-end{color:var(--neon-yellow);font-weight:700}
+.val-dim{color:rgba(255,255,255,.15)}
+/* day separator */
+.day-sep{border-left:2px solid rgba(255,255,255,.08)!important}
 .cat-row td{background:rgba(0,0,0,.35);cursor:pointer;user-select:none;padding:.38rem .65rem}
 .cat-row:hover td{background:rgba(0,245,255,.04)}
 .cat-lbl{font-family:'Orbitron',sans-serif;font-size:.56rem;letter-spacing:.12em;
@@ -303,39 +316,95 @@ async function loadData(){
     renderGesamt();
   }catch(e){hideSpinner();showToast("Fehler: "+e.message,"var(--neon-magenta)")}
 }
-function renderTable(){
-  const dates=[...new Set(bewegungen.map(b=>b.datum))].sort();
-  let thHTML="<tr><th class='col-artikel'>Artikel</th><th class='th-anfang'>Anfangs-<br>bestand</th>";
-  dates.forEach(d=>{
-    const lbl=d.slice(8)+"."+d.slice(5,7)+".";
-    if(bewegungen.some(b=>b.datum===d&&b.type==="einkauf")) thHTML+=`<th class="th-einkauf">🟢 ${lbl}</th>`;
-    if(bewegungen.some(b=>b.datum===d&&b.type==="geraet")) thHTML+=`<th class="th-geraet">🔵 ${lbl}</th>`;
-    thHTML+=`<th class="th-theke" title="Theke ${lbl}" style="opacity:.5">🔴 ${lbl}</th>`;
+function getDaysInMonth(zeitraum){
+  const [y,m]=zeitraum.split("-").map(Number);
+  return new Date(y,m,0).getDate();
+}
+
+function calcBestand(prodId, upToDay, zeitraum){
+  const ab=Number(anfangsbestand[prodId]??0);
+  let e=0,g=0,t=0;
+  bewegungen.forEach(b=>{
+    const day=parseInt(b.datum.slice(8));
+    if(b.monat!==zeitraum&&!b.datum.startsWith(zeitraum)) return;
+    if(day>upToDay) return;
+    const v=b.items&&b.items[prodId]?Number(b.items[prodId]):0;
+    if(b.type==="einkauf") e+=v;
+    else if(b.type==="geraet") g+=v;
+    else if(b.type==="theke") t+=v;
   });
-  thHTML+="<th class='th-ges-e'>Einkauf<br>Ges.</th><th class='th-ges-g'>Gerät<br>Ges.</th><th class='th-ges-t' style='opacity:.6'>Theke<br>Ges.</th><th class='th-end'>End-<br>bestand</th></tr>";
-  document.getElementById("g-thead").innerHTML=thHTML;
+  return ab+e+g-t;
+}
+
+function renderTable(){
+  const totalDays=getDaysInMonth(currentZeitraum);
+  // Build day range: show all days but only render cols if there's data
+  // Find which days have any bewegung
+  const activeDays=new Set(bewegungen.map(b=>parseInt(b.datum.slice(8))));
+
+  // HEADER ROW 1: day numbers (spanning 4 cols each)
+  let th1="<tr><th class='col-artikel' rowspan='2'>Artikel</th><th class='th-anfang' rowspan='2'>Anfangs-<br>bestand</th>";
+  for(let d=1;d<=totalDays;d++){
+    if(activeDays.has(d)){
+      th1+=`<th colspan='4' class='th-day day-sep'>${d}.</th>`;
+    }
+  }
+  th1+="<th class='th-ges-e' rowspan='2'>Einkauf<br>Ges.</th>";
+  th1+="<th class='th-ges-g' rowspan='2'>Gerät<br>Ges.</th>";
+  th1+="<th class='th-ges-t' rowspan='2'>Theke<br>Ges.</th>";
+  th1+="<th class='th-end' rowspan='2'>End-<br>bestand</th></tr>";
+
+  // HEADER ROW 2: Einkauf | Gerät | Theke | Bestand per active day
+  let th2="<tr>";
+  for(let d=1;d<=totalDays;d++){
+    if(activeDays.has(d)){
+      th2+=`<th class='th-einkauf day-sep'>Einkauf</th>`;
+      th2+=`<th class='th-geraet'>Gerät</th>`;
+      th2+=`<th class='th-theke'>Theke</th>`;
+      th2+=`<th class='th-bestand'>Bestand</th>`;
+    }
+  }
+  th2+="</tr>";
+  document.getElementById("g-thead").innerHTML=th1+th2;
+
+  // BODY
   let tbHTML="";
   PRODUCTS.forEach((cat,ci)=>{
     tbHTML+=`<tr class="cat-row ${ci===0?"open":""}" onclick="toggleCat(this)" data-cat="${ci}">
       <td class="col-artikel"><div class="cat-lbl"><span class="cat-arr">▶</span>${cat.cat}</div></td>
-      <td colspan="99" style="background:rgba(0,0,0,.35)"></td></tr>`;
+      <td colspan="999" style="background:rgba(0,0,0,.35)"></td></tr>`;
     cat.items.forEach(prod=>{
-      const ab=anfangsbestand[prod.id]??0;
+      const ab=Number(anfangsbestand[prod.id]??0);
       let tE=0,tG=0,tT=0;
-      bewegungen.forEach(b=>{const v=b.items&&b.items[prod.id]?Number(b.items[prod.id]):0;if(b.type==="einkauf")tE+=v;else if(b.type==="geraet")tG+=v;else if(b.type==="theke")tT+=v;});
-      const end=Number(ab)+tE+tG-tT;
+      bewegungen.forEach(b=>{
+        const v=b.items&&b.items[prod.id]?Number(b.items[prod.id]):0;
+        if(b.type==="einkauf") tE+=v;
+        else if(b.type==="geraet") tG+=v;
+        else if(b.type==="theke") tT+=v;
+      });
+      const endbestand=ab+tE+tG-tT;
       tbHTML+=`<tr class="prod-row ${ci===0?"":"hidden"}" data-cat="${ci}">`;
       tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${prod.icon}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit}</div></div></div></td>`;
-      tbHTML+=`<td class="val-anfang">${ab||"—"}</td>`;
-      dates.forEach(d=>{
-        if(bewegungen.some(b=>b.datum===d&&b.type==="einkauf")){const b=bewegungen.find(x=>x.datum===d&&x.type==="einkauf");const v=b&&b.items&&b.items[prod.id]?b.items[prod.id]:"—";tbHTML+=`<td class="${v!=="—"?"val-einkauf":"val-dim"}">${v}</td>`;}
-        if(bewegungen.some(b=>b.datum===d&&b.type==="geraet")){const b=bewegungen.find(x=>x.datum===d&&x.type==="geraet");const v=b&&b.items&&b.items[prod.id]?b.items[prod.id]:"—";tbHTML+=`<td class="${v!=="—"?"val-geraet":"val-dim"}">${v}</td>`;}
-        tbHTML+=`<td class="val-dim" style="opacity:.35">—</td>`;
-      });
-      tbHTML+=`<td class="${tE>0?"val-einkauf":"val-dim"}">${tE||"—"}</td>`;
-      tbHTML+=`<td class="${tG>0?"val-geraet":"val-dim"}">${tG||"—"}</td>`;
-      tbHTML+=`<td class="val-dim" style="opacity:.35">—</td>`;
-      tbHTML+=`<td class="val-end">${end}</td></tr>`;
+      tbHTML+=`<td class="td-anfang">${ab||"—"}</td>`;
+      for(let d=1;d<=totalDays;d++){
+        if(!activeDays.has(d)) continue;
+        const bE=bewegungen.find(b=>parseInt(b.datum.slice(8))===d&&b.type==="einkauf");
+        const bG=bewegungen.find(b=>parseInt(b.datum.slice(8))===d&&b.type==="geraet");
+        const bT=bewegungen.find(b=>parseInt(b.datum.slice(8))===d&&b.type==="theke");
+        const vE=bE&&bE.items&&bE.items[prod.id]?bE.items[prod.id]:null;
+        const vG=bG&&bG.items&&bG.items[prod.id]?bG.items[prod.id]:null;
+        const vT=bT&&bT.items&&bT.items[prod.id]?bT.items[prod.id]:null;
+        const bestand=calcBestand(prod.id,d,currentZeitraum);
+        tbHTML+=`<td class="td-einkauf day-sep">${vE||""}</td>`;
+        tbHTML+=`<td class="td-geraet">${vG||""}</td>`;
+        tbHTML+=`<td class="td-theke">${vT||""}</td>`;
+        tbHTML+=`<td class="td-bestand">${bestand}</td>`;
+      }
+      tbHTML+=`<td class="td-einkauf">${tE||""}</td>`;
+      tbHTML+=`<td class="td-geraet">${tG||""}</td>`;
+      tbHTML+=`<td class="td-theke">${tT||""}</td>`;
+      tbHTML+=`<td class="td-end">${endbestand}</td>`;
+      tbHTML+="</tr>";
     });
   });
   document.getElementById("g-tbody").innerHTML=tbHTML;
