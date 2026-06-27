@@ -615,21 +615,11 @@ window.openView = function(inv){
 
 // ── PROCESS FORM ──
 window.openProcessForm = async function(){
-  // Load artikel config for this lager
-  let formProducts = ALL_PRODUCTS;
-  try {
-    const cfgDoc = await db.collection('artikel_config').doc(currentEntry.lager).get();
-    if(cfgDoc.exists){
-      const ids = new Set(cfgDoc.data().selected_ids||[]);
-      if(ids.size>0){
-        formProducts = ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
-      }
-    }
-  } catch(e){}
-
+  // Admin always sees FULL product list — to be able to add anything from photos
+  // Prefilled values from Mitarbeiter's list are highlighted in cyan
   const prefilled = currentEntry.items||{};
   let html='';
-  formProducts.forEach(cat=>{
+  ALL_PRODUCTS.forEach(cat=>{
     html+=`<div class="inv-form-cat">
       <div class="inv-form-cat-header">${cat.cat}</div>`;
     cat.items.forEach(prod=>{
