@@ -256,10 +256,27 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
     <div class="hdr-org" id="hdr-org">GAME GALAXY</div>
     <div class="hdr-page">+ INVENTUR</div>
   </div>
-  <div class="hdr-user" id="hdr-user" style="margin-left:auto">
-    <span id="hdr-username">—</span>
+  <div class="hdr-user" id="hdr-user" style="margin-left:auto;cursor:pointer" onclick="toggleUserMenu()">
+    <span id="hdr-username">—</span> ▾
   </div>
 </header>
+
+<!-- User dropdown -->
+<div id="user-dropdown-inv" style="display:none;position:fixed;top:var(--header-h);right:.8rem;
+  background:rgba(17,24,39,.98);border:1px solid var(--glass-border);border-radius:10px;
+  padding:.5rem;z-index:300;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+  <button onclick="window.location.href='gg-portal.html'" style="width:100%;background:none;border:none;
+    color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.6rem .9rem;
+    text-align:left;cursor:pointer;border-radius:6px;display:block">
+    ← Zurück zum Portal
+  </button>
+  <div style="height:1px;background:var(--glass-border);margin:.3rem 0"></div>
+  <button onclick="logoutUser()" style="width:100%;background:none;border:none;
+    color:var(--neon-magenta);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.6rem .9rem;
+    text-align:left;cursor:pointer;border-radius:6px;display:block">
+    Abmelden
+  </button>
+</div>
 
 <!-- MAIN -->
 <div class="main-content">
@@ -494,14 +511,37 @@ async function loadArtikelConfig(){
 }
 
 // ── STATE ──
-let currentLager   = localStorage.getItem('gg_org') || 'zentrallager';
-let currentUser    = localStorage.getItem('gg_user') || 'Mitarbeiter';
+let currentLager   = localStorage.getItem('gg_org') || '';
+let currentUser    = localStorage.getItem('gg_user') || '';
 let currentZeitraum= '2026-06';
+
+// Redirect if not logged in or Zentrallager
+if(!currentLager || currentLager === 'zentrallager' || !currentUser){
+  window.location.href = 'gg-portal.html';
+}
 let selectedPhotos = []; // {file, preview, url}
 let listItems      = {}; // {prodId: qty}
 let photoDone      = false;
 let listDone       = false;
 let currentInvId   = null; // for editing
+
+// ── USER MENU ──
+function toggleUserMenu(){
+  const d = document.getElementById('user-dropdown-inv');
+  d.style.display = d.style.display==='none' ? 'block' : 'none';
+}
+function logoutUser(){
+  localStorage.removeItem('gg_user');
+  localStorage.removeItem('gg_role');
+  window.location.href = 'gg-portal.html';
+}
+// Close dropdown on outside click
+document.addEventListener('click', e=>{
+  const dd = document.getElementById('user-dropdown-inv');
+  if(dd && !dd.contains(e.target) && !document.getElementById('hdr-user').contains(e.target)){
+    dd.style.display='none';
+  }
+});
 
 // ── SIDEBAR ──
 window.toggleSidebar = ()=>{
@@ -862,6 +902,8 @@ async function loadArchive(){
 document.addEventListener('DOMContentLoaded', ()=>{ loadArchive(); });
 
 // ── Make all functions globally accessible ──
+window.toggleUserMenu = toggleUserMenu;
+window.logoutUser = logoutUser;
 window.openHelp = openHelp;
 window.openEdit = openEdit;
 window.closeModal = closeModal;
