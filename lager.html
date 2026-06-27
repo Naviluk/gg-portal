@@ -544,10 +544,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
@@ -557,8 +557,8 @@ const firebaseConfig = {
   messagingSenderId: "309166662214",
   appId: "1:309166662214:web:6576576ac41d1f08aae047"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ── PRODUCT DATA ──
 const PRODUCTS = [
@@ -790,8 +790,8 @@ async function loadData(){
   wareneingangs=[];
   try {
     for(const mo of months){
-      const q=query(collection(db,'wareneingang'),where('lager','==',currentLager),where('monat','==',mo));
-      const snap=await getDocs(q);
+      const q=db.collection('wareneingang').where('lager','==',currentLager).where('monat','==',mo);
+      const snap=await q.get();
       snap.forEach(d=>wareneingangs.push({id:d.id,...d.data()}));
     }
   } catch(e){}
@@ -799,15 +799,15 @@ async function loadData(){
   anfangsbestand={};
   // Load Anfangsbestand from Inventur page (anfangsbestand collection)
   try {
-    const abDoc=await getDoc(doc(db,'anfangsbestand',currentLager+'_'+currentZeitraum));
-    if(abDoc.exists()) anfangsbestand=abDoc.data();
+    const abDoc=await db.collection('anfangsbestand'.get().doc(currentLager+'_'+currentZeitraum));
+    if(abDoc.exists) anfangsbestand=abDoc.data();
   } catch(e){}
 
   // Load Bestand from last inventur of current period
   bestandData={};
   try {
-    const invQ=query(collection(db,'inventur'),where('lager','==',currentLager),where('monat','==',currentZeitraum.length===7?currentZeitraum:currentZeitraum));
-    const invSnap=await getDocs(invQ);
+    const invQ=db.collection('inventur').where('lager','==',currentLager).where('monat','==',currentZeitraum.length===7?currentZeitraum:currentZeitraum);
+    const invSnap=await invQ.get();
     let lastInvDate=null; let lastInvItems={};
     invSnap.forEach(d=>{ const inv=d.data(); if(!lastInvDate||inv.datum>lastInvDate){lastInvDate=inv.datum;lastInvItems=inv.items||{};} });
     bestandData=lastInvItems;
@@ -852,7 +852,7 @@ window.saveAnfangsbestand = async function(){
   showSpinner();
   anfangsbestand[currentAbProdId] = val;
   try {
-    await setDoc(doc(db,'anfangsbestand',currentLager+'_'+currentZeitraum), anfangsbestand, {merge:true});
+    await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand, {merge:true});
   } catch(e){}
   hideSpinner();
   document.getElementById('modal-ab').classList.remove('show');
@@ -1034,7 +1034,7 @@ window.confirmWareneingang = async function(){
     createdAt:new Date().toISOString()
   };
   try {
-    await addDoc(collection(db,'wareneingang'),entry);
+    await db.collection('wareneingang').add(entry);
     hideSpinner();
     document.getElementById('modal-we').classList.remove('show');
     showToast('Wareneingang erfolgreich eingetragen!');

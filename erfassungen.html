@@ -352,10 +352,10 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, setDoc, getDoc, orderBy }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
@@ -365,8 +365,8 @@ const firebaseConfig = {
   messagingSenderId: "309166662214",
   appId: "1:309166662214:web:6576576ac41d1f08aae047"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 const ALL_PRODUCTS = [
   {cat:'Getränke', items:[
@@ -475,12 +475,11 @@ async function loadSubmissions(){
   try {
     let q;
     if(lager){
-      q = query(collection(db,'mitarbeiter_inventur'),
-        where('lager','==',lager), where('monat','==',zeitraum));
+      q = db.collection('mitarbeiter_inventur').where('lager','==',lager).where('monat','==',zeitraum);
     } else {
-      q = query(collection(db,'mitarbeiter_inventur'), where('monat','==',zeitraum));
+      q = db.collection('mitarbeiter_inventur').where('monat','==',zeitraum);
     }
-    const snap = await getDocs(q);
+    const snap = await q.get();
     const entries = [];
     snap.forEach(d=>entries.push({id:d.id,...d.data()}));
     entries.sort((a,b)=>b.datum.localeCompare(a.datum));
@@ -588,8 +587,8 @@ window.openProcessForm = async function(){
   // Load artikel config for this lager
   let formProducts = ALL_PRODUCTS;
   try {
-    const cfgDoc = await getDoc(doc(db,'artikel_config',currentEntry.lager));
-    if(cfgDoc.exists()){
+    const cfgDoc = await db.collection('artikel_config'.get().doc(currentEntry.lager));
+    if(cfgDoc.exists){
       const ids = new Set(cfgDoc.data().selected_ids||[]);
       if(ids.size>0){
         formProducts = ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
@@ -631,7 +630,7 @@ window.finalizeInventur = async function(){
     });
 
     // Save to inventur collection (shows on uebersicht.html)
-    await addDoc(collection(db,'inventur'),{
+    await db.collection('inventur').add({
       lager: currentEntry.lager,
       monat: currentEntry.monat,
       datum: date,
@@ -642,13 +641,13 @@ window.finalizeInventur = async function(){
 
     // Also save to anfangsbestand
     const abKey = currentEntry.lager+'_'+currentEntry.monat;
-    const abDoc = await getDoc(doc(db,'anfangsbestand',abKey));
-    if(!abDoc.exists()){
-      await setDoc(doc(db,'anfangsbestand',abKey),items);
+    const abDoc = await db.collection('anfangsbestand'.get().doc(abKey));
+    if(!abDoc.exists){
+      await db.collection('anfangsbestand').doc(abKey).set(items);
     }
 
     // Mark submission as done
-    await updateDoc(doc(db,'mitarbeiter_inventur',currentEntry.id),{status:'done'});
+    await db.collection('mitarbeiter_inventur').doc(currentEntry.id).update({status:'done'});
 
     hideSpinner();
     closeModal('modal-view');
@@ -666,8 +665,8 @@ window.openArtikelConfig = async function(){
   configSelections={};
   for(const lager of LAGERS){
     try {
-      const d=await getDoc(doc(db,'artikel_config',lager));
-      configSelections[lager]=new Set(d.exists()?(d.data().selected_ids||[]):[]);
+      const d=await db.collection('artikel_config'.get().doc(lager));
+      configSelections[lager]=new Set(d.exists?(d.data().selected_ids||[]):[]);
     } catch(e){ configSelections[lager]=new Set(); }
   }
   hideSpinner();
@@ -730,7 +729,7 @@ window.saveArtikelConfig=async function(){
   try {
     for(const lager of LAGERS){
       const ids=[...( configSelections[lager]||new Set())];
-      await setDoc(doc(db,'artikel_config',lager),{selected_ids:ids,updatedAt:new Date().toISOString()});
+      await db.collection('artikel_config').doc(lager).set({selected_ids:ids,updatedAt:new Date().toISOString()});
     }
     hideSpinner();
     closeModal('modal-config');

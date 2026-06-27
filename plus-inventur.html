@@ -400,12 +400,10 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, getDoc }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-storage.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
@@ -415,10 +413,10 @@ const firebaseConfig = {
   messagingSenderId: "309166662214",
   appId: "1:309166662214:web:6576576ac41d1f08aae047"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 let storage;
-try { storage = getStorage(app); } catch(e) { console.warn('Storage not available:', e); }
+try { storage = firebase.storage(); } catch(e) { console.warn('Storage not available:', e); }
 
 // ── PRODUCTS — loaded from Firebase per Lager ──
 let PRODUCTS = []; // will be loaded from artikel_config/{lager}
@@ -481,8 +479,8 @@ const ALL_PRODUCTS = [
 
 async function loadArtikelConfig(){
   try {
-    const docSnap = await getDoc(doc(db,'artikel_config', currentLager));
-    if(docSnap.exists()){
+    const docSnap = await db.collection('artikel_config').doc(currentLager).get();
+    if(docSnap.exists){
       const data = docSnap.data();
       const selectedIds = new Set(data.selected_ids || []);
       if(selectedIds.size > 0){
@@ -494,7 +492,6 @@ async function loadArtikelConfig(){
       }
     }
   } catch(e){}
-  // Fallback: show message, no list
   PRODUCTS = [];
 }
 
@@ -744,7 +741,7 @@ async function submitInventur(){
       createdAt: new Date().toISOString()
     };
 
-    await addDoc(collection(db,'mitarbeiter_inventur'), entry);
+    await db.collection('mitarbeiter_inventur').add(entry);
 
     // Send email notification via EmailJS (if configured)
     sendEmailNotification(entry);
@@ -776,10 +773,10 @@ async function loadArchive(){
   const section = document.getElementById('archive-section');
   const emptyMsg = document.getElementById('empty-msg');
   try {
-    const q = query(collection(db,'mitarbeiter_inventur'),
-      where('lager','==',currentLager),
-      where('monat','==',currentZeitraum));
-    const snap = await getDocs(q);
+    const snap = await db.collection('mitarbeiter_inventur')
+      .where('lager','==',currentLager)
+      .where('monat','==',currentZeitraum)
+      .get();
     const entries = [];
     snap.forEach(d=>entries.push({id:d.id,...d.data()}));
     entries.sort((a,b)=>b.datum.localeCompare(a.datum));

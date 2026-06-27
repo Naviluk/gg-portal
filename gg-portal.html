@@ -745,12 +745,10 @@
 <!-- ══════════════════════════════════════════
      FIREBASE + APP LOGIC
 ══════════════════════════════════════════ -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut }
-  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
 
 // ── FIREBASE CONFIG ──
 const firebaseConfig = {
@@ -762,8 +760,8 @@ const firebaseConfig = {
   appId: "1:309166662214:web:6576576ac41d1f08aae047"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const auth = getAuth(app);
 
 // ── STATE ──
@@ -853,8 +851,8 @@ async function handleOrgPassword(){
   if(pin.length < 6){ showErr('err-orgpw','Bitte alle 6 Stellen eingeben.'); return; }
   showSpinner();
   try {
-    const snap = await getDoc(doc(db, 'organisations', currentOrg));
-    if(!snap.exists()){ hideSpinner(); showErr('err-orgpw','Filiale nicht gefunden. Bitte Admin kontaktieren.'); return; }
+    const snap = await db.collection('organisations'.get().doc(currentOrg));
+    if(!snap.exists){ hideSpinner(); showErr('err-orgpw','Filiale nicht gefunden. Bitte Admin kontaktieren.'); return; }
     const data = snap.data();
     if(data.password !== pin){ hideSpinner(); showErr('err-orgpw','Falsches Passwort. Bitte erneut versuchen.'); clearPinRow('pin-org-row'); focusFirstPin('pin-org-row'); return; }
     // Save to localStorage
@@ -909,8 +907,8 @@ async function openStaffSwitch(mandatory=false){
   sel.innerHTML = '<option value="">— Bitte wählen —</option>';
   document.getElementById('msg-no-staff').classList.remove('show');
   try {
-    const q = query(collection(db,'users'), where('org','==',currentOrg), where('role','in',['Mitarbeiter','MitarbeiterPlus']));
-    const snap = await getDocs(q);
+    const q = db.collection('users').where('org','==',currentOrg).where('role','in',['Mitarbeiter','MitarbeiterPlus']);
+    const snap = await q.get();
     if(snap.empty){ document.getElementById('msg-no-staff').classList.add('show'); return; }
     snap.forEach(d=>{ const opt=document.createElement('option'); opt.value=d.id; opt.textContent=d.data().name; sel.appendChild(opt); });
   } catch(e){ document.getElementById('msg-no-staff').classList.add('show'); }
@@ -934,7 +932,7 @@ async function handleStaffLogin(){
   if(pin.length < 4){ showErr('err-staff-pw','Bitte 4-stelligen PIN eingeben.'); return; }
   showSpinner();
   try {
-    const snap = await getDoc(doc(db,'users',uid));
+    const snap = await db.collection('users'.get().doc(uid));
     const data = snap.data();
     if(data.pin !== pin){ hideSpinner(); showErr('err-staff-pw','Falscher PIN.'); clearPinRow('pin-staff-row'); focusFirstPin('pin-staff-row'); return; }
     currentStaff = { name: data.name, role: data.role, uid };
@@ -997,8 +995,8 @@ async function handleAdminName(){
   showSpinner();
   try {
     // Search user by name in admin roles
-    const q = query(collection(db,'users'), where('name','==',name), where('role','in',ADMIN_ROLES));
-    const snap = await getDocs(q);
+    const q = db.collection('users').where('name','==',name).where('role','in',ADMIN_ROLES);
+    const snap = await q.get();
     if(snap.empty){ hideSpinner(); showErr('err-admin-name','Benutzername nicht gefunden oder keine Berechtigung.'); return; }
     adminNameInput = name;
     hideSpinner();
@@ -1015,8 +1013,8 @@ async function handleAdminPassword(){
   if(pin.length < 4){ showErr('err-admin-pw','Bitte 4-stelligen PIN eingeben.'); return; }
   showSpinner();
   try {
-    const q = query(collection(db,'users'), where('name','==',adminNameInput), where('role','in',ADMIN_ROLES));
-    const snap = await getDocs(q);
+    const q = db.collection('users').where('name','==',adminNameInput).where('role','in',ADMIN_ROLES);
+    const snap = await q.get();
     let found = null;
     snap.forEach(d=>{ if(d.data().pin===pin) found=d.data(); });
     if(!found){ hideSpinner(); showErr('err-admin-pw','Falscher PIN. Bitte erneut versuchen.'); clearPinRow('pin-admin-row'); focusFirstPin('pin-admin-row'); return; }
