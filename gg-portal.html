@@ -940,6 +940,8 @@ async function handleStaffLogin(){
     currentStaff = { name: data.name, role: data.role, uid };
     document.getElementById('hdr-staff-username').textContent = data.name;
     document.getElementById('hdr-staff-username-mob').textContent = data.name;
+    localStorage.setItem('gg_user', data.name);
+    localStorage.setItem('gg_role', data.role);
     // MitarbeiterPlus sees Getränke and + Inventur
     document.getElementById('nav-getranke-staff').style.display = data.role==='MitarbeiterPlus'?'':'none';
     document.getElementById('nav-inventur-staff').style.display = data.role==='MitarbeiterPlus'?'':'none';

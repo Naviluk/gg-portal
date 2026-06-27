@@ -210,6 +210,21 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   .top-bar{gap:.5rem}
   .btn-erstellen{margin-left:0;width:100%}
 }
+
+/* ── SIDEBAR ── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
+.sidebar-overlay.open{display:block}
+.sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;
+  background:rgba(17,24,39,.98);border-right:1px solid var(--glass-border);
+  z-index:160;transition:left .3s;overflow-y:auto}
+.sidebar.open{left:0}
+.nav-list{list-style:none;padding:.6rem 0}
+.nav-item{border-bottom:1px solid rgba(0,245,255,.06)}
+.nav-link{width:100%;background:none;border:none;color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;font-size:.95rem;letter-spacing:.08em;
+  padding:.75rem 1.2rem;text-align:left;cursor:pointer;transition:color .2s}
+.nav-link:hover{color:var(--neon-cyan)}
+.nav-divider{height:1px;background:rgba(0,245,255,.08);margin:.3rem 0}
 </style>
 </head>
 <body>
@@ -217,9 +232,26 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
 <div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
+<!-- SIDEBAR (Mitarbeiter) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <div style="padding:1.2rem 1.2rem .5rem;border-bottom:1px solid rgba(0,245,255,.08)">
+    <div style="font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.15em;color:var(--neon-cyan);margin-bottom:.2rem" id="sidebar-org">GAME GALAXY</div>
+    <div style="font-size:.8rem;color:var(--text-dim)" id="sidebar-user">—</div>
+  </div>
+  <ul class="nav-list">
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
+    <li class="nav-item" id="nav-getraenke" style="display:none"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item" id="nav-plus-inv"><button class="nav-link" onclick="closeSidebar()" style="color:var(--neon-magenta)">＋ Inventur</button></li>
+  </ul>
+</nav>
+
 <!-- HEADER (Mitarbeiter style) -->
 <header class="app-header">
-  <div style="width:30px"></div>
+  <button class="burger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
   <div class="hdr-center">
     <div class="hdr-org" id="hdr-org">GAME GALAXY</div>
     <div class="hdr-page">+ INVENTUR</div>
@@ -476,6 +508,16 @@ let photoDone      = false;
 let listDone       = false;
 let currentInvId   = null; // for editing
 
+// ── SIDEBAR ──
+window.toggleSidebar = ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+};
+window.closeSidebar = ()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+};
+
 // ── EXPOSE ──
 window.openHelp       = openHelp;
 window.closeModal     = closeModal;
@@ -500,10 +542,22 @@ function showToast(msg, color='var(--neon-green)'){
 }
 
 // ── HEADER ──
-const orgNames = {nettetal:'GAME GALAXY NETTETAL',brüggen:'GAME GALAXY BRÜGGEN',
-  viersen:'GAME GALAXY VIERSEN',köln:'GAME GALAXY KÖLN',zentrallager:'GAME GALAXY ZENTRALLAGER'};
-document.getElementById('hdr-org').textContent = orgNames[currentLager] || 'GAME GALAXY';
+const orgNames = {
+  nettetal:'GAME GALAXY NETTETAL', brüggen:'GAME GALAXY BRÜGGEN',
+  viersen:'GAME GALAXY VIERSEN', köln:'GAME GALAXY KÖLN',
+  zentrallager:'GAME GALAXY ZENTRALLAGER'
+};
+const orgDisplay = orgNames[currentLager] || 'GAME GALAXY';
+document.getElementById('hdr-org').textContent = orgDisplay;
 document.getElementById('hdr-username').textContent = currentUser;
+document.getElementById('sidebar-org').textContent = orgDisplay;
+document.getElementById('sidebar-user').textContent = currentUser;
+
+// Show Getränke only for MitarbeiterPlus
+const currentRole = localStorage.getItem('gg_role') || '';
+if(currentRole === 'MitarbeiterPlus'){
+  document.getElementById('nav-getraenke').style.display = '';
+}
 
 // ── ZEITRAUM SELECT ──
 document.getElementById('sel-zeitraum').addEventListener('change', e=>{
@@ -629,7 +683,8 @@ function renderInvList(){
   let html = '';
   PRODUCTS.forEach((catObj,ci)=>{
     const isFirst = ci===0;
-    html += `<div class="inv-cat ${isFirst?'open':''}" id="inv-cat-${ci}">
+    const catOpenCls = isFirst ? 'open' : '';
+    html += `<div class="inv-cat ${catOpenCls}" id="inv-cat-${ci}">
       <div class="inv-cat-header" onclick="toggleInvCat(${ci})">
         <span class="inv-cat-label">${catObj.cat}</span>
         <span class="inv-cat-arrow">▶</span>
