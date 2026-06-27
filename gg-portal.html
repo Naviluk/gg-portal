@@ -747,6 +747,7 @@
 ══════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script>
 
@@ -762,13 +763,12 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = getAuth(app);
 
 // ── STATE ──
-let currentOrg     = null;  // e.g. "brüggen"
-let currentStaff   = null;  // { name, role }
-let currentAdmin   = null;  // { name, role }
-let adminNameInput = '';
+var currentOrg     = null;
+var currentStaff   = null;
+var currentAdmin   = null;
+var adminNameInput = '';
 
 // ── EXPOSE TO WINDOW (for onclick handlers) ──
 window.handleOrgSelect      = handleOrgSelect;
@@ -851,7 +851,7 @@ async function handleOrgPassword(){
   if(pin.length < 6){ showErr('err-orgpw','Bitte alle 6 Stellen eingeben.'); return; }
   showSpinner();
   try {
-    const snap = await db.collection('organisations'.get().doc(currentOrg));
+    const snap = await db.collection('organisations').doc(currentOrg).get();
     if(!snap.exists){ hideSpinner(); showErr('err-orgpw','Filiale nicht gefunden. Bitte Admin kontaktieren.'); return; }
     const data = snap.data();
     if(data.password !== pin){ hideSpinner(); showErr('err-orgpw','Falsches Passwort. Bitte erneut versuchen.'); clearPinRow('pin-org-row'); focusFirstPin('pin-org-row'); return; }
@@ -932,7 +932,7 @@ async function handleStaffLogin(){
   if(pin.length < 4){ showErr('err-staff-pw','Bitte 4-stelligen PIN eingeben.'); return; }
   showSpinner();
   try {
-    const snap = await db.collection('users'.get().doc(uid));
+    const snap = await db.collection('users').doc(uid).get();
     const data = snap.data();
     if(data.pin !== pin){ hideSpinner(); showErr('err-staff-pw','Falscher PIN.'); clearPinRow('pin-staff-row'); focusFirstPin('pin-staff-row'); return; }
     currentStaff = { name: data.name, role: data.role, uid };
