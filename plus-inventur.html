@@ -402,7 +402,6 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script>
 
 const firebaseConfig = {
@@ -415,8 +414,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-let storage;
-try { storage = firebase.storage(); } catch(e) { console.warn('Storage not available:', e); }
+// Storage: using Cloudinary (see uploadPhotos function)
 
 // ── PRODUCTS — loaded from Firebase per Lager ──
 let PRODUCTS = []; // will be loaded from artikel_config/{lager}
@@ -617,33 +615,40 @@ function renderPhotosGrid(){
 
 window.removePhoto = function(i){ selectedPhotos.splice(i,1); renderPhotosGrid(); }
 
+// ── CLOUDINARY CONFIG ──
+const CLOUDINARY_CLOUD = 'dxohdlnbd';
+const CLOUDINARY_PRESET = 'jitjn4w5';
+
 async function uploadPhotos(){
   if(selectedPhotos.length===0) return;
   showSpinner();
   try {
-    if(storage){
-      for(let i=0;i<selectedPhotos.length;i++){
-        if(selectedPhotos[i].url) continue; // already uploaded
-        const path = `inventur/${currentLager}/${currentZeitraum}/${Date.now()}_${i}.jpg`;
-        const storageRef = ref(storage, path);
-        await uploadBytes(storageRef, selectedPhotos[i].file);
-        selectedPhotos[i].url = await getDownloadURL(storageRef);
+    for(let i=0;i<selectedPhotos.length;i++){
+      if(selectedPhotos[i].url) continue; // already uploaded
+      const formData = new FormData();
+      formData.append('file', selectedPhotos[i].file);
+      formData.append('upload_preset', CLOUDINARY_PRESET);
+      formData.append('folder', `inventur/${currentLager}/${currentZeitraum}`);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if(data.secure_url){
+        selectedPhotos[i].url = data.secure_url;
+      } else {
+        throw new Error(data.error?.message || 'Upload fehlgeschlagen');
       }
     }
     photoDone = true;
     document.getElementById('card-photo').classList.add('done');
     document.getElementById('photo-list-prompt').style.display='block';
     hideSpinner();
-    showToast('Fotos erfolgreich gespeichert!');
+    showToast('Fotos erfolgreich gespeichert! ✓');
     backToChoose();
   } catch(e){
     hideSpinner();
-    // Storage not enabled yet — still mark as done with local previews
-    photoDone = true;
-    document.getElementById('card-photo').classList.add('done');
-    document.getElementById('photo-list-prompt').style.display='block';
-    showToast('Fotos vorgemerkt (Storage aktivieren nicht vergessen)', 'var(--neon-yellow)');
-    backToChoose();
+    showToast('Fehler beim Upload: '+e.message, 'var(--neon-magenta)');
   }
 }
 
