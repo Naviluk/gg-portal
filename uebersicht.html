@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>WARENEINGANG – GAME GALAXY</title>
+<title>INVENTUR ÜBERSICHT – GAME GALAXY</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
@@ -230,7 +230,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   width:70px;text-align:center;padding:.2rem .3rem;outline:none}
 
 /* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.92);z-index:500;
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,10,.88);z-index:500;
   align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto}
 .modal-overlay.show{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
@@ -438,7 +438,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="wareneingang.html" style="color:var(--neon-cyan)">Wareneingang</a></li>
+        <li><a href="wareneingang.html">Wareneingang</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -458,7 +458,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="uebersicht.html" style="color:var(--neon-cyan)">Übersicht</a></li>
         <li><a href="erfassungen.html">Erfassungen</a></li>
       </ul>
     </li>
@@ -496,7 +496,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-12">Dezember 2026</option>
       <option value="2026">Jahr 2026</option>
     </select>
-    <button class="btn-wareneingang" onclick="openWareneingang()">＋ Wareneingang erstellen</button>
+    <button class="btn-wareneingang" onclick="openWareneingang()">＋ Inventur erstellen</button>
   </div>
 
   <!-- Table -->
@@ -513,12 +513,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="modal-overlay" id="modal-we">
   <div class="modal">
     <button class="modal-close" onclick="closeWareneingang()">✕</button>
-    <div class="modal-title" id="we-title">Wareneingang erstellen</div>
+    <div class="modal-title" id="we-title">Inventur erstellen</div>
 
     <!-- Step 1: Auswahl -->
     <div id="we-step1">
       <div class="field">
-        <label class="field-label">Datum</label>
+        <label class="field-label">Datum der Inventur</label>
         <input type="date" id="we-date">
       </div>
       <div class="field">
@@ -721,25 +721,31 @@ function renderTable(){
 }
 
 function renderTableActual(){
-  const isZentral = currentLager === 'zentrallager';
-
   const thead = document.getElementById('lager-thead');
   const tbody = document.getElementById('lager-tbody');
 
+  // inventuren sorted by date
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
+  // last inventur date for Bestand column
+  const lastDate = dates.length > 0 ? dates[dates.length-1] : null;
 
   // ── HEADER ──
+  // Columns: Artikel | Anfangsbestand (INV DD.MM.) | [inventur date cols] 
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
+
+  // Anfangsbestand column with subtitle
+  const prevMonthLabel = getPrevMonthLabel();
+  thHTML += `<th class="num-cell inv-anfang-th">
+    <div>Anfangsbestand</div>
+    <div style="font-size:.6rem;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:.05em;margin-top:.15rem">${prevMonthLabel}</div>
+  </th>`;
+
+  // Inventur date columns
   dates.forEach(d=>{
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
     thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
   });
-  if(isZentral){
-    thHTML += '<th class="num-cell"><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></th>';
-  } else {
-    thHTML += '<th class="num-cell"><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></th>';
-  }
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -755,95 +761,45 @@ function renderTableActual(){
       <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
 
     catObj.items.forEach(prod=>{
-      const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
-      const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const prodHidden = isFirst ? '' : 'hidden';
+      const ab = anfangsbestand[prod.id] ?? '';
+      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
+      const safeName = prod.name.replace(/"/g,'&quot;');
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
+
+      // Anfangsbestand — editable if no previous inventur
+      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeName}">
+        <span class="edit-val">${abDisplay}</span></td>`;
+
+      // Inventur date columns
       dates.forEach(d=>{
-        const we = wareneingangs.find(w=>w.datum===d);
-        const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-td">${qty}</td>`;
+        const inv = wareneingangs.find(w=>w.datum===d);
+        const qty = inv&&inv.items&&inv.items[prod.id] !== undefined ? inv.items[prod.id] : '—';
+        tbHTML += `<td class="num-cell detail-td" style="color:var(--neon-green)">${qty}</td>`;
       });
-      const sumVal = totalEink || '—';
-      tbHTML += `<td class="num-cell" style="color:var(--neon-cyan);font-weight:700">${sumVal}</td>`;
+
       tbHTML += `</tr>`;
     });
   });
 
-  // ── SHOPS SECTION (Zentrallager only) ──
-  if(isZentral){
-    const allShops = new Set();
-    wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
-
-    if(allShops.size > 0){
-      // Separator + Shops header
-      tbHTML += `<tr class="shops-separator"><td colspan="999" style="padding:0;height:2px;background:rgba(255,0,204,.4)"></td></tr>`;
-      tbHTML += `<tr class="cat-row open shops-cat-row" onclick="toggleShopsSection()">
-        <td class="col-artikel"><div class="cat-label" style="color:var(--neon-magenta)"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
-        <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
-
-      // Track grand total per date
-      const dateGrandTotals = {};
-      dates.forEach(d=>{ dateGrandTotals[d]=0; });
-      let grandTotal = 0;
-
-      allShops.forEach(shop=>{
-        // Single row per shop
-        tbHTML += `<tr class="shop-row-item">`;
-        tbHTML += `<td class="col-artikel"><div class="prod-info" style="gap:.4rem">
-          <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
-          <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
-        </div></td>`;
-        let shopTotal = 0;
-        dates.forEach(d=>{
-          const we = wareneingangs.find(w=>w.datum===d);
-          let amt = '—';
-          if(we&&we.shops){
-            const shopEntry = we.shops.find(s=>s.shop===shop);
-            if(shopEntry&&shopEntry.betrag){
-              const val = parseFloat(shopEntry.betrag)||0;
-              amt = val.toFixed(2)+' €';
-              shopTotal += val;
-              dateGrandTotals[d] += val;
-              grandTotal += val;
-            }
-          }
-          tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-size:.78rem">${amt}</td>`;
-        });
-        const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+' €' : '—';
-        tbHTML += `<td class="num-cell" style="color:var(--neon-yellow);font-weight:700">${shopTotalStr}</td>`;
-        tbHTML += `</tr>`;
-      });
-
-      // Gesamt row
-      const gesamtStyle = 'border-top:1px solid rgba(255,0,204,.3);background:rgba(255,0,204,.06)';
-      tbHTML += `<tr class="shop-row-item">`;
-      tbHTML += `<td class="col-artikel" style="${gesamtStyle}"><div class="prod-name" style="font-family:Century Gothic,sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta)">GESAMT</div></td>`;
-      dates.forEach(d=>{
-        const dtTotal = dateGrandTotals[d];
-        const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+' €' : '—';
-        tbHTML += `<td class="num-cell" style="color:var(--neon-magenta);font-weight:700;font-size:.82rem;${gesamtStyle}">${dtStr}</td>`;
-      });
-      const grandStr = grandTotal > 0 ? grandTotal.toFixed(2)+' €' : '—';
-      tbHTML += `<td class="num-cell" style="color:var(--neon-magenta);font-weight:700;font-size:.9rem;${gesamtStyle}">${grandStr}</td>`;
-      tbHTML += `</tr>`;
-    }
-  }
-
   tbody.innerHTML = tbHTML;
 }
 
-window.toggleShopsSection = function(){
-  document.querySelectorAll('.shop-row-item, .shops-separator').forEach(r=>r.classList.toggle('hidden'));
-  document.querySelectorAll('.shops-cat-row').forEach(r=>r.classList.toggle('open'));
+function getPrevMonthLabel(){
+  const zeit = currentZeitraum;
+  if(zeit.length !== 7) return '—';
+  const mm = zeit.slice(5,7);
+  return `INV 01.${mm}.`;
 }
 
-// ── CATEGORY TOGGLE ── single table version
+window.toggleShopsSection = function(){}  // not used in inventur
+
+// ── CATEGORY TOGGLE ──
 window.toggleCategory = function(row){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
@@ -859,7 +815,7 @@ async function loadData(){
   wareneingangs=[];
   try {
     for(const mo of months){
-      const q=query(collection(db,'wareneingang'),where('lager','==',currentLager),where('monat','==',mo));
+      const q=query(collection(db,'inventur'),where('lager','==',currentLager),where('monat','==',mo));
       const snap=await getDocs(q);
       snap.forEach(d=>wareneingangs.push({id:d.id,...d.data()}));
     }
@@ -923,8 +879,8 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('modal-we').classList.add('show');
 
   const isZentral = currentLager==='zentrallager';
-  document.getElementById('we-title').textContent = isZentral ? 'Einkauf erfassen' : 'Wareneingang erfassen';
-  document.getElementById('we-shops-section').style.display = isZentral?'':'none';
+  document.getElementById('we-title').textContent = 'Inventur erstellen';
+  document.getElementById('we-shops-section').style.display = 'none';
   document.getElementById('we-selected-list').style.display='none';
 
   // Set date
@@ -978,7 +934,7 @@ function updateSelectedPreview(){
   const shops = document.getElementById('we-shops-section');
   if(!ids.length){ sel.style.display='none'; shops.style.display='none'; return; }
   sel.style.display='block';
-  if(currentLager==='zentrallager') shops.style.display='block';
+  // No shops in Inventur
   // Group by category
   let html=''; let lastCat='';
   PRODUCTS.forEach(catObj=>{
@@ -1037,7 +993,7 @@ window.buildConfirm = function(){
   document.getElementById('we-step2').style.display='block';
 
   const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('confirm-date-label').textContent='Inventur-Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
 
   let html=''; let lastCat='';
   PRODUCTS.forEach(catObj=>{
@@ -1085,7 +1041,7 @@ window.confirmWareneingang = async function(){
     createdAt:new Date().toISOString()
   };
   try {
-    await addDoc(collection(db,'wareneingang'),entry);
+    await addDoc(collection(db,'inventur'),entry);
     hideSpinner();
     document.getElementById('modal-we').classList.remove('show');
     showToast('Wareneingang erfolgreich eingetragen!');

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>INVENTUR – ERFASSUNGEN – GAME GALAXY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+:root{
+  --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
+  --neon-cyan:#00f5ff;--neon-magenta:#ff00cc;--neon-yellow:#ffee00;--neon-green:#00ff88;
+  --glass:rgba(255,255,255,.04);--glass-border:rgba(0,245,255,.15);
+  --text:#e0e8ff;--text-dim:#7080a0;--header-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(0,245,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:rgba(17,24,39,.96);border-bottom:1px solid var(--glass-border);
+  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:200}
+.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);animation:scan 3s ease-in-out infinite}
+@keyframes scan{0%,100%{opacity:.3}50%{opacity:1}}
+.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
+.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;box-shadow:0 0 6px var(--neon-cyan)}
+.hdr-center{flex:1;text-align:center}
+.hdr-title{font-family:'Orbitron',sans-serif;font-size:clamp(.6rem,1.5vw,.85rem);letter-spacing:.12em;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-sub{font-size:.65rem;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;margin-top:.1rem}
+.hdr-right{display:flex;align-items:center;gap:.8rem}
+.hdr-user{font-size:.9rem;color:var(--neon-cyan);white-space:nowrap}
+
+/* Sidebar */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
+.sidebar-overlay.open{display:block}
+.sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:rgba(17,24,39,.98);
+  border-right:1px solid var(--glass-border);z-index:160;transition:left .3s;padding-top:var(--header-h);overflow-y:auto}
+.sidebar.open{left:0}
+.nav-list{list-style:none;padding:.8rem 0}
+.nav-item{border-bottom:1px solid rgba(0,245,255,.06)}
+.nav-link{width:100%;background:none;border:none;color:var(--text-dim);font-family:'Rajdhani',sans-serif;
+  font-size:.95rem;letter-spacing:.08em;padding:.75rem 1.2rem;text-align:left;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;transition:color .2s}
+.nav-link:hover,.nav-link.active{color:var(--neon-cyan)}
+.nav-sub{list-style:none;display:none;background:rgba(0,0,0,.2)}
+.nav-sub li a{display:block;padding:.55rem 1.2rem .55rem 2rem;color:var(--text-dim);text-decoration:none;font-size:.88rem;transition:color .2s}
+.nav-sub li a:hover{color:var(--neon-cyan)}
+.nav-item.open .nav-sub{display:block}
+.nav-item.open .nav-arrow{transform:rotate(90deg)}
+.nav-arrow{transition:transform .25s;font-size:.7rem;opacity:.5}
+svg.nav-arrow{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.5;transition:transform .25s}
+.nav-divider{height:1px;background:rgba(0,245,255,.08);margin:.4rem 0}
+
+/* ── MAIN ── */
+.main-content{margin-top:var(--header-h);padding:1.5rem;position:relative;z-index:1}
+
+/* ── TOP BAR ── */
+.top-bar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ctrl-select{background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem 2rem .5rem .9rem;
+  outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2300f5ff'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;transition:border-color .2s}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+.ctrl-select option{background:#1a2235}
+.btn{display:inline-flex;align-items:center;gap:.4rem;font-family:'Orbitron',sans-serif;
+  font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:6px;
+  cursor:pointer;padding:.6rem 1.1rem;transition:all .2s}
+.btn-cyan{background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.3);color:var(--neon-cyan)}
+.btn-cyan:hover{background:rgba(0,245,255,.2)}
+.btn-magenta{background:linear-gradient(135deg,var(--neon-magenta),#cc0099);color:#fff;font-weight:700;box-shadow:0 0 12px rgba(255,0,204,.3)}
+.btn-magenta:hover{box-shadow:0 0 24px rgba(255,0,204,.6);transform:translateY(-1px)}
+.btn-green{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--text-dim)}
+.btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+
+/* ── CARDS ── */
+.archive-section{display:flex;flex-direction:column;gap:1rem}
+.inv-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:16px;
+  padding:1.2rem 1.5rem;position:relative;transition:border-color .2s;cursor:pointer}
+.inv-card:hover{border-color:rgba(0,245,255,.3)}
+.inv-card.unread{border-left:3px solid var(--neon-magenta)}
+.inv-card-header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.7rem}
+.inv-date{font-family:'Orbitron',sans-serif;font-size:.9rem;letter-spacing:.08em;color:var(--neon-cyan)}
+.inv-lager-badge{font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.2rem .6rem;border-radius:10px;background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.2);color:var(--neon-cyan)}
+.inv-status{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:10px;font-family:'Orbitron',sans-serif}
+.inv-status.pending{background:rgba(255,0,204,.1);border:1px solid rgba(255,0,204,.3);color:var(--neon-magenta)}
+.inv-status.sent{background:rgba(255,238,0,.1);border:1px solid rgba(255,238,0,.3);color:var(--neon-yellow)}
+.inv-status.done{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--neon-green)}
+.inv-meta{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.85rem;color:var(--text-dim)}
+.inv-meta span{display:flex;align-items:center;gap:.3rem}
+.inv-meta .val{color:var(--text);font-weight:600}
+.inv-by{font-size:.78rem;color:var(--text-dim);margin-left:auto}
+.inv-actions{margin-top:.9rem;display:flex;gap:.6rem;flex-wrap:wrap}
+.new-dot{width:8px;height:8px;border-radius:50%;background:var(--neon-magenta);
+  box-shadow:0 0 8px var(--neon-magenta);flex-shrink:0}
+.photos-preview{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+.photo-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--glass-border);cursor:pointer}
+.empty-state{text-align:center;padding:4rem 1rem;color:var(--text-dim)}
+.empty-state .e-icon{font-size:3rem;margin-bottom:1rem}
+.empty-state .e-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,10,.88);z-index:500;overflow-y:auto}
+.modal-overlay.show{display:block}
+.modal-inner{display:flex;align-items:flex-start;justify-content:center;min-height:100%;padding:1.5rem;gap:1.5rem;flex-wrap:wrap}
+.modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:16px;
+  padding:1.5rem;width:100%;max-width:520px;position:relative;box-shadow:0 0 60px rgba(0,245,255,.1);flex-shrink:0}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-dim);font-size:1.3rem;cursor:pointer}
+.modal-close:hover{color:var(--neon-magenta)}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:.12em;
+  color:var(--neon-cyan);text-transform:uppercase;margin-bottom:1.2rem}
+.mobile-notice{display:none;background:rgba(255,238,0,.08);border:1px solid rgba(255,238,0,.2);
+  border-radius:8px;padding:1rem;color:var(--neon-yellow);font-size:.85rem;text-align:center;margin-top:1rem}
+@media(max-width:768px){.mobile-notice{display:block}.desktop-actions{display:none!important}}
+
+/* View modal sections */
+.view-section{margin-bottom:1.2rem}
+.view-label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.5rem}
+.view-photos{display:flex;gap:.6rem;flex-wrap:wrap}
+.view-photo{width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--glass-border);cursor:pointer}
+.photo-full{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;
+  align-items:center;justify-content:center;cursor:zoom-out}
+.photo-full.show{display:flex}
+.photo-full img{max-width:95vw;max-height:95vh;border-radius:8px;object-fit:contain}
+
+/* Artikel config modal */
+.config-modal .modal{max-width:620px}
+.lager-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.lager-tab{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.4rem .8rem;border-radius:6px;border:1px solid var(--glass-border);background:none;
+  color:var(--text-dim);cursor:pointer;transition:all .2s}
+.lager-tab.active{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.08)}
+.config-cat{margin-bottom:.8rem}
+.config-cat-header{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;
+  background:rgba(0,0,0,.2);border-radius:6px;cursor:pointer;user-select:none}
+.config-cat-label{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;
+  color:var(--neon-yellow);text-transform:uppercase;flex:1}
+.config-cat-items{padding:.3rem .5rem;display:none}
+.config-cat.open .config-cat-items{display:block}
+.config-item{display:flex;align-items:center;gap:.5rem;padding:.25rem 0}
+.config-item label{font-size:.85rem;color:var(--text);cursor:pointer;flex:1;display:flex;align-items:center;gap:.4rem}
+.config-item input[type=checkbox]{accent-color:var(--neon-cyan);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+
+/* Inventur form (for admin processing) */
+.inv-form-section{margin-bottom:1rem}
+.inv-form-cat{margin-bottom:.8rem}
+.inv-form-cat-header{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
+  color:var(--neon-yellow);text-transform:uppercase;padding:.4rem .6rem;background:rgba(0,0,0,.3);border-radius:6px;margin-bottom:.3rem}
+.inv-form-row{display:flex;align-items:center;gap:.5rem;padding:.28rem .3rem;border-radius:4px}
+.inv-form-row:hover{background:rgba(0,245,255,.03)}
+.inv-form-icon{width:22px;height:22px;border-radius:50%;background:rgba(0,245,255,.1);
+  display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.inv-form-name{flex:1;font-size:.82rem}
+.inv-form-unit{font-size:.68rem;color:var(--text-dim);flex-shrink:0;min-width:40px}
+.inv-form-qty{width:62px;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);
+  border-radius:4px;color:var(--neon-green);font-family:'Century Gothic',sans-serif;font-size:.85rem;
+  padding:.25rem .3rem;text-align:center;outline:none}
+.inv-form-qty:focus{border-color:var(--neon-green)}
+.inv-form-qty[type=number]{-moz-appearance:textfield}
+.inv-form-qty::-webkit-outer-spin-button,.inv-form-qty::-webkit-inner-spin-button{-webkit-appearance:none}
+.prefilled{border-color:rgba(0,245,255,.4)!important;color:var(--neon-cyan)!important}
+
+/* Field */
+.field{margin-bottom:1rem}
+.field-label{display:block;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:.3rem}
+input[type=date]{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;outline:none}
+input[type=date]:focus{border-color:var(--neon-cyan)}
+
+/* Toast + Spinner */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:rgba(0,255,136,.12);border:1px solid var(--neon-green);border-radius:8px;
+  padding:.8rem 1.4rem;font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.1em;
+  color:var(--neon-green);z-index:999;display:none;white-space:nowrap}
+.toast.show{display:block}
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.8);z-index:999;align-items:center;justify-content:center}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:640px){
+  .main-content{padding:1rem .8rem}
+  .top-bar{gap:.5rem}
+  .modal-inner{flex-direction:column;padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+<div class="photo-full" id="photo-full" onclick="closeFullPhoto()"><img id="photo-full-img" src="" alt=""></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <button class="burger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="hdr-center">
+    <div class="hdr-title">GAME GALAXY Betriebsportal</div>
+    <div class="hdr-sub">INVENTUR – ERFASSUNGEN</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-user" id="hdr-user">Admin ▾</div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <ul class="nav-list">
+    <li class="nav-item open">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="lieferplanung.html">Lieferplanung</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html">Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
+        Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html" style="color:var(--neon-cyan)">Erfassungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
+  </ul>
+</nav>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="top-bar">
+    <select class="ctrl-select" id="sel-lager" onchange="onFilterChange()">
+      <option value="">Alle Lager</option>
+      <option value="zentrallager">Zentrallager</option>
+      <option value="nettetal">Nettetal</option>
+      <option value="brüggen">Brüggen</option>
+      <option value="viersen">Viersen</option>
+      <option value="köln">Köln</option>
+    </select>
+    <select class="ctrl-select" id="sel-zeitraum" onchange="onFilterChange()">
+      <option value="2026-06" selected>Juni 2026</option>
+      <option value="2026-05">Mai 2026</option>
+      <option value="2026-04">April 2026</option>
+      <option value="2026-07">Juli 2026</option>
+      <option value="2026-08">August 2026</option>
+      <option value="2026-09">September 2026</option>
+      <option value="2026-10">Oktober 2026</option>
+      <option value="2026-11">November 2026</option>
+      <option value="2026-12">Dezember 2026</option>
+    </select>
+    <button class="btn btn-cyan" onclick="openArtikelConfig()" style="margin-left:auto">
+      ⚙️ Artikellisten konfigurieren
+    </button>
+  </div>
+
+  <div class="archive-section" id="archive-section">
+    <div class="empty-state" id="empty-msg">
+      <div class="e-icon">📭</div>
+      <div class="e-title">Keine Erfassungen</div>
+      <div style="font-size:.85rem">Für den gewählten Zeitraum liegen keine Inventuren vor.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: VIEW + PROCESS ═══ -->
+<div class="modal-overlay" id="modal-view">
+  <div class="modal-inner">
+    <!-- Left: submission data -->
+    <div class="modal" id="modal-left">
+      <button class="modal-close" onclick="closeModal('modal-view')">✕</button>
+      <div class="modal-title" id="view-title">Inventur vom —</div>
+      <div class="view-section">
+        <div class="view-label">Lager / Mitarbeiter</div>
+        <div id="view-meta" style="font-size:.9rem;color:var(--text)">—</div>
+      </div>
+      <div class="view-section" id="view-photos-section">
+        <div class="view-label">Fotos (<span id="view-photo-count">0</span>)</div>
+        <div class="view-photos" id="view-photos"></div>
+      </div>
+      <div class="view-section" id="view-list-section">
+        <div class="view-label">Inventurliste (<span id="view-filled">0</span> / <span id="view-total">0</span> Artikel)</div>
+        <div id="view-list" style="max-height:280px;overflow-y:auto"></div>
+      </div>
+      <div class="mobile-notice">
+        📱 Öffnen Sie diese Seite auf einem Computer oder Tablet, um die Inventur zu bearbeiten.
+      </div>
+      <div class="desktop-actions" id="desktop-actions" style="margin-top:1rem;display:flex;gap:.7rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="closeModal('modal-view')">Schließen</button>
+        <button class="btn btn-magenta" onclick="openProcessForm()" id="btn-process">
+          📋 Inventur erstellen
+        </button>
+      </div>
+    </div>
+    <!-- Right: admin form (hidden until openProcessForm) -->
+    <div class="modal" id="modal-right" style="display:none">
+      <div class="modal-title">Inventur ausfüllen</div>
+      <div class="field">
+        <label class="field-label">Datum</label>
+        <input type="date" id="form-date">
+      </div>
+      <div id="form-products" style="max-height:400px;overflow-y:auto"></div>
+      <div style="margin-top:1rem;display:flex;gap:.7rem">
+        <button class="btn btn-ghost" onclick="document.getElementById('modal-right').style.display='none'">← Zurück</button>
+        <button class="btn btn-green" style="flex:1" onclick="finalizeInventur()">✓ Inventur abschließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ARTIKEL CONFIG ═══ -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal-inner config-modal" style="justify-content:center">
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" onclick="closeModal('modal-config')">✕</button>
+      <div class="modal-title">⚙️ Artikellisten konfigurieren</div>
+      <div class="lager-tabs" id="config-tabs"></div>
+      <div id="config-content" style="max-height:420px;overflow-y:auto"></div>
+      <div style="margin-top:1rem;display:flex;gap:.7rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('modal-config')">Abbrechen</button>
+        <button class="btn btn-magenta" onclick="saveArtikelConfig()">💾 Speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, updateDoc, setDoc, getDoc, orderBy }
+  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const ALL_PRODUCTS = [
+  {cat:'Getränke', items:[
+    {id:'rb_blue',name:'Red Bull',unit:'0,25 L',icon:'🔵'},
+    {id:'rb_zero',name:'Red Bull Zero',unit:'0,25 L',icon:'🩵'},
+    {id:'rb_white',name:'Red Bull White',unit:'0,25 L',icon:'⚪️'},
+    {id:'action_e',name:'Action Energy / Power Up',unit:'0,25 L',icon:'⚡'},
+    {id:'cola_red',name:'Coca Cola',unit:'0,33 L',icon:'🔴'},
+    {id:'cola_zero',name:'Coca Cola Zero',unit:'0,33 L',icon:'⚫'},
+    {id:'fanta',name:'Fanta',unit:'0,33 L',icon:'🟠'},
+    {id:'sprite',name:'Sprite',unit:'0,33 L',icon:'🟢'},
+    {id:'vio_stil',name:'VIO Wasser Still',unit:'0,50 L',icon:'💧'},
+    {id:'vio_med',name:'VIO Wasser Med.',unit:'0,50 L',icon:'🫧'},
+    {id:'gero_sp',name:'Gerolsteiner Sprud.',unit:'0,33 L',icon:'🌊'},
+    {id:'gero_med',name:'Gerolsteiner Med.',unit:'0,33 L',icon:'💦'},
+    {id:'durstl',name:'Durstlöscher',unit:'',icon:'🥤'},
+  ]},
+  {cat:'Snacks', items:[
+    {id:'erdnuesse',name:'Erdnüsse',unit:'20 St.',icon:'🥜'},
+    {id:'stuf',name:'Studentenfutter',unit:'20 St.',icon:'🍿'},
+    {id:'snickers',name:'Snickers',unit:'24 St.',icon:'🍫'},
+    {id:'mars',name:'Mars',unit:'24 St.',icon:'🍬'},
+    {id:'twix',name:'Twix',unit:'30 St.',icon:'🍭'},
+    {id:'mnm',name:'M&M',unit:'24 St.',icon:'🟡'},
+    {id:'pringles',name:'Pringles',unit:'24 St.',icon:'🥫'},
+    {id:'kitkat',name:'KitKat White',unit:'24 St.',icon:'🤍'},
+    {id:'bifi_orig',name:'BIFI Original',unit:'40 St.',icon:'🌭'},
+    {id:'bifi_roll',name:'BIFI Roll',unit:'24 St.',icon:'🥖'},
+  ]},
+  {cat:'Süssigkeiten', items:[
+    {id:'croissant',name:'Croissants',unit:'5 St.',icon:'🥐'},
+    {id:'madeleine',name:'Madeleines',unit:'',icon:'🧁'},
+    {id:'rollino',name:'Rollino',unit:'',icon:'🍥'},
+    {id:'biscoff',name:'Biscoff Gebäck',unit:'300 St.',icon:'🍪'},
+    {id:'nimm2',name:'Nimm 2 Soft',unit:'345 g.',icon:'🍬'},
+    {id:'risen',name:'Risen Toffees',unit:'900 g.',icon:'🍫'},
+    {id:'milchb',name:'Milch Boller',unit:'345 g.',icon:'🥛'},
+    {id:'werthers',name:'Werthers',unit:'245 g.',icon:'🟡'},
+    {id:'haribo',name:'Haribo Eimer',unit:'1 KG',icon:'🐻'},
+    {id:'kaffee',name:'Kaffee Classic Grande',unit:'',icon:'☕'},
+    {id:'zucker',name:'Zucker',unit:'2 KG.',icon:'🧂'},
+  ]},
+  {cat:'Haushaltsartikel', items:[
+    {id:'toilp',name:'Toilettenpapier',unit:'',icon:'🧻'},
+    {id:'kuchenr',name:'Küchenrollen',unit:'',icon:'🧻'},
+    {id:'handsch_e',name:'Handschuhe Einmal.',unit:'100 St.',icon:'🧤'},
+    {id:'spulmit',name:'Spülmittel',unit:'',icon:'🧼'},
+    {id:'glasrein',name:'Glasreiniger',unit:'',icon:'🪟'},
+    {id:'wc_rein',name:'WC-Reiniger',unit:'',icon:'🚽'},
+    {id:'mull120',name:'Müllbeutel 120 L.',unit:'15 St.',icon:'🗑️'},
+    {id:'mull60',name:'Müllbeutel 60 L.',unit:'30 St.',icon:'🗑️'},
+    {id:'seife_nf',name:'Seife / Nachfüllung',unit:'1-2 L',icon:'🧴'},
+    {id:'desinfek',name:'Desinfektor',unit:'',icon:'💉'},
+    {id:'batterie',name:'Batterien AA',unit:'',icon:'🔋'},
+    {id:'glasrein2',name:'Glasreiniger Spray',unit:'',icon:'🪟'},
+    {id:'boden_aj',name:'Bodenreiniger',unit:'',icon:'🧹'},
+    {id:'allzweck',name:'Allzweckreiniger',unit:'',icon:'✨'},
+    {id:'mull35',name:'Müllbeutel 35 L.',unit:'30 St.',icon:'🗑️'},
+    {id:'mull25',name:'Müllbeutel 25 L.',unit:'30 St.',icon:'🗑️'},
+    {id:'seife_fl',name:'Seife Flasche',unit:'',icon:'🧴'},
+    {id:'feuchtt',name:'Feuchte Tücher',unit:'',icon:'🧻'},
+    {id:'staubsb',name:'Staubsauger Beutel',unit:'',icon:'🌀'},
+    {id:'togo_b',name:'To Go Becher',unit:'50 St.',icon:'🥤'},
+  ]},
+];
+
+const LAGERS = ['zentrallager','nettetal','brüggen','viersen','köln'];
+const LAGER_NAMES = {zentrallager:'Zentrallager',nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+
+// ── STATE ──
+let currentEntry = null;
+let configLager  = 'brüggen';
+let configSelections = {}; // {lager: Set(ids)}
+
+// ── SIDEBAR ──
+window.toggleSidebar = ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+};
+window.closeSidebar = ()=>{
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+};
+window.toggleSubMenu = btn=>{
+  btn.closest('.nav-item').classList.toggle('open');
+};
+
+// ── HELPERS ──
+const showSpinner = ()=>document.getElementById('spinner').classList.add('show');
+const hideSpinner = ()=>document.getElementById('spinner').classList.remove('show');
+function showToast(msg, color='var(--neon-green)'){
+  const t=document.getElementById('toast'); t.textContent=msg; t.style.color=color;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
+}
+window.closeModal = id=>document.getElementById(id).classList.remove('show');
+window.closeFullPhoto = ()=>document.getElementById('photo-full').classList.remove('show');
+
+// ── LOAD SUBMISSIONS ──
+window.onFilterChange = loadSubmissions;
+async function loadSubmissions(){
+  showSpinner();
+  const lager   = document.getElementById('sel-lager').value;
+  const zeitraum= document.getElementById('sel-zeitraum').value;
+  const section = document.getElementById('archive-section');
+  const emptyMsg= document.getElementById('empty-msg');
+  try {
+    let q;
+    if(lager){
+      q = query(collection(db,'mitarbeiter_inventur'),
+        where('lager','==',lager), where('monat','==',zeitraum));
+    } else {
+      q = query(collection(db,'mitarbeiter_inventur'), where('monat','==',zeitraum));
+    }
+    const snap = await getDocs(q);
+    const entries = [];
+    snap.forEach(d=>entries.push({id:d.id,...d.data()}));
+    entries.sort((a,b)=>b.datum.localeCompare(a.datum));
+    hideSpinner();
+
+    section.innerHTML='';
+    const em=document.createElement('div');
+    em.className='empty-state'; em.id='empty-msg'; em.style.display='none';
+    em.innerHTML='<div class="e-icon">📭</div><div class="e-title">Keine Erfassungen</div><div style="font-size:.85rem">Für den gewählten Zeitraum liegen keine Inventuren vor.</div>';
+    section.appendChild(em);
+
+    if(entries.length===0){ em.style.display='block'; return; }
+
+    entries.forEach(inv=>{
+      const card = document.createElement('div');
+      const isUnread = inv.status==='sent';
+      card.className = 'inv-card' + (isUnread?' unread':'');
+      card.onclick = ()=>openView(inv);
+
+      const d = new Date(inv.datum);
+      const dateStr = d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+      const statusLabel = inv.status==='done'?'Bearbeitet':inv.status==='sent'?'Nicht bearbeitet':'—';
+      const statusClass = inv.status==='done'?'done':'sent';
+      const lagerName = LAGER_NAMES[inv.lager]||inv.lager||'—';
+      const photosHtml = (inv.photos||[]).slice(0,4).map(url=>
+        `<img class="photo-thumb" src="${url}" onclick="event.stopPropagation();openFullPhoto('${url}')">`).join('');
+
+      card.innerHTML = `
+        <div class="inv-card-header">
+          ${isUnread?'<div class="new-dot"></div>':''}
+          <span class="inv-date">${dateStr}</span>
+          <span class="inv-lager-badge">${lagerName}</span>
+          <span class="inv-status ${statusClass}">${statusLabel}</span>
+          <span class="inv-by">${inv.mitarbeiter||'—'}</span>
+        </div>
+        <div class="inv-meta">
+          <span>📷 <span class="val">${inv.photoCount||0}</span> Fotos</span>
+          <span>📋 <span class="val">${inv.filledCount||0}</span> / <span class="val">${inv.totalCount||0}</span> Artikel</span>
+        </div>
+        ${photosHtml ? `<div class="photos-preview">${photosHtml}</div>` : ''}`;
+      section.appendChild(card);
+    });
+  } catch(e){
+    hideSpinner();
+    console.error(e);
+    showToast('Fehler beim Laden', 'var(--neon-magenta)');
+  }
+}
+
+// ── VIEW SUBMISSION ──
+window.openFullPhoto = url=>{
+  document.getElementById('photo-full-img').src=url;
+  document.getElementById('photo-full').classList.add('show');
+};
+
+window.openView = function(inv){
+  currentEntry = inv;
+  const d = new Date(inv.datum);
+  const dateStr = d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('view-title').textContent = 'Inventur vom '+dateStr;
+  document.getElementById('view-meta').textContent = (LAGER_NAMES[inv.lager]||inv.lager) + ' – ' + (inv.mitarbeiter||'—');
+  document.getElementById('form-date').value = inv.datum;
+
+  // Photos
+  const photos = inv.photos||[];
+  document.getElementById('view-photo-count').textContent = photos.length;
+  document.getElementById('view-photos').innerHTML = photos.map(url=>
+    `<img class="view-photo" src="${url}" onclick="openFullPhoto('${url}')">`).join('');
+  document.getElementById('view-photos-section').style.display = photos.length?'block':'none';
+
+  // List
+  const items = inv.items||{};
+  const filled = Object.keys(items).filter(k=>items[k]>0);
+  document.getElementById('view-filled').textContent = filled.length;
+  document.getElementById('view-total').textContent = inv.totalCount||0;
+  let listHtml='';
+  if(filled.length>0){
+    filled.forEach(id=>{
+      const prod = ALL_PRODUCTS.flatMap(c=>c.items).find(p=>p.id===id);
+      const name = prod?prod.name:id;
+      listHtml+=`<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid rgba(0,245,255,.05)">
+        <span style="font-size:.82rem">${name}</span>
+        <span style="font-family:'Century Gothic',sans-serif;color:var(--neon-cyan);font-size:.85rem">${items[id]}</span>
+      </div>`;
+    });
+  } else {
+    listHtml='<div style="color:var(--text-dim);font-size:.82rem">Keine Listendaten – nur Fotos vorhanden</div>';
+  }
+  document.getElementById('view-list').innerHTML=listHtml;
+  document.getElementById('view-list-section').style.display='block';
+
+  // Button
+  const btn=document.getElementById('btn-process');
+  if(inv.status==='done'){
+    btn.style.display='none';
+  } else {
+    btn.style.display='inline-flex';
+  }
+  document.getElementById('modal-right').style.display='none';
+  document.getElementById('modal-view').classList.add('show');
+};
+
+// ── PROCESS FORM ──
+window.openProcessForm = async function(){
+  // Load artikel config for this lager
+  let formProducts = ALL_PRODUCTS;
+  try {
+    const cfgDoc = await getDoc(doc(db,'artikel_config',currentEntry.lager));
+    if(cfgDoc.exists()){
+      const ids = new Set(cfgDoc.data().selected_ids||[]);
+      if(ids.size>0){
+        formProducts = ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
+      }
+    }
+  } catch(e){}
+
+  const prefilled = currentEntry.items||{};
+  let html='';
+  formProducts.forEach(cat=>{
+    html+=`<div class="inv-form-cat">
+      <div class="inv-form-cat-header">${cat.cat}</div>`;
+    cat.items.forEach(prod=>{
+      const val = prefilled[prod.id]||'';
+      const cls = val?'inv-form-qty prefilled':'inv-form-qty';
+      html+=`<div class="inv-form-row">
+        <div class="inv-form-icon">${prod.icon||'📦'}</div>
+        <span class="inv-form-name">${prod.name}</span>
+        <span class="inv-form-unit">${prod.unit||''}</span>
+        <input class="${cls}" type="number" min="0" placeholder="0" value="${val}" data-id="${prod.id}">
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('form-products').innerHTML=html;
+  document.getElementById('modal-right').style.display='block';
+};
+
+// ── FINALIZE ──
+window.finalizeInventur = async function(){
+  const date = document.getElementById('form-date').value;
+  if(!date){ showToast('Datum fehlt','var(--neon-yellow)'); return; }
+  showSpinner();
+  try {
+    // Collect items
+    const items={};
+    document.querySelectorAll('#form-products .inv-form-qty').forEach(inp=>{
+      if(inp.value) items[inp.dataset.id]=parseInt(inp.value);
+    });
+
+    // Save to inventur collection (shows on uebersicht.html)
+    await addDoc(collection(db,'inventur'),{
+      lager: currentEntry.lager,
+      monat: currentEntry.monat,
+      datum: date,
+      items,
+      createdAt: new Date().toISOString(),
+      sourceId: currentEntry.id
+    });
+
+    // Also save to anfangsbestand
+    const abKey = currentEntry.lager+'_'+currentEntry.monat;
+    const abDoc = await getDoc(doc(db,'anfangsbestand',abKey));
+    if(!abDoc.exists()){
+      await setDoc(doc(db,'anfangsbestand',abKey),items);
+    }
+
+    // Mark submission as done
+    await updateDoc(doc(db,'mitarbeiter_inventur',currentEntry.id),{status:'done'});
+
+    hideSpinner();
+    closeModal('modal-view');
+    showToast('Inventur erfolgreich abgeschlossen! ✓');
+    loadSubmissions();
+  } catch(e){
+    hideSpinner();
+    showToast('Fehler: '+e.message,'var(--neon-magenta)');
+  }
+};
+
+// ── ARTIKEL CONFIG ──
+window.openArtikelConfig = async function(){
+  showSpinner();
+  configSelections={};
+  for(const lager of LAGERS){
+    try {
+      const d=await getDoc(doc(db,'artikel_config',lager));
+      configSelections[lager]=new Set(d.exists()?(d.data().selected_ids||[]):[]);
+    } catch(e){ configSelections[lager]=new Set(); }
+  }
+  hideSpinner();
+  renderConfigTabs();
+  renderConfigContent();
+  document.getElementById('modal-config').classList.add('show');
+};
+
+function renderConfigTabs(){
+  document.getElementById('config-tabs').innerHTML=LAGERS.map(l=>
+    `<button class="lager-tab ${l===configLager?'active':''}" onclick="switchConfigLager('${l}')">${LAGER_NAMES[l]}</button>`
+  ).join('');
+}
+
+window.switchConfigLager=function(lager){
+  // Save current checkboxes
+  saveCurrentConfigState();
+  configLager=lager;
+  renderConfigTabs();
+  renderConfigContent();
+};
+
+function saveCurrentConfigState(){
+  const checkboxes=document.querySelectorAll('#config-content input[type=checkbox]');
+  if(!configSelections[configLager]) configSelections[configLager]=new Set();
+  configSelections[configLager].clear();
+  checkboxes.forEach(cb=>{ if(cb.checked) configSelections[configLager].add(cb.value); });
+}
+
+function renderConfigContent(){
+  const sel=configSelections[configLager]||new Set();
+  const count=sel.size;
+  let html=`<div style="font-size:.8rem;color:var(--text-dim);margin-bottom:.8rem">${count>0?count+' Artikel ausgewählt':'Noch keine Artikel ausgewählt'}</div>`;
+  ALL_PRODUCTS.forEach((cat,ci)=>{
+    const anyChecked=cat.items.some(i=>sel.has(i.id));
+    html+=`<div class="config-cat ${anyChecked?'open':''}" id="cfg-cat-${ci}">
+      <div class="config-cat-header" onclick="toggleConfigCat(${ci})">
+        <span class="config-cat-label">${cat.cat}</span>
+        <span style="font-size:.65rem;color:var(--text-dim)">${cat.items.filter(i=>sel.has(i.id)).length}/${cat.items.length}</span>
+      </div>
+      <div class="config-cat-items">`;
+    cat.items.forEach(prod=>{
+      const checked=sel.has(prod.id)?'checked':'';
+      html+=`<div class="config-item">
+        <label><input type="checkbox" value="${prod.id}" ${checked}>${prod.icon||'📦'} ${prod.name} <span style="color:var(--text-dim);font-size:.75rem">${prod.unit||''}</span></label>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('config-content').innerHTML=html;
+}
+
+window.toggleConfigCat=function(ci){
+  document.getElementById('cfg-cat-'+ci).classList.toggle('open');
+};
+
+window.saveArtikelConfig=async function(){
+  saveCurrentConfigState();
+  showSpinner();
+  try {
+    for(const lager of LAGERS){
+      const ids=[...( configSelections[lager]||new Set())];
+      await setDoc(doc(db,'artikel_config',lager),{selected_ids:ids,updatedAt:new Date().toISOString()});
+    }
+    hideSpinner();
+    closeModal('modal-config');
+    showToast('Artikellisten gespeichert! ✓');
+  } catch(e){
+    hideSpinner();
+    showToast('Fehler: '+e.message,'var(--neon-magenta)');
+  }
+};
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  loadSubmissions();
+});
+</script>
+</body>
+</html>

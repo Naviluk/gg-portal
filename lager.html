@@ -428,7 +428,15 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </ul>
     </li>
     <li class="nav-divider"></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='inventur.html'">Inventur</button></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html">Erfassungen</a></li>
+      </ul>
+    </li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
     <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
