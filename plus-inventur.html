@@ -515,19 +515,7 @@ window.closeSidebar = ()=>{
   document.getElementById('sidebar-overlay').classList.remove('open');
 };
 
-// ── EXPOSE ──
-window.openHelp       = openHelp;
-window.closeModal     = closeModal;
-window.openCreate     = openCreate;
-window.startPhoto     = startPhoto;
-window.startList      = startList;
-window.backToChoose   = backToChoose;
-window.handleFiles    = handleFiles;
-window.uploadPhotos   = uploadPhotos;
-window.saveList       = saveList;
-window.submitInventur = submitInventur;
-window.toggleInvCat   = toggleInvCat;
-window.removePhoto    = removePhoto;
+// ── EXPOSE — all functions declared as window.X directly ──
 
 // ── SPINNER / TOAST ──
 const showSpinner = () => document.getElementById('spinner').classList.add('show');
@@ -702,7 +690,7 @@ function renderInvList(){
   container.innerHTML = html;
 }
 
-window.toggleInvCat = function(ci){
+function toggleInvCat(ci){
   document.getElementById('inv-cat-'+ci).classList.toggle('open');
 }
 
@@ -827,6 +815,22 @@ async function loadArchive(){
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', ()=>{ loadArchive(); });
+
+// ── Make all functions globally accessible ──
+window.openHelp = openHelp;
+window.closeModal = closeModal;
+window.openCreate = openCreate;
+window.startPhoto = startPhoto;
+window.startList = startList;
+window.backToChoose = backToChoose;
+window.handleFiles = handleFiles;
+window.uploadPhotos = uploadPhotos;
+window.saveList = saveList;
+window.submitInventur = submitInventur;
+window.toggleInvCat = toggleInvCat;
+window.removePhoto = removePhoto;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
 </script>
 </body>
 </html>
