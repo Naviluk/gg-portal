@@ -347,7 +347,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <!-- Send button - shown when at least one done -->
       <div id="send-section" style="display:none;margin-top:1rem">
         <div style="height:1px;background:var(--glass-border);margin-bottom:1rem"></div>
-        <button class="btn btn-magenta" style="width:100%" onclick="submitInventur()">
+        <button class="btn btn-magenta" style="width:100%" onclick="submitInventur()" id="send-btn">
           ✓ Inventur erstellen und absenden
         </button>
       </div>
@@ -563,6 +563,7 @@ function openCreate(e, invId=null){
   document.getElementById('photo-list-prompt').style.display='none';
   document.getElementById('list-photo-section').style.display='none';
   document.getElementById('inv-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('send-btn').textContent = '✓ Inventur erstellen und absenden';
   showStep('step-choose');
   document.getElementById('modal-create').classList.add('show');
 }
@@ -731,21 +732,28 @@ async function submitInventur(){
       totalCount,
       mitarbeiter: currentUser,
       status: 'sent',
-      createdAt: new Date().toISOString()
+      updatedAt: new Date().toISOString()
     };
 
-    await db.collection('mitarbeiter_inventur').add(entry);
-
-    // Send email notification via EmailJS (if configured)
-    sendEmailNotification(entry);
-
-    hideSpinner();
-    closeModal('modal-create');
-    showToast('Inventur erfolgreich abgesendet! ✓');
+    if(currentInvId){
+      // Update existing
+      await db.collection('mitarbeiter_inventur').doc(currentInvId).update(entry);
+      hideSpinner();
+      closeModal('modal-create');
+      showToast('Änderungen gespeichert! ✓');
+    } else {
+      // Create new
+      entry.createdAt = new Date().toISOString();
+      await db.collection('mitarbeiter_inventur').add(entry);
+      sendEmailNotification(entry);
+      hideSpinner();
+      closeModal('modal-create');
+      showToast('Inventur erfolgreich abgesendet! ✓');
+    }
     loadArchive();
   } catch(e){
     hideSpinner();
-    showToast('Fehler beim Absenden: '+e.message, 'var(--neon-magenta)');
+    showToast('Fehler: '+e.message, 'var(--neon-magenta)');
   }
 }
 
@@ -783,6 +791,8 @@ function openEdit(inv){
 
   renderPhotosGrid();
   updateSendSection();
+  // Update button label for edit mode
+  document.getElementById('send-btn').textContent = '💾 Änderungen speichern';
   showStep('step-choose');
   document.getElementById('modal-create').classList.add('show');
 }
