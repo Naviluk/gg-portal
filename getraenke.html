@@ -83,8 +83,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   padding:.6rem 1.3rem;transition:all .2s}
 .btn-einkauf{background:rgba(0,200,80,.1);border-color:rgba(0,200,80,.35);color:var(--col-e)}
 .btn-einkauf:hover{background:rgba(0,200,80,.2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,200,80,.2)}
-.btn-geraet{background:rgba(255,145,0,.1);border-color:rgba(255,145,0,.35);color:var(--col-g)}
-.btn-geraet:hover{background:rgba(255,145,0,.2);transform:translateY(-1px)}
+.btn-geraet{background:linear-gradient(135deg,#ff9100,#cc6600);border-color:#ff9100;color:#fff;box-shadow:0 4px 18px rgba(255,145,0,.4)}
+.btn-geraet:hover{background:linear-gradient(135deg,#ffaa22,#dd7700);transform:translateY(-1px);box-shadow:0 6px 24px rgba(255,145,0,.5)}
 .btn-gesamt{background:rgba(199,125,255,.1);border-color:rgba(199,125,255,.3);color:var(--col-end);margin-left:auto}
 .btn-gesamt:hover{background:rgba(199,125,255,.2);transform:translateY(-1px)}
 
@@ -108,19 +108,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 /* Column type colors */
 .th-ab{color:#ccc}
-.td-ab{color:#111;font-weight:700;background:#c4c2c2}
+.td-ab{color:#111;font-weight:700;background:#c0bebe}
 .th-einkauf{color:var(--col-e)}
 .td-einkauf{color:var(--col-e)}
-.th-einkauf-ges{color:#1e5c2e;background:#b5d9bf!important}
-.td-einkauf-ges{color:#1e5c2e;font-weight:700;background:#c8e6d0}
+.th-einkauf-ges{color:#0F3020;background:#9AB39B!important}
+.td-einkauf-ges{color:#0F3020;font-weight:700;background:#9AB39B}
 .th-geraet{color:var(--col-g)}
 .td-geraet{color:var(--col-g)}
-.th-geraet-ges{color:#6b3500;background:#e8c99a!important}
-.td-geraet-ges{color:#6b3500;font-weight:700;background:#f0d8b0}
-.th-theke{color:#e08080}
-.td-theke{color:#aa4444;opacity:.8;background:#e8cece}
+.th-geraet-ges{color:#3D1A00;background:#C8A882!important}
+.td-geraet-ges{color:#3D1A00;font-weight:700;background:#C8A882}
+.th-theke{color:#ffaaaa;background:#9a6060!important}
+.td-theke{color:#3D0000;font-weight:700;background:#B89898}
 .th-end{color:#ccc}
-.td-end{color:#111;font-weight:700;background:#c4c2c2}
+.td-end{color:#111;font-weight:700;background:#c0bebe}
 
 /* Expand arrow for Gesamt cols */
 .col-expand-wrap{display:flex;align-items:center;justify-content:center;gap:.4rem}
@@ -130,10 +130,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .detail-col.visible{display:table-cell}
 
 /* Detail date cols */
-.th-date-e{color:var(--col-e);background:rgba(0,200,80,.05)!important;font-size:.65rem;letter-spacing:.04em}
-.th-date-g{color:var(--col-g);background:rgba(255,145,0,.05)!important;font-size:.65rem;letter-spacing:.04em}
-.td-date-e{color:#1e5c2e;background:#d4edda}
-.td-date-g{color:#6b3500;background:#ead9be}
+.th-date-e{color:#0F3020;background:#9AB39B!important;font-size:.65rem;letter-spacing:.04em}
+.th-date-g{color:#3D1A00;background:#C8A882!important;font-size:.65rem;letter-spacing:.04em}
+.td-date-e{color:#0F3020;background:#b0ccb1}
+.td-date-g{color:#3D1A00;background:#d4b890}
 .dim{color:var(--text-muted)}
 
 /* Category rows */
@@ -174,35 +174,35 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,12,18,.75);z-index:500;
   align-items:flex-start;justify-content:center;padding:1.2rem;overflow-y:auto;backdrop-filter:blur(6px)}
 .modal-overlay.show{display:flex}
-.modal{background:var(--bg3);border:1px solid var(--glass-border);border-radius:16px;
+.modal{background:#d6d3d3;border:1px solid rgba(0,200,255,.2);border-radius:16px;
   padding:1.8rem;width:100%;max-width:480px;position:relative;margin:auto;box-shadow:var(--shadow-lg)}
 .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;
   color:var(--text-dim);font-size:1.4rem;cursor:pointer;line-height:1}
-.modal-close:hover{color:var(--accent2)}
+.modal-close:hover{color:#cc2200}
 .modal-title{font-family:'Orbitron',sans-serif;font-size:.8rem;letter-spacing:.12em;
   text-transform:uppercase;margin-bottom:1.4rem;font-weight:700}
 .modal-title.einkauf{color:var(--col-e)}.modal-title.geraet{color:var(--col-g)}
 .field{margin-bottom:1rem}
 .field-label{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;
-  color:var(--text-dim);text-transform:uppercase;margin-bottom:.4rem}
-input[type=date]{width:100%;background:rgba(0,0,0,.3);border:1.5px solid var(--glass-border);
+  color:#445;text-transform:uppercase;margin-bottom:.4rem}
+input[type=date]{width:100%;background:rgba(255,255,255,.5);border:1.5px solid rgba(0,0,0,.2);
   border-radius:8px;color:var(--text);font-family:'Century Gothic',sans-serif;
   font-size:.95rem;padding:.6rem .9rem;outline:none;transition:border-color .2s}
-input[type=date]:focus{border-color:var(--accent)}
+input[type=date]:focus{border-color:var(--accent);background:rgba(255,255,255,.7)}
 .form-cat-hdr{font-family:'Orbitron',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.1em;
-  color:#ffcc44;text-transform:uppercase;padding:.45rem .7rem;background:rgba(0,0,0,.3);
+  color:#334;text-transform:uppercase;padding:.45rem .7rem;background:rgba(0,0,0,.1);
   border-radius:8px;margin:.7rem 0 .3rem;cursor:pointer;border:1px solid rgba(255,200,50,.1);transition:background .2s}
 .form-cat-hdr:hover{background:rgba(255,200,50,.08)}
 .form-row{display:flex;align-items:center;gap:.6rem;padding:.35rem .3rem;border-radius:6px;transition:background .15s}
 .form-row:hover{background:rgba(0,200,255,.05)}
-.form-icon{width:26px;height:26px;border-radius:7px;background:rgba(0,200,255,.1);
+.form-icon{width:26px;height:26px;border-radius:7px;background:rgba(0,0,0,.1);
   display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
-.form-name{flex:1;font-size:.9rem;font-weight:600;color:var(--text)}
+.form-name{flex:1;font-size:.9rem;font-weight:600;color:#111}
 .form-unit{font-size:.7rem;color:var(--text-dim);min-width:38px}
-.form-qty{width:68px;background:rgba(0,0,0,.35);border:1.5px solid rgba(0,200,255,.18);
+.form-qty{width:68px;background:rgba(255,255,255,.6);border:1.5px solid rgba(0,0,0,.18);
   border-radius:6px;font-family:'Century Gothic',sans-serif;font-size:.95rem;font-weight:700;
   padding:.3rem .4rem;text-align:center;outline:none;color:var(--text);transition:all .2s}
-.form-qty:focus{border-color:var(--accent);background:rgba(0,200,255,.06);color:var(--accent)}
+.form-qty:focus{border-color:var(--accent);background:rgba(255,255,255,.9);color:#111}
 .form-qty.einkauf:focus{border-color:var(--col-e);color:var(--col-e)}
 .form-qty.geraet:focus{border-color:var(--col-g);color:var(--col-g)}
 .form-qty[type=number]{-moz-appearance:textfield}
@@ -230,10 +230,16 @@ input[type=date]:focus{border-color:var(--accent)}
 .spinner{width:42px;height:42px;border:3px solid rgba(0,100,200,.2);border-top-color:var(--accent);
   border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:1024px){
+  .end-label-full{display:none!important}
+  .end-label-short{display:inline!important}
+}
 @media(max-width:640px){
   .main-content{padding:.9rem .7rem}
   .btn-gesamt{margin-left:0;width:100%}
   .g-table td,.g-table th{padding:.42rem .5rem;font-size:.8rem}
+  .end-label-full{display:none!important}
+  .end-label-short{display:inline!important}
 }
 </style>
 </head>
@@ -402,7 +408,7 @@ function renderTable(){
   // Einkauf Gesamt + detail cols
   th+=`<th class='th-einkauf-ges'>
     <div class='col-expand-wrap'>
-      <span>Alle Einkäufe</span>
+      <span>Waren-<br>eingang</span>
       <span class='expand-btn' id='expand-e' onclick='toggleExpand("e")'>▶</span>
     </div></th>`;
   eDates.forEach(d=>{
@@ -413,7 +419,7 @@ function renderTable(){
   // Gerät Gesamt + detail cols
   th+=`<th class='th-geraet-ges'>
     <div class='col-expand-wrap'>
-      <span>Alle Gerät</span>
+      <span>Gerät-<br>auffül.</span>
       <span class='expand-btn' id='expand-g' onclick='toggleExpand("g")'>▶</span>
     </div></th>`;
   gDates.forEach(d=>{
@@ -424,8 +430,8 @@ function renderTable(){
   });
 
   // Theke + End
-  th+="<th class='th-theke' style='opacity:.6'>Thekenverk.</th>";
-  th+="<th class='th-end'>Endbestand</th>";
+  th+="<th class='th-theke'>Theken-<br>verkauf</th>";
+  th+="<th class='th-end'><span class='end-label-full'>Endbestand</span><span class='end-label-short' style='display:none'>End-<br>bestand</span></th>";
   th+="</tr>";
   document.getElementById("g-thead").innerHTML=th;
 
