@@ -513,7 +513,7 @@ async function loadSubmissions(){
     const snap = await q.get();
     const entries = [];
     snap.forEach(d=>entries.push({id:d.id,...d.data()}));
-    entries.sort((a,b)=>a.datum.localeCompare(b.datum));
+    entries.sort((a,b)=>b.datum.localeCompare(a.datum));
     hideSpinner();
 
     section.innerHTML='';
