@@ -867,7 +867,7 @@ async function loadData(){
 
   anfangsbestand={};
   try {
-    const abDoc=await db.collection('anfangsbestand'.get().doc(currentLager+'_'+currentZeitraum));
+    const abDoc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
     if(abDoc.exists) anfangsbestand=abDoc.data();
   } catch(e){}
 
