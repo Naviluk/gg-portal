@@ -6,7 +6,6 @@
 <meta name="robots" content="noindex, nofollow">
 <title>GETRÄNKE &amp; SNACKS – GAME GALAXY</title>
 <style>
-<style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
   --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
@@ -123,14 +122,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border)}
 
 /* ── SINGLE TABLE with sticky first column ── */
-.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%}
+.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:var(--bg)}
 .lager-table th{
   font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
   font-size:.78rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
   padding:.7rem .9rem;border-bottom:1px solid var(--glass-border);
   white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
   background:#111827}
-.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
+.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem;background:var(--bg)}
 .lager-table tr:last-child td{border-bottom:none}
 .lager-table tr:hover td{background:rgba(0,245,255,.03)}
 
@@ -170,7 +169,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 }
 
 /* category row */
-.cat-row td{background:rgba(0,0,0,.4);padding:.4rem .9rem;cursor:pointer;user-select:none}
+.cat-row td{background:rgba(0,0,0,.6);padding:.4rem .9rem;cursor:pointer;user-select:none}
 .cat-row:hover td{background:rgba(0,245,255,.05)}
 .cat-label{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.15em;
   color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
@@ -376,7 +375,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 /* ── КНОПКИ + GERÄT / + THEKE ── */
 .btn-geraet{
-  margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
   font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
   background:linear-gradient(135deg,rgba(0,245,255,.2),rgba(0,245,255,.08));
   color:var(--neon-cyan);font-weight:700;
@@ -492,8 +491,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <button class="btn-geraet" onclick="openForm('geraet')">&#xFF0B; Gerät</button>
-    <button class="btn-theke" onclick="openForm('theke')">&#xFF0B; Theke</button>
+    <div style="margin-left:auto;display:flex;gap:.6rem;flex-shrink:0">
+      <button class="btn-geraet" onclick="openForm('geraet')">&#xFF0B; Gerät</button>
+      <button class="btn-theke" onclick="openForm('theke')">&#xFF0B; Theke</button>
+    </div>
   </div>
 
   <div class="table-wrap-single">
