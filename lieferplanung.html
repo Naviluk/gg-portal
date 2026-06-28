@@ -418,14 +418,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
-.plan-row{display:flex;align-items:center;gap:.55rem;padding:.4rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;transition:background .15s;min-height:40px}
+.plan-row{display:flex;align-items:center;gap:.6rem;padding:.42rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;transition:background .15s}
 .plan-row:hover{background:rgba(0,245,255,.03)}
-.plan-row-name{flex:1;font-size:.86rem;min-width:0;overflow:hidden;line-height:1.2}
-.plan-row-name span.prod-unit-inline{font-size:.7rem;color:var(--text-dim);margin-left:.3rem;white-space:nowrap}
+.plan-row-name{flex:1;font-size:.86rem;line-height:1.3;word-break:break-word}
+.plan-row-name .prod-unit-inline{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
 .plan-row-empf{width:42px;text-align:center;font-size:.82rem;color:var(--neon-yellow);flex-shrink:0}
-.plan-row-qty{width:64px;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);
-  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.92rem;
-  padding:.32rem .4rem;border-radius:5px;text-align:center;outline:none;flex-shrink:0;
+.plan-row-qty{width:68px;flex-shrink:0;background:rgba(0,0,0,.5);border:1px solid var(--neon-cyan);
+  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.95rem;
+  padding:.32rem .4rem;border-radius:5px;text-align:center;outline:none;
   transition:border-color .15s,box-shadow .15s}
 .plan-row-qty:focus{border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.3)}
 .plan-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
@@ -862,7 +862,7 @@ function renderSollContent(){
     catObj.items.forEach(prod=>{
       const v=lgD[prod.id]??'';
       html+=`<div class="plan-row"><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name" title="${prod.name}">${prod.name}<span class="prod-unit-inline">${prod.unit||''}</span></div>
+        <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
         <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" placeholder="St." value="${v}"></div>`;
     });
     html+='</div></div>';
@@ -896,7 +896,7 @@ window.openPlan=function(){
       const diff=Math.max(0,soll-akt);
       catHtml+=`<div class="plan-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name" title="${prod.name}">${prod.name}<span class="prod-unit-inline">${prod.unit||''}</span></div>
+        <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
         <span class="plan-row-empf" title="Empfohlen">${diff>0?diff:'✓'}</span>
         <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St." value="${plan||diff||''}">
       </div>`;
