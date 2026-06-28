@@ -1171,14 +1171,35 @@ window.aiSubmitInventur=async function(){
 };
 
 
-window.deleteSubmission = async function(id, btn){
-  if(!confirm('Inventur wirklich löschen?')) return;
-  btn.disabled=true;
+let _deleteId = null;
+let _deleteBtn = null;
+
+window.deleteSubmission = function(id, btn){
+  _deleteId = id;
+  _deleteBtn = btn;
+  document.getElementById('modal-delete-confirm').classList.add('show');
+};
+
+window.closeDeleteConfirm = function(){
+  document.getElementById('modal-delete-confirm').classList.remove('show');
+  _deleteId = null; _deleteBtn = null;
+};
+
+window.confirmDelete = async function(){
+  if(!_deleteId) return;
+  const btn = document.getElementById('btn-delete-confirm-ok');
+  btn.disabled = true;
+  btn.textContent = '…';
   try{
-    await db.collection('mitarbeiter_inventur').doc(id).delete();
+    await db.collection('mitarbeiter_inventur').doc(_deleteId).delete();
+    document.getElementById('modal-delete-confirm').classList.remove('show');
     showToast('Inventur gelöscht','var(--neon-magenta)');
     loadSubmissions();
-  }catch(e){ btn.disabled=false; showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
+  }catch(e){
+    btn.disabled=false; btn.textContent='🗑 Ja, löschen';
+    showToast('Fehler: '+e.message,'var(--neon-magenta)');
+  }
+  _deleteId=null; _deleteBtn=null;
 };
 
 // ── INIT ──
@@ -1186,5 +1207,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   loadSubmissions();
 });
 </script>
+
+<!-- ═══ MODAL: DELETE CONFIRM ═══ -->
+<div class="modal-overlay" id="modal-delete-confirm" style="z-index:600">
+  <div class="modal-inner" style="justify-content:center;align-items:center">
+    <div class="modal" style="max-width:400px;text-align:center;padding:2.2rem 2rem">
+      <div style="font-size:2.4rem;margin-bottom:1rem">🗑</div>
+      <div class="modal-title" style="color:var(--neon-magenta);margin-bottom:.8rem">Eintrag löschen</div>
+      <p style="font-size:.9rem;color:var(--text-dim);line-height:1.6;margin-bottom:.4rem">
+        Sind Sie sicher, dass Sie diese Inventur<br>
+        <strong style="color:var(--text)">unwiderruflich löschen</strong> möchten?
+      </p>
+      <p style="font-size:.78rem;color:rgba(255,0,85,.6);margin-bottom:1.8rem;letter-spacing:.03em">
+        Diese Aktion kann nicht rückgängig gemacht werden.
+      </p>
+      <div style="display:flex;gap:.8rem;justify-content:center">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeDeleteConfirm()">Abbrechen</button>
+        <button class="btn btn-magenta" style="flex:1" id="btn-delete-confirm-ok" onclick="confirmDelete()">
+          🗑 Ja, löschen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
