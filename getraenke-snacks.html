@@ -6,6 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>GETRÄNKE & SNACKS – GAME GALAXY</title>
 <style>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
   --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
@@ -45,7 +46,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .burger.open span:nth-child(2){opacity:0}
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
-/* ── SIDEBAR ── */
+/* sidebar */
 .sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:rgba(17,24,39,.97);
   border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
   transition:left .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px)}
@@ -54,190 +55,357 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 .sidebar-overlay.show{display:block}
 .nav-list{list-style:none;padding:1rem 0}
 .nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
-  background:none;border:none;width:100%;text-align:left;color:var(--text);font-family:'Rajdhani',sans-serif;
-  font-size:.95rem;letter-spacing:.06em;cursor:pointer;transition:color .2s,background .2s}
+  font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:.15em;color:var(--text-dim);
+  text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
 .nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(0,245,255,.06)}
-.nav-arrow{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s;flex-shrink:0}
+.nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
 .nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
 .nav-sub{display:none;list-style:none;background:rgba(0,0,0,.2)}
 .nav-item.open>.nav-sub{display:block}
 .nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Rajdhani',sans-serif;
-  font-size:.9rem;color:var(--text-dim);text-decoration:none;transition:color .2s}
+  font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.05em;transition:color .2s}
 .nav-sub li a:hover{color:var(--neon-magenta)}
-.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 0}
+.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 1.5rem}
 
-/* ── USER DROPDOWN ── */
-.user-dropdown{position:fixed;top:calc(var(--header-h) + 4px);right:1.2rem;background:rgba(17,24,39,.97);
-  border:1px solid var(--glass-border);border-radius:8px;z-index:300;min-width:180px;
-  backdrop-filter:blur(16px);display:none;padding:.4rem 0}
+/* user dropdown */
+.user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
+  background:rgba(17,24,39,.97);border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
+  display:none;z-index:300;min-width:180px;backdrop-filter:blur(16px)}
 .user-dropdown.show{display:block}
-.user-dropdown button{display:block;width:100%;background:none;border:none;color:var(--text);
-  font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:.55rem 1rem;text-align:left;cursor:pointer;transition:background .15s}
-.user-dropdown button:hover{background:rgba(0,245,255,.06);color:var(--neon-cyan)}
-.user-dropdown button.danger{color:var(--neon-magenta)}
+.user-dropdown button{display:block;width:100%;padding:.7rem 1.2rem;text-align:left;background:none;border:none;
+  cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--text-dim);letter-spacing:.05em;transition:background .15s,color .15s}
+.user-dropdown button:hover{background:rgba(0,245,255,.08);color:var(--neon-cyan)}
+.user-dropdown button.danger:hover{background:rgba(255,0,102,.1);color:#ff6699}
 
-/* ── TOAST / SPINNER ── */
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);
-  background:rgba(0,245,255,.12);border:1px solid var(--neon-cyan);color:var(--neon-cyan);
-  font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.1em;padding:.6rem 1.4rem;
-  border-radius:20px;z-index:999;opacity:0;transition:all .35s;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.spinner-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,10,.6);align-items:center;justify-content:center}
+/* ── MAIN ── */
+.main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
+
+/* ── TOP CONTROLS ── */
+.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ctrl-select{background:rgba(0,0,0,.5);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
+  outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2300f5ff'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;
+  transition:border-color .2s;min-width:0}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+.ctrl-select option{background:#0a0a1a}
+.btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--neon-magenta),#cc0099);color:#fff;font-weight:700;
+  border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
+  box-shadow:0 0 16px rgba(255,0,204,.4);transition:all .2s;white-space:nowrap}
+.btn-wareneingang:hover{box-shadow:0 0 28px rgba(255,0,204,.7);transform:translateY(-1px)}
+@media(max-width:640px){
+  .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
+  .ctrl-select{
+    font-size:.75rem;
+    padding:.4rem 1.5rem .4rem .5rem;
+    background-position:right .35rem center;
+    flex:0 0 auto;
+    width:auto;
+    min-width:0;
+  }
+  /* Mobile button: exactly wide enough for "＋ Wareneingang" on line 1 */
+  .btn-wareneingang{
+    margin-left:auto;
+    flex-shrink:0;
+    font-size:.48rem;
+    padding:.4rem .55rem;
+    line-height:1.4;
+    white-space:normal;
+    text-align:center;
+    width:115px;
+  }
+}
+
+/* ── TABLE WRAPPER ── */
+.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border)}
+
+/* ── SINGLE TABLE with sticky first column ── */
+.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%}
+.lager-table th{
+  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
+  font-size:.78rem;letter-spacing:.05em;color:var(--neon-cyan);text-transform:uppercase;
+  padding:.7rem .9rem;border-bottom:1px solid var(--glass-border);
+  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
+  background:#111827}
+.lager-table td{padding:.55rem .9rem;border-bottom:1px solid rgba(0,245,255,.05);vertical-align:middle;font-size:.9rem}
+.lager-table tr:last-child td{border-bottom:none}
+.lager-table tr:hover td{background:rgba(0,245,255,.03)}
+
+/* Sticky Artikel column */
+.col-artikel{
+  position:sticky;left:0;z-index:5;
+  background:#111827;
+  text-align:left!important;
+  border-right:1px solid rgba(0,245,255,.15)!important;
+  min-width:200px;
+}
+.lager-table th.col-artikel{z-index:20;background:#111827}
+
+/* Desktop: icons hidden */
+.th-icon{display:none}
+.th-text{display:inline}
+.th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
+
+@media(max-width:640px){
+  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
+  .lager-table th{font-size:.55rem;letter-spacing:.02em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
+  .lager-table td{padding:.38rem .2rem;font-size:.8rem}
+  .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
+  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
+  /* Einkäufe/Lieferungen: icon only on mobile */
+  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
+  /* Bestand/Anfangsbestand text */
+  .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
+  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.55rem}
+  .num-cell{font-size:.72rem}
+  .prod-name{font-size:.78rem;white-space:normal;word-break:break-word}
+  .prod-unit{font-size:.65rem}
+  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  .prod-info{gap:.28rem}
+  .main-content{padding:1rem .35rem}
+}
+
+/* category row */
+.cat-row td{background:rgba(0,0,0,.4);padding:.4rem .9rem;cursor:pointer;user-select:none}
+.cat-row:hover td{background:rgba(0,245,255,.05)}
+.cat-label{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.15em;
+  color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
+.cat-row.open .cat-arrow{transform:rotate(90deg)}
+.cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+
+/* product row */
+.prod-row{transition:background .15s}
+.prod-row.hidden{display:none}
+.prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(0,245,255,.15));
+  display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+  border:1px solid rgba(0,245,255,.2)}
+.prod-info{display:flex;align-items:center;gap:.6rem}
+.prod-name{font-size:.88rem;color:var(--text);line-height:1.2}
+.prod-unit{font-size:.72rem;color:var(--text-dim)}
+
+/* number cells */
+.num-cell{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:.82rem;color:var(--text)}
+.num-cell.editable{cursor:pointer;transition:color .2s}
+.num-cell.editable:hover{color:var(--neon-cyan)}
+.num-cell.editable .edit-val{border-bottom:1px dashed rgba(0,245,255,.4);padding-bottom:1px}
+
+/* Expand arrow — small, no border, magenta/green */
+.col-einkauf-header{position:relative}
+.expand-arrow{display:inline-flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;margin-left:.3rem;
+  font-size:.7rem;color:var(--neon-magenta);transition:color .2s;
+  vertical-align:middle;flex-shrink:0;padding:0;line-height:1}
+.expand-arrow:hover{color:#fff}
+.expand-arrow.expanded{color:var(--neon-green)}
+.col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
+
+/* detail date columns */
+.detail-col{display:none}
+.detail-col.visible{display:table-cell}
+.detail-th{background:rgba(0,10,30,.7);color:var(--neon-green);
+  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
+  font-size:.95rem;letter-spacing:.03em;white-space:nowrap;cursor:pointer}
+.detail-th:hover{color:var(--neon-cyan)}
+.detail-td{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:.78rem;color:var(--neon-green);background:rgba(0,255,136,.03)}
+
+/* inline edit input */
+.inline-input{background:rgba(0,0,0,.6);border:1px solid var(--neon-cyan);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;
+  width:70px;text-align:center;padding:.2rem .3rem;outline:none}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.92);z-index:500;
+  align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
+  padding:1.5rem;width:100%;max-width:600px;position:relative;box-shadow:0 0 60px rgba(0,245,255,.1);
+  margin:auto}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:.15em;
+  color:var(--neon-cyan);text-transform:uppercase;margin-bottom:1.2rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-dim);font-size:1.2rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--neon-magenta)}
+
+/* form elements in modal */
+.field-label{display:block;font-size:.75rem;letter-spacing:.1em;color:var(--text-dim);
+  text-transform:uppercase;margin-bottom:.35rem}
+.field{margin-bottom:1rem}
+input[type=date],input[type=text],input[type=number],.m-select{
+  width:100%;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.55rem .8rem;
+  outline:none;transition:border-color .2s}
+input:focus,.m-select:focus{border-color:var(--neon-cyan)}
+.m-select{appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2300f5ff'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .8rem center;padding-right:2rem}
+.m-select option{background:#0a0a1a}
+
+/* category in modal — all collapsed by default */
+.modal-cat-header{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;
+  background:rgba(0,0,0,.3);border-radius:6px;cursor:pointer;margin-bottom:.3rem;user-select:none}
+.modal-cat-header:hover{background:rgba(0,245,255,.06)}
+.modal-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em;
+  color:var(--neon-yellow);text-transform:uppercase;flex:1}
+.modal-cat-arrow{font-size:.65rem;transition:transform .2s;color:var(--text-dim)}
+.modal-cat.open .modal-cat-arrow{transform:rotate(90deg)}
+.modal-cat-items{display:none;padding:0 0 .5rem .5rem}
+.modal-cat.open .modal-cat-items{display:block}
+
+/* product checkbox row in modal */
+.modal-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s;overflow:hidden}
+.modal-prod-row:hover{background:rgba(0,245,255,.04)}
+.prod-checkbox{width:18px;height:18px;border:2px solid var(--glass-border);border-radius:4px;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;background:rgba(0,0,0,.3)}
+.prod-checkbox.checked{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
+.prod-checkbox.checked::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
+/* qty input — wider on desktop, no spinner arrows */
+.qty-input{width:75px;min-width:75px;max-width:75px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;
+  padding:.3rem .4rem;text-align:center;outline:none;display:none;transition:border-color .2s}
+.qty-input.show{display:block}
+.qty-input:focus{border-color:var(--neon-cyan)}
+/* hide number input arrows */
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty-input[type=number]{-moz-appearance:textfield}
+.betrag-input::-webkit-outer-spin-button,.betrag-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.betrag-input[type=number]{-moz-appearance:textfield}
+/* product name block — takes remaining space, name + unit stacked */
+.modal-prod-name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem;overflow:hidden}
+.modal-prod-name{font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-prod-unit{font-size:.7rem;color:var(--text-dim)}
+
+/* selected list */
+.selected-list{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
+.selected-list-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em;
+  color:var(--neon-magenta);text-transform:uppercase;margin-bottom:.6rem}
+.selected-item{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;padding:.35rem 0;
+  border-bottom:1px solid rgba(0,245,255,.05)}
+.selected-item-name{font-size:.88rem;color:var(--text)}
+.selected-item-unit{font-size:.72rem;color:var(--text-dim);margin-left:.2rem}
+.selected-item-qty{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;
+  color:var(--neon-green);font-weight:700;flex-shrink:0}
+.selected-cat-label{font-size:.62rem;color:var(--text-dim);letter-spacing:.08em;margin-top:.5rem;margin-bottom:.2rem}
+
+/* shops — shop select wider, betrag narrower */
+.shops-section{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
+.shops-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:.6rem}
+.shop-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;width:100%}
+.shop-select{flex:1;min-width:0;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:.5rem 1.8rem .5rem .7rem;
+  outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%2300f5ff'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .5rem center;transition:border-color .2s}
+.shop-select:focus{border-color:var(--neon-cyan)}
+.shop-select option{background:#0a0a1a}
+.betrag-input{width:80px;min-width:80px;max-width:80px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--neon-yellow);font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.85rem;padding:.5rem .4rem;text-align:right;outline:none}
+.betrag-input:focus{border-color:var(--neon-yellow)}
+.shop-remove{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;padding:.2rem;flex-shrink:0}
+.shop-remove:hover{color:#ff6699}
+.btn-add-shop{display:inline-flex;align-items:center;gap:.3rem;background:none;
+  border:1px dashed rgba(0,245,255,.3);border-radius:6px;color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;font-size:.85rem;padding:.4rem .8rem;cursor:pointer;transition:all .2s}
+.btn-add-shop:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+
+/* modal buttons */
+.modal-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+  border:none;border-radius:6px;cursor:pointer;padding:.65rem 1.2rem;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--neon-cyan),#0088cc);color:#000;font-weight:700;box-shadow:0 0 16px rgba(0,245,255,.3)}
+.btn-primary:hover{box-shadow:0 0 28px rgba(0,245,255,.6);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid rgba(255,255,255,.1);font-family:'Rajdhani',sans-serif;font-size:.85rem}
+.btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+.btn-danger{background:linear-gradient(135deg,#ff0066,#cc0044);color:#fff;font-weight:700}
+
+/* confirm view */
+.confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:baseline;
+  padding:.45rem 0;border-bottom:1px solid rgba(0,245,255,.06);gap:.5rem}
+.confirm-item .ci-name{color:var(--text);font-size:.88rem;flex:1}
+.confirm-item .ci-unit{font-size:.7rem;color:var(--text-dim);margin-left:.2rem}
+.confirm-item .ci-qty{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-green);font-weight:700;flex-shrink:0}
+.confirm-item .ci-cat{font-size:.65rem;color:var(--text-dim);display:block}
+.confirm-shops{margin-top:.8rem;padding:.7rem;background:rgba(0,0,0,.3);border-radius:6px;border:1px solid rgba(0,245,255,.1)}
+.confirm-shops-title{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:.5rem}
+.confirm-shop-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;padding:.25rem 0;border-bottom:1px solid rgba(0,245,255,.05)}
+.confirm-shop-row:last-child{border-bottom:none}
+.confirm-shop-row .cs-name{color:var(--text-dim)}
+.confirm-shop-row .cs-amt{color:var(--neon-yellow);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.82rem;font-weight:700}
+.confirm-date{font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--neon-magenta);margin-bottom:.8rem}
+
+/* success toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:rgba(0,255,136,.12);border:1px solid var(--neon-green);border-radius:8px;
+  padding:.8rem 1.4rem;font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.1em;
+  color:var(--neon-green);z-index:999;display:none;white-space:nowrap;
+  box-shadow:0 0 20px rgba(0,255,136,.3)}
+.toast.show{display:block;animation:fadeInUp .3s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* spinner */
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.85);z-index:999;align-items:center;justify-content:center}
 .spinner-overlay.show{display:flex}
 .spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── CONTROLS ── */
-.main-content{position:relative;z-index:1;padding-top:calc(var(--header-h) + 1rem);padding-bottom:2rem}
-.lager-controls{display:flex;flex-wrap:wrap;gap:.6rem;padding:.8rem 1.2rem;align-items:center}
-.ctrl-select{background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);
-  font-family:'Rajdhani',sans-serif;font-size:.92rem;padding:.45rem .8rem;border-radius:6px;cursor:pointer;outline:none}
-.ctrl-select:focus{border-color:var(--neon-cyan)}
-
-/* ── ACTION BUTTONS ── */
-.btn-gs{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
-  font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.1em;font-weight:700;
-  padding:.55rem 1.1rem;border-radius:6px;border:none;cursor:pointer;transition:box-shadow .2s,transform .2s;white-space:nowrap}
-.btn-geraet{background:linear-gradient(135deg,rgba(0,245,255,.15),rgba(0,245,255,.05));
-  border:1px solid var(--neon-cyan);color:var(--neon-cyan);box-shadow:0 0 12px rgba(0,245,255,.2)}
-.btn-geraet:hover{box-shadow:0 0 24px rgba(0,245,255,.5);transform:translateY(-1px)}
-.btn-theke{background:linear-gradient(135deg,rgba(255,0,204,.15),rgba(255,0,204,.05));
-  border:1px solid var(--neon-magenta);color:var(--neon-magenta);box-shadow:0 0 12px rgba(255,0,204,.2)}
-.btn-theke:hover{box-shadow:0 0 24px rgba(255,0,204,.5);transform:translateY(-1px)}
-
-/* ── TABLE ── */
-.table-wrap-single{position:relative;z-index:1;overflow-x:auto;padding:0 1.2rem 1.2rem;-webkit-overflow-scrolling:touch}
-.lager-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:auto;min-width:700px}
-.lager-table th,.lager-table td{padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
-.lager-table th{background:var(--bg3);font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--text-dim);position:sticky;top:var(--header-h);z-index:5;border-bottom:2px solid var(--glass-border)}
-.col-artikel{min-width:180px;text-align:left;position:sticky;left:0;z-index:6;background:var(--bg3)}
-.lager-table td.col-artikel{background:var(--bg2);z-index:4}
-.num-cell{text-align:center;font-family:'Rajdhani',sans-serif;font-size:.9rem;min-width:72px}
-.th-icon{display:block;font-size:1rem;margin-bottom:.15rem}
-.th-text{display:block;line-height:1.2}
-
-/* Category rows */
-.cat-row{cursor:pointer;background:rgba(0,0,0,.35)}
-.cat-row td{padding:.5rem .6rem}
-.cat-label{display:flex;align-items:center;gap:.5rem;font-family:'Orbitron',sans-serif;
-  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-yellow)}
-.cat-arrow{display:inline-block;transition:transform .2s;font-size:.55rem;color:var(--neon-yellow)}
-.cat-row.open .cat-arrow{transform:rotate(90deg)}
-.cat-items-count{font-size:.55rem;color:var(--text-dim)}
-.prod-row.hidden{display:none}
-
-/* Product rows */
-.prod-info{display:flex;align-items:center;gap:.5rem}
-.prod-icon{width:28px;height:28px;border-radius:50%;background:rgba(0,245,255,.08);
-  border:1px solid rgba(0,245,255,.2);display:flex;align-items:center;justify-content:center;
-  font-size:.85rem;flex-shrink:0}
-.prod-name{font-size:.88rem;color:var(--text);line-height:1.2}
-.prod-unit{font-size:.7rem;color:var(--text-dim)}
-.prod-row:hover td{background:rgba(0,245,255,.03)}
-
-/* Anfangsbestand clickable */
-.anfang-cell{cursor:pointer;transition:background .15s}
-.anfang-cell:hover{background:rgba(0,245,255,.08)!important}
-.anfang-cell .edit-val{display:flex;align-items:center;justify-content:center;gap:.3rem}
-
-/* Expand/detail cols */
-.detail-col{display:none}
-.detail-col.visible{display:table-cell}
-.col-einkauf-header .col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.4rem}
-.expand-arrow{cursor:pointer;font-size:.65rem;transition:transform .2s;user-select:none;padding:.1rem .25rem}
-.expand-arrow.expanded{transform:rotate(180deg)}
-.th-col-anfang,.th-col-liefer,.th-col-geraet,.th-col-theke,.th-col-endbestand{min-width:72px}
-
-/* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,10,.88);z-index:500;overflow-y:auto;padding:1rem}
-.modal-overlay.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
-.modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
-  padding:1.8rem;width:100%;max-width:520px;position:relative;max-height:90vh;overflow-y:auto}
-.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text-dim);
-  font-size:1.2rem;cursor:pointer;line-height:1;padding:.2rem}
-.modal-close:hover{color:var(--neon-magenta)}
-.modal-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--neon-cyan);margin-bottom:1.2rem}
-.field{margin-bottom:1rem}
-.field-label{display:block;font-size:.65rem;letter-spacing:.1em;color:var(--text-dim);
-  text-transform:uppercase;margin-bottom:.4rem}
-.field input[type=date],.field input[type=number]{width:100%;background:rgba(0,0,0,.35);
-  border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;
-  font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none}
-.field input:focus{border-color:var(--neon-cyan)}
-
-/* Modal product list */
-.modal-cat{margin-bottom:.3rem;border:1px solid rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
-.modal-cat-header{display:flex;align-items:center;justify-content:space-between;
-  padding:.5rem .8rem;background:rgba(0,0,0,.3);cursor:pointer;user-select:none}
-.modal-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--neon-yellow)}
-.modal-cat-arrow{font-size:.55rem;color:var(--text-dim);transition:transform .2s}
-.modal-cat.open .modal-cat-arrow{transform:rotate(90deg)}
-.modal-cat-items{display:none;padding:.3rem}
-.modal-cat.open .modal-cat-items{display:block}
-.modal-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .4rem;border-radius:4px;transition:background .15s}
-.modal-prod-row:hover{background:rgba(0,245,255,.04)}
-.prod-checkbox{width:16px;height:16px;border:1px solid var(--glass-border);border-radius:3px;
-  flex-shrink:0;cursor:pointer;transition:background .15s,border-color .15s;position:relative}
-.prod-checkbox.checked{background:var(--neon-cyan);border-color:var(--neon-cyan)}
-.prod-checkbox.checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;font-size:.65rem;color:#000;font-weight:700}
-.modal-prod-name-block{flex:1;min-width:0}
-.modal-prod-name{font-size:.88rem;color:var(--text)}
-.modal-prod-unit{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
-.qty-input{width:60px;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);color:var(--neon-cyan);
-  font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:.3rem .5rem;border-radius:4px;
-  text-align:center;outline:none;display:none}
-.qty-input.show{display:block}
-.qty-input:focus{border-color:var(--neon-cyan)}
-
-/* Selected list */
-.selected-list{background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.15);border-radius:6px;padding:.8rem;margin-top:.8rem}
-.selected-list-title{font-size:.62rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:.5rem}
-.selected-cat-label{font-size:.6rem;color:var(--text-dim);letter-spacing:.08em;margin:.4rem 0 .2rem;text-transform:uppercase}
-.selected-item{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.selected-item-name{font-size:.85rem;color:var(--text)}
-.selected-item-unit{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
-.selected-item-qty{font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--neon-cyan);font-weight:600}
-
-/* Confirm */
-.confirm-item{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.ci-name{font-size:.88rem}
-.ci-unit{font-size:.7rem;color:var(--text-dim)}
-.ci-qty{font-family:'Rajdhani',sans-serif;font-size:.95rem;color:var(--neon-cyan);font-weight:700}
-.confirm-date{font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem;letter-spacing:.06em}
-
-/* Modal buttons */
-.modal-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
-.btn{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.1em;padding:.55rem 1.2rem;
-  border-radius:6px;border:none;cursor:pointer;transition:all .2s;font-weight:700}
-.btn-primary{background:linear-gradient(135deg,var(--neon-cyan),#0080ff);color:#000}
-.btn-primary:hover{box-shadow:0 0 20px rgba(0,245,255,.5)}
-.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-dim)}
-.btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
-.btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000}
-.btn-save:hover{box-shadow:0 0 20px rgba(0,255,136,.5)}
-
-/* Anfangsbestand modal */
-.modal-small{max-width:360px}
-
-/* Inline entry rows in expandable date cols */
-.we-date-th{cursor:pointer}
-.we-date-th:hover{background:rgba(0,245,255,.08)!important}
-.edit-date-icon{font-size:.65rem;opacity:.6;margin-left:.2rem}
-
+/* Mobile: Anfangsbestand header split */
+.th-text-mob{display:none}
 @media(max-width:640px){
-  .lager-controls{flex-direction:column;align-items:stretch}
-  .btn-gs{width:100%}
+  .th-text-mob{display:inline}
+  .th-col-anfang .th-text{display:none}
+}
+/* Button text spans */
+.btn-line1{display:inline}
+.btn-line2{display:inline}
+.btn-wareneingang{white-space:nowrap} /* desktop: one line */
+@media(max-width:640px){
+  .btn-line1{display:block}
+  .btn-line2{display:block}
+  .btn-wareneingang{white-space:normal}
+}
+.text-dim-small{color:var(--text-dim);font-size:.72rem}
+</style>
+</head>
+<body>
+/* ── КНОПКИ + GERÄT / + THEKE ── */
+.btn-geraet{
+  margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(135deg,rgba(0,245,255,.2),rgba(0,245,255,.08));
+  color:var(--neon-cyan);font-weight:700;
+  border:1px solid var(--neon-cyan);border-radius:6px;padding:.5rem .9rem;cursor:pointer;
+  box-shadow:0 0 12px rgba(0,245,255,.25);transition:all .2s;white-space:nowrap}
+.btn-geraet:hover{box-shadow:0 0 24px rgba(0,245,255,.6);transform:translateY(-1px)}
+.btn-theke{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--neon-magenta),#cc0099);
+  color:#fff;font-weight:700;
+  border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
+  box-shadow:0 0 16px rgba(255,0,204,.4);transition:all .2s;white-space:nowrap}
+.btn-theke:hover{box-shadow:0 0 28px rgba(255,0,204,.7);transform:translateY(-1px)}
+.edit-date-icon{font-size:.7rem;opacity:.55;margin-left:.15rem;cursor:pointer}
+.we-date-th:hover,.geraet-date-th:hover,.theke-date-th:hover{opacity:.8}
+.btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700;box-shadow:0 0 16px rgba(0,255,136,.3)}
+.btn-save:hover{box-shadow:0 0 28px rgba(0,255,136,.6);transform:translateY(-1px)}
+@media(max-width:640px){
+  .btn-geraet,.btn-theke{font-size:.48rem;padding:.4rem .55rem}
 }
 </style>
 </head>
 <body>
 
-<div class="toast" id="toast"></div>
 <div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
 
 <!-- HEADER -->
 <header class="app-header">
@@ -327,8 +495,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <button class="btn-gs btn-geraet" style="margin-left:auto" onclick="openForm('geraet')">＋ Gerät</button>
-    <button class="btn-gs btn-theke" onclick="openForm('theke')">＋ Theke</button>
+    <button class="btn-geraet" onclick="openForm('geraet')">＋ Gerät</button>
+    <button class="btn-theke" onclick="openForm('theke')">＋ Theke</button>
   </div>
 
   <div class="table-wrap-single">
@@ -339,34 +507,36 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   </div>
 </div>
 
-<!-- ═══ MODAL: GERÄT / THEKE EINGABE ═══ -->
+<!-- ═══ MODAL: GERÄT / THEKE ═══ -->
 <div class="modal-overlay" id="modal-form">
   <div class="modal">
     <button class="modal-close" onclick="closeForm()">✕</button>
     <div class="modal-title" id="form-title">Gerät – Eintrag</div>
 
-    <div class="field">
-      <label class="field-label">Datum</label>
-      <input type="date" id="form-date">
-    </div>
-    <div class="field">
-      <label class="field-label">Waren auswählen</label>
-      <div id="form-product-list"></div>
-    </div>
-    <div id="form-selected-list" class="selected-list" style="display:none">
-      <div class="selected-list-title">Ausgewählte Waren</div>
-      <div id="form-selected-items"></div>
+    <!-- Schritt 1: Auswahl -->
+    <div id="form-step1">
+      <div class="field">
+        <label class="field-label">Datum</label>
+        <input type="date" id="form-date">
+      </div>
+      <div class="field">
+        <label class="field-label">Waren auswählen</label>
+        <div id="form-product-list"></div>
+      </div>
+      <div id="form-selected-list" class="selected-list" style="display:none">
+        <div class="selected-list-title">Ausgewählte Waren</div>
+        <div id="form-selected-items"></div>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter →</button>
+        <button class="btn btn-ghost" onclick="closeForm()">Abbrechen</button>
+      </div>
     </div>
 
-    <div class="modal-btn-row">
-      <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter →</button>
-      <button class="btn btn-ghost" onclick="closeForm()">Abbrechen</button>
-    </div>
-
-    <!-- Bestätigung -->
+    <!-- Schritt 2: Bestätigung -->
     <div id="form-step2" style="display:none">
       <div class="confirm-date" id="form-confirm-date"></div>
-      <div id="form-confirm-list"></div>
+      <div class="confirm-list" id="form-confirm-list"></div>
       <div class="modal-btn-row">
         <button class="btn btn-save" id="form-save-btn" onclick="saveFormEntry()">✓ Speichern</button>
         <button class="btn btn-ghost" onclick="backToFormEdit()">← Zurück</button>
@@ -377,8 +547,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
 
 <!-- ═══ MODAL: ANFANGSBESTAND ═══ -->
 <div class="modal-overlay" id="modal-ab">
-  <div class="modal modal-small">
-    <button class="modal-close" onclick="closeAbModal()">✕</button>
+  <div class="modal" style="max-width:360px">
+    <button class="modal-close" onclick="document.getElementById('modal-ab').classList.remove('show')">✕</button>
     <div class="modal-title">Anfangsbestand festlegen</div>
     <div class="field">
       <label class="field-label" id="ab-prod-label">Produkt</label>
@@ -386,7 +556,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
     </div>
     <div class="modal-btn-row">
       <button class="btn btn-primary" onclick="saveAnfangsbestand()">Speichern</button>
-      <button class="btn btn-ghost" onclick="closeAbModal()">Abbrechen</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-ab').classList.remove('show')">Abbrechen</button>
     </div>
   </div>
 </div>
@@ -409,136 +579,125 @@ const db = firebase.firestore();
 // ── PRODUKTE (nur Getränke & Snacks) ──
 const GS_PRODUCTS = [
   {cat:'Getränke', items:[
-    {id:'rb_blue',   name:'Red Bull',                    unit:'0,25 L', icon:'🔵'},
-    {id:'rb_zero',   name:'Red Bull Zero',               unit:'0,25 L', icon:'🩵'},
-    {id:'rb_white',  name:'Red Bull White',              unit:'0,25 L', icon:'⚪️'},
-    {id:'action_e',  name:'Action Energy / Power Up',    unit:'0,25 L', icon:'⚡'},
-    {id:'cola_red',  name:'Coca Cola',                   unit:'0,33 L', icon:'🔴'},
-    {id:'cola_zero', name:'Coca Cola Zero',              unit:'0,33 L', icon:'⚫'},
-    {id:'fanta',     name:'Fanta',                       unit:'0,33 L', icon:'🟠'},
-    {id:'sprite',    name:'Sprite',                      unit:'0,33 L', icon:'🟢'},
-    {id:'vio_stil',  name:'VIO Wasser Still',            unit:'0,50 L', icon:'💧'},
-    {id:'vio_med',   name:'VIO Wasser Med.',             unit:'0,50 L', icon:'🫧'},
-    {id:'gero_sp',   name:'Gerolsteiner Sprud.',         unit:'0,33 L', icon:'🌊'},
-    {id:'gero_med',  name:'Gerolsteiner Med.',           unit:'0,33 L', icon:'💦'},
-    {id:'durstl',    name:'Durstlöscher',                unit:'',       icon:'🥤'},
+    {id:'rb_blue',   name:'Red Bull',                 unit:'0,25 L', icon:'🔵'},
+    {id:'rb_zero',   name:'Red Bull Zero',            unit:'0,25 L', icon:'🩵'},
+    {id:'rb_white',  name:'Red Bull White',           unit:'0,25 L', icon:'⚪️'},
+    {id:'action_e',  name:'Action Energy / Power Up', unit:'0,25 L', icon:'⚡'},
+    {id:'cola_red',  name:'Coca Cola',                unit:'0,33 L', icon:'🔴'},
+    {id:'cola_zero', name:'Coca Cola Zero',           unit:'0,33 L', icon:'⚫'},
+    {id:'fanta',     name:'Fanta',                    unit:'0,33 L', icon:'🟠'},
+    {id:'sprite',    name:'Sprite',                   unit:'0,33 L', icon:'🟢'},
+    {id:'vio_stil',  name:'VIO Wasser Still',         unit:'0,50 L', icon:'💧'},
+    {id:'vio_med',   name:'VIO Wasser Med.',          unit:'0,50 L', icon:'🫧'},
+    {id:'gero_sp',   name:'Gerolsteiner Sprud.',      unit:'0,33 L', icon:'🌊'},
+    {id:'gero_med',  name:'Gerolsteiner Med.',        unit:'0,33 L', icon:'💦'},
+    {id:'durstl',    name:'Durstlöscher',             unit:'',       icon:'🥤'},
   ]},
   {cat:'Snacks', items:[
-    {id:'erdnuesse', name:'Erdnüsse',      unit:'20 St.', icon:'🥜'},
-    {id:'stuf',      name:'Studentenfutter',unit:'20 St.',icon:'🍿'},
-    {id:'snickers',  name:'Snickers',      unit:'24 St.', icon:'🍫'},
-    {id:'mars',      name:'Mars',          unit:'24 St.', icon:'🍬'},
-    {id:'twix',      name:'Twix',          unit:'30 St.', icon:'🍭'},
-    {id:'mnm',       name:'M&M',           unit:'24 St.', icon:'🟡'},
-    {id:'pringles',  name:'Pringles',      unit:'24 St.', icon:'🥫'},
-    {id:'kitkat',    name:'KitKat White',  unit:'24 St.', icon:'🤍'},
-    {id:'bifi_orig', name:'BIFI Original', unit:'40 St.', icon:'🌭'},
-    {id:'bifi_roll', name:'BIFI Roll',     unit:'24 St.', icon:'🥖'},
+    {id:'erdnuesse', name:'Erdnüsse',       unit:'20 St.', icon:'🥜'},
+    {id:'stuf',      name:'Studentenfutter',unit:'20 St.', icon:'🍿'},
+    {id:'snickers',  name:'Snickers',       unit:'24 St.', icon:'🍫'},
+    {id:'mars',      name:'Mars',           unit:'24 St.', icon:'🍬'},
+    {id:'twix',      name:'Twix',           unit:'30 St.', icon:'🍭'},
+    {id:'mnm',       name:'M&M',            unit:'24 St.', icon:'🟡'},
+    {id:'pringles',  name:'Pringles',       unit:'24 St.', icon:'🥫'},
+    {id:'kitkat',    name:'KitKat White',   unit:'24 St.', icon:'🤍'},
+    {id:'bifi_orig', name:'BIFI Original',  unit:'40 St.', icon:'🌭'},
+    {id:'bifi_roll', name:'BIFI Roll',      unit:'24 St.', icon:'🥖'},
   ]},
 ];
 
-// ── NEON FARBEN ──
 const NEON = {
-  nettetal: {neon:'#00aaff', bg:'rgba(0,170,255,.10)',  bgD:'rgba(0,170,255,.05)',  border:'rgba(0,170,255,.35)'},
-  brüggen:  {neon:'#ff0055', bg:'rgba(255,0,85,.10)',   bgD:'rgba(255,0,85,.05)',   border:'rgba(255,0,85,.35)'},
-  viersen:  {neon:'#ff8800', bg:'rgba(255,136,0,.10)',  bgD:'rgba(255,136,0,.05)',  border:'rgba(255,136,0,.35)'},
-  köln:     {neon:'#cc00ff', bg:'rgba(204,0,255,.10)',  bgD:'rgba(204,0,255,.05)',  border:'rgba(204,0,255,.35)'},
+  nettetal:{neon:'#00aaff', bg:'rgba(0,170,255,.10)',  bgD:'rgba(0,170,255,.05)',  border:'rgba(0,170,255,.35)'},
+  brüggen: {neon:'#ff0055', bg:'rgba(255,0,85,.10)',   bgD:'rgba(255,0,85,.05)',   border:'rgba(255,0,85,.35)'},
+  viersen: {neon:'#ff8800', bg:'rgba(255,136,0,.10)',  bgD:'rgba(255,136,0,.05)',  border:'rgba(255,136,0,.35)'},
+  köln:    {neon:'#cc00ff', bg:'rgba(204,0,255,.10)',  bgD:'rgba(204,0,255,.05)',  border:'rgba(204,0,255,.35)'},
 };
 const LAGER_NAMES = {nettetal:'Nettetal', brüggen:'Brüggen', viersen:'Viersen', köln:'Köln'};
 
 // ── STATE ──
 let currentLager    = 'brüggen';
 let currentZeitraum = '2026-06';
-let lieferungen     = []; // [{id, datum, items:{prodId:qty}}]
-let geraetEntries   = []; // [{id, datum, items:{prodId:qty}}]
-let thekeEntries    = []; // [{id, datum, items:{prodId:qty}}]
+let lieferungen     = [];
+let geraetEntries   = [];
+let thekeEntries    = [];
 let anfangsbestand  = {};
 let endbestandData  = {};
-
-let liefer_expanded  = false;
-let geraet_expanded  = false;
-let theke_expanded   = false;
-
-let formType        = 'geraet'; // 'geraet' | 'theke'
+let liefer_expanded = false;
+let geraet_expanded = false;
+let theke_expanded  = false;
+let formType        = 'geraet';
 let formItems       = {};
-let formEditId      = null; // null = new entry, else entry.id
-
+let formEditId      = null;
 let currentAbProdId = null;
 
 // ── UTILS ──
-function showSpinner(){ document.getElementById('spinner').classList.add('show') }
-function hideSpinner(){ document.getElementById('spinner').classList.remove('show') }
-function showToast(msg, color){
+function showSpinner(){ document.getElementById('spinner').classList.add('show'); }
+function hideSpinner(){ document.getElementById('spinner').classList.remove('show'); }
+function showToast(msg){
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  if(color) t.style.color = color; else t.style.color = '';
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 3500);
 }
-function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show'); document.getElementById('burger-btn').classList.toggle('open'); }
-function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); document.getElementById('burger-btn').classList.remove('open'); }
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+  document.getElementById('burger-btn').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.getElementById('burger-btn').classList.remove('open');
+}
 function toggleSubMenu(btn){ btn.closest('.nav-item').classList.toggle('open'); }
 function toggleUserDropdown(){
   document.getElementById('user-dropdown').classList.toggle('show');
   document.addEventListener('click', function h(e){
-    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){ document.getElementById('user-dropdown').classList.remove('show'); document.removeEventListener('click',h); }
+    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){
+      document.getElementById('user-dropdown').classList.remove('show');
+      document.removeEventListener('click',h);
+    }
   });
 }
 
-// ── LOAD DATA ──
+// ── DATEN LADEN ──
 async function loadData(){
   showSpinner();
   currentLager    = document.getElementById('sel-lager').value;
   currentZeitraum = document.getElementById('sel-zeitraum').value;
-
-  lieferungen   = [];
-  geraetEntries = [];
-  thekeEntries  = [];
-  anfangsbestand = {};
-  endbestandData = {};
+  lieferungen=[]; geraetEntries=[]; thekeEntries=[];
+  anfangsbestand={}; endbestandData={};
 
   try {
-    // Lieferungen (aus wareneingang collection, wie in lager.html)
-    const qL = db.collection('wareneingang')
-      .where('lager','==',currentLager)
-      .where('monat','==',currentZeitraum);
-    const snapL = await qL.get();
-    snapL.forEach(d=>lieferungen.push({id:d.id,...d.data()}));
+    const snap = await db.collection('wareneingang')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snap.forEach(d=>lieferungen.push({id:d.id,...d.data()}));
   } catch(e){}
 
   try {
-    // Gerät-Einträge
-    const qG = db.collection('gs_geraet')
-      .where('lager','==',currentLager)
-      .where('monat','==',currentZeitraum);
-    const snapG = await qG.get();
-    snapG.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));
+    const snap = await db.collection('gs_geraet')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snap.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));
     geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
   } catch(e){}
 
   try {
-    // Theke-Einträge
-    const qT = db.collection('gs_theke')
-      .where('lager','==',currentLager)
-      .where('monat','==',currentZeitraum);
-    const snapT = await qT.get();
-    snapT.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));
+    const snap = await db.collection('gs_theke')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snap.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));
     thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
   } catch(e){}
 
   try {
-    // Anfangsbestand
-    const abDoc = await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
-    if(abDoc.exists) anfangsbestand = abDoc.data();
+    const doc = await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
+    if(doc.exists) anfangsbestand = doc.data();
   } catch(e){}
 
   try {
-    // Endbestand = letzter Inventur-Eintrag des Zeitraums
-    const invSnap = await db.collection('inventur')
-      .where('lager','==',currentLager)
-      .where('monat','==',currentZeitraum).get();
-    let lastDate = null; let lastItems = {};
-    invSnap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{};} });
+    const snap = await db.collection('inventur')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    let lastDate=null, lastItems={};
+    snap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{};} });
     endbestandData = lastItems;
   } catch(e){}
 
@@ -546,12 +705,10 @@ async function loadData(){
   renderTable();
 }
 
-// ── RENDER TABLE ──
+// ── TABELLE RENDERN ──
 function renderTable(){
   const cc = NEON[currentLager] || {neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
   const neutralTh = 'color:var(--text-dim)';
-
-  // Alle einzigartigen Daten
   const liefer_dates = [...new Set(lieferungen.map(w=>w.datum))].sort();
   const geraet_dates = [...new Set(geraetEntries.map(e=>e.datum))].sort();
   const theke_dates  = [...new Set(thekeEntries.map(e=>e.datum))].sort();
@@ -565,74 +722,68 @@ function renderTable(){
   thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
     <div class="col-einkauf-wrap">
       <span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
-      <span class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()" style="color:${cc.neon}">▶</span>
+      <button class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()">▶</button>
     </div></th>`;
   liefer_dates.forEach(d=>{
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-liefer-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label} <span class="edit-date-icon">✏️</span></th>`;
+    thHTML += `<th class="num-cell detail-col detail-liefer-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}">${label} <span class="edit-date-icon">✏️</span></th>`;
   });
 
   // Gerät – neutral
-  thHTML += `<th class="num-cell col-einkauf-header th-col-geraet" style="${neutralTh}">
+  thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
     <div class="col-einkauf-wrap">
       <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
-      <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
+      <button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()">▶</button>
     </div></th>`;
   geraet_dates.forEach(d=>{
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="color:var(--text-dim);font-size:.68rem" data-date="${d}" data-type="geraet">${label} <span class="edit-date-icon">✏️</span></th>`;
+    thHTML += `<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="color:var(--text-dim);font-size:.72rem" data-date="${d}" data-type="geraet">${label} <span class="edit-date-icon">✏️</span></th>`;
   });
 
   // Theke – neutral
-  thHTML += `<th class="num-cell col-einkauf-header th-col-theke" style="${neutralTh}">
+  thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
     <div class="col-einkauf-wrap">
       <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
-      <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
+      <button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</button>
     </div></th>`;
   theke_dates.forEach(d=>{
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.68rem" data-date="${d}" data-type="theke">${label} <span class="edit-date-icon">✏️</span></th>`;
+    thHTML += `<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.72rem" data-date="${d}" data-type="theke">${label} <span class="edit-date-icon">✏️</span></th>`;
   });
 
   // Endbestand
-  thHTML += '<th class="num-cell th-col-endbestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th>';
+  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th>';
   thHTML += '</tr>';
   document.getElementById('gs-thead').innerHTML = thHTML;
 
   // ── BODY ──
   let tbHTML = '';
   GS_PRODUCTS.forEach((catObj, ci)=>{
-    const isFirst = ci === 0;
-    const catOpen = isFirst ? 'open' : '';
-    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+    const isFirst = ci===0;
+    tbHTML += `<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
       <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
 
     catObj.items.forEach(prod=>{
-      const prodHidden = isFirst ? '' : 'hidden';
       const ab = anfangsbestand[prod.id] ?? '';
-      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-
-      // Lieferungen gesamt
+      const abDisplay = ab!=='' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const totalLiefer = lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
-      // Gerät gesamt
       const totalGeraet = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-      // Theke gesamt
       const totalTheke  = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-      // Endbestand
-      const eb = endbestandData[prod.id] !== undefined ? endbestandData[prod.id] : '—';
-      const ebStyle = eb !== '—' ? 'color:var(--neon-green)' : '';
+      const eb = endbestandData[prod.id]!==undefined ? endbestandData[prod.id] : '—';
+      const ebStyle = eb!=='—' ? 'color:var(--neon-green)' : '';
+      const prodHidden = isFirst ? '' : 'hidden';
 
-      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
+      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
       // Anfangsbestand – klickbar
-      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
+      tbHTML += `<td class="num-cell num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
 
-      // Lieferungen gesamt – Lager-Farbe
+      // Lieferungen gesamt
       tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${totalLiefer||'—'}</td>`;
       liefer_dates.forEach(d=>{
         const we = lieferungen.find(w=>w.datum===d);
@@ -664,40 +815,44 @@ function renderTable(){
 
   document.getElementById('gs-tbody').innerHTML = tbHTML;
 
-  // Zustand der aufgeklappten Spalten wiederherstellen
-  if(liefer_expanded)  applyDetailCols('liefer', true);
-  if(geraet_expanded)  applyDetailCols('geraet', true);
-  if(theke_expanded)   applyDetailCols('theke',  true);
+  // Zustand wiederherstellen
+  if(liefer_expanded) applyDetailCols('liefer', true);
+  if(geraet_expanded) applyDetailCols('geraet', true);
+  if(theke_expanded)  applyDetailCols('theke',  true);
 
-  // Klick-Handler für Datumsköpfe (Lieferungen bearbeiten)
+  // Klick-Handler Lieferungen-Datum
   document.querySelectorAll('.we-date-th').forEach(th=>{
+    th.style.cursor='pointer';
     th.addEventListener('click', ()=>openEditLieferung(th.dataset.date));
   });
-  // Klick-Handler für Gerät/Theke-Datumsköpfe (Einträge bearbeiten)
+  // Klick-Handler Gerät-Datum
   document.querySelectorAll('.geraet-date-th').forEach(th=>{
+    th.style.cursor='pointer';
     th.addEventListener('click', ()=>openEditEntry('geraet', th.dataset.date));
   });
+  // Klick-Handler Theke-Datum
   document.querySelectorAll('.theke-date-th').forEach(th=>{
+    th.style.cursor='pointer';
     th.addEventListener('click', ()=>openEditEntry('theke', th.dataset.date));
   });
 }
 
-// ── CATEGORY TOGGLE ──
+// ── KATEGORIE TOGGLE ──
 window.toggleCategory = function(row){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
   document.querySelectorAll(`#gs-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
 };
 
-// ── EXPAND COLS ──
+// ── SPALTEN AUFKLAPPEN ──
 function applyDetailCols(type, show){
-  document.querySelectorAll(`.detail-${type}-th, .detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));
+  document.querySelectorAll(`.detail-${type}-th,.detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));
   const btn = document.getElementById(`expand-${type}-btn`);
-  if(btn){ btn.textContent = show ? '◀' : '▶'; btn.classList.toggle('expanded', show); }
+  if(btn){ btn.textContent=show?'◀':'▶'; btn.classList.toggle('expanded',show); }
 }
-window.toggleLieferCols  = function(){ liefer_expanded = !liefer_expanded; applyDetailCols('liefer', liefer_expanded); };
-window.toggleGeraetCols  = function(){ geraet_expanded = !geraet_expanded; applyDetailCols('geraet', geraet_expanded); };
-window.toggleThekeCols   = function(){ theke_expanded  = !theke_expanded;  applyDetailCols('theke',  theke_expanded);  };
+window.toggleLieferCols = function(){ liefer_expanded=!liefer_expanded; applyDetailCols('liefer',liefer_expanded); };
+window.toggleGeraetCols = function(){ geraet_expanded=!geraet_expanded; applyDetailCols('geraet',geraet_expanded); };
+window.toggleThekeCols  = function(){ theke_expanded=!theke_expanded;   applyDetailCols('theke', theke_expanded);  };
 
 // ── ANFANGSBESTAND ──
 window.openAnfangsbestandModal = function(prodId, prodName){
@@ -707,42 +862,38 @@ window.openAnfangsbestandModal = function(prodId, prodName){
   document.getElementById('modal-ab').classList.add('show');
   setTimeout(()=>document.getElementById('ab-value').focus(), 100);
 };
-window.closeAbModal = function(){ document.getElementById('modal-ab').classList.remove('show'); };
 window.saveAnfangsbestand = async function(){
   const val = parseInt(document.getElementById('ab-value').value);
   if(isNaN(val)||val<0) return;
   showSpinner();
   anfangsbestand[currentAbProdId] = val;
-  try {
-    await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true});
-  } catch(e){}
+  try { await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true}); } catch(e){}
   hideSpinner();
-  closeAbModal();
+  document.getElementById('modal-ab').classList.remove('show');
   renderTable();
   showToast('Anfangsbestand gespeichert');
 };
 
-// ── FORMULAR: GERÄT / THEKE ──
+// ── FORMULAR GERÄT / THEKE ÖFFNEN ──
 window.openForm = function(type, prefillItems, editId, prefillDate){
-  formType     = type;
-  formItems    = prefillItems ? {...prefillItems} : {};
-  formEditId   = editId || null;
+  formType   = type;
+  formItems  = prefillItems ? Object.assign({},prefillItems) : {};
+  formEditId = editId || null;
 
   const cc = NEON[currentLager] || {};
-  const isGeraet = type === 'geraet';
-  const titleColor = isGeraet ? 'var(--neon-cyan)' : 'var(--neon-magenta)';
-  const lagerName  = LAGER_NAMES[currentLager] || currentLager;
+  const isGeraet = type==='geraet';
+  const lagerName = LAGER_NAMES[currentLager]||currentLager;
+  const lagerColor = cc.neon || 'var(--text)';
   document.getElementById('form-title').innerHTML =
-    `${isGeraet ? '⚙️ Gerät' : '🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .5rem;border-radius:8px;background:${cc.bg||'rgba(0,0,0,.3)'};border:1px solid ${cc.border||'rgba(255,255,255,.1)'};color:${cc.neon||'var(--text)'}">${lagerName}</span>`;
+    `${isGeraet?'⚙️ Gerät':'🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .55rem;border-radius:8px;background:${cc.bg||'rgba(0,0,0,.3)'};border:1px solid ${cc.border||'rgba(255,255,255,.1)'};color:${lagerColor}">${lagerName}</span>`;
 
-  // Datum
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('form-date').value = prefillDate || today;
+  // Datum setzen
+  document.getElementById('form-date').value = prefillDate || new Date().toISOString().slice(0,10);
 
-  // Produktliste aufbauen – nur Getränke & Snacks, erste Kategorie offen
+  // Produktliste aufbauen – identisches Format wie Wareneingang in lager.html
   let html = '';
   GS_PRODUCTS.forEach((catObj,ci)=>{
-    const isFirst = ci === 0;
+    const isFirst = ci===0;
     html += `<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}">
       <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
         <span class="modal-cat-label">${catObj.cat}</span>
@@ -750,52 +901,54 @@ window.openForm = function(type, prefillItems, editId, prefillDate){
       </div>
       <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
-      const hasPrefill = formItems[prod.id] !== undefined;
+      const hasPre = formItems[prod.id]!==undefined;
       html += `<div class="modal-prod-row" id="frow-${prod.id}">
-        <div class="prod-checkbox${hasPrefill?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div>
+        <div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div>
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="modal-prod-name-block">
           <span class="modal-prod-name">${prod.name}</span>
-          ${prod.unit ? `<span class="modal-prod-unit">${prod.unit}</span>` : ''}
+          ${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}
         </div>
-        <input class="qty-input${hasPrefill?' show':''}" id="fqty-${prod.id}" type="number" min="0" placeholder="St."
-          value="${hasPrefill ? formItems[prod.id] : ''}"
-          onchange="updateFormQty('${prod.id}',this.value)">
+        <input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" placeholder="St."
+          value="${hasPre?formItems[prod.id]:''}"
+          oninput="updateFormQty('${prod.id}',this.value)">
       </div>`;
     });
     html += `</div></div>`;
   });
   document.getElementById('form-product-list').innerHTML = html;
 
-  document.getElementById('form-step2').style.display   = 'none';
-  document.getElementById('form-save-btn').textContent  = editId ? '✓ Änderungen speichern' : '✓ Speichern';
+  // Schritt 1 zeigen, Schritt 2 verstecken
+  document.getElementById('form-step1').style.display = '';
+  document.getElementById('form-step2').style.display = 'none';
+  document.getElementById('form-selected-list').style.display = 'none';
+  document.getElementById('form-selected-items').innerHTML = '';
+  document.getElementById('form-save-btn').textContent = editId ? '✓ Änderungen speichern' : '✓ Speichern';
 
-  // Vorauswahl-Preview aktualisieren
   updateFormPreview();
-
   document.getElementById('modal-form').classList.add('show');
 };
 window.closeForm = function(){ document.getElementById('modal-form').classList.remove('show'); };
 
 window.toggleFormProd = function(prodId){
   const cb  = document.getElementById('fcb-'+prodId);
-  const qty = document.getElementById('fqty-'+prodId);
+  const inp = document.getElementById('fqty-'+prodId);
   const isChecked = cb.classList.toggle('checked');
-  qty.classList.toggle('show', isChecked);
-  if(isChecked){ qty.focus(); formItems[prodId]=0; }
+  inp.classList.toggle('show', isChecked);
+  if(isChecked){ inp.focus(); if(!formItems[prodId]) formItems[prodId]=0; }
   else { delete formItems[prodId]; }
   updateFormPreview();
 };
 window.updateFormQty = function(prodId, val){
-  formItems[prodId] = parseInt(val)||0;
+  if(val!=='') formItems[prodId]=parseInt(val)||0;
   updateFormPreview();
 };
 function updateFormPreview(){
   const ids = Object.keys(formItems);
   const sel = document.getElementById('form-selected-list');
   if(!ids.length){ sel.style.display='none'; return; }
-  sel.style.display = 'block';
-  let html = ''; let lastCat = '';
+  sel.style.display='block';
+  let html='', lastCat='';
   GS_PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
       if(ids.includes(prod.id)){
@@ -816,14 +969,14 @@ window.buildFormConfirm = function(){
   const date = document.getElementById('form-date').value;
   if(!date){ showToast('Bitte Datum auswählen.'); return; }
 
-  // Mengen aus DOM neu lesen
-  ids.forEach(id=>{ const inp=document.getElementById('fqty-'+id); if(inp) formItems[id]=parseInt(inp.value)||0; });
+  // Aktuelle Werte aus DOM lesen
+  ids.forEach(id=>{ const inp=document.getElementById('fqty-'+id); if(inp&&inp.value!=='') formItems[id]=parseInt(inp.value)||0; });
 
   const d = new Date(date);
   document.getElementById('form-confirm-date').textContent =
-    'Datum: ' + d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
 
-  let html = ''; let lastCat = '';
+  let html='', lastCat='';
   GS_PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
       if(ids.includes(prod.id)){
@@ -837,62 +990,71 @@ window.buildFormConfirm = function(){
   });
   document.getElementById('form-confirm-list').innerHTML = html;
 
-  // Schrittweise anzeigen
-  document.getElementById('form-product-list').closest('.field').style.display = 'none';
-  document.getElementById('form-selected-list').style.display = 'none';
-  document.querySelector('.modal-btn-row').style.display = 'none';
-  document.getElementById('form-step2').style.display = 'block';
+  document.getElementById('form-step1').style.display = 'none';
+  document.getElementById('form-step2').style.display = '';
 };
 
 window.backToFormEdit = function(){
-  document.getElementById('form-product-list').closest('.field').style.display = '';
-  document.getElementById('form-selected-list').style.display = Object.keys(formItems).length ? 'block' : 'none';
-  document.querySelector('.modal-btn-row').style.display = '';
+  document.getElementById('form-step1').style.display = '';
   document.getElementById('form-step2').style.display = 'none';
 };
 
 window.saveFormEntry = async function(){
   const date  = document.getElementById('form-date').value;
   const monat = date.slice(0,7);
-  const collection = formType === 'geraet' ? 'gs_geraet' : 'gs_theke';
-  const entry = { lager:currentLager, datum:date, monat, items:formItems, updatedAt:new Date().toISOString() };
+  const col   = formType==='geraet' ? 'gs_geraet' : 'gs_theke';
+  const entry = {lager:currentLager, datum:date, monat, items:{...formItems}, updatedAt:new Date().toISOString()};
 
   showSpinner();
   try {
     if(formEditId){
-      await db.collection(collection).doc(formEditId).update(entry);
+      await db.collection(col).doc(formEditId).update(entry);
       showToast('Eintrag aktualisiert ✓');
     } else {
       entry.createdAt = new Date().toISOString();
-      await db.collection(collection).add(entry);
+      await db.collection(col).add(entry);
       showToast('Eintrag gespeichert ✓');
     }
     closeForm();
     await loadData();
   } catch(e){
     hideSpinner();
-    showToast('Fehler beim Speichern: '+e.message, 'var(--neon-magenta)');
+    showToast('Fehler: '+e.message);
   }
 };
 
-// ── LIEFERUNG BEARBEITEN (öffnet Wareneingang-Form) ──
+// ── LIEFERUNG BEARBEITEN ──
 window.openEditLieferung = function(date){
+  // Lieferungen kommen aus wareneingang collection – verweise auf lager.html
   const we = lieferungen.find(w=>w.datum===date);
   if(!we) return;
-  // Öffne wareneingang.html oder leite zu lager.html weiter mit Datum-Parameter
-  window.open('lager.html?edit='+we.id, '_blank');
+  window.open('lager.html', '_blank');
 };
 
-// ── GERÄT/THEKE EINTRAG BEARBEITEN ──
+// ── GERÄT / THEKE EINTRAG BEARBEITEN ──
 window.openEditEntry = function(type, date){
-  const entries = type === 'geraet' ? geraetEntries : thekeEntries;
-  const entry = entries.find(e=>e.datum===date);
+  const list = type==='geraet' ? geraetEntries : thekeEntries;
+  const entry = list.find(e=>e.datum===date);
   if(!entry) return;
   openForm(type, entry.items, entry.id, entry.datum);
 };
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', ()=>{
+  window.toggleSidebar    = toggleSidebar;
+  window.closeSidebar     = closeSidebar;
+  window.toggleUserDropdown = toggleUserDropdown;
+  window.toggleSubMenu    = toggleSubMenu;
+  window.toggleCategory   = toggleCategory;
+  window.toggleLieferCols = toggleLieferCols;
+  window.toggleGeraetCols = toggleGeraetCols;
+  window.toggleThekeCols  = toggleThekeCols;
+  window.openForm         = openForm;
+  window.closeForm        = closeForm;
+  window.openEditEntry    = openEditEntry;
+  window.saveFormEntry    = saveFormEntry;
+  window.saveAnfangsbestand = saveAnfangsbestand;
+
   // Anfangsbestand-Klick
   document.getElementById('gs-tbody').addEventListener('click', e=>{
     const cell = e.target.closest('.anfang-cell');
