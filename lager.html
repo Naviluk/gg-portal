@@ -698,50 +698,88 @@ function renderTable(){
 
 function renderTableActual(){
   const isZentral = currentLager === 'zentrallager';
+  const lager = currentLager;
 
   const thead = document.getElementById('lager-thead');
   const tbody = document.getElementById('lager-tbody');
 
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
-  // ── HEADER ── single table, sticky col-artikel
+  // Colors for current lager
+  const lc = {
+    nettetal: {bg:'rgba(0,100,255,.10)', bgD:'rgba(0,100,255,.06)', thC:'#001e5c', border:'rgba(0,100,255,.3)'},
+    brüggen:  {bg:'rgba(200,0,0,.10)',   bgD:'rgba(200,0,0,.06)',   thC:'#5c0000', border:'rgba(200,0,0,.3)'},
+    viersen:  {bg:'rgba(200,100,0,.10)', bgD:'rgba(200,100,0,.06)', thC:'#3d2000', border:'rgba(200,100,0,.3)'},
+    köln:     {bg:'rgba(120,0,200,.10)', bgD:'rgba(120,0,200,.06)', thC:'#200040', border:'rgba(120,0,200,.3)'},
+  };
+  const cc = lc[lager] || {bg:'rgba(100,100,100,.1)', bgD:'rgba(100,100,100,.06)', thC:'#222', border:'rgba(150,150,150,.3)'};
+  const zGreen = {bg:'rgba(0,180,80,.10)', bgD:'rgba(0,180,80,.06)', thC:'#0a2e14', border:'rgba(0,180,80,.30)'};
+
+  // ── HEADER ──
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
+
+  // Anfangsbestand FIRST for all lagers
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+
   if(isZentral){
-    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
-    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf">
+    // Einkäufe with green highlight
+    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf" style="background:${zGreen.bg};color:${zGreen.thC};border-bottom:2px solid ${zGreen.border}">
       <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🛒</span><span class="th-text">Alle Einkäufe</span></span>
+        <span><span class="th-icon">🛒</span><span class="th-text" style="color:${zGreen.thC}">Einkäufe</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.thC}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
-    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></th>';
+    // Lieferungen
+    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
   } else {
-    thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
-    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer">
+    // Lieferungen with lager color
+    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};color:${cc.thC};border-bottom:2px solid ${cc.border}">
       <div class="col-einkauf-wrap">
-        <span><span class="th-icon">🚚</span><span class="th-text">Alle Lieferungen</span></span>
+        <span><span class="th-icon">🚚</span><span class="th-text" style="color:${cc.thC}">Lieferungen</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.thC}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
   }
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangsbestand</span><span class="th-text-mob">Anfangs-<br>bestand</span></th>';
+
+  // Gerät column (expandable, placeholder)
+  thHTML += `<th class="num-cell col-einkauf-header th-col-geraet" style="background:rgba(255,145,0,.08);color:#2e1500;border-bottom:2px solid rgba(255,145,0,.25)">
+    <div class="col-einkauf-wrap">
+      <span><span class="th-icon">⚙️</span><span class="th-text" style="color:#2e1500">Gerät</span></span>
+      <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" title="Details aufklappen">▶</span>
+    </div></th>`;
+  dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-col detail-geraet-th" style="background:rgba(255,145,0,.05);color:#2e1500;font-size:.68rem">${label}</th>`;
+  });
+
+  // Theke column (expandable, placeholder)
+  thHTML += `<th class="num-cell col-einkauf-header th-col-theke" style="background:rgba(220,50,50,.08);color:#3d0000;border-bottom:2px solid rgba(220,50,50,.25)">
+    <div class="col-einkauf-wrap">
+      <span><span class="th-icon">🔴</span><span class="th-text" style="color:#3d0000">Theke</span></span>
+      <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" title="Details aufklappen">▶</span>
+    </div></th>`;
+  dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-col detail-theke-th" style="background:rgba(220,50,50,.05);color:#3d0000;font-size:.68rem">${label}</th>`;
+  });
+
+  // Bestand LAST
+  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
-  // ── BODY ── single table
+  // ── BODY ──
   let tbHTML = '';
-
   PRODUCTS.forEach((catObj, ci)=>{
     const isFirst = ci === 0;
     const catOpen = isFirst ? 'open' : '';
-
     tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
       <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
@@ -757,26 +795,51 @@ function renderTableActual(){
         <div class="prod-icon">${prod.icon||'📦'}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
-      const bestandVal = bestandData[prod.id] !== undefined ? bestandData[prod.id] : '—';
-      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-green)' : '';
-      tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
+
+      // Anfangsbestand FIRST
+      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
+      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
+
+      // Einkäufe / Lieferungen gesamt
       const einkVal = totalEink || '—';
-      tbHTML += `<td class="num-cell">${einkVal}</td>`;
+      if(isZentral){
+        tbHTML += `<td class="num-cell" style="background:${zGreen.bg};color:${zGreen.thC};font-weight:700">${einkVal}</td>`;
+      } else {
+        tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.thC};font-weight:700">${einkVal}</td>`;
+      }
+
+      // Detail date cols (Einkauf/Lieferung)
       dates.forEach(d=>{
         const we = wareneingangs.find(w=>w.datum===d);
         const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-col detail-td">${qty}</td>`;
+        const bgStyle = isZentral ? `background:${zGreen.bgD};color:${zGreen.thC}` : `background:${cc.bgD};color:${cc.thC}`;
+        tbHTML += `<td class="num-cell detail-col detail-td" style="${bgStyle}">${qty}</td>`;
       });
-      if(isZentral) tbHTML += `<td class="num-cell">—</td>`;
-      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      const safeProdName = prod.name.replace(/"/g, '&quot;');
-      tbHTML += `<td class="num-cell"><span class="edit-val">${abDisplay}</span></td>`;
+
+      // Gerät cols (placeholder)
+      tbHTML += `<td class="num-cell" style="background:rgba(255,145,0,.06);color:#5a3000">—</td>`;
+      dates.forEach(d=>{
+        tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="background:rgba(255,145,0,.04);color:#5a3000">—</td>`;
+      });
+
+      // Theke cols (placeholder)
+      tbHTML += `<td class="num-cell" style="background:rgba(220,50,50,.06);color:#5a0000">—</td>`;
+      dates.forEach(d=>{
+        tbHTML += `<td class="num-cell detail-col detail-theke-td" style="background:rgba(220,50,50,.04);color:#5a0000">—</td>`;
+      });
+
+      // Bestand LAST
+      const bestandVal = bestandData[prod.id] !== undefined ? bestandData[prod.id] : '—';
+      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-green)' : '';
+      tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
     });
   });
 
   tbody.innerHTML = tbHTML;
   if(detailExpanded) applyDetailCols(true);
+  if(geraetExpanded) applyGeraetCols(true);
+  if(thekeExpanded) applyThekeCols(true);
 }
 
 // called after data loads
