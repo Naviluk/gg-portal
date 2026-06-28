@@ -339,14 +339,14 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- ═══ MODAL: ADMIN INVENTUR (full worker-style form) ═══ -->
+<!-- ═══ MODAL: ADMIN INVENTUR ═══ -->
 <div class="modal-overlay" id="modal-admin-inv">
   <div class="modal-inner" style="justify-content:center">
-    <div class="modal" style="max-width:520px">
+    <div class="modal" style="max-width:560px">
       <button class="modal-close" onclick="closeModal('modal-admin-inv')">✕</button>
       <div class="modal-title" style="color:var(--neon-magenta)">＋ Inventur erfassen</div>
 
-      <!-- Lager selector -->
+      <!-- Lager tabs -->
       <div class="field">
         <label class="field-label">Lager</label>
         <div class="inv-modal-lager-tabs" id="admin-inv-lager-tabs"></div>
@@ -361,18 +361,18 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <!-- STEP CHOOSE -->
       <div id="ai-step-choose">
         <p style="font-size:.9rem;color:var(--text-dim);margin-bottom:1rem;text-align:center;letter-spacing:.05em">Mit was möchten Sie beginnen?</p>
-        <div class="choice-grid">
-          <div class="choice-card" id="ai-card-photo" onclick="aiStartPhoto()">
-            <div class="choice-icon">📸</div>
-            <div class="choice-title">Fotos machen</div>
-            <div class="choice-sub">Lager fotografieren</div>
-            <div class="choice-edit-btn" onclick="event.stopPropagation();aiStartPhoto()">✏️ Bearbeiten</div>
+        <div class="ai-choice-grid">
+          <div class="ai-choice-card" id="ai-card-photo" onclick="aiStartPhoto()">
+            <div class="ai-choice-icon">📸</div>
+            <div class="ai-choice-title">Fotos machen</div>
+            <div class="ai-choice-sub">Lager fotografieren</div>
+            <div class="ai-choice-edit-btn" onclick="event.stopPropagation();aiStartPhoto()">✏️ Bearbeiten</div>
           </div>
-          <div class="choice-card" id="ai-card-list" onclick="aiStartList()">
-            <div class="choice-icon">📋</div>
-            <div class="choice-title">Inventurliste</div>
-            <div class="choice-sub">Mengen eintragen</div>
-            <div class="choice-edit-btn" onclick="event.stopPropagation();aiStartList()">✏️ Bearbeiten</div>
+          <div class="ai-choice-card" id="ai-card-list" onclick="aiStartList()">
+            <div class="ai-choice-icon">📋</div>
+            <div class="ai-choice-title">Inventurliste</div>
+            <div class="ai-choice-sub">Mengen eintragen</div>
+            <div class="ai-choice-edit-btn" onclick="event.stopPropagation();aiStartList()">✏️ Bearbeiten</div>
           </div>
         </div>
         <div id="ai-send-section" style="display:none;margin-top:1rem">
@@ -385,17 +385,18 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
 
       <!-- STEP PHOTO -->
       <div id="ai-step-photo" style="display:none">
-        <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.5">
+        <div class="ai-upload-note">
           Stellen Sie sicher, dass auf den Fotos alle notwendigen Artikel sichtbar sind.
+          Fehlende Artikel können Sie zusätzlich über die Inventurliste ergänzen.
         </div>
-        <div class="upload-area" onclick="document.getElementById('ai-file-input').click()">
+        <div class="ai-upload-area" onclick="document.getElementById('ai-file-input').click()">
           <div style="font-size:2rem">📷</div>
           <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-cyan);margin:.4rem 0">FOTO HINZUFÜGEN</div>
-          <div style="font-size:.78rem;color:var(--text-dim)">Tippen Sie hier um Fotos auszuwählen</div>
-          <input type="file" id="ai-file-input" multiple accept="image/*" style="display:none" onchange="aiHandleFiles(this.files)">
+          <div class="ai-upload-hint">Tippen Sie hier um Fotos auszuwählen</div>
+          <input type="file" id="ai-file-input" multiple accept="image/*" onchange="aiHandleFiles(this.files)">
         </div>
-        <div id="ai-photos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem"></div>
-        <div style="display:flex;gap:.7rem;margin-top:.8rem">
+        <div class="ai-photos-grid" id="ai-photos-grid"></div>
+        <div style="display:flex;gap:.7rem;margin-top:.5rem">
           <button class="btn btn-ghost" style="flex:1" onclick="aiBackToChoose()">← Zurück</button>
           <button class="btn btn-primary" style="flex:2" id="ai-upload-btn" onclick="aiUploadPhotos()" disabled>📤 Fotos speichern</button>
         </div>
@@ -408,13 +409,14 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <!-- STEP LIST -->
       <div id="ai-step-list" style="display:none">
         <div id="ai-inv-list-container" style="max-height:50vh;overflow-y:auto"></div>
-        <div id="ai-list-photo-section" style="display:none;margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem">
-          <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:.7rem">Sie können auch Fotos hinzufügen:</div>
-          <div class="upload-area" onclick="document.getElementById('ai-file-input2').click()" style="padding:1rem">
+        <div class="ai-optional-photo" id="ai-list-photo-section" style="display:none">
+          <div class="ai-optional-label">Sie können auch Fotos hinzufügen:</div>
+          <div class="ai-upload-area" onclick="document.getElementById('ai-file-input2').click()" style="padding:1rem">
             <div style="font-size:1.5rem">📷</div>
-            <input type="file" id="ai-file-input2" multiple accept="image/*" style="display:none" onchange="aiHandleFiles(this.files)">
+            <div class="ai-upload-hint">Fotos optional hinzufügen</div>
+            <input type="file" id="ai-file-input2" multiple accept="image/*" onchange="aiHandleFiles(this.files)">
           </div>
-          <div id="ai-photos-grid2" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem"></div>
+          <div class="ai-photos-grid" id="ai-photos-grid2"></div>
         </div>
         <div style="display:flex;gap:.7rem;margin-top:1rem">
           <button class="btn btn-ghost" style="flex:1" onclick="aiBackToChoose()">← Zurück</button>
@@ -967,10 +969,10 @@ window.aiHandleFiles=function(files){
 function renderAiPhotos(){
   const grid=document.getElementById('ai-photos-grid');
   const grid2=document.getElementById('ai-photos-grid2');
-  const html=aiPhotos.map((p,i)=>`<div class="ai-photo-thumb">
-    <img src="${p.preview||p.url}">
+  const html=aiPhotos.map((p,i)=>`<div class="ai-photo-item">
+    <img src="${p.preview||p.url}" alt="Foto">
     <button class="ai-photo-remove" onclick="aiRemovePhoto(${i})">✕</button>
-  </div>`).join('');
+  </div>`).join('') + `<button class="ai-add-more-btn" onclick="document.getElementById('ai-file-input').click()">＋</button>`;
   if(grid) grid.innerHTML=html;
   if(grid2) grid2.innerHTML=html;
   const btn=document.getElementById('ai-upload-btn');
@@ -1035,7 +1037,7 @@ function renderAiList(){
 }
 
 window.aiSaveList=function(){
-  document.querySelectorAll('#ai-inv-list-container .inv-item-qty').forEach(inp=>{
+  document.querySelectorAll('#ai-inv-list-container .ai-item-qty').forEach(inp=>{
     if(inp.value) aiItems[inp.dataset.id]=parseInt(inp.value);
   });
   aiListDone=true;
