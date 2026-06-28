@@ -843,6 +843,75 @@ function renderTableActual(){
     });
   });
 
+  // ── SHOPS SECTION (Zentrallager only) ──
+  if(isZentral){
+    const allShops = new Set();
+    wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
+
+    if(allShops.size > 0){
+      tbHTML += `<tr class="shops-separator"><td colspan="999" style="padding:0;height:2px;background:rgba(255,0,204,.4)"></td></tr>`;
+      tbHTML += `<tr class="cat-row open shops-cat-row" data-shops="1" onclick="toggleShopsSection()">
+        <td class="col-artikel"><div class="cat-label" style="color:var(--neon-magenta)"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
+        <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
+
+      const dateGrandTotals = {};
+      dates.forEach(d=>{ dateGrandTotals[d]=0; });
+      let grandTotal = 0;
+
+      allShops.forEach(shop=>{
+        tbHTML += `<tr class="shop-row-item">`;
+        tbHTML += `<td class="col-artikel"><div class="prod-info" style="gap:.4rem">
+          <div class="prod-icon" style="font-size:.8rem;background:rgba(255,0,204,.12);border-color:rgba(255,0,204,.3)">🏪</div>
+          <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
+        </div></td>`;
+        // Anfangsbestand placeholder
+        tbHTML += `<td class="num-cell">—</td>`;
+        // Einkäufe gesamt placeholder
+        let shopTotal = 0;
+        tbHTML += `<td class="num-cell" style="background:rgba(0,255,85,.10)">`;
+        tbHTML += `</td>`;
+        // Detail date cols (Einkauf dates)
+        dates.forEach(d=>{
+          const we = wareneingangs.find(w=>w.datum===d);
+          let amt = '';
+          if(we&&we.shops){
+            const shopEntry = we.shops.find(s=>s.shop===shop);
+            if(shopEntry&&shopEntry.betrag){
+              const val = parseFloat(shopEntry.betrag)||0;
+              amt = val.toFixed(2)+' €';
+              shopTotal += val;
+              dateGrandTotals[d] += val;
+              grandTotal += val;
+            }
+          }
+          tbHTML += `<td class="num-cell detail-col detail-td" style="background:rgba(0,255,85,.05);color:#00ff55;font-size:.78rem">${amt}</td>`;
+        });
+        // Einkäufe gesamt cell — update with shopTotal
+        const shopTotalStr = shopTotal > 0 ? '<b>'+shopTotal.toFixed(2)+' €</b>' : '—';
+        // Lieferungen placeholder
+        tbHTML += `<td class="num-cell">—</td>`;
+        // Gerät/Theke/Bestand placeholders not applicable for shops
+        tbHTML += `<td class="num-cell" colspan="3">—</td>`;
+        tbHTML += `</tr>`;
+      });
+
+      // Gesamt row
+      const gs = 'border-top:1px solid rgba(255,0,204,.3);background:rgba(255,0,204,.06)';
+      tbHTML += `<tr class="shop-row-item">`;
+      tbHTML += `<td class="col-artikel" style="${gs}"><div class="prod-name" style="font-family:'Century Gothic',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta);font-weight:700">GESAMT</div></td>`;
+      tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
+      // Einkäufe gesamt total
+      tbHTML += `<td class="num-cell" style="${gs};background:rgba(0,255,85,.10);color:#00ff55;font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+' €':'—'}</td>`;
+      dates.forEach(d=>{
+        const dtTotal = dateGrandTotals[d];
+        const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+' €' : '';
+        tbHTML += `<td class="num-cell detail-col detail-td" style="${gs};background:rgba(0,255,85,.05);color:var(--neon-magenta);font-weight:700;font-size:.82rem">${dtStr}</td>`;
+      });
+      tbHTML += `<td class="num-cell" style="${gs}" colspan="3">—</td>`;
+      tbHTML += `</tr>`;
+    }
+  }
+
   tbody.innerHTML = tbHTML;
   if(detailExpanded) applyDetailCols(true);
   if(geraetExpanded) applyGeraetCols(true);
@@ -942,7 +1011,17 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('modal-we').classList.add('show');
 
   const isZentral = currentLager==='zentrallager';
-  document.getElementById('we-title').textContent = isZentral ? 'Einkauf erfassen' : 'Wareneingang erfassen';
+  const lagerColors = {
+    zentrallager: {name:'Zentrallager', color:'var(--neon-green)'},
+    nettetal:     {name:'Nettetal',     color:'#00aaff'},
+    brüggen:      {name:'Brüggen',      color:'#ff0055'},
+    viersen:      {name:'Viersen',      color:'#ff8800'},
+    köln:         {name:'Köln',         color:'#cc00ff'},
+  };
+  const lc = lagerColors[currentLager] || {name: currentLager, color:'var(--text)'};
+  const titleText = isZentral ? 'Einkauf erfassen' : 'Wareneingang erfassen';
+  document.getElementById('we-title').innerHTML =
+    `${titleText} — <span style="color:${lc.color};text-shadow:0 0 10px ${lc.color}">${lc.name}</span>`;
   document.getElementById('we-shops-section').style.display = isZentral?'':'none';
   document.getElementById('we-selected-list').style.display='none';
 
