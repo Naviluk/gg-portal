@@ -277,7 +277,10 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <button class="btn btn-cyan" onclick="openArtikelConfig()" style="margin-left:auto">
+    <button class="btn btn-magenta" onclick="openAdminInvenur()" style="margin-left:auto">
+      ＋ Inventur
+    </button>
+    <button class="btn btn-cyan" onclick="openArtikelConfig()">
       ⚙️ Artikellisten
     </button>
   </div>
@@ -331,6 +334,35 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <div style="margin-top:1rem;display:flex;gap:.7rem">
         <button class="btn btn-ghost" onclick="document.getElementById('modal-right').style.display='none'">← Zurück</button>
         <button class="btn btn-green" style="flex:1" onclick="finalizeInventur()">✓ Inventur abschließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADMIN INVENTUR ═══ -->
+<div class="modal-overlay" id="modal-admin-inv">
+  <div class="modal-inner" style="justify-content:center">
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" onclick="closeModal('modal-admin-inv')">✕</button>
+      <div class="modal-title" style="color:var(--neon-magenta)">＋ Inventur erstellen</div>
+
+      <div class="field">
+        <label class="field-label">Lager</label>
+        <div class="inv-modal-lager-tabs" id="admin-inv-lager-tabs"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Datum</label>
+        <input type="date" id="admin-inv-date">
+      </div>
+
+      <div id="admin-inv-products" style="max-height:380px;overflow-y:auto"></div>
+
+      <div style="margin-top:1rem;display:flex;gap:.7rem">
+        <button class="btn btn-ghost" onclick="closeModal('modal-admin-inv')">Abbrechen</button>
+        <button class="btn btn-magenta" style="flex:1" onclick="submitAdminInventur()">
+          ✓ Inventur absenden
+        </button>
       </div>
     </div>
   </div>
@@ -773,6 +805,113 @@ window.saveArtikelConfig=async function(){
     hideSpinner();
     closeModal('modal-config');
     showToast('Artikellisten gespeichert! ✓');
+  } catch(e){
+    hideSpinner();
+    showToast('Fehler: '+e.message,'var(--neon-magenta)');
+  }
+};
+
+// ── ADMIN INVENTUR ──
+const LAGER_NEON_ADM = {
+  nettetal: {color:'#00aaff', border:'rgba(0,170,255,.5)',  bg:'rgba(0,170,255,.12)'},
+  brüggen:  {color:'#ff0055', border:'rgba(255,0,85,.5)',   bg:'rgba(255,0,85,.12)'},
+  viersen:  {color:'#ff8800', border:'rgba(255,136,0,.5)',  bg:'rgba(255,136,0,.12)'},
+  köln:     {color:'#cc00ff', border:'rgba(204,0,255,.5)',  bg:'rgba(204,0,255,.12)'},
+};
+const ADMIN_LAGERS = ['nettetal','brüggen','viersen','köln'];
+const LAGER_NAMES_ADM = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+let adminInvLager = 'brüggen';
+
+window.openAdminInvenur = async function(){
+  adminInvLager = 'brüggen';
+  document.getElementById('admin-inv-date').value = new Date().toISOString().slice(0,10);
+  renderAdminLagerTabs();
+  await renderAdminInvProducts();
+  document.getElementById('modal-admin-inv').classList.add('show');
+};
+
+function renderAdminLagerTabs(){
+  const nc = LAGER_NEON_ADM;
+  document.getElementById('admin-inv-lager-tabs').innerHTML = ADMIN_LAGERS.map(l=>{
+    const c = nc[l];
+    const isActive = l===adminInvLager;
+    const style = isActive
+      ? `color:${c.color};border-color:${c.border};background:${c.bg};box-shadow:0 0 10px ${c.bg}`
+      : `color:var(--text-dim);border-color:rgba(255,255,255,.1)`;
+    return `<button class="inv-lager-btn" style="${style}" onclick="switchAdminLager('${l}')">${LAGER_NAMES_ADM[l]}</button>`;
+  }).join('');
+}
+
+window.switchAdminLager = async function(lager){
+  adminInvLager = lager;
+  renderAdminLagerTabs();
+  await renderAdminInvProducts();
+};
+
+async function renderAdminInvProducts(){
+  // Load artikel config for selected lager
+  let products = ALL_PRODUCTS;
+  try {
+    const cfgDoc = await getDoc(doc(db,'artikel_config',adminInvLager));
+    if(cfgDoc.exists()){
+      const ids = new Set(cfgDoc.data().selected_ids||[]);
+      if(ids.size>0){
+        products = ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
+      }
+    }
+  } catch(e){}
+
+  let html='';
+  if(products.length===0){
+    html='<div style="text-align:center;padding:1.5rem;color:var(--text-dim);font-size:.85rem">Keine Artikel konfiguriert für dieses Lager</div>';
+  } else {
+    products.forEach((cat,ci)=>{
+      html+=`<div class="inv-form-cat-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${cat.cat}</div><div>`;
+      cat.items.forEach(prod=>{
+        html+=`<div class="inv-form-row">
+          <div class="inv-form-icon">${prod.icon||'📦'}</div>
+          <span class="inv-form-name">${prod.name}</span>
+          <span class="inv-form-unit">${prod.unit||''}</span>
+          <input class="inv-form-qty" type="number" min="0" placeholder="0" data-id="${prod.id}">
+        </div>`;
+      });
+      html+='</div>';
+    });
+  }
+  document.getElementById('admin-inv-products').innerHTML=html;
+}
+
+window.submitAdminInventur = async function(){
+  const date = document.getElementById('admin-inv-date').value;
+  if(!date){ showToast('Datum fehlt','var(--neon-yellow)'); return; }
+
+  const items={};
+  document.querySelectorAll('#admin-inv-products .inv-form-qty').forEach(inp=>{
+    if(inp.value&&parseInt(inp.value)>0) items[inp.dataset.id]=parseInt(inp.value);
+  });
+
+  const monat = date.slice(0,7);
+  const filledCount = Object.keys(items).length;
+
+  showSpinner();
+  try {
+    await addDoc(collection(db,'mitarbeiter_inventur'),{
+      lager: adminInvLager,
+      monat,
+      datum: date,
+      items,
+      photos: [],
+      photoCount: 0,
+      filledCount,
+      totalCount: filledCount,
+      mitarbeiter: 'Admin',
+      status: 'sent',
+      createdAt: new Date().toISOString()
+    });
+    hideSpinner();
+    closeModal('modal-admin-inv');
+    showToast('Inventur erstellt! ✓');
+    loadSubmissions();
   } catch(e){
     hideSpinner();
     showToast('Fehler: '+e.message,'var(--neon-magenta)');
