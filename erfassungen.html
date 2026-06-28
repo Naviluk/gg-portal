@@ -728,7 +728,7 @@ async function loadSubmissions(){
           <span>📋 <span class="val">${inv.filledCount||0}</span> / <span class="val">${inv.totalCount||0}</span> Artikel</span>
         </div>
         ${photosHtml ? `<div class="photos-preview">${photosHtml}</div>` : ''}
-        ${inv.kommentar ? `<div class="inv-kommentar"><span class="inv-kommentar-icon">💬</span>${inv.kommentar}</div>` : ''}\`;
+        ${inv.kommentar ? `<div class="inv-kommentar"><span class="inv-kommentar-icon">💬</span>${inv.kommentar}</div>` : ''}` ;
       section.appendChild(card);
     });
   } catch(e){
