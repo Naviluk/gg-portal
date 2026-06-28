@@ -87,11 +87,11 @@ svg.nav-arrow{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:
 .inv-card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:16px;
   padding:1.2rem 1.5rem;position:relative;transition:border-color .2s;cursor:pointer}
 .inv-card:hover{border-color:rgba(0,245,255,.3)}
-.inv-card.unread{border-left:3px solid var(--neon-magenta)}
+.inv-card.unread{border-left:3px solid var(--lager-color, var(--neon-magenta))}
 .inv-card-header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.7rem}
 .inv-date{font-family:'Orbitron',sans-serif;font-size:.9rem;letter-spacing:.08em;color:var(--neon-cyan)}
 .inv-lager-badge{font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;
-  padding:.2rem .6rem;border-radius:10px;background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.2);color:var(--neon-cyan)}
+  padding:.2rem .6rem;border-radius:10px;background:var(--lager-bg,rgba(0,245,255,.1));border:1px solid var(--lager-border,rgba(0,245,255,.2));color:var(--lager-color,var(--neon-cyan))}
 .inv-status{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .6rem;border-radius:10px;font-family:'Orbitron',sans-serif}
 .inv-status.pending{background:rgba(255,0,204,.1);border:1px solid rgba(255,0,204,.3);color:var(--neon-magenta)}
 .inv-status.sent{background:rgba(255,238,0,.1);border:1px solid rgba(255,238,0,.3);color:var(--neon-yellow)}
@@ -99,10 +99,14 @@ svg.nav-arrow{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:
 .inv-meta{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.85rem;color:var(--text-dim)}
 .inv-meta span{display:flex;align-items:center;gap:.3rem}
 .inv-meta .val{color:var(--text);font-weight:600}
+.inv-kommentar{margin-top:.6rem;padding:.45rem .6rem;background:rgba(0,245,255,.04);border-left:2px solid rgba(0,245,255,.3);border-radius:0 4px 4px 0;font-size:.82rem;color:var(--text-dim);line-height:1.4;display:flex;gap:.4rem;align-items:flex-start}
+.inv-kommentar-icon{flex-shrink:0;font-size:.85rem;margin-top:.05rem}
 .inv-by{font-size:.78rem;color:var(--text-dim);margin-left:auto}
 .inv-actions{margin-top:.9rem;display:flex;gap:.6rem;flex-wrap:wrap}
-.new-dot{width:8px;height:8px;border-radius:50%;background:var(--neon-magenta);
-  box-shadow:0 0 8px var(--neon-magenta);flex-shrink:0}
+.new-dot{width:8px;height:8px;border-radius:50%;background:var(--lager-color,var(--neon-magenta));
+  box-shadow:0 0 8px var(--lager-color,var(--neon-magenta));flex-shrink:0}
+.btn-trash{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:1rem;padding:.3rem .4rem;border-radius:6px;transition:color .15s,background .15s;line-height:1;flex-shrink:0}
+.btn-trash:hover{color:var(--neon-magenta);background:rgba(255,0,85,.1)}
 .photos-preview{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
 .photo-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--glass-border);cursor:pointer}
 .empty-state{text-align:center;padding:4rem 1rem;color:var(--text-dim)}
@@ -388,7 +392,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
     </div>
     <!-- Right: admin form (hidden until openProcessForm) -->
     <div class="modal" id="modal-right" style="display:none">
-      <div class="modal-title">Inventur ausfüllen</div>
+      <div class="modal-title" style="display:flex;align-items:center;gap:.6rem">Inventur ausfüllen <span id="form-lager-badge" style="font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.1em;padding:.2rem .6rem;border-radius:10px;background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.2);color:var(--neon-cyan)"></span></div>
       <div class="field">
         <label class="field-label">Datum</label>
         <input type="date" id="form-date">
@@ -440,7 +444,13 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
         </div>
         <div id="ai-send-section" style="display:none;margin-top:1rem">
           <div style="height:1px;background:var(--glass-border);margin-bottom:1rem"></div>
-          <button class="btn btn-magenta" style="width:100%" onclick="aiSubmitInventur()">
+          <div class="field">
+            <label style="font-size:.7rem;letter-spacing:.08em;color:var(--text-dim);margin-bottom:.4rem;display:block">KOMMENTAR (optional)</label>
+            <textarea id="ai-kommentar" rows="3" placeholder="Anmerkungen, Besonderheiten, Wünsche…"
+              style="width:100%;box-sizing:border-box;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);border-radius:6px;color:var(--text);font-family:inherit;font-size:.85rem;padding:.55rem .7rem;resize:vertical;outline:none;transition:border-color .2s"
+              onfocus="this.style.borderColor='var(--neon-cyan)'" onblur="this.style.borderColor='var(--glass-border)'"></textarea>
+          </div>
+          <button class="btn btn-magenta" style="width:100%;margin-top:.5rem" onclick="aiSubmitInventur()">
             ✓ Inventur absenden
           </button>
         </div>
@@ -687,7 +697,10 @@ async function loadSubmissions(){
     entries.forEach(inv=>{
       const card = document.createElement('div');
       const isUnread = inv.status==='sent';
+      const nc = LAGER_NEON[inv.lager]||{color:'#00f5ff',bg:'rgba(0,245,255,.1)',border:'rgba(0,245,255,.2)'};
       card.className = 'inv-card' + (isUnread?' unread':'');
+      if(isUnread) card.style.cssText=`--lager-color:${nc.color};--lager-bg:${nc.bg};--lager-border:${nc.border}`;
+      else card.style.cssText=`--lager-color:${nc.color};--lager-bg:${nc.bg};--lager-border:${nc.border}`;
       card.onclick = ()=>openView(inv);
 
       const d = new Date(inv.datum);
@@ -697,6 +710,9 @@ async function loadSubmissions(){
       const lagerName = LAGER_NAMES[inv.lager]||inv.lager||'—';
       const photosHtml = (inv.photos||[]).slice(0,4).map(url=>
         `<img class="photo-thumb" src="${url}" onclick="event.stopPropagation();openFullPhoto('${url}')">`).join('');
+      const trashBtn = isUnread
+        ? `<button class="btn-trash" title="Löschen" onclick="event.stopPropagation();deleteSubmission('${inv.id}',this)">🗑</button>`
+        : '';
 
       card.innerHTML = `
         <div class="inv-card-header">
@@ -705,12 +721,14 @@ async function loadSubmissions(){
           <span class="inv-lager-badge">${lagerName}</span>
           <span class="inv-status ${statusClass}">${statusLabel}</span>
           <span class="inv-by">${inv.mitarbeiter||'—'}</span>
+          ${trashBtn}
         </div>
         <div class="inv-meta">
           <span>📷 <span class="val">${inv.photoCount||0}</span> Fotos</span>
           <span>📋 <span class="val">${inv.filledCount||0}</span> / <span class="val">${inv.totalCount||0}</span> Artikel</span>
         </div>
-        ${photosHtml ? `<div class="photos-preview">${photosHtml}</div>` : ''}`;
+        ${photosHtml ? `<div class="photos-preview">${photosHtml}</div>` : ''}
+        ${inv.kommentar ? `<div class="inv-kommentar"><span class="inv-kommentar-icon">💬</span>${inv.kommentar}</div>` : ''}\`;
       section.appendChild(card);
     });
   } catch(e){
@@ -775,6 +793,15 @@ window.openView = function(inv){
 
 // ── PROCESS FORM ──
 window.openProcessForm = async function(){
+  // Update lager badge in modal-right title
+  const _nc = LAGER_NEON[currentEntry.lager]||{color:'#00f5ff',bg:'rgba(0,245,255,.1)',border:'rgba(0,245,255,.2)'};
+  const _badge = document.getElementById('form-lager-badge');
+  if(_badge){
+    _badge.textContent = LAGER_NAMES[currentEntry.lager]||currentEntry.lager||'';
+    _badge.style.color = _nc.color;
+    _badge.style.background = _nc.bg;
+    _badge.style.borderColor = _nc.border;
+  }
   // Admin always sees FULL product list — to be able to add anything from photos
   // Prefilled values from Mitarbeiter's list are highlighted in cyan
   const prefilled = currentEntry.items||{};
@@ -954,6 +981,7 @@ let aiProducts = [];
 
 window.openAdminInvenur = async function(){
   aiLager='brüggen'; aiPhotos=[]; aiItems={}; aiPhotoDone=false; aiListDone=false;
+  const kom=document.getElementById('ai-kommentar'); if(kom) kom.value='';
   document.getElementById('ai-inv-date').value=new Date().toISOString().slice(0,10);
   document.getElementById('ai-card-photo').classList.remove('done');
   document.getElementById('ai-card-list').classList.remove('done');
@@ -1124,6 +1152,7 @@ window.aiSubmitInventur=async function(){
   const items=Object.fromEntries(Object.entries(aiItems).filter(([,v])=>v>0));
   const filledCount=Object.keys(items).length;
   const monat=date.slice(0,7);
+  const kommentar=(document.getElementById('ai-kommentar').value||'').trim();
   showSpinner();
   try{
     await db.collection('mitarbeiter_inventur').add({
@@ -1131,6 +1160,7 @@ window.aiSubmitInventur=async function(){
       items, photos, photoCount:photos.length,
       filledCount, totalCount:aiProducts.reduce((s,c)=>s+c.items.length,0),
       mitarbeiter:'Admin', status:'sent',
+      kommentar: kommentar||null,
       createdAt:new Date().toISOString()
     });
     hideSpinner();
@@ -1138,6 +1168,17 @@ window.aiSubmitInventur=async function(){
     showToast('Inventur erfolgreich erstellt! ✓');
     loadSubmissions();
   }catch(e){ hideSpinner(); showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
+};
+
+
+window.deleteSubmission = async function(id, btn){
+  if(!confirm('Inventur wirklich löschen?')) return;
+  btn.disabled=true;
+  try{
+    await db.collection('mitarbeiter_inventur').doc(id).delete();
+    showToast('Inventur gelöscht','var(--neon-magenta)');
+    loadSubmissions();
+  }catch(e){ btn.disabled=false; showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
 };
 
 // ── INIT ──
