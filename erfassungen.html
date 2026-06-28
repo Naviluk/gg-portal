@@ -1069,6 +1069,11 @@ window.aiUploadPhotos=async function(){
   }catch(e){ hideSpinner(); showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
 };
 
+window.aiToggleCat=function(ci){
+  const el=document.getElementById('ai-inv-cat-'+ci);
+  if(el) el.classList.toggle('open');
+};
+
 function renderAiList(){
   const container=document.getElementById('ai-inv-list-container');
   if(!aiProducts.length){
@@ -1100,7 +1105,6 @@ function renderAiList(){
     html+='</div></div>';
   });
   container.innerHTML=html;
-}
 }
 
 window.aiSaveList=function(){
