@@ -418,13 +418,16 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
-.plan-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.04)}
-.plan-row-name{flex:1;font-size:.88rem}
-.plan-row-empf{width:55px;text-align:center;font-size:.85rem;color:var(--neon-yellow)}
-.plan-row-qty{width:65px;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);
-  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
-  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none}
-.plan-row-qty:focus{border-color:var(--neon-cyan)}
+.plan-row{display:flex;align-items:center;gap:.55rem;padding:.4rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;transition:background .15s;min-height:40px}
+.plan-row:hover{background:rgba(0,245,255,.03)}
+.plan-row-name{flex:1;font-size:.86rem;min-width:0;overflow:hidden;line-height:1.2}
+.plan-row-name span.prod-unit-inline{font-size:.7rem;color:var(--text-dim);margin-left:.3rem;white-space:nowrap}
+.plan-row-empf{width:42px;text-align:center;font-size:.82rem;color:var(--neon-yellow);flex-shrink:0}
+.plan-row-qty{width:64px;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);
+  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.92rem;
+  padding:.32rem .4rem;border-radius:5px;text-align:center;outline:none;flex-shrink:0;
+  transition:border-color .15s,box-shadow .15s}
+.plan-row-qty:focus{border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.3)}
 .plan-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
 .soll-lager-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -539,7 +542,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- GESAMT SIDEBAR -->
 <div class="gesamt-panel" id="gesamt-panel">
   <button class="gesamt-close" onclick="closeGesamt()">✕</button>
-  <div class="gesamt-panel-title">📊 Gesamtübersicht – alle Lager</div>
+  <div class="gesamt-panel-title">📊 Gesamtlieferung – alle Lager</div>
   <div id="gesamt-content"></div>
 </div>
 
@@ -798,15 +801,41 @@ window.toggleCategory=function(row){
 
 window.openGesamt=function(){
   let html='';
+  // Kopfzeile: Spalten pro Lager + Gesamt
+  const activeLagers = LAGERS.filter(lg=>Object.keys(planData[lg]||{}).length>0);
+  if(activeLagers.length>0){
+    let headerRow='<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid var(--glass-border)">';
+    headerRow+='<span style="flex:1;font-size:.65rem;color:var(--text-dim);letter-spacing:.06em">ARTIKEL</span>';
+    activeLagers.forEach(lg=>{
+      const nc=NEON[lg]||{};
+      headerRow+=`<span style="width:44px;text-align:center;font-size:.6rem;font-family:'Orbitron',sans-serif;letter-spacing:.06em;color:${nc.neon}">${LAGER_NAMES[lg]||lg}</span>`;
+    });
+    headerRow+='<span style="width:44px;text-align:right;font-size:.6rem;color:var(--text-dim);letter-spacing:.06em">GESAMT</span></div>';
+    html+=headerRow;
+  }
   PRODUCTS.forEach(catObj=>{
     let catHtml='';
     catObj.items.forEach(prod=>{
-      let t=0;LAGERS.forEach(lg=>{t+=Number((bestandData[lg]||{})[prod.id])||0});
-      if(t>0)catHtml+=`<div class="gesamt-row"><span class="gesamt-name">${prod.icon} ${prod.name}</span><span class="gesamt-qty">${t}</span></div>`;
+      let total=0;
+      const qtyPerLager=[];
+      LAGERS.forEach(lg=>{
+        const q=Number((planData[lg]||{})[prod.id])||0;
+        total+=q;
+        if(activeLagers.includes(lg)) qtyPerLager.push({lg,q});
+      });
+      if(total>0){
+        let row=`<div class="gesamt-row"><span class="gesamt-name">${prod.icon} ${prod.name}</span>`;
+        qtyPerLager.forEach(({lg,q})=>{
+          const nc=NEON[lg]||{};
+          row+=`<span style="width:44px;text-align:center;font-size:.88rem;color:${q>0?nc.neon:'var(--text-dim)'};font-weight:${q>0?700:400}">${q>0?q:'—'}</span>`;
+        });
+        row+=`<span class="gesamt-qty" style="width:44px;text-align:right">${total}</span></div>`;
+        catHtml+=row;
+      }
     });
     if(catHtml)html+=`<div class="gesamt-cat"><div class="gesamt-cat-title">${catObj.cat}</div>${catHtml}</div>`;
   });
-  document.getElementById('gesamt-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Keine Daten.</p>';
+  document.getElementById('gesamt-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Noch keine geplanten Lieferungen vorhanden.</p>';
   document.getElementById('gesamt-panel').classList.add('open');
 };
 window.closeGesamt=function(){document.getElementById('gesamt-panel').classList.remove('open')};
@@ -833,8 +862,8 @@ function renderSollContent(){
     catObj.items.forEach(prod=>{
       const v=lgD[prod.id]??'';
       html+=`<div class="plan-row"><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name">${prod.name} <span style="font-size:.7rem;color:var(--text-dim)">${prod.unit||''}</span></div>
-        <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" placeholder="0" value="${v}"></div>`;
+        <div class="plan-row-name" title="${prod.name}">${prod.name}<span class="prod-unit-inline">${prod.unit||''}</span></div>
+        <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" placeholder="St." value="${v}"></div>`;
     });
     html+='</div></div>';
   });
@@ -867,9 +896,9 @@ window.openPlan=function(){
       const diff=Math.max(0,soll-akt);
       catHtml+=`<div class="plan-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name">${prod.name} <span style="font-size:.7rem;color:var(--text-dim)">${prod.unit||''}</span></div>
+        <div class="plan-row-name" title="${prod.name}">${prod.name}<span class="prod-unit-inline">${prod.unit||''}</span></div>
         <span class="plan-row-empf" title="Empfohlen">${diff>0?diff:'✓'}</span>
-        <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0" placeholder="0" value="${plan||diff||''}">
+        <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St." value="${plan||diff||''}">
       </div>`;
     });
     if(catHtml)html+=`<div class="plan-cat-label">${catObj.cat}</div>${catHtml}`;

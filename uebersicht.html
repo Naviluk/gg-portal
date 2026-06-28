@@ -701,6 +701,9 @@ let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // {productId: value}
 let currentAbProdId = null;
+let lieferungenData = {}; // {prodId: total} — из wareneingang collection
+let geraetData      = {}; // {prodId: total} — из gs_geraet collection
+let thekeData       = {}; // {prodId: total} — из gs_theke collection
 
 // ── EXPOSE (assigned after function definitions below) ──
 
@@ -746,6 +749,10 @@ function renderTableActual(){
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
     thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
   });
+  // Monatl. Verbrauch Spalte
+  thHTML += `<th class="num-cell" style="border-left:2px solid rgba(255,238,0,.3);min-width:80px">
+    <span class="th-icon">📉</span><span class="th-text" style="color:var(--neon-yellow)">Monatl.<br>Verbrauch</span>
+  </th>`;
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -782,6 +789,24 @@ function renderTableActual(){
         const qty = inv&&inv.items&&inv.items[prod.id] !== undefined ? inv.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-td" style="color:var(--neon-green)">${qty}</td>`;
       });
+
+      // ── Monatl. Verbrauch: f = a + b - c - d - e ──
+      // a = Anfangsbestand, b = Lieferungen, c = Gerät, d = Theke, e = letzter Inventurwert
+      const a_val = Number(anfangsbestand[prod.id]) || 0;
+      const b_val = Number(lieferungenData[prod.id]) || 0;
+      const c_val = Number(geraetData[prod.id]) || 0;
+      const d_val = Number(thekeData[prod.id]) || 0;
+      // e = последний по дате инвентур этого периода
+      const lastInv = wareneingangs.filter(w=>w.items&&w.items[prod.id]!==undefined)
+        .sort((x,y)=>y.datum.localeCompare(x.datum))[0];
+      const e_val = lastInv ? Number(lastInv.items[prod.id]) : null;
+      let verbrauchCell = '<span style="color:var(--text-dim)">—</span>';
+      if(e_val !== null) {
+        const f = a_val + b_val - c_val - d_val - e_val;
+        const fColor = f > 0 ? 'var(--neon-yellow)' : f < 0 ? 'var(--neon-magenta)' : 'var(--text-dim)';
+        verbrauchCell = `<span style="color:${fColor};font-weight:700">${f}</span>`;
+      }
+      tbHTML += `<td class="num-cell" style="border-left:2px solid rgba(255,238,0,.15)">${verbrauchCell}</td>`;
 
       tbHTML += `</tr>`;
     });
@@ -825,6 +850,39 @@ async function loadData(){
   try {
     const abDoc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
     if(abDoc.exists) anfangsbestand=abDoc.data();
+  } catch(e){}
+
+  // Lieferungen (wareneingang) für diesen Zeitraum
+  lieferungenData={};
+  try {
+    const snapL=await db.collection('wareneingang')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapL.forEach(d=>{
+      const items=d.data().items||{};
+      Object.entries(items).forEach(([pid,qty])=>{lieferungenData[pid]=(lieferungenData[pid]||0)+Number(qty);});
+    });
+  } catch(e){}
+
+  // Gerät-Einträge
+  geraetData={};
+  try {
+    const snapG=await db.collection('gs_geraet')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapG.forEach(d=>{
+      const items=d.data().items||{};
+      Object.entries(items).forEach(([pid,qty])=>{geraetData[pid]=(geraetData[pid]||0)+Number(qty);});
+    });
+  } catch(e){}
+
+  // Theke-Einträge
+  thekeData={};
+  try {
+    const snapT=await db.collection('gs_theke')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapT.forEach(d=>{
+      const items=d.data().items||{};
+      Object.entries(items).forEach(([pid,qty])=>{thekeData[pid]=(thekeData[pid]||0)+Number(qty);});
+    });
   } catch(e){}
 
   hideSpinner();
