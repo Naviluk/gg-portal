@@ -784,6 +784,7 @@ function renderTable(){
     <th class="num-cell" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
       <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
       <span class="th-text" style="color:var(--neon-magenta)">${planLabel}</span>
+      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlan()" title="Planung bearbeiten">✎</button>
     </th>
   </tr>`;
 
@@ -879,12 +880,6 @@ window.switchSollLager=function(lg){saveSollLocal();sollModalLager=lg;renderSoll
 
 function renderSollContent(){
   const lgD = sollData[sollModalLager]||{};
-  // Инициализируем временный объект выбранных и значений
-  if(!window._sollSel) window._sollSel={};
-  window._sollSel[sollModalLager] = window._sollSel[sollModalLager]||{};
-  // Для каждого продукта с сохранённым значением — отмечаем как выбранный
-  Object.keys(lgD).forEach(pid=>{ if(lgD[pid]>0) window._sollSel[sollModalLager][pid]=true; });
-
   let html='';
   PRODUCTS.forEach((catObj,ci)=>{
     html+=`<div class="modal-cat open" id="scat-${ci}">
@@ -894,9 +889,10 @@ function renderSollContent(){
       </div>
       <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
-      const v = lgD[prod.id]||'';
-      const checked = v>0 ? ' checked' : '';
-      const shown   = v>0 ? ' show'    : '';
+      const v = lgD[prod.id] ?? '';
+      const hasVal = v!=='' && Number(v)>0;
+      const checked = hasVal ? ' checked' : '';
+      const shown   = hasVal ? ' show'    : '';
       const unit = prod.unit ? `<span class="modal-prod-unit">${prod.unit}</span>` : '';
       html+=`<div class="soll-prod-row" id="srow-${prod.id}">
         <div class="soll-checkbox${checked}" id="scb-${prod.id}" onclick="toggleSollProd('${prod.id}')"></div>
@@ -905,8 +901,7 @@ function renderSollContent(){
           <span class="modal-prod-name">${prod.name}</span>${unit}
         </div>
         <input class="soll-qty${shown}" id="soll-${sollModalLager}-${prod.id}"
-          type="number" min="0" placeholder="St." value="${v}"
-          oninput="updateSollQty('${prod.id}',this.value)">
+          type="number" min="0" placeholder="St." value="${hasVal?v:''}">
       </div>`;
     });
     html+='</div></div>';
