@@ -731,7 +731,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf" style="background:${zGreen.bg};border-bottom:2px solid ${zGreen.border}">
       <div class="col-einkauf-wrap">
         <span style="color:${zGreen.neon};font-weight:700"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen" style="color:${zGreen.neon}">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -744,7 +744,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
       <div class="col-einkauf-wrap">
         <span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen" style="color:${cc.neon}">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -754,7 +754,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
-        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()">▶</span>
+        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -764,7 +764,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
-        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</span>
+        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
