@@ -339,30 +339,87 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- ═══ MODAL: ADMIN INVENTUR ═══ -->
+<!-- ═══ MODAL: ADMIN INVENTUR (full worker-style form) ═══ -->
 <div class="modal-overlay" id="modal-admin-inv">
   <div class="modal-inner" style="justify-content:center">
-    <div class="modal" style="max-width:560px">
+    <div class="modal" style="max-width:520px">
       <button class="modal-close" onclick="closeModal('modal-admin-inv')">✕</button>
-      <div class="modal-title" style="color:var(--neon-magenta)">＋ Inventur erstellen</div>
+      <div class="modal-title" style="color:var(--neon-magenta)">＋ Inventur erfassen</div>
 
+      <!-- Lager selector -->
       <div class="field">
         <label class="field-label">Lager</label>
         <div class="inv-modal-lager-tabs" id="admin-inv-lager-tabs"></div>
       </div>
 
-      <div class="field">
-        <label class="field-label">Datum</label>
-        <input type="date" id="admin-inv-date">
+      <!-- Date -->
+      <div class="field" id="ai-date-field">
+        <label class="field-label">Datum der Inventur</label>
+        <input type="date" id="ai-inv-date">
       </div>
 
-      <div id="admin-inv-products" style="max-height:380px;overflow-y:auto"></div>
+      <!-- STEP CHOOSE -->
+      <div id="ai-step-choose">
+        <p style="font-size:.9rem;color:var(--text-dim);margin-bottom:1rem;text-align:center;letter-spacing:.05em">Mit was möchten Sie beginnen?</p>
+        <div class="choice-grid">
+          <div class="choice-card" id="ai-card-photo" onclick="aiStartPhoto()">
+            <div class="choice-icon">📸</div>
+            <div class="choice-title">Fotos machen</div>
+            <div class="choice-sub">Lager fotografieren</div>
+            <div class="choice-edit-btn" onclick="event.stopPropagation();aiStartPhoto()">✏️ Bearbeiten</div>
+          </div>
+          <div class="choice-card" id="ai-card-list" onclick="aiStartList()">
+            <div class="choice-icon">📋</div>
+            <div class="choice-title">Inventurliste</div>
+            <div class="choice-sub">Mengen eintragen</div>
+            <div class="choice-edit-btn" onclick="event.stopPropagation();aiStartList()">✏️ Bearbeiten</div>
+          </div>
+        </div>
+        <div id="ai-send-section" style="display:none;margin-top:1rem">
+          <div style="height:1px;background:var(--glass-border);margin-bottom:1rem"></div>
+          <button class="btn btn-magenta" style="width:100%" onclick="aiSubmitInventur()">
+            ✓ Inventur absenden
+          </button>
+        </div>
+      </div>
 
-      <div style="margin-top:1rem;display:flex;gap:.7rem">
-        <button class="btn btn-ghost" onclick="closeModal('modal-admin-inv')">Abbrechen</button>
-        <button class="btn btn-magenta" style="flex:1" onclick="submitAdminInventur()">
-          ✓ Inventur absenden
-        </button>
+      <!-- STEP PHOTO -->
+      <div id="ai-step-photo" style="display:none">
+        <div style="font-size:.82rem;color:var(--text-dim);margin-bottom:1rem;line-height:1.5">
+          Stellen Sie sicher, dass auf den Fotos alle notwendigen Artikel sichtbar sind.
+        </div>
+        <div class="upload-area" onclick="document.getElementById('ai-file-input').click()">
+          <div style="font-size:2rem">📷</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-cyan);margin:.4rem 0">FOTO HINZUFÜGEN</div>
+          <div style="font-size:.78rem;color:var(--text-dim)">Tippen Sie hier um Fotos auszuwählen</div>
+          <input type="file" id="ai-file-input" multiple accept="image/*" style="display:none" onchange="aiHandleFiles(this.files)">
+        </div>
+        <div id="ai-photos-grid" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem"></div>
+        <div style="display:flex;gap:.7rem;margin-top:.8rem">
+          <button class="btn btn-ghost" style="flex:1" onclick="aiBackToChoose()">← Zurück</button>
+          <button class="btn btn-primary" style="flex:2" id="ai-upload-btn" onclick="aiUploadPhotos()" disabled>📤 Fotos speichern</button>
+        </div>
+        <div id="ai-photo-list-prompt" style="display:none;margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem">
+          <p style="font-size:.85rem;color:var(--text-dim);margin-bottom:.8rem">Sie können zusätzlich die Inventurliste ausfüllen:</p>
+          <button class="btn btn-ghost" style="width:100%" onclick="aiBackToChoose();setTimeout(aiStartList,100)">📋 Inventurliste öffnen</button>
+        </div>
+      </div>
+
+      <!-- STEP LIST -->
+      <div id="ai-step-list" style="display:none">
+        <div id="ai-inv-list-container" style="max-height:50vh;overflow-y:auto"></div>
+        <div id="ai-list-photo-section" style="display:none;margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem">
+          <div style="font-size:.8rem;color:var(--text-dim);margin-bottom:.7rem">Sie können auch Fotos hinzufügen:</div>
+          <div class="upload-area" onclick="document.getElementById('ai-file-input2').click()" style="padding:1rem">
+            <div style="font-size:1.5rem">📷</div>
+            <input type="file" id="ai-file-input2" multiple accept="image/*" style="display:none" onchange="aiHandleFiles(this.files)">
+          </div>
+          <div id="ai-photos-grid2" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem"></div>
+        </div>
+        <div style="display:flex;gap:.7rem;margin-top:1rem">
+          <button class="btn btn-ghost" style="flex:1" onclick="aiBackToChoose()">← Zurück</button>
+          <button class="btn btn-primary" style="flex:2" onclick="aiSaveList()">✓ Liste speichern</button>
+        </div>
       </div>
     </div>
   </div>
@@ -813,109 +870,201 @@ window.saveArtikelConfig=async function(){
 
 // ── ADMIN INVENTUR ──
 const LAGER_NEON_ADM = {
-  nettetal: {color:'#00aaff', border:'rgba(0,170,255,.5)',  bg:'rgba(0,170,255,.12)'},
-  brüggen:  {color:'#ff0055', border:'rgba(255,0,85,.5)',   bg:'rgba(255,0,85,.12)'},
-  viersen:  {color:'#ff8800', border:'rgba(255,136,0,.5)',  bg:'rgba(255,136,0,.12)'},
-  köln:     {color:'#cc00ff', border:'rgba(204,0,255,.5)',  bg:'rgba(204,0,255,.12)'},
+  nettetal:{color:'#00aaff',border:'rgba(0,170,255,.5)',bg:'rgba(0,170,255,.12)'},
+  brüggen: {color:'#ff0055',border:'rgba(255,0,85,.5)', bg:'rgba(255,0,85,.12)'},
+  viersen: {color:'#ff8800',border:'rgba(255,136,0,.5)',bg:'rgba(255,136,0,.12)'},
+  köln:    {color:'#cc00ff',border:'rgba(204,0,255,.5)',bg:'rgba(204,0,255,.12)'},
 };
 const ADMIN_LAGERS = ['nettetal','brüggen','viersen','köln'];
 const LAGER_NAMES_ADM = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
-let adminInvLager = 'brüggen';
+const CLOUDINARY_CLOUD_ADM = 'dxohdlnbd';
+const CLOUDINARY_PRESET_ADM = 'jitjn4w5';
+
+let aiLager = 'brüggen';
+let aiPhotos = []; // [{file, preview, url}]
+let aiItems = {};
+let aiPhotoDone = false;
+let aiListDone = false;
+let aiProducts = [];
 
 window.openAdminInvenur = async function(){
-  adminInvLager = 'brüggen';
-  document.getElementById('admin-inv-date').value = new Date().toISOString().slice(0,10);
-  renderAdminLagerTabs();
-  await renderAdminInvProducts();
+  aiLager='brüggen'; aiPhotos=[]; aiItems={}; aiPhotoDone=false; aiListDone=false;
+  document.getElementById('ai-inv-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('ai-card-photo').classList.remove('done');
+  document.getElementById('ai-card-list').classList.remove('done');
+  document.getElementById('ai-send-section').style.display='none';
+  document.getElementById('ai-photos-grid').innerHTML='';
+  document.getElementById('ai-upload-btn').disabled=true;
+  renderAiLagerTabs();
+  await loadAiProducts();
+  aiShowStep('ai-step-choose');
   document.getElementById('modal-admin-inv').classList.add('show');
 };
 
-function renderAdminLagerTabs(){
-  const nc = LAGER_NEON_ADM;
-  document.getElementById('admin-inv-lager-tabs').innerHTML = ADMIN_LAGERS.map(l=>{
-    const c = nc[l];
-    const isActive = l===adminInvLager;
-    const style = isActive
-      ? `color:${c.color};border-color:${c.border};background:${c.bg};box-shadow:0 0 10px ${c.bg}`
-      : `color:var(--text-dim);border-color:rgba(255,255,255,.1)`;
-    return `<button class="inv-lager-btn" style="${style}" onclick="switchAdminLager('${l}')">${LAGER_NAMES_ADM[l]}</button>`;
+function renderAiLagerTabs(){
+  document.getElementById('admin-inv-lager-tabs').innerHTML=ADMIN_LAGERS.map(l=>{
+    const c=LAGER_NEON_ADM[l];
+    const isActive=l===aiLager;
+    const style=isActive?`color:${c.color};border-color:${c.border};background:${c.bg};box-shadow:0 0 10px ${c.bg}`
+      :`color:var(--text-dim);border-color:rgba(255,255,255,.1)`;
+    return `<button class="inv-lager-btn" style="${style}" onclick="aiSwitchLager('${l}')">${LAGER_NAMES_ADM[l]}</button>`;
   }).join('');
 }
 
-window.switchAdminLager = async function(lager){
-  adminInvLager = lager;
-  renderAdminLagerTabs();
-  await renderAdminInvProducts();
+window.aiSwitchLager=async function(lager){
+  aiLager=lager; aiItems={}; aiListDone=false;
+  document.getElementById('ai-card-list').classList.remove('done');
+  renderAiLagerTabs();
+  await loadAiProducts();
+  aiUpdateSend();
 };
 
-async function renderAdminInvProducts(){
-  // Load artikel config for selected lager
-  let products = ALL_PRODUCTS;
-  try {
-    const cfgDoc = await getDoc(doc(db,'artikel_config',adminInvLager));
-    if(cfgDoc.exists()){
-      const ids = new Set(cfgDoc.data().selected_ids||[]);
-      if(ids.size>0){
-        products = ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
-      }
+async function loadAiProducts(){
+  aiProducts=ALL_PRODUCTS;
+  try{
+    const d=await db.collection('artikel_config').doc(aiLager).get();
+    if(d.exists){
+      const ids=new Set(d.data().selected_ids||[]);
+      if(ids.size>0) aiProducts=ALL_PRODUCTS.map(c=>({cat:c.cat,items:c.items.filter(i=>ids.has(i.id))})).filter(c=>c.items.length>0);
     }
-  } catch(e){}
-
-  let html='';
-  if(products.length===0){
-    html='<div style="text-align:center;padding:1.5rem;color:var(--text-dim);font-size:.85rem">Keine Artikel konfiguriert für dieses Lager</div>';
-  } else {
-    products.forEach((cat,ci)=>{
-      html+=`<div class="inv-form-cat-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">${cat.cat}</div><div>`;
-      cat.items.forEach(prod=>{
-        html+=`<div class="inv-form-row">
-          <div class="inv-form-icon">${prod.icon||'📦'}</div>
-          <span class="inv-form-name">${prod.name}</span>
-          <span class="inv-form-unit">${prod.unit||''}</span>
-          <input class="inv-form-qty" type="number" min="0" placeholder="0" data-id="${prod.id}">
-        </div>`;
-      });
-      html+='</div>';
-    });
-  }
-  document.getElementById('admin-inv-products').innerHTML=html;
+  }catch(e){}
 }
 
-window.submitAdminInventur = async function(){
-  const date = document.getElementById('admin-inv-date').value;
-  if(!date){ showToast('Datum fehlt','var(--neon-yellow)'); return; }
-
-  const items={};
-  document.querySelectorAll('#admin-inv-products .inv-form-qty').forEach(inp=>{
-    if(inp.value&&parseInt(inp.value)>0) items[inp.dataset.id]=parseInt(inp.value);
+function aiShowStep(id){
+  ['ai-step-choose','ai-step-photo','ai-step-list'].forEach(s=>{
+    document.getElementById(s).style.display=s===id?'block':'none';
   });
+  document.getElementById('ai-date-field').style.display=id==='ai-step-choose'?'block':'none';
+}
 
-  const monat = date.slice(0,7);
-  const filledCount = Object.keys(items).length;
+function aiUpdateSend(){
+  const show=aiPhotoDone||aiListDone;
+  document.getElementById('ai-send-section').style.display=show?'block':'none';
+}
 
+window.aiBackToChoose=function(){ aiShowStep('ai-step-choose'); aiUpdateSend(); };
+
+window.aiStartPhoto=function(){
+  aiShowStep('ai-step-photo');
+  document.getElementById('ai-photo-list-prompt').style.display=aiListDone?'block':'none';
+  renderAiPhotos();
+};
+
+window.aiStartList=async function(){
+  aiShowStep('ai-step-list');
+  document.getElementById('ai-list-photo-section').style.display=aiPhotoDone?'block':'none';
+  renderAiList();
+};
+
+window.aiHandleFiles=function(files){
+  [...files].forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{ aiPhotos.push({file:f,preview:e.target.result,url:null}); renderAiPhotos(); };
+    reader.readAsDataURL(f);
+  });
+};
+
+function renderAiPhotos(){
+  const grid=document.getElementById('ai-photos-grid');
+  const grid2=document.getElementById('ai-photos-grid2');
+  const html=aiPhotos.map((p,i)=>`<div class="ai-photo-thumb">
+    <img src="${p.preview||p.url}">
+    <button class="ai-photo-remove" onclick="aiRemovePhoto(${i})">✕</button>
+  </div>`).join('');
+  if(grid) grid.innerHTML=html;
+  if(grid2) grid2.innerHTML=html;
+  const btn=document.getElementById('ai-upload-btn');
+  if(btn) btn.disabled=aiPhotos.length===0;
+}
+
+window.aiRemovePhoto=function(i){ aiPhotos.splice(i,1); renderAiPhotos(); };
+
+window.aiUploadPhotos=async function(){
+  if(!aiPhotos.length) return;
   showSpinner();
-  try {
-    await addDoc(collection(db,'mitarbeiter_inventur'),{
-      lager: adminInvLager,
-      monat,
-      datum: date,
-      items,
-      photos: [],
-      photoCount: 0,
-      filledCount,
-      totalCount: filledCount,
-      mitarbeiter: 'Admin',
-      status: 'sent',
-      createdAt: new Date().toISOString()
+  try{
+    for(let i=0;i<aiPhotos.length;i++){
+      if(aiPhotos[i].url) continue;
+      const fd=new FormData();
+      fd.append('file',aiPhotos[i].file);
+      fd.append('upload_preset',CLOUDINARY_PRESET_ADM);
+      fd.append('folder',`inventur/${aiLager}/${document.getElementById('ai-inv-date').value.slice(0,7)}`);
+      const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_ADM}/image/upload`,{method:'POST',body:fd});
+      const data=await res.json();
+      if(data.secure_url) aiPhotos[i].url=data.secure_url;
+      else throw new Error(data.error?.message||'Upload failed');
+    }
+    aiPhotoDone=true;
+    document.getElementById('ai-card-photo').classList.add('done');
+    document.getElementById('ai-photo-list-prompt').style.display='block';
+    hideSpinner();
+    showToast('Fotos gespeichert! ✓');
+    aiBackToChoose();
+  }catch(e){ hideSpinner(); showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
+};
+
+function renderAiList(){
+  const container=document.getElementById('ai-inv-list-container');
+  if(!aiProducts.length){
+    container.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem">
+      <div style="font-size:2rem;margin-bottom:.5rem">📋</div>Keine Artikel konfiguriert</div>`;
+    return;
+  }
+  let html='';
+  aiProducts.forEach((cat,ci)=>{
+    const isFirst=ci===0;
+    html+=`<div class="inv-cat ${isFirst?'':''}">
+      <div class="inv-cat-header open" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none'">
+        <span class="inv-cat-arrow">▶</span>
+        <span class="inv-cat-label">${cat.cat}</span>
+      </div>
+      <div class="inv-cat-items">`;
+    cat.items.forEach(prod=>{
+      const val=aiItems[prod.id]||'';
+      html+=`<div class="inv-item-row">
+        <div class="inv-item-icon">${prod.icon||'📦'}</div>
+        <span class="inv-item-name">${prod.name}</span>
+        <span class="inv-item-unit">${prod.unit||''}</span>
+        <input class="inv-item-qty" type="number" min="0" placeholder="0" value="${val}" data-id="${prod.id}"
+          oninput="aiItems[this.dataset.id]=this.value?parseInt(this.value):undefined">
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  container.innerHTML=html;
+}
+
+window.aiSaveList=function(){
+  document.querySelectorAll('#ai-inv-list-container .inv-item-qty').forEach(inp=>{
+    if(inp.value) aiItems[inp.dataset.id]=parseInt(inp.value);
+  });
+  aiListDone=true;
+  document.getElementById('ai-card-list').classList.add('done');
+  showToast('Liste gespeichert!');
+  aiBackToChoose();
+};
+
+window.aiSubmitInventur=async function(){
+  const date=document.getElementById('ai-inv-date').value;
+  if(!date){ showToast('Datum fehlt','var(--neon-yellow)'); return; }
+  const photos=aiPhotos.map(p=>p.url||p.preview||'').filter(Boolean);
+  const items=Object.fromEntries(Object.entries(aiItems).filter(([,v])=>v>0));
+  const filledCount=Object.keys(items).length;
+  const monat=date.slice(0,7);
+  showSpinner();
+  try{
+    await db.collection('mitarbeiter_inventur').add({
+      lager:aiLager, monat, datum:date,
+      items, photos, photoCount:photos.length,
+      filledCount, totalCount:aiProducts.reduce((s,c)=>s+c.items.length,0),
+      mitarbeiter:'Admin', status:'sent',
+      createdAt:new Date().toISOString()
     });
     hideSpinner();
     closeModal('modal-admin-inv');
-    showToast('Inventur erstellt! ✓');
+    showToast('Inventur erfolgreich erstellt! ✓');
     loadSubmissions();
-  } catch(e){
-    hideSpinner();
-    showToast('Fehler: '+e.message,'var(--neon-magenta)');
-  }
+  }catch(e){ hideSpinner(); showToast('Fehler: '+e.message,'var(--neon-magenta)'); }
 };
 
 // ── INIT ──
