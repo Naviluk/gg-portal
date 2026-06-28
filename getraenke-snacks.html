@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>GETRÄNKE & SNACKS – GAME GALAXY</title>
+<title>GETRÄNKE &amp; SNACKS – GAME GALAXY</title>
 <style>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
@@ -373,9 +373,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .btn-wareneingang{white-space:normal}
 }
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
-</style>
-</head>
-<body>
+
 /* ── КНОПКИ + GERÄT / + THEKE ── */
 .btn-geraet{
   margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
@@ -394,7 +392,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   box-shadow:0 0 16px rgba(255,0,204,.4);transition:all .2s;white-space:nowrap}
 .btn-theke:hover{box-shadow:0 0 28px rgba(255,0,204,.7);transform:translateY(-1px)}
 .edit-date-icon{font-size:.7rem;opacity:.55;margin-left:.15rem;cursor:pointer}
-.we-date-th:hover,.geraet-date-th:hover,.theke-date-th:hover{opacity:.8}
 .btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700;box-shadow:0 0 16px rgba(0,255,136,.3)}
 .btn-save:hover{box-shadow:0 0 28px rgba(0,255,136,.6);transform:translateY(-1px)}
 @media(max-width:640px){
@@ -427,7 +424,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </header>
 
 <div class="user-dropdown" id="user-dropdown">
-  <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
+  <button onclick="window.location.href='gg-portal.html'">&#8592; Zurück zum Portal</button>
   <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
 </div>
 
@@ -495,8 +492,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <button class="btn-geraet" onclick="openForm('geraet')">＋ Gerät</button>
-    <button class="btn-theke" onclick="openForm('theke')">＋ Theke</button>
+    <button class="btn-geraet" onclick="openForm('geraet')">&#xFF0B; Gerät</button>
+    <button class="btn-theke" onclick="openForm('theke')">&#xFF0B; Theke</button>
   </div>
 
   <div class="table-wrap-single">
@@ -507,13 +504,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- ═══ MODAL: GERÄT / THEKE ═══ -->
+<!-- MODAL: GERÄT / THEKE -->
 <div class="modal-overlay" id="modal-form">
   <div class="modal">
-    <button class="modal-close" onclick="closeForm()">✕</button>
+    <button class="modal-close" onclick="closeForm()">&#x2715;</button>
     <div class="modal-title" id="form-title">Gerät – Eintrag</div>
-
-    <!-- Schritt 1: Auswahl -->
     <div id="form-step1">
       <div class="field">
         <label class="field-label">Datum</label>
@@ -528,27 +523,25 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <div id="form-selected-items"></div>
       </div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter →</button>
+        <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter &#x2192;</button>
         <button class="btn btn-ghost" onclick="closeForm()">Abbrechen</button>
       </div>
     </div>
-
-    <!-- Schritt 2: Bestätigung -->
     <div id="form-step2" style="display:none">
       <div class="confirm-date" id="form-confirm-date"></div>
       <div class="confirm-list" id="form-confirm-list"></div>
       <div class="modal-btn-row">
-        <button class="btn btn-save" id="form-save-btn" onclick="saveFormEntry()">✓ Speichern</button>
-        <button class="btn btn-ghost" onclick="backToFormEdit()">← Zurück</button>
+        <button class="btn btn-save" id="form-save-btn" onclick="saveFormEntry()">&#x2713; Speichern</button>
+        <button class="btn btn-ghost" onclick="backToFormEdit()">&#x2190; Zurück</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL: ANFANGSBESTAND ═══ -->
+<!-- MODAL: ANFANGSBESTAND -->
 <div class="modal-overlay" id="modal-ab">
   <div class="modal" style="max-width:360px">
-    <button class="modal-close" onclick="document.getElementById('modal-ab').classList.remove('show')">✕</button>
+    <button class="modal-close" onclick="document.getElementById('modal-ab').classList.remove('show')">&#x2715;</button>
     <div class="modal-title">Anfangsbestand festlegen</div>
     <div class="field">
       <label class="field-label" id="ab-prod-label">Produkt</label>
@@ -564,7 +557,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
   authDomain: "lager-b898e.firebaseapp.com",
@@ -576,7 +568,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ── PRODUKTE (nur Getränke & Snacks) ──
 const GS_PRODUCTS = [
   {cat:'Getränke', items:[
     {id:'rb_blue',   name:'Red Bull',                 unit:'0,25 L', icon:'🔵'},
@@ -594,476 +585,158 @@ const GS_PRODUCTS = [
     {id:'durstl',    name:'Durstlöscher',             unit:'',       icon:'🥤'},
   ]},
   {cat:'Snacks', items:[
-    {id:'erdnuesse', name:'Erdnüsse',       unit:'20 St.', icon:'🥜'},
-    {id:'stuf',      name:'Studentenfutter',unit:'20 St.', icon:'🍿'},
-    {id:'snickers',  name:'Snickers',       unit:'24 St.', icon:'🍫'},
-    {id:'mars',      name:'Mars',           unit:'24 St.', icon:'🍬'},
-    {id:'twix',      name:'Twix',           unit:'30 St.', icon:'🍭'},
-    {id:'mnm',       name:'M&M',            unit:'24 St.', icon:'🟡'},
-    {id:'pringles',  name:'Pringles',       unit:'24 St.', icon:'🥫'},
-    {id:'kitkat',    name:'KitKat White',   unit:'24 St.', icon:'🤍'},
-    {id:'bifi_orig', name:'BIFI Original',  unit:'40 St.', icon:'🌭'},
-    {id:'bifi_roll', name:'BIFI Roll',      unit:'24 St.', icon:'🥖'},
+    {id:'erdnuesse', name:'Erdnüsse',        unit:'20 St.', icon:'🥜'},
+    {id:'stuf',      name:'Studentenfutter', unit:'20 St.', icon:'🍿'},
+    {id:'snickers',  name:'Snickers',        unit:'24 St.', icon:'🍫'},
+    {id:'mars',      name:'Mars',            unit:'24 St.', icon:'🍬'},
+    {id:'twix',      name:'Twix',            unit:'30 St.', icon:'🍭'},
+    {id:'mnm',       name:'M&M',             unit:'24 St.', icon:'🟡'},
+    {id:'pringles',  name:'Pringles',        unit:'24 St.', icon:'🥫'},
+    {id:'kitkat',    name:'KitKat White',    unit:'24 St.', icon:'🤍'},
+    {id:'bifi_orig', name:'BIFI Original',   unit:'40 St.', icon:'🌭'},
+    {id:'bifi_roll', name:'BIFI Roll',       unit:'24 St.', icon:'🥖'},
   ]},
 ];
 
 const NEON = {
-  nettetal:{neon:'#00aaff', bg:'rgba(0,170,255,.10)',  bgD:'rgba(0,170,255,.05)',  border:'rgba(0,170,255,.35)'},
-  brüggen: {neon:'#ff0055', bg:'rgba(255,0,85,.10)',   bgD:'rgba(255,0,85,.05)',   border:'rgba(255,0,85,.35)'},
-  viersen: {neon:'#ff8800', bg:'rgba(255,136,0,.10)',  bgD:'rgba(255,136,0,.05)',  border:'rgba(255,136,0,.35)'},
-  köln:    {neon:'#cc00ff', bg:'rgba(204,0,255,.10)',  bgD:'rgba(204,0,255,.05)',  border:'rgba(204,0,255,.35)'},
+  nettetal:{neon:'#00aaff',bg:'rgba(0,170,255,.10)',bgD:'rgba(0,170,255,.05)',border:'rgba(0,170,255,.35)'},
+  brüggen: {neon:'#ff0055',bg:'rgba(255,0,85,.10)', bgD:'rgba(255,0,85,.05)', border:'rgba(255,0,85,.35)'},
+  viersen: {neon:'#ff8800',bg:'rgba(255,136,0,.10)',bgD:'rgba(255,136,0,.05)',border:'rgba(255,136,0,.35)'},
+  köln:    {neon:'#cc00ff',bg:'rgba(204,0,255,.10)',bgD:'rgba(204,0,255,.05)',border:'rgba(204,0,255,.35)'},
 };
-const LAGER_NAMES = {nettetal:'Nettetal', brüggen:'Brüggen', viersen:'Viersen', köln:'Köln'};
+const LAGER_NAMES = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
 
-// ── STATE ──
-let currentLager    = 'brüggen';
-let currentZeitraum = '2026-06';
-let lieferungen     = [];
-let geraetEntries   = [];
-let thekeEntries    = [];
-let anfangsbestand  = {};
-let endbestandData  = {};
-let liefer_expanded = false;
-let geraet_expanded = false;
-let theke_expanded  = false;
-let formType        = 'geraet';
-let formItems       = {};
-let formEditId      = null;
-let currentAbProdId = null;
+let currentLager='brüggen', currentZeitraum='2026-06';
+let lieferungen=[], geraetEntries=[], thekeEntries=[];
+let anfangsbestand={}, endbestandData={};
+let liefer_expanded=false, geraet_expanded=false, theke_expanded=false;
+let formType='geraet', formItems={}, formEditId=null, currentAbProdId=null;
 
-// ── UTILS ──
-function showSpinner(){ document.getElementById('spinner').classList.add('show'); }
-function hideSpinner(){ document.getElementById('spinner').classList.remove('show'); }
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3500);
-}
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
-  document.getElementById('burger-btn').classList.toggle('open');
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
-  document.getElementById('burger-btn').classList.remove('open');
-}
-function toggleSubMenu(btn){ btn.closest('.nav-item').classList.toggle('open'); }
-function toggleUserDropdown(){
-  document.getElementById('user-dropdown').classList.toggle('show');
-  document.addEventListener('click', function h(e){
-    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){
-      document.getElementById('user-dropdown').classList.remove('show');
-      document.removeEventListener('click',h);
-    }
-  });
-}
+function showSpinner(){document.getElementById('spinner').classList.add('show')}
+function hideSpinner(){document.getElementById('spinner').classList.remove('show')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');document.getElementById('burger-btn').classList.toggle('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('show');document.getElementById('burger-btn').classList.remove('open')}
+function toggleSubMenu(btn){btn.closest('.nav-item').classList.toggle('open')}
+function toggleUserDropdown(){document.getElementById('user-dropdown').classList.toggle('show');document.addEventListener('click',function h(e){if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){document.getElementById('user-dropdown').classList.remove('show');document.removeEventListener('click',h)}})}
 
-// ── DATEN LADEN ──
 async function loadData(){
   showSpinner();
-  currentLager    = document.getElementById('sel-lager').value;
-  currentZeitraum = document.getElementById('sel-zeitraum').value;
-  lieferungen=[]; geraetEntries=[]; thekeEntries=[];
-  anfangsbestand={}; endbestandData={};
-
-  try {
-    const snap = await db.collection('wareneingang')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snap.forEach(d=>lieferungen.push({id:d.id,...d.data()}));
-  } catch(e){}
-
-  try {
-    const snap = await db.collection('gs_geraet')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snap.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));
-    geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
-  } catch(e){}
-
-  try {
-    const snap = await db.collection('gs_theke')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snap.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));
-    thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
-  } catch(e){}
-
-  try {
-    const doc = await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
-    if(doc.exists) anfangsbestand = doc.data();
-  } catch(e){}
-
-  try {
-    const snap = await db.collection('inventur')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    let lastDate=null, lastItems={};
-    snap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{};} });
-    endbestandData = lastItems;
-  } catch(e){}
-
+  currentLager=document.getElementById('sel-lager').value;
+  currentZeitraum=document.getElementById('sel-zeitraum').value;
+  lieferungen=[];geraetEntries=[];thekeEntries=[];anfangsbestand={};endbestandData={};
+  try{const s=await db.collection('wareneingang').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>lieferungen.push({id:d.id,...d.data()}))}catch(e){}
+  try{const s=await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
+  try{const s=await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
+  try{const doc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();if(doc.exists)anfangsbestand=doc.data()}catch(e){}
+  try{const s=await db.collection('inventur').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();let ld=null,li={};s.forEach(d=>{const inv=d.data();if(!ld||inv.datum>ld){ld=inv.datum;li=inv.items||{}}});endbestandData=li}catch(e){}
   hideSpinner();
   renderTable();
 }
 
-// ── TABELLE RENDERN ──
 function renderTable(){
-  const cc = NEON[currentLager] || {neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
-  const neutralTh = 'color:var(--text-dim)';
-  const liefer_dates = [...new Set(lieferungen.map(w=>w.datum))].sort();
-  const geraet_dates = [...new Set(geraetEntries.map(e=>e.datum))].sort();
-  const theke_dates  = [...new Set(thekeEntries.map(e=>e.datum))].sort();
+  const cc=NEON[currentLager]||{neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
+  const liefer_dates=[...new Set(lieferungen.map(w=>w.datum))].sort();
+  const geraet_dates=[...new Set(geraetEntries.map(e=>e.datum))].sort();
+  const theke_dates=[...new Set(thekeEntries.map(e=>e.datum))].sort();
 
-  // ── HEADER ──
-  let thHTML = '<tr>';
-  thHTML += '<th class="col-artikel">Artikel</th>';
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+  let thHTML='<tr>';
+  thHTML+='<th class="col-artikel">Artikel</th>';
+  thHTML+='<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}"><div class="col-einkauf-wrap"><span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span><button class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()">▶</button></div></th>`;
+  liefer_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-liefer-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()">▶</button></div></th>`;
+  geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="color:var(--text-dim);font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</button></div></th>`;
+  theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
+  thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th></tr>';
+  document.getElementById('gs-thead').innerHTML=thHTML;
 
-  // Lieferungen – Lager-Farbe
-  thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
-    <div class="col-einkauf-wrap">
-      <span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
-      <button class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()">▶</button>
-    </div></th>`;
-  liefer_dates.forEach(d=>{
-    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-liefer-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}">${label} <span class="edit-date-icon">✏️</span></th>`;
-  });
-
-  // Gerät – neutral
-  thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
-    <div class="col-einkauf-wrap">
-      <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
-      <button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()">▶</button>
-    </div></th>`;
-  geraet_dates.forEach(d=>{
-    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="color:var(--text-dim);font-size:.72rem" data-date="${d}" data-type="geraet">${label} <span class="edit-date-icon">✏️</span></th>`;
-  });
-
-  // Theke – neutral
-  thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
-    <div class="col-einkauf-wrap">
-      <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
-      <button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</button>
-    </div></th>`;
-  theke_dates.forEach(d=>{
-    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.72rem" data-date="${d}" data-type="theke">${label} <span class="edit-date-icon">✏️</span></th>`;
-  });
-
-  // Endbestand
-  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th>';
-  thHTML += '</tr>';
-  document.getElementById('gs-thead').innerHTML = thHTML;
-
-  // ── BODY ──
-  let tbHTML = '';
-  GS_PRODUCTS.forEach((catObj, ci)=>{
-    const isFirst = ci===0;
-    tbHTML += `<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
-      <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
-
-    catObj.items.forEach(prod=>{
-      const ab = anfangsbestand[prod.id] ?? '';
-      const abDisplay = ab!=='' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      const totalLiefer = lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
-      const totalGeraet = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-      const totalTheke  = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-      const eb = endbestandData[prod.id]!==undefined ? endbestandData[prod.id] : '—';
-      const ebStyle = eb!=='—' ? 'color:var(--neon-green)' : '';
-      const prodHidden = isFirst ? '' : 'hidden';
-
-      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}">`;
-      tbHTML += `<td class="col-artikel"><div class="prod-info">
-        <div class="prod-icon">${prod.icon||'📦'}</div>
-        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
-      </div></td>`;
-
-      // Anfangsbestand – klickbar
-      tbHTML += `<td class="num-cell num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
-
-      // Lieferungen gesamt
-      tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${totalLiefer||'—'}</td>`;
-      liefer_dates.forEach(d=>{
-        const we = lieferungen.find(w=>w.datum===d);
-        const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-col detail-liefer-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
-      });
-
-      // Gerät gesamt
-      tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalGeraet||'—'}</td>`;
-      geraet_dates.forEach(d=>{
-        const entry = geraetEntries.find(e=>e.datum===d);
-        const qty = entry&&entry.items&&entry.items[prod.id] ? entry.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">${qty}</td>`;
-      });
-
-      // Theke gesamt
-      tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalTheke||'—'}</td>`;
-      theke_dates.forEach(d=>{
-        const entry = thekeEntries.find(e=>e.datum===d);
-        const qty = entry&&entry.items&&entry.items[prod.id] ? entry.items[prod.id] : '—';
-        tbHTML += `<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${qty}</td>`;
-      });
-
-      // Endbestand
-      tbHTML += `<td class="num-cell" style="${ebStyle}">${eb}</td>`;
-      tbHTML += '</tr>';
-    });
-  });
-
-  document.getElementById('gs-tbody').innerHTML = tbHTML;
-
-  // Zustand wiederherstellen
-  if(liefer_expanded) applyDetailCols('liefer', true);
-  if(geraet_expanded) applyDetailCols('geraet', true);
-  if(theke_expanded)  applyDetailCols('theke',  true);
-
-  // Klick-Handler Lieferungen-Datum
-  document.querySelectorAll('.we-date-th').forEach(th=>{
-    th.style.cursor='pointer';
-    th.addEventListener('click', ()=>openEditLieferung(th.dataset.date));
-  });
-  // Klick-Handler Gerät-Datum
-  document.querySelectorAll('.geraet-date-th').forEach(th=>{
-    th.style.cursor='pointer';
-    th.addEventListener('click', ()=>openEditEntry('geraet', th.dataset.date));
-  });
-  // Klick-Handler Theke-Datum
-  document.querySelectorAll('.theke-date-th').forEach(th=>{
-    th.style.cursor='pointer';
-    th.addEventListener('click', ()=>openEditEntry('theke', th.dataset.date));
-  });
-}
-
-// ── KATEGORIE TOGGLE ──
-window.toggleCategory = function(row){
-  const ci = row.dataset.cat;
-  const isOpen = row.classList.toggle('open');
-  document.querySelectorAll(`#gs-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
-};
-
-// ── SPALTEN AUFKLAPPEN ──
-function applyDetailCols(type, show){
-  document.querySelectorAll(`.detail-${type}-th,.detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));
-  const btn = document.getElementById(`expand-${type}-btn`);
-  if(btn){ btn.textContent=show?'◀':'▶'; btn.classList.toggle('expanded',show); }
-}
-window.toggleLieferCols = function(){ liefer_expanded=!liefer_expanded; applyDetailCols('liefer',liefer_expanded); };
-window.toggleGeraetCols = function(){ geraet_expanded=!geraet_expanded; applyDetailCols('geraet',geraet_expanded); };
-window.toggleThekeCols  = function(){ theke_expanded=!theke_expanded;   applyDetailCols('theke', theke_expanded);  };
-
-// ── ANFANGSBESTAND ──
-window.openAnfangsbestandModal = function(prodId, prodName){
-  currentAbProdId = prodId;
-  document.getElementById('ab-prod-label').textContent = prodName;
-  document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
-  document.getElementById('modal-ab').classList.add('show');
-  setTimeout(()=>document.getElementById('ab-value').focus(), 100);
-};
-window.saveAnfangsbestand = async function(){
-  const val = parseInt(document.getElementById('ab-value').value);
-  if(isNaN(val)||val<0) return;
-  showSpinner();
-  anfangsbestand[currentAbProdId] = val;
-  try { await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true}); } catch(e){}
-  hideSpinner();
-  document.getElementById('modal-ab').classList.remove('show');
-  renderTable();
-  showToast('Anfangsbestand gespeichert');
-};
-
-// ── FORMULAR GERÄT / THEKE ÖFFNEN ──
-window.openForm = function(type, prefillItems, editId, prefillDate){
-  formType   = type;
-  formItems  = prefillItems ? Object.assign({},prefillItems) : {};
-  formEditId = editId || null;
-
-  const cc = NEON[currentLager] || {};
-  const isGeraet = type==='geraet';
-  const lagerName = LAGER_NAMES[currentLager]||currentLager;
-  const lagerColor = cc.neon || 'var(--text)';
-  document.getElementById('form-title').innerHTML =
-    `${isGeraet?'⚙️ Gerät':'🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .55rem;border-radius:8px;background:${cc.bg||'rgba(0,0,0,.3)'};border:1px solid ${cc.border||'rgba(255,255,255,.1)'};color:${lagerColor}">${lagerName}</span>`;
-
-  // Datum setzen
-  document.getElementById('form-date').value = prefillDate || new Date().toISOString().slice(0,10);
-
-  // Produktliste aufbauen – identisches Format wie Wareneingang in lager.html
-  let html = '';
+  let tbHTML='';
   GS_PRODUCTS.forEach((catObj,ci)=>{
-    const isFirst = ci===0;
-    html += `<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}">
-      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
-        <span class="modal-cat-label">${catObj.cat}</span>
-        <span class="modal-cat-arrow">▶</span>
-      </div>
-      <div class="modal-cat-items">`;
+    const isFirst=ci===0;
+    tbHTML+=`<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}"><td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td><td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
     catObj.items.forEach(prod=>{
-      const hasPre = formItems[prod.id]!==undefined;
-      html += `<div class="modal-prod-row" id="frow-${prod.id}">
-        <div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div>
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="modal-prod-name-block">
-          <span class="modal-prod-name">${prod.name}</span>
-          ${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}
-        </div>
-        <input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" placeholder="St."
-          value="${hasPre?formItems[prod.id]:''}"
-          oninput="updateFormQty('${prod.id}',this.value)">
-      </div>`;
+      const ab=anfangsbestand[prod.id]??'';
+      const abD=ab!==''?ab:'<span style="color:var(--text-dim);font-size:.7rem">+</span>';
+      const tL=lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+      const tG=geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      const tT=thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      const eb=endbestandData[prod.id]!==undefined?endbestandData[prod.id]:'—';
+      const ebS=eb!=='—'?'color:var(--neon-green)':'';
+      tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}">`;
+      tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${prod.icon||'📦'}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
+      tbHTML+=`<td class="num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abD}</span></td>`;
+      tbHTML+=`<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${tL||'—'}</td>`;
+      liefer_dates.forEach(d=>{const we=lieferungen.find(w=>w.datum===d);const q=we&&we.items&&we.items[prod.id]?we.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-liefer-td" style="background:${cc.bgD};color:${cc.neon}">${q}</td>`;});
+      tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tG||'—'}</td>`;
+      geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">${q}</td>`;});
+      tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tT||'—'}</td>`;
+      theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${q}</td>`;});
+      tbHTML+=`<td class="num-cell" style="${ebS}">${eb}</td></tr>`;
     });
-    html += `</div></div>`;
   });
-  document.getElementById('form-product-list').innerHTML = html;
+  document.getElementById('gs-tbody').innerHTML=tbHTML;
 
-  // Schritt 1 zeigen, Schritt 2 verstecken
-  document.getElementById('form-step1').style.display = '';
-  document.getElementById('form-step2').style.display = 'none';
-  document.getElementById('form-selected-list').style.display = 'none';
-  document.getElementById('form-selected-items').innerHTML = '';
-  document.getElementById('form-save-btn').textContent = editId ? '✓ Änderungen speichern' : '✓ Speichern';
+  if(liefer_expanded)applyDetailCols('liefer',true);
+  if(geraet_expanded)applyDetailCols('geraet',true);
+  if(theke_expanded)applyDetailCols('theke',true);
 
+  document.querySelectorAll('.we-date-th').forEach(th=>th.addEventListener('click',()=>openEditLieferung(th.dataset.date)));
+  document.querySelectorAll('.geraet-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('geraet',th.dataset.date)));
+  document.querySelectorAll('.theke-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('theke',th.dataset.date)));
+}
+
+window.toggleCategory=function(row){const ci=row.dataset.cat;const o=row.classList.toggle('open');document.querySelectorAll(`#gs-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!o))};
+function applyDetailCols(type,show){document.querySelectorAll(`.detail-${type}-th,.detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));const btn=document.getElementById(`expand-${type}-btn`);if(btn){btn.textContent=show?'◀':'▶';btn.classList.toggle('expanded',show)}}
+window.toggleLieferCols=function(){liefer_expanded=!liefer_expanded;applyDetailCols('liefer',liefer_expanded)};
+window.toggleGeraetCols=function(){geraet_expanded=!geraet_expanded;applyDetailCols('geraet',geraet_expanded)};
+window.toggleThekeCols=function(){theke_expanded=!theke_expanded;applyDetailCols('theke',theke_expanded)};
+
+window.openAnfangsbestandModal=function(prodId,prodName){currentAbProdId=prodId;document.getElementById('ab-prod-label').textContent=prodName;document.getElementById('ab-value').value=anfangsbestand[prodId]??'';document.getElementById('modal-ab').classList.add('show');setTimeout(()=>document.getElementById('ab-value').focus(),100)};
+window.saveAnfangsbestand=async function(){const val=parseInt(document.getElementById('ab-value').value);if(isNaN(val)||val<0)return;showSpinner();anfangsbestand[currentAbProdId]=val;try{await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true})}catch(e){}hideSpinner();document.getElementById('modal-ab').classList.remove('show');renderTable();showToast('Anfangsbestand gespeichert')};
+
+window.openForm=function(type,prefillItems,editId,prefillDate){
+  formType=type;formItems=prefillItems?Object.assign({},prefillItems):{};formEditId=editId||null;
+  const cc=NEON[currentLager]||{};
+  const isG=type==='geraet';
+  document.getElementById('form-title').innerHTML=`${isG?'⚙️ Gerät':'🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .55rem;border-radius:8px;background:${cc.bg||'rgba(0,0,0,.3)'};border:1px solid ${cc.border||'rgba(255,255,255,.1)'};color:${cc.neon||'var(--text)'}">${LAGER_NAMES[currentLager]||currentLager}</span>`;
+  document.getElementById('form-date').value=prefillDate||new Date().toISOString().slice(0,10);
+  let html='';
+  GS_PRODUCTS.forEach((catObj,ci)=>{
+    const isFirst=ci===0;
+    html+=`<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-arrow">▶</span></div><div class="modal-cat-items">`;
+    catObj.items.forEach(prod=>{
+      const hasPre=formItems[prod.id]!==undefined;
+      html+=`<div class="modal-prod-row"><div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div><div class="modal-prod-name-block"><span class="modal-prod-name">${prod.name}</span>${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}</div><input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" placeholder="St." value="${hasPre?formItems[prod.id]:''}" oninput="updateFormQty('${prod.id}',this.value)"></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  document.getElementById('form-product-list').innerHTML=html;
+  document.getElementById('form-step1').style.display='';
+  document.getElementById('form-step2').style.display='none';
+  document.getElementById('form-selected-list').style.display='none';
+  document.getElementById('form-save-btn').textContent=editId?'✓ Änderungen speichern':'✓ Speichern';
   updateFormPreview();
   document.getElementById('modal-form').classList.add('show');
 };
-window.closeForm = function(){ document.getElementById('modal-form').classList.remove('show'); };
+window.closeForm=function(){document.getElementById('modal-form').classList.remove('show')};
 
-window.toggleFormProd = function(prodId){
-  const cb  = document.getElementById('fcb-'+prodId);
-  const inp = document.getElementById('fqty-'+prodId);
-  const isChecked = cb.classList.toggle('checked');
-  inp.classList.toggle('show', isChecked);
-  if(isChecked){ inp.focus(); if(!formItems[prodId]) formItems[prodId]=0; }
-  else { delete formItems[prodId]; }
-  updateFormPreview();
-};
-window.updateFormQty = function(prodId, val){
-  if(val!=='') formItems[prodId]=parseInt(val)||0;
-  updateFormPreview();
-};
-function updateFormPreview(){
-  const ids = Object.keys(formItems);
-  const sel = document.getElementById('form-selected-list');
-  if(!ids.length){ sel.style.display='none'; return; }
-  sel.style.display='block';
-  let html='', lastCat='';
-  GS_PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){ html+=`<div class="selected-cat-label">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        html+=`<div class="selected-item">
-          <span class="selected-item-name">${prod.icon} ${prod.name}<span class="selected-item-unit">${prod.unit||''}</span></span>
-          <span class="selected-item-qty">${formItems[prod.id]||0}</span>
-        </div>`;
-      }
-    });
-  });
-  document.getElementById('form-selected-items').innerHTML = html;
-}
+window.toggleFormProd=function(prodId){const cb=document.getElementById('fcb-'+prodId);const inp=document.getElementById('fqty-'+prodId);const ok=cb.classList.toggle('checked');inp.classList.toggle('show',ok);if(ok){inp.focus();if(formItems[prodId]===undefined)formItems[prodId]=0;}else{delete formItems[prodId];}updateFormPreview()};
+window.updateFormQty=function(prodId,val){if(val!=='')formItems[prodId]=parseInt(val)||0;updateFormPreview()};
+function updateFormPreview(){const ids=Object.keys(formItems);const sel=document.getElementById('form-selected-list');if(!ids.length){sel.style.display='none';return;}sel.style.display='block';let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div class="selected-cat-label">${c.cat}</div>`;lc=c.cat;}html+=`<div class="selected-item"><span class="selected-item-name">${p.icon} ${p.name}<span class="selected-item-unit">${p.unit||''}</span></span><span class="selected-item-qty">${formItems[p.id]||0}</span></div>`;}});});document.getElementById('form-selected-items').innerHTML=html}
 
-window.buildFormConfirm = function(){
-  const ids = Object.keys(formItems);
-  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
-  const date = document.getElementById('form-date').value;
-  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+window.buildFormConfirm=function(){const ids=Object.keys(formItems);if(!ids.length){showToast('Bitte mindestens einen Artikel auswählen.');return;}const date=document.getElementById('form-date').value;if(!date){showToast('Bitte Datum auswählen.');return;}ids.forEach(id=>{const inp=document.getElementById('fqty-'+id);if(inp&&inp.value!=='')formItems[id]=parseInt(inp.value)||0;});const d=new Date(date);document.getElementById('form-confirm-date').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${c.cat}</div>`;lc=c.cat;}html+=`<div class="confirm-item"><span class="ci-name">${p.icon} ${p.name} <span class="ci-unit">${p.unit||''}</span></span><span class="ci-qty">${formItems[p.id]||0}</span></div>`;}}); });document.getElementById('form-confirm-list').innerHTML=html;document.getElementById('form-step1').style.display='none';document.getElementById('form-step2').style.display='';};
+window.backToFormEdit=function(){document.getElementById('form-step1').style.display='';document.getElementById('form-step2').style.display='none'};
+window.saveFormEntry=async function(){const date=document.getElementById('form-date').value;const monat=date.slice(0,7);const col=formType==='geraet'?'gs_geraet':'gs_theke';const entry={lager:currentLager,datum:date,monat,items:{...formItems},updatedAt:new Date().toISOString()};showSpinner();try{if(formEditId){await db.collection(col).doc(formEditId).update(entry);showToast('Eintrag aktualisiert ✓');}else{entry.createdAt=new Date().toISOString();await db.collection(col).add(entry);showToast('Eintrag gespeichert ✓');}closeForm();await loadData();}catch(e){hideSpinner();showToast('Fehler: '+e.message)}};
 
-  // Aktuelle Werte aus DOM lesen
-  ids.forEach(id=>{ const inp=document.getElementById('fqty-'+id); if(inp&&inp.value!=='') formItems[id]=parseInt(inp.value)||0; });
+window.openEditLieferung=function(date){const we=lieferungen.find(w=>w.datum===date);if(we)window.open('lager.html','_blank')};
+window.openEditEntry=function(type,date){const list=type==='geraet'?geraetEntries:thekeEntries;const entry=list.find(e=>e.datum===date);if(entry)openForm(type,entry.items,entry.id,entry.datum)};
 
-  const d = new Date(date);
-  document.getElementById('form-confirm-date').textContent =
-    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-
-  let html='', lastCat='';
-  GS_PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        html+=`<div class="confirm-item">
-          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span>
-          <span class="ci-qty">${formItems[prod.id]||0}</span>
-        </div>`;
-      }
-    });
-  });
-  document.getElementById('form-confirm-list').innerHTML = html;
-
-  document.getElementById('form-step1').style.display = 'none';
-  document.getElementById('form-step2').style.display = '';
-};
-
-window.backToFormEdit = function(){
-  document.getElementById('form-step1').style.display = '';
-  document.getElementById('form-step2').style.display = 'none';
-};
-
-window.saveFormEntry = async function(){
-  const date  = document.getElementById('form-date').value;
-  const monat = date.slice(0,7);
-  const col   = formType==='geraet' ? 'gs_geraet' : 'gs_theke';
-  const entry = {lager:currentLager, datum:date, monat, items:{...formItems}, updatedAt:new Date().toISOString()};
-
-  showSpinner();
-  try {
-    if(formEditId){
-      await db.collection(col).doc(formEditId).update(entry);
-      showToast('Eintrag aktualisiert ✓');
-    } else {
-      entry.createdAt = new Date().toISOString();
-      await db.collection(col).add(entry);
-      showToast('Eintrag gespeichert ✓');
-    }
-    closeForm();
-    await loadData();
-  } catch(e){
-    hideSpinner();
-    showToast('Fehler: '+e.message);
-  }
-};
-
-// ── LIEFERUNG BEARBEITEN ──
-window.openEditLieferung = function(date){
-  // Lieferungen kommen aus wareneingang collection – verweise auf lager.html
-  const we = lieferungen.find(w=>w.datum===date);
-  if(!we) return;
-  window.open('lager.html', '_blank');
-};
-
-// ── GERÄT / THEKE EINTRAG BEARBEITEN ──
-window.openEditEntry = function(type, date){
-  const list = type==='geraet' ? geraetEntries : thekeEntries;
-  const entry = list.find(e=>e.datum===date);
-  if(!entry) return;
-  openForm(type, entry.items, entry.id, entry.datum);
-};
-
-// ── INIT ──
-document.addEventListener('DOMContentLoaded', ()=>{
-  window.toggleSidebar    = toggleSidebar;
-  window.closeSidebar     = closeSidebar;
-  window.toggleUserDropdown = toggleUserDropdown;
-  window.toggleSubMenu    = toggleSubMenu;
-  window.toggleCategory   = toggleCategory;
-  window.toggleLieferCols = toggleLieferCols;
-  window.toggleGeraetCols = toggleGeraetCols;
-  window.toggleThekeCols  = toggleThekeCols;
-  window.openForm         = openForm;
-  window.closeForm        = closeForm;
-  window.openEditEntry    = openEditEntry;
-  window.saveFormEntry    = saveFormEntry;
-  window.saveAnfangsbestand = saveAnfangsbestand;
-
-  // Anfangsbestand-Klick
-  document.getElementById('gs-tbody').addEventListener('click', e=>{
-    const cell = e.target.closest('.anfang-cell');
-    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
-  });
-
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('gs-tbody').addEventListener('click',e=>{const cell=e.target.closest('.anfang-cell');if(cell)openAnfangsbestandModal(cell.dataset.prodId,cell.dataset.prodName)});
   loadData();
 });
-
 </script>
 </body>
 </html>
