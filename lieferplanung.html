@@ -397,7 +397,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-plan:hover{background:rgba(0,255,136,.2)}
 .btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700}
 .btn-save:hover{box-shadow:0 0 22px rgba(0,255,136,.5);transform:translateY(-1px)}
-.plan-value{color:var(--neon-green);font-weight:700}
+.plan-value{color:var(--neon-magenta);font-weight:700}
 /* Gesamt sidebar */
 .gesamt-panel{
   position:fixed;top:0;right:-380px;bottom:0;width:360px;
@@ -418,16 +418,33 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
-.plan-row{display:flex;align-items:center;gap:.6rem;padding:.42rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;transition:background .15s}
-.plan-row:hover{background:rgba(0,245,255,.03)}
-.plan-row-name{flex:1;font-size:.86rem;line-height:1.3;word-break:break-word}
-.plan-row-name .prod-unit-inline{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+/* Soll / Plan form — идентично Wareneingang */
+.soll-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s}
+.soll-prod-row:hover{background:rgba(0,245,255,.04)}
+.soll-checkbox{width:18px;height:18px;border:2px solid var(--glass-border);border-radius:4px;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;background:rgba(0,0,0,.3)}
+.soll-checkbox.checked{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
+.soll-checkbox.checked::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
+.soll-qty{width:75px;min-width:75px;max-width:75px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
+  padding:.3rem .4rem;text-align:center;outline:none;display:none;transition:border-color .2s}
+.soll-qty.show{display:block}
+.soll-qty:focus{border-color:var(--neon-cyan)}
+.soll-qty::-webkit-outer-spin-button,.soll-qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.soll-qty[type=number]{-moz-appearance:textfield}
+/* Plan form row (с рекомендацией) */
+.plan-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s}
+.plan-row:hover{background:rgba(0,245,255,.04)}
 .plan-row-empf{width:42px;text-align:center;font-size:.82rem;color:var(--neon-yellow);flex-shrink:0}
-.plan-row-qty{width:68px;flex-shrink:0;background:rgba(0,0,0,.5);border:1px solid var(--neon-cyan);
-  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.95rem;
-  padding:.32rem .4rem;border-radius:5px;text-align:center;outline:none;
-  transition:border-color .15s,box-shadow .15s}
-.plan-row-qty:focus{border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.3)}
+.plan-qty{width:75px;min-width:75px;max-width:75px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
+  padding:.3rem .4rem;text-align:center;outline:none;transition:border-color .2s}
+.plan-qty:focus{border-color:var(--neon-cyan)}
+.plan-qty::-webkit-outer-spin-button,.plan-qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.plan-qty[type=number]{-moz-appearance:textfield}
 .plan-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
 .soll-lager-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
@@ -759,9 +776,15 @@ function renderTable(){
     <th class="col-artikel">Artikel</th>
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktueller<br>Bestand</span></th>
     <th class="num-cell"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbrauch</span></th>
-    <th class="num-cell" style="min-width:130px"><span class="th-icon">${empfIcon}</span><span class="th-text">${empfLabel}</span>
-      <button class="btn-plan" style="margin-left:.4rem" onclick="openPlan()" title="Planung erstellen">✎</button></th>
-    <th class="num-cell"><span class="th-icon">${isZentral?'🛒':'🚚'}</span><span class="th-text">${planLabel}</span></th>
+    <th class="num-cell" style="min-width:130px;background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
+      <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
+      <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
+      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-green);border-color:var(--neon-green);background:rgba(0,255,136,.1)" onclick="openPlan()" title="Planung erstellen">✎</button>
+    </th>
+    <th class="num-cell" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
+      <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
+      <span class="th-text" style="color:var(--neon-magenta)">${planLabel}</span>
+    </th>
   </tr>`;
 
   let tbHTML='';
@@ -786,8 +809,8 @@ function renderTable(){
         </div></td>
         <td class="num-cell">${aktD}</td>
         <td class="num-cell" style="color:var(--text-dim)">${sollD}</td>
-        <td class="num-cell" style="${empfStyle}">${empf}</td>
-        <td class="num-cell">${planD}</td>
+        <td class="num-cell" style="background:rgba(0,255,136,.04);${empfStyle}">${empf}</td>
+        <td class="num-cell" style="background:rgba(255,0,204,.04)">${planD}</td>
       </tr>`;
     });
   });
@@ -855,23 +878,59 @@ function renderSollTabs(){
 window.switchSollLager=function(lg){saveSollLocal();sollModalLager=lg;renderSollTabs();renderSollContent()};
 
 function renderSollContent(){
-  const lgD=sollData[sollModalLager]||{};
+  const lgD = sollData[sollModalLager]||{};
+  // Инициализируем временный объект выбранных и значений
+  if(!window._sollSel) window._sollSel={};
+  window._sollSel[sollModalLager] = window._sollSel[sollModalLager]||{};
+  // Для каждого продукта с сохранённым значением — отмечаем как выбранный
+  Object.keys(lgD).forEach(pid=>{ if(lgD[pid]>0) window._sollSel[sollModalLager][pid]=true; });
+
   let html='';
   PRODUCTS.forEach((catObj,ci)=>{
-    html+=`<div class="modal-cat open"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-arrow">▶</span></div><div class="modal-cat-items">`;
+    html+=`<div class="modal-cat open" id="scat-${ci}">
+      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
+        <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-arrow">▶</span>
+      </div>
+      <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
-      const v=lgD[prod.id]??'';
-      html+=`<div class="plan-row"><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
-        <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" placeholder="St." value="${v}"></div>`;
+      const v = lgD[prod.id]||'';
+      const checked = v>0 ? ' checked' : '';
+      const shown   = v>0 ? ' show'    : '';
+      const unit = prod.unit ? `<span class="modal-prod-unit">${prod.unit}</span>` : '';
+      html+=`<div class="soll-prod-row" id="srow-${prod.id}">
+        <div class="soll-checkbox${checked}" id="scb-${prod.id}" onclick="toggleSollProd('${prod.id}')"></div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>${unit}
+        </div>
+        <input class="soll-qty${shown}" id="soll-${sollModalLager}-${prod.id}"
+          type="number" min="0" placeholder="St." value="${v}"
+          oninput="updateSollQty('${prod.id}',this.value)">
+      </div>`;
     });
     html+='</div></div>';
   });
   document.getElementById('soll-content').innerHTML=html;
 }
+
+window.toggleSollProd = function(prodId){
+  const cb  = document.getElementById('scb-'+prodId);
+  const inp = document.getElementById('soll-'+sollModalLager+'-'+prodId);
+  const isChecked = cb.classList.toggle('checked');
+  inp.classList.toggle('show', isChecked);
+  if(isChecked){ inp.focus(); }
+  else { inp.value=''; }
+};
+window.updateSollQty = function(prodId, val){
+  // Значение обновится при saveSollLocal()
+};
 function saveSollLocal(){
   const d={};
-  PRODUCTS.forEach(c=>c.items.forEach(p=>{const i=document.getElementById(`soll-${sollModalLager}-${p.id}`);if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)d[p.id]=v;}}));
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{
+    const i=document.getElementById('soll-'+sollModalLager+'-'+p.id);
+    if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)d[p.id]=v;}
+  }));
   sollData[sollModalLager]=d;
 }
 window.saveSoll=async function(){
@@ -898,7 +957,7 @@ window.openPlan=function(){
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
         <span class="plan-row-empf" title="Empfohlen">${diff>0?diff:'✓'}</span>
-        <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St." value="${plan||diff||''}">
+        <input class="plan-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St." value="${plan||diff||''}">
       </div>`;
     });
     if(catHtml)html+=`<div class="plan-cat-label">${catObj.cat}</div>${catHtml}`;
