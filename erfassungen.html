@@ -138,7 +138,7 @@ svg.nav-arrow{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:
 .lager-tab{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
   padding:.4rem .8rem;border-radius:6px;border:1px solid var(--glass-border);background:none;
   color:var(--text-dim);cursor:pointer;transition:all .2s}
-.lager-tab.active{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.08)}
+.lager-tab.active{border-color:inherit;color:inherit;background:inherit}
 .config-cat{margin-bottom:.8rem}
 .config-cat-header{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;
   background:rgba(0,0,0,.2);border-radius:6px;cursor:pointer;user-select:none}
@@ -278,7 +278,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
       <option value="2026-12">Dezember 2026</option>
     </select>
     <button class="btn btn-cyan" onclick="openArtikelConfig()" style="margin-left:auto">
-      ⚙️ Artikellisten konfigurieren
+      ⚙️ Artikellisten
     </button>
   </div>
 
@@ -341,7 +341,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
   <div class="modal-inner config-modal" style="justify-content:center">
     <div class="modal" style="max-width:620px">
       <button class="modal-close" onclick="closeModal('modal-config')">✕</button>
-      <div class="modal-title">⚙️ Artikellisten konfigurieren</div>
+      <div class="modal-title">⚙️ Artikellisten &nbsp;<span id="config-lager-name" style="font-size:.7rem;letter-spacing:.08em"></span></div>
       <div class="lager-tabs" id="config-tabs"></div>
       <div id="config-content" style="max-height:420px;overflow-y:auto"></div>
       <div style="margin-top:1rem;display:flex;gap:.7rem;justify-content:flex-end">
@@ -466,6 +466,12 @@ const ALL_PRODUCTS = [
 
 const LAGERS = ['nettetal','brüggen','viersen','köln'];
 const LAGER_NAMES = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+const LAGER_NEON = {
+  nettetal: {color:'#00aaff', bg:'rgba(0,170,255,.1)',  border:'rgba(0,170,255,.4)'},
+  brüggen:  {color:'#ff0055', bg:'rgba(255,0,85,.1)',   border:'rgba(255,0,85,.4)'},
+  viersen:  {color:'#ff8800', bg:'rgba(255,136,0,.1)',  border:'rgba(255,136,0,.4)'},
+  köln:     {color:'#cc00ff', bg:'rgba(204,0,255,.1)',  border:'rgba(204,0,255,.4)'},
+};
 
 // ── STATE ──
 let currentEntry = null;
@@ -693,21 +699,33 @@ window.openArtikelConfig = async function(){
   hideSpinner();
   renderConfigTabs();
   renderConfigContent();
+  // Show initial lager name
+  const nc0 = LAGER_NEON[configLager]||{color:'var(--neon-cyan)'};
+  const sub0 = document.getElementById('config-lager-name');
+  if(sub0){ sub0.textContent=LAGER_NAMES[configLager]; sub0.style.color=nc0.color; sub0.style.textShadow=`0 0 8px ${nc0.color}`; }
   document.getElementById('modal-config').classList.add('show');
 };
 
 function renderConfigTabs(){
-  document.getElementById('config-tabs').innerHTML=LAGERS.map(l=>
-    `<button class="lager-tab ${l===configLager?'active':''}" onclick="switchConfigLager('${l}')">${LAGER_NAMES[l]}</button>`
-  ).join('');
+  document.getElementById('config-tabs').innerHTML=LAGERS.map(l=>{
+    const nc = LAGER_NEON[l]||{color:'var(--neon-cyan)',bg:'rgba(0,245,255,.08)',border:'rgba(0,245,255,.3)'};
+    const isActive = l===configLager;
+    const style = isActive
+      ? `color:${nc.color};background:${nc.bg};border-color:${nc.border};box-shadow:0 0 10px ${nc.bg}`
+      : `color:var(--text-dim);border-color:rgba(255,255,255,.1)`;
+    return `<button class="lager-tab" style="${style}" onclick="switchConfigLager('${l}')">${LAGER_NAMES[l]}</button>`;
+  }).join('');
 }
 
 window.switchConfigLager=function(lager){
-  // Save current checkboxes
   saveCurrentConfigState();
   configLager=lager;
   renderConfigTabs();
   renderConfigContent();
+  // Update modal subtitle
+  const nc = LAGER_NEON[lager]||{color:'var(--neon-cyan)'};
+  const sub = document.getElementById('config-lager-name');
+  if(sub){ sub.textContent=LAGER_NAMES[lager]; sub.style.color=nc.color; sub.style.textShadow=`0 0 8px ${nc.color}`; }
 };
 
 function saveCurrentConfigState(){
