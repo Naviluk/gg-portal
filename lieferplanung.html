@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>LIEFERPLANUNG – GAME GALAXY</title>
 <style>
-<style>
+
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
 :root{
   --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
@@ -392,15 +392,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-plan{
   display:inline-flex;align-items:center;gap:.3rem;
   background:rgba(0,255,136,.1);border:1px solid var(--neon-green);color:var(--neon-green);
-  border-radius:4px;padding:.25rem .55rem;cursor:pointer;font-size:.7rem;font-family:'Rajdhani',sans-serif;
-  font-weight:600;transition:all .2s}
+  border-radius:4px;padding:.25rem .55rem;cursor:pointer;font-size:.7rem;
+  font-family:'Rajdhani',sans-serif;font-weight:600;transition:all .2s}
 .btn-plan:hover{background:rgba(0,255,136,.2)}
-.col-empf{min-width:120px}
-.col-plan{min-width:100px}
-.empf-value{color:var(--neon-yellow);font-weight:700}
-.empf-neg{color:var(--text-dim)}
+.btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700}
+.btn-save:hover{box-shadow:0 0 22px rgba(0,255,136,.5);transform:translateY(-1px)}
 .plan-value{color:var(--neon-green);font-weight:700}
-
 /* Gesamt sidebar */
 .gesamt-panel{
   position:fixed;top:0;right:-380px;bottom:0;width:360px;
@@ -419,8 +416,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .gesamt-qty{font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--neon-cyan);font-weight:700}
 .gesamt-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
-
-/* Plan form modal */
+/* Plan & Soll modal */
 .plan-modal{max-width:600px}
 .plan-row{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.04)}
 .plan-row-name{flex:1;font-size:.88rem}
@@ -431,13 +427,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .plan-row-qty:focus{border-color:var(--neon-cyan)}
 .plan-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
-
-/* Soll-Bestand Modal */
 .soll-lager-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .soll-tab{font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.08em;
   padding:.35rem .7rem;border-radius:6px;cursor:pointer;border:1px solid var(--glass-border);
   background:transparent;color:var(--text-dim);transition:all .2s}
 .soll-tab.active{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.08)}
+
 </style>
 </head>
 <body>
@@ -445,7 +440,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- HEADER -->
 <header class="app-header">
   <div class="hdr-left">
     <button class="burger" id="burger-btn" onclick="toggleSidebar()" aria-label="Menü">
@@ -465,11 +459,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </header>
 
 <div class="user-dropdown" id="user-dropdown">
-  <button onclick="window.location.href='gg-portal.html'">&#8592; Zurück zum Portal</button>
+  <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
   <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
 </div>
 
-<!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
   <ul class="nav-list">
@@ -510,7 +503,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </ul>
 </nav>
 
-<!-- MAIN -->
 <div class="main-content">
   <div class="lager-controls">
     <select class="ctrl-select" id="sel-lager" onchange="loadData()">
@@ -534,10 +526,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <!-- Кнопки зависят от склада -->
     <div id="ctrl-buttons" style="display:flex;gap:.6rem;margin-left:auto;flex-wrap:wrap"></div>
   </div>
-
   <div class="table-wrap-single">
     <table class="lager-table" id="lp-table">
       <thead id="lp-thead"></thead>
@@ -546,14 +536,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- ═══ GESAMT SIDEBAR ═══ -->
+<!-- GESAMT SIDEBAR -->
 <div class="gesamt-panel" id="gesamt-panel">
   <button class="gesamt-close" onclick="closeGesamt()">✕</button>
   <div class="gesamt-panel-title">📊 Gesamtübersicht – alle Lager</div>
   <div id="gesamt-content"></div>
 </div>
 
-<!-- ═══ MODAL: SOLL-BESTAND ═══ -->
+<!-- MODAL: SOLL-BESTAND -->
 <div class="modal-overlay" id="modal-soll">
   <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="closeSoll()">✕</button>
@@ -561,13 +551,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="soll-lager-tabs" id="soll-tabs"></div>
     <div id="soll-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveSoll()">&#128190; Speichern</button>
+      <button class="btn btn-primary" onclick="saveSoll()">💾 Speichern</button>
       <button class="btn btn-ghost" onclick="closeSoll()">Abbrechen</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL: PLANUNG (Закупка / Lieferung) ═══ -->
+<!-- MODAL: PLANUNG -->
 <div class="modal-overlay" id="modal-plan">
   <div class="modal plan-modal">
     <button class="modal-close" onclick="closePlan()">✕</button>
@@ -575,7 +565,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div style="font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem" id="plan-subtitle"></div>
     <div id="plan-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-save" onclick="savePlan()">&#10003; Speichern</button>
+      <button class="btn btn-save" onclick="savePlan()">✓ Speichern</button>
       <button class="btn btn-ghost" onclick="closePlan()">Abbrechen</button>
     </div>
   </div>
@@ -700,26 +690,19 @@ const PRODUCTS = [
   ]},
 ];
 
-
-const LAGERS = ['nettetal','brüggen','viersen','köln'];
-const LAGER_NAMES = {zentrallager:'Zentrallager',nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+const LAGERS = ['nettetal','br\u00fcggen','viersen','k\u00f6ln'];
+const LAGER_NAMES = {zentrallager:'Zentrallager',nettetal:'Nettetal','br\u00fcggen':'Br\u00fcggen',viersen:'Viersen','k\u00f6ln':'K\u00f6ln'};
 const NEON = {
   nettetal:{neon:'#00aaff',bg:'rgba(0,170,255,.10)',border:'rgba(0,170,255,.35)'},
-  brüggen: {neon:'#ff0055',bg:'rgba(255,0,85,.10)', border:'rgba(255,0,85,.35)'},
-  viersen: {neon:'#ff8800',bg:'rgba(255,136,0,.10)',border:'rgba(255,136,0,.35)'},
-  köln:    {neon:'#cc00ff',bg:'rgba(204,0,255,.10)',border:'rgba(204,0,255,.35)'},
+  'br\u00fcggen':{neon:'#ff0055',bg:'rgba(255,0,85,.10)',border:'rgba(255,0,85,.35)'},
+  viersen:{neon:'#ff8800',bg:'rgba(255,136,0,.10)',border:'rgba(255,136,0,.35)'},
+  'k\u00f6ln':{neon:'#cc00ff',bg:'rgba(204,0,255,.10)',border:'rgba(204,0,255,.35)'},
 };
 
-// ── STATE ──
-let currentLager    = 'zentrallager';
-let currentZeitraum = '2026-06';
-let bestandData     = {}; // {lager: {prodId: qty}}
-let sollData        = {}; // {lager: {prodId: qty}} — Soll-Bestand / Monatl.Verbrauch
-let planData        = {}; // {lager: {prodId: qty}} — geplante Einkäufe/Lieferungen
-let sollModalLager  = 'nettetal';
-let planType        = 'einkauf'; // 'einkauf' | 'lieferung'
+let currentLager='zentrallager', currentZeitraum='2026-06';
+let bestandData={}, sollData={}, planData={};
+let sollModalLager='nettetal', planType='einkauf';
 
-// ── UTILS ──
 function showSpinner(){document.getElementById('spinner').classList.add('show')}
 function hideSpinner(){document.getElementById('spinner').classList.remove('show')}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200)}
@@ -728,303 +711,187 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 function toggleSubMenu(btn){btn.closest('.nav-item').classList.toggle('open')}
 function toggleUserDropdown(){document.getElementById('user-dropdown').classList.toggle('show');document.addEventListener('click',function h(e){if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){document.getElementById('user-dropdown').classList.remove('show');document.removeEventListener('click',h)}})}
 
-// ── LOAD DATA ──
 async function loadData(){
   showSpinner();
-  currentLager    = document.getElementById('sel-lager').value;
-  currentZeitraum = document.getElementById('sel-zeitraum').value;
-  bestandData = {};
-
-  const lagersToLoad = currentLager==='zentrallager' ? LAGERS : [currentLager];
-
-  // Für jeden Lager: letzten Endbestand aus inventur collection
-  for(const lg of lagersToLoad){
+  currentLager=document.getElementById('sel-lager').value;
+  currentZeitraum=document.getElementById('sel-zeitraum').value;
+  bestandData={};
+  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+  for(const lg of toLoad){
     try{
-      const snap = await db.collection('inventur')
-        .where('lager','==',lg).where('monat','==',currentZeitraum).get();
-      let lastDate=null, lastItems={};
-      snap.forEach(d=>{const inv=d.data();if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{}}});
-      bestandData[lg] = lastItems;
-    }catch(e){bestandData[lg]={};}
+      const snap=await db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get();
+      let ld=null,li={};
+      snap.forEach(d=>{const inv=d.data();if(!ld||inv.datum>ld){ld=inv.datum;li=inv.items||{}}});
+      bestandData[lg]=li;
+    }catch(e){bestandData[lg]={}}
   }
-
-  // Soll-Bestand aus Firebase
+  try{const doc=await db.collection('lp_soll').doc('config').get();if(doc.exists)sollData=doc.data();}catch(e){}
+  planData={};
   try{
-    const doc = await db.collection('lp_soll').doc('config').get();
-    if(doc.exists) sollData = doc.data();
+    const snap=await db.collection('lp_planung').where('monat','==',currentZeitraum).get();
+    snap.forEach(d=>{const plan=d.data();if(!planData[plan.lager])planData[plan.lager]={};Object.assign(planData[plan.lager],plan.items||{})});
   }catch(e){}
-
-  // Planungsdaten aus Firebase
-  try{
-    const snap = await db.collection('lp_planung').where('monat','==',currentZeitraum).get();
-    snap.forEach(d=>{
-      const plan=d.data();
-      if(!planData[plan.lager]) planData[plan.lager]={};
-      Object.assign(planData[plan.lager], plan.items||{});
-    });
-  }catch(e){}
-
   hideSpinner();
   updateButtons();
   renderTable();
 }
 
-// ── КНОПКИ ──
 function updateButtons(){
-  const div = document.getElementById('ctrl-buttons');
+  const div=document.getElementById('ctrl-buttons');
   if(currentLager==='zentrallager'){
-    div.innerHTML = `
-      <button class="btn-soll" onclick="openSoll()">&#x2699;&#xFE0F; Soll-Bestand</button>
-      <button class="btn-gesamt" onclick="openGesamt()">&#x1F4CA; Gesamt</button>
-    `;
-  } else {
-    div.innerHTML = `<button class="btn-gesamt" onclick="openGesamt()">&#x1F4CA; Gesamt</button>`;
+    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button><button class="btn-gesamt" onclick="openGesamt()">📊 Gesamt</button>';
+  }else{
+    div.innerHTML='<button class="btn-gesamt" onclick="openGesamt()">📊 Gesamt</button>';
   }
 }
 
-// ── RENDER TABLE ──
 function renderTable(){
-  const isZentral = currentLager==='zentrallager';
-  const lagersToShow = isZentral ? LAGERS : [currentLager];
-  const cc = NEON[currentLager] || {};
+  const isZentral=currentLager==='zentrallager';
+  const toShow=isZentral?LAGERS:[currentLager];
+  const empfIcon=isZentral?'🛒':'🚚';
+  const empfLabel=isZentral?'Empf. Einkauf':'Empf. Lieferung';
+  const planLabel=isZentral?'Gepl. Einkauf':'Gepl. Lieferung';
 
-  // ── HEADER ──
-  let thHTML='<tr><th class="col-artikel">Artikel</th>';
-  thHTML += '<th class="num-cell th-col-anfang" style="min-width:90px"><span class="th-icon">📊</span><span class="th-text">Aktueller<br>Bestand</span></th>';
-  thHTML += '<th class="num-cell" style="min-width:90px"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbrauch</span></th>';
+  document.getElementById('lp-thead').innerHTML=`<tr>
+    <th class="col-artikel">Artikel</th>
+    <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktueller<br>Bestand</span></th>
+    <th class="num-cell"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbrauch</span></th>
+    <th class="num-cell" style="min-width:130px"><span class="th-icon">${empfIcon}</span><span class="th-text">${empfLabel}</span>
+      <button class="btn-plan" style="margin-left:.4rem" onclick="openPlan()" title="Planung erstellen">✎</button></th>
+    <th class="num-cell"><span class="th-icon">${isZentral?'🛒':'🚚'}</span><span class="th-text">${planLabel}</span></th>
+  </tr>`;
 
-  const empfIcon = isZentral ? '🛒' : '🚚';
-  const empfLabel = isZentral ? 'Empf. Einkauf' : 'Empf. Lieferung';
-  const planLabel = isZentral ? 'Gepl. Einkauf' : 'Gepl. Lieferung';
-  const planIcon = isZentral ? '🛒' : '🚚';
-
-  thHTML += `<th class="num-cell col-empf"><span class="th-icon">${empfIcon}</span><span class="th-text">${empfLabel}</span>
-    <button class="btn-plan" style="margin-left:.4rem;font-size:.6rem" onclick="openPlan()" title="Planung erstellen">&#9998;</button></th>`;
-  thHTML += `<th class="num-cell col-plan"><span class="th-icon">${planIcon}</span><span class="th-text">${planLabel}</span></th>`;
-  thHTML += '</tr>';
-  document.getElementById('lp-thead').innerHTML = thHTML;
-
-  // ── BODY ──
   let tbHTML='';
   PRODUCTS.forEach((catObj,ci)=>{
     const isFirst=ci===0;
     tbHTML+=`<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">${catObj.items.length}</span></div></td>
       <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
-
     catObj.items.forEach(prod=>{
-      // Aktueller Bestand: сумма по всем складам (Zentrallager) или одного
-      let aktBestand = 0;
-      lagersToShow.forEach(lg=>{aktBestand += Number((bestandData[lg]||{})[prod.id])||0;});
-      const aktDisplay = aktBestand > 0 ? aktBestand : '—';
-
-      // Soll (Monatl. Verbrauch) — сумма по всем складам или одного
-      let sollSum = 0;
-      lagersToShow.forEach(lg=>{sollSum += Number((sollData[lg]||{})[prod.id])||0;});
-      const sollDisplay = sollSum > 0 ? sollSum : '—';
-
-      // Empfehlung = Soll - Bestand
-      let empf = '—';
-      let empfStyle = '';
-      if(sollSum>0){
-        const diff = sollSum - aktBestand;
-        if(diff>0){empf=diff;empfStyle='color:var(--neon-yellow);font-weight:700';}
-        else{empf='✓';empfStyle='color:var(--neon-green)';}
-      }
-
-      // Planung
-      let planSum = 0;
-      lagersToShow.forEach(lg=>{planSum += Number((planData[lg]||{})[prod.id])||0;});
-      const planDisplay = planSum > 0 ? `<span class="plan-value">${planSum}</span>` : '—';
-
-      tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}" data-prod="${prod.id}">
+      let akt=0; toShow.forEach(lg=>{akt+=Number((bestandData[lg]||{})[prod.id])||0});
+      let soll=0; toShow.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0});
+      let plan=0; toShow.forEach(lg=>{plan+=Number((planData[lg]||{})[prod.id])||0});
+      const aktD=akt>0?akt:'—';
+      const sollD=soll>0?soll:'—';
+      let empf='—', empfStyle='color:var(--text-dim)';
+      if(soll>0){const d=soll-akt;if(d>0){empf=d;empfStyle='color:var(--neon-yellow);font-weight:700';}else{empf='✓';empfStyle='color:var(--neon-green)';}}
+      const planD=plan>0?`<span class="plan-value">${plan}</span>`:'—';
+      tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}">
         <td class="col-artikel"><div class="prod-info">
           <div class="prod-icon">${prod.icon||'📦'}</div>
           <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
         </div></td>
-        <td class="num-cell">${aktDisplay}</td>
-        <td class="num-cell" style="color:var(--text-dim)">${sollDisplay}</td>
-        <td class="num-cell ${empf!=='—'&&empf!=='✓'?'':''}" style="${empfStyle}">${empf}</td>
-        <td class="num-cell">${planDisplay}</td>
+        <td class="num-cell">${aktD}</td>
+        <td class="num-cell" style="color:var(--text-dim)">${sollD}</td>
+        <td class="num-cell" style="${empfStyle}">${empf}</td>
+        <td class="num-cell">${planD}</td>
       </tr>`;
     });
   });
-
   document.getElementById('lp-tbody').innerHTML=tbHTML;
 }
 
 window.toggleCategory=function(row){
-  const ci=row.dataset.cat;
-  const o=row.classList.toggle('open');
+  const ci=row.dataset.cat;const o=row.classList.toggle('open');
   document.querySelectorAll(`#lp-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!o));
 };
 
-// ── GESAMT PANEL ──
 window.openGesamt=function(){
   let html='';
   PRODUCTS.forEach(catObj=>{
-    html+=`<div class="gesamt-cat"><div class="gesamt-cat-title">${catObj.cat}</div>`;
+    let catHtml='';
     catObj.items.forEach(prod=>{
-      let total=0;
-      LAGERS.forEach(lg=>{total+=Number((bestandData[lg]||{})[prod.id])||0;});
-      if(total>0){
-        html+=`<div class="gesamt-row">
-          <span class="gesamt-name">${prod.icon} ${prod.name}</span>
-          <span class="gesamt-qty">${total}</span>
-        </div>`;
-      }
+      let t=0;LAGERS.forEach(lg=>{t+=Number((bestandData[lg]||{})[prod.id])||0});
+      if(t>0)catHtml+=`<div class="gesamt-row"><span class="gesamt-name">${prod.icon} ${prod.name}</span><span class="gesamt-qty">${t}</span></div>`;
     });
-    html+='</div>';
+    if(catHtml)html+=`<div class="gesamt-cat"><div class="gesamt-cat-title">${catObj.cat}</div>${catHtml}</div>`;
   });
-  document.getElementById('gesamt-content').innerHTML = html || '<p style="color:var(--text-dim);font-size:.85rem">Keine Daten vorhanden.</p>';
+  document.getElementById('gesamt-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Keine Daten.</p>';
   document.getElementById('gesamt-panel').classList.add('open');
 };
 window.closeGesamt=function(){document.getElementById('gesamt-panel').classList.remove('open')};
 
-// ── SOLL-BESTAND MODAL ──
 window.openSoll=function(){
-  sollModalLager = LAGERS[0];
-  renderSollTabs();
-  renderSollContent();
+  sollModalLager=LAGERS[0];renderSollTabs();renderSollContent();
   document.getElementById('modal-soll').classList.add('show');
 };
 window.closeSoll=function(){document.getElementById('modal-soll').classList.remove('show')};
 
 function renderSollTabs(){
-  const tabs = LAGERS.map(lg=>{
-    const nc = NEON[lg]||{};
-    const isActive = lg===sollModalLager;
-    return `<button class="soll-tab${isActive?' active':''}" 
-      style="${isActive?`border-color:${nc.neon};color:${nc.neon};background:${nc.bg}`:''}"
-      onclick="switchSollLager('${lg}')">${LAGER_NAMES[lg]||lg}</button>`;
+  document.getElementById('soll-tabs').innerHTML=LAGERS.map(lg=>{
+    const nc=NEON[lg]||{};const a=lg===sollModalLager;
+    return `<button class="soll-tab${a?' active':''}" style="${a?`border-color:${nc.neon};color:${nc.neon};background:${nc.bg}`:''}" onclick="switchSollLager('${lg}')">${LAGER_NAMES[lg]||lg}</button>`;
   }).join('');
-  document.getElementById('soll-tabs').innerHTML=tabs;
 }
-
-window.switchSollLager=function(lg){
-  // Сохраняем текущие значения перед переключением
-  saveSollLocal();
-  sollModalLager=lg;
-  renderSollTabs();
-  renderSollContent();
-};
+window.switchSollLager=function(lg){saveSollLocal();sollModalLager=lg;renderSollTabs();renderSollContent()};
 
 function renderSollContent(){
-  const lgData = sollData[sollModalLager]||{};
+  const lgD=sollData[sollModalLager]||{};
   let html='';
   PRODUCTS.forEach((catObj,ci)=>{
-    html+=`<div class="modal-cat open" id="scat-${ci}">
-      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
-        <span class="modal-cat-label">${catObj.cat}</span>
-        <span class="modal-cat-arrow">▶</span>
-      </div>
-      <div class="modal-cat-items">`;
+    html+=`<div class="modal-cat open"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-arrow">▶</span></div><div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
-      const val = lgData[prod.id]??'';
-      html+=`<div class="plan-row">
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+      const v=lgD[prod.id]??'';
+      html+=`<div class="plan-row"><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="plan-row-name">${prod.name} <span style="font-size:.7rem;color:var(--text-dim)">${prod.unit||''}</span></div>
-        <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" 
-          placeholder="0" value="${val}" style="border-color:var(--neon-cyan)">
-      </div>`;
+        <input class="plan-row-qty" id="soll-${sollModalLager}-${prod.id}" type="number" min="0" placeholder="0" value="${v}"></div>`;
     });
     html+='</div></div>';
   });
   document.getElementById('soll-content').innerHTML=html;
 }
-
 function saveSollLocal(){
-  // Читаем текущие значения из DOM и сохраняем в sollData
-  const lgData = {};
-  PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      const inp=document.getElementById(`soll-${sollModalLager}-${prod.id}`);
-      if(inp&&inp.value!==''){lgData[prod.id]=parseInt(inp.value)||0;}
-    });
-  });
-  sollData[sollModalLager]=lgData;
+  const d={};
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{const i=document.getElementById(`soll-${sollModalLager}-${p.id}`);if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)d[p.id]=v;}}));
+  sollData[sollModalLager]=d;
 }
-
 window.saveSoll=async function(){
-  saveSollLocal();
-  showSpinner();
-  try{
-    await db.collection('lp_soll').doc('config').set(sollData,{merge:true});
-    showToast('Soll-Bestand gespeichert ✓');
-    closeSoll();
-    renderTable();
-  }catch(e){showToast('Fehler: '+e.message);}
-  hideSpinner();
+  saveSollLocal();showSpinner();
+  try{await db.collection('lp_soll').doc('config').set(sollData,{merge:true});showToast('Soll-Bestand gespeichert ✓');closeSoll();renderTable();}
+  catch(e){showToast('Fehler: '+e.message);}hideSpinner();
 };
 
-// ── PLAN MODAL ──
 window.openPlan=function(){
-  planType = currentLager==='zentrallager' ? 'einkauf' : 'lieferung';
-  const isEinkauf = planType==='einkauf';
-  document.getElementById('plan-title').textContent = isEinkauf ? '🛒 Neue Bestellung planen' : '🚚 Neue Lieferung planen';
-  document.getElementById('plan-subtitle').textContent =
-    'Empfohlene Mengen vorausgefüllt – Werte können angepasst werden.';
-
-  const lagersForPlan = currentLager==='zentrallager' ? LAGERS : [currentLager];
+  planType=currentLager==='zentrallager'?'einkauf':'lieferung';
+  const isE=planType==='einkauf';
+  document.getElementById('plan-title').textContent=isE?'🛒 Neue Bestellung planen':'🚚 Neue Lieferung planen';
+  document.getElementById('plan-subtitle').textContent='Empfohlene Mengen vorausgefüllt – Werte können angepasst werden.';
+  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   let html='';
   PRODUCTS.forEach(catObj=>{
-    const hasItems = catObj.items.some(prod=>{
-      let soll=0;
-      lagersForPlan.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;});
-      let akt=0;
-      lagersForPlan.forEach(lg=>{akt+=Number((bestandData[lg]||{})[prod.id])||0;});
-      return soll>0;
-    });
-    if(!hasItems) return;
-    html+=`<div class="plan-cat-label">${catObj.cat}</div>`;
+    let catHtml='';
     catObj.items.forEach(prod=>{
-      let soll=0,akt=0;
-      lagersForPlan.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;});
-      if(soll===0) return;
+      let soll=0,akt=0,plan=0;
+      toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;plan+=Number((planData[lg]||{})[prod.id])||0;});
+      if(soll===0)return;
       const diff=Math.max(0,soll-akt);
-      let existing=0;
-      lagersForPlan.forEach(lg=>{existing+=Number((planData[lg]||{})[prod.id])||0;});
-      html+=`<div class="plan-row">
+      catHtml+=`<div class="plan-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="plan-row-name">${prod.name} <span style="font-size:.7rem;color:var(--text-dim)">${prod.unit||''}</span></div>
         <span class="plan-row-empf" title="Empfohlen">${diff>0?diff:'✓'}</span>
-        <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0"
-          placeholder="0" value="${existing||diff||''}">
+        <input class="plan-row-qty" id="plan-${prod.id}" type="number" min="0" placeholder="0" value="${plan||diff||''}">
       </div>`;
     });
+    if(catHtml)html+=`<div class="plan-cat-label">${catObj.cat}</div>${catHtml}`;
   });
-  document.getElementById('plan-content').innerHTML = html || '<p style="color:var(--text-dim);font-size:.85rem">Soll-Bestand zuerst konfigurieren.</p>';
+  document.getElementById('plan-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Bitte zuerst Soll-Bestand konfigurieren.</p>';
   document.getElementById('modal-plan').classList.add('show');
 };
 window.closePlan=function(){document.getElementById('modal-plan').classList.remove('show')};
-
 window.savePlan=async function(){
-  const lagersForPlan = currentLager==='zentrallager' ? LAGERS : [currentLager];
+  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   const items={};
-  PRODUCTS.forEach(catObj=>catObj.items.forEach(prod=>{
-    const inp=document.getElementById('plan-'+prod.id);
-    if(inp&&inp.value!==''){const v=parseInt(inp.value)||0;if(v>0)items[prod.id]=v;}
-  }));
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{const i=document.getElementById('plan-'+p.id);if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)items[p.id]=v;}}));
   showSpinner();
   try{
-    const entry={lager:currentLager,monat:currentZeitraum,items,type:planType,createdAt:new Date().toISOString()};
-    await db.collection('lp_planung').add(entry);
-    // Обновляем локальный planData
-    lagersForPlan.forEach(lg=>{
-      if(!planData[lg]) planData[lg]={};
-      Object.assign(planData[lg],items);
-    });
+    await db.collection('lp_planung').add({lager:currentLager,monat:currentZeitraum,items,type:planType,createdAt:new Date().toISOString()});
+    toLoad.forEach(lg=>{if(!planData[lg])planData[lg]={};Object.assign(planData[lg],items);});
     showToast(planType==='einkauf'?'Einkauf gespeichert ✓':'Lieferung gespeichert ✓');
-    closePlan();
-    renderTable();
-  }catch(e){showToast('Fehler: '+e.message);}
-  hideSpinner();
+    closePlan();renderTable();
+  }catch(e){showToast('Fehler: '+e.message);}hideSpinner();
 };
 
-// ── INIT ──
-document.addEventListener('DOMContentLoaded', ()=>{
-  loadData();
-});
+document.addEventListener('DOMContentLoaded',loadData);
 </script>
 </body>
 </html>
