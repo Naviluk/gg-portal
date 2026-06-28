@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>GETRÄNKE & SNACKS – GAME GALAXY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+:root{
+  --bg:#111827;--bg2:#1a2235;--bg3:#1e2840;
+  --neon-cyan:#00f5ff;--neon-magenta:#ff00cc;--neon-yellow:#ffee00;--neon-green:#00ff88;
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(0,245,255,0.15);
+  --text:#e0e8ff;--text-dim:#7080a0;--header-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(255,0,204,0.06) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(0,245,255,0.08) 0%,transparent 60%);pointer-events:none}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:rgba(5,5,16,0.95);border-bottom:1px solid var(--glass-border);
+  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100}
+.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);animation:scan 3s ease-in-out infinite}
+@keyframes scan{0%,100%{opacity:.3}50%{opacity:1}}
+.hdr-left{display:flex;align-items:center}
+.hdr-center{flex:1;text-align:center}
+.hdr-right{display:flex;align-items:center;gap:.5rem}
+.hdr-org{font-family:'Orbitron',sans-serif;font-size:clamp(.6rem,1.5vw,.85rem);letter-spacing:.12em;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(0,245,255,.4));line-height:1.1}
+.hdr-page{font-family:'Rajdhani',sans-serif;font-size:.7rem;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase;margin-top:.1rem}
+.hdr-user{font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
+  display:flex;align-items:center;gap:.3rem;white-space:nowrap}
+.hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
+.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
+.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s;box-shadow:0 0 6px var(--neon-cyan)}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:rgba(17,24,39,.97);
+  border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
+  transition:left .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px)}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.5)}
+.sidebar-overlay.show{display:block}
+.nav-list{list-style:none;padding:1rem 0}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
+  background:none;border:none;width:100%;text-align:left;color:var(--text);font-family:'Rajdhani',sans-serif;
+  font-size:.95rem;letter-spacing:.06em;cursor:pointer;transition:color .2s,background .2s}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(0,245,255,.06)}
+.nav-arrow{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s;flex-shrink:0}
+.nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
+.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.2)}
+.nav-item.open>.nav-sub{display:block}
+.nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Rajdhani',sans-serif;
+  font-size:.9rem;color:var(--text-dim);text-decoration:none;transition:color .2s}
+.nav-sub li a:hover{color:var(--neon-magenta)}
+.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 0}
+
+/* ── USER DROPDOWN ── */
+.user-dropdown{position:fixed;top:calc(var(--header-h) + 4px);right:1.2rem;background:rgba(17,24,39,.97);
+  border:1px solid var(--glass-border);border-radius:8px;z-index:300;min-width:180px;
+  backdrop-filter:blur(16px);display:none;padding:.4rem 0}
+.user-dropdown.show{display:block}
+.user-dropdown button{display:block;width:100%;background:none;border:none;color:var(--text);
+  font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:.55rem 1rem;text-align:left;cursor:pointer;transition:background .15s}
+.user-dropdown button:hover{background:rgba(0,245,255,.06);color:var(--neon-cyan)}
+.user-dropdown button.danger{color:var(--neon-magenta)}
+
+/* ── TOAST / SPINNER ── */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);
+  background:rgba(0,245,255,.12);border:1px solid var(--neon-cyan);color:var(--neon-cyan);
+  font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:.1em;padding:.6rem 1.4rem;
+  border-radius:20px;z-index:999;opacity:0;transition:all .35s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.spinner-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,10,.6);align-items:center;justify-content:center}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(0,245,255,.2);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── CONTROLS ── */
+.main-content{position:relative;z-index:1;padding-top:calc(var(--header-h) + 1rem);padding-bottom:2rem}
+.lager-controls{display:flex;flex-wrap:wrap;gap:.6rem;padding:.8rem 1.2rem;align-items:center}
+.ctrl-select{background:var(--bg2);border:1px solid var(--glass-border);color:var(--text);
+  font-family:'Rajdhani',sans-serif;font-size:.92rem;padding:.45rem .8rem;border-radius:6px;cursor:pointer;outline:none}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+
+/* ── ACTION BUTTONS ── */
+.btn-gs{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.1em;font-weight:700;
+  padding:.55rem 1.1rem;border-radius:6px;border:none;cursor:pointer;transition:box-shadow .2s,transform .2s;white-space:nowrap}
+.btn-geraet{background:linear-gradient(135deg,rgba(0,245,255,.15),rgba(0,245,255,.05));
+  border:1px solid var(--neon-cyan);color:var(--neon-cyan);box-shadow:0 0 12px rgba(0,245,255,.2)}
+.btn-geraet:hover{box-shadow:0 0 24px rgba(0,245,255,.5);transform:translateY(-1px)}
+.btn-theke{background:linear-gradient(135deg,rgba(255,0,204,.15),rgba(255,0,204,.05));
+  border:1px solid var(--neon-magenta);color:var(--neon-magenta);box-shadow:0 0 12px rgba(255,0,204,.2)}
+.btn-theke:hover{box-shadow:0 0 24px rgba(255,0,204,.5);transform:translateY(-1px)}
+
+/* ── TABLE ── */
+.table-wrap-single{position:relative;z-index:1;overflow-x:auto;padding:0 1.2rem 1.2rem;-webkit-overflow-scrolling:touch}
+.lager-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:auto;min-width:700px}
+.lager-table th,.lager-table td{padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap}
+.lager-table th{background:var(--bg3);font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text-dim);position:sticky;top:var(--header-h);z-index:5;border-bottom:2px solid var(--glass-border)}
+.col-artikel{min-width:180px;text-align:left;position:sticky;left:0;z-index:6;background:var(--bg3)}
+.lager-table td.col-artikel{background:var(--bg2);z-index:4}
+.num-cell{text-align:center;font-family:'Rajdhani',sans-serif;font-size:.9rem;min-width:72px}
+.th-icon{display:block;font-size:1rem;margin-bottom:.15rem}
+.th-text{display:block;line-height:1.2}
+
+/* Category rows */
+.cat-row{cursor:pointer;background:rgba(0,0,0,.35)}
+.cat-row td{padding:.5rem .6rem}
+.cat-label{display:flex;align-items:center;gap:.5rem;font-family:'Orbitron',sans-serif;
+  font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-yellow)}
+.cat-arrow{display:inline-block;transition:transform .2s;font-size:.55rem;color:var(--neon-yellow)}
+.cat-row.open .cat-arrow{transform:rotate(90deg)}
+.cat-items-count{font-size:.55rem;color:var(--text-dim)}
+.prod-row.hidden{display:none}
+
+/* Product rows */
+.prod-info{display:flex;align-items:center;gap:.5rem}
+.prod-icon{width:28px;height:28px;border-radius:50%;background:rgba(0,245,255,.08);
+  border:1px solid rgba(0,245,255,.2);display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;flex-shrink:0}
+.prod-name{font-size:.88rem;color:var(--text);line-height:1.2}
+.prod-unit{font-size:.7rem;color:var(--text-dim)}
+.prod-row:hover td{background:rgba(0,245,255,.03)}
+
+/* Anfangsbestand clickable */
+.anfang-cell{cursor:pointer;transition:background .15s}
+.anfang-cell:hover{background:rgba(0,245,255,.08)!important}
+.anfang-cell .edit-val{display:flex;align-items:center;justify-content:center;gap:.3rem}
+
+/* Expand/detail cols */
+.detail-col{display:none}
+.detail-col.visible{display:table-cell}
+.col-einkauf-header .col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.4rem}
+.expand-arrow{cursor:pointer;font-size:.65rem;transition:transform .2s;user-select:none;padding:.1rem .25rem}
+.expand-arrow.expanded{transform:rotate(180deg)}
+.th-col-anfang,.th-col-liefer,.th-col-geraet,.th-col-theke,.th-col-endbestand{min-width:72px}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,10,.88);z-index:500;overflow-y:auto;padding:1rem}
+.modal-overlay.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
+.modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
+  padding:1.8rem;width:100%;max-width:520px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text-dim);
+  font-size:1.2rem;cursor:pointer;line-height:1;padding:.2rem}
+.modal-close:hover{color:var(--neon-magenta)}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--neon-cyan);margin-bottom:1.2rem}
+.field{margin-bottom:1rem}
+.field-label{display:block;font-size:.65rem;letter-spacing:.1em;color:var(--text-dim);
+  text-transform:uppercase;margin-bottom:.4rem}
+.field input[type=date],.field input[type=number]{width:100%;background:rgba(0,0,0,.35);
+  border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;
+  font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none}
+.field input:focus{border-color:var(--neon-cyan)}
+
+/* Modal product list */
+.modal-cat{margin-bottom:.3rem;border:1px solid rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.modal-cat-header{display:flex;align-items:center;justify-content:space-between;
+  padding:.5rem .8rem;background:rgba(0,0,0,.3);cursor:pointer;user-select:none}
+.modal-cat-label{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--neon-yellow)}
+.modal-cat-arrow{font-size:.55rem;color:var(--text-dim);transition:transform .2s}
+.modal-cat.open .modal-cat-arrow{transform:rotate(90deg)}
+.modal-cat-items{display:none;padding:.3rem}
+.modal-cat.open .modal-cat-items{display:block}
+.modal-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .4rem;border-radius:4px;transition:background .15s}
+.modal-prod-row:hover{background:rgba(0,245,255,.04)}
+.prod-checkbox{width:16px;height:16px;border:1px solid var(--glass-border);border-radius:3px;
+  flex-shrink:0;cursor:pointer;transition:background .15s,border-color .15s;position:relative}
+.prod-checkbox.checked{background:var(--neon-cyan);border-color:var(--neon-cyan)}
+.prod-checkbox.checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:.65rem;color:#000;font-weight:700}
+.modal-prod-name-block{flex:1;min-width:0}
+.modal-prod-name{font-size:.88rem;color:var(--text)}
+.modal-prod-unit{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+.qty-input{width:60px;background:rgba(0,0,0,.4);border:1px solid var(--glass-border);color:var(--neon-cyan);
+  font-family:'Rajdhani',sans-serif;font-size:.9rem;padding:.3rem .5rem;border-radius:4px;
+  text-align:center;outline:none;display:none}
+.qty-input.show{display:block}
+.qty-input:focus{border-color:var(--neon-cyan)}
+
+/* Selected list */
+.selected-list{background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.15);border-radius:6px;padding:.8rem;margin-top:.8rem}
+.selected-list-title{font-size:.62rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:.5rem}
+.selected-cat-label{font-size:.6rem;color:var(--text-dim);letter-spacing:.08em;margin:.4rem 0 .2rem;text-transform:uppercase}
+.selected-item{display:flex;justify-content:space-between;align-items:center;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.selected-item-name{font-size:.85rem;color:var(--text)}
+.selected-item-unit{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+.selected-item-qty{font-family:'Rajdhani',sans-serif;font-size:.9rem;color:var(--neon-cyan);font-weight:600}
+
+/* Confirm */
+.confirm-item{display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.ci-name{font-size:.88rem}
+.ci-unit{font-size:.7rem;color:var(--text-dim)}
+.ci-qty{font-family:'Rajdhani',sans-serif;font-size:.95rem;color:var(--neon-cyan);font-weight:700}
+.confirm-date{font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem;letter-spacing:.06em}
+
+/* Modal buttons */
+.modal-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.1em;padding:.55rem 1.2rem;
+  border-radius:6px;border:none;cursor:pointer;transition:all .2s;font-weight:700}
+.btn-primary{background:linear-gradient(135deg,var(--neon-cyan),#0080ff);color:#000}
+.btn-primary:hover{box-shadow:0 0 20px rgba(0,245,255,.5)}
+.btn-ghost{background:transparent;border:1px solid var(--glass-border);color:var(--text-dim)}
+.btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+.btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000}
+.btn-save:hover{box-shadow:0 0 20px rgba(0,255,136,.5)}
+
+/* Anfangsbestand modal */
+.modal-small{max-width:360px}
+
+/* Inline entry rows in expandable date cols */
+.we-date-th{cursor:pointer}
+.we-date-th:hover{background:rgba(0,245,255,.08)!important}
+.edit-date-icon{font-size:.65rem;opacity:.6;margin-left:.2rem}
+
+@media(max-width:640px){
+  .lager-controls{flex-direction:column;align-items:stretch}
+  .btn-gs{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="hdr-left">
+    <button class="burger" id="burger-btn" onclick="toggleSidebar()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-org">GAME GALAXY Betriebsportal</div>
+    <div class="hdr-page">LAGER – Getränke &amp; Snacks</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-user" onclick="toggleUserDropdown()">
+      <span id="hdr-username">Admin</span>
+      <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+  </div>
+</header>
+
+<div class="user-dropdown" id="user-dropdown">
+  <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
+  <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <ul class="nav-list">
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="getraenke-snacks.html" style="color:var(--neon-cyan)">Getränke &amp; Snacks</a></li>
+        <li><a href="lieferplanung.html">Lieferplanung</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html">Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html">Erfassungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
+  </ul>
+</nav>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="lager-controls">
+    <select class="ctrl-select" id="sel-lager" onchange="loadData()">
+      <option value="nettetal">Nettetal</option>
+      <option value="brüggen" selected>Brüggen</option>
+      <option value="viersen">Viersen</option>
+      <option value="köln">Köln</option>
+    </select>
+    <select class="ctrl-select" id="sel-zeitraum" onchange="loadData()">
+      <option value="2026-01">Januar 2026</option>
+      <option value="2026-02">Februar 2026</option>
+      <option value="2026-03">März 2026</option>
+      <option value="2026-04">April 2026</option>
+      <option value="2026-05">Mai 2026</option>
+      <option value="2026-06" selected>Juni 2026</option>
+      <option value="2026-07">Juli 2026</option>
+      <option value="2026-08">August 2026</option>
+      <option value="2026-09">September 2026</option>
+      <option value="2026-10">Oktober 2026</option>
+      <option value="2026-11">November 2026</option>
+      <option value="2026-12">Dezember 2026</option>
+    </select>
+    <button class="btn-gs btn-geraet" style="margin-left:auto" onclick="openForm('geraet')">＋ Gerät</button>
+    <button class="btn-gs btn-theke" onclick="openForm('theke')">＋ Theke</button>
+  </div>
+
+  <div class="table-wrap-single">
+    <table class="lager-table" id="gs-table">
+      <thead id="gs-thead"></thead>
+      <tbody id="gs-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ MODAL: GERÄT / THEKE EINGABE ═══ -->
+<div class="modal-overlay" id="modal-form">
+  <div class="modal">
+    <button class="modal-close" onclick="closeForm()">✕</button>
+    <div class="modal-title" id="form-title">Gerät – Eintrag</div>
+
+    <div class="field">
+      <label class="field-label">Datum</label>
+      <input type="date" id="form-date">
+    </div>
+    <div class="field">
+      <label class="field-label">Waren auswählen</label>
+      <div id="form-product-list"></div>
+    </div>
+    <div id="form-selected-list" class="selected-list" style="display:none">
+      <div class="selected-list-title">Ausgewählte Waren</div>
+      <div id="form-selected-items"></div>
+    </div>
+
+    <div class="modal-btn-row">
+      <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter →</button>
+      <button class="btn btn-ghost" onclick="closeForm()">Abbrechen</button>
+    </div>
+
+    <!-- Bestätigung -->
+    <div id="form-step2" style="display:none">
+      <div class="confirm-date" id="form-confirm-date"></div>
+      <div id="form-confirm-list"></div>
+      <div class="modal-btn-row">
+        <button class="btn btn-save" id="form-save-btn" onclick="saveFormEntry()">✓ Speichern</button>
+        <button class="btn btn-ghost" onclick="backToFormEdit()">← Zurück</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ANFANGSBESTAND ═══ -->
+<div class="modal-overlay" id="modal-ab">
+  <div class="modal modal-small">
+    <button class="modal-close" onclick="closeAbModal()">✕</button>
+    <div class="modal-title">Anfangsbestand festlegen</div>
+    <div class="field">
+      <label class="field-label" id="ab-prod-label">Produkt</label>
+      <input type="number" id="ab-value" min="0" placeholder="Menge eingeben">
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-primary" onclick="saveAnfangsbestand()">Speichern</button>
+      <button class="btn btn-ghost" onclick="closeAbModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── PRODUKTE (nur Getränke & Snacks) ──
+const GS_PRODUCTS = [
+  {cat:'Getränke', items:[
+    {id:'rb_blue',   name:'Red Bull',                    unit:'0,25 L', icon:'🔵'},
+    {id:'rb_zero',   name:'Red Bull Zero',               unit:'0,25 L', icon:'🩵'},
+    {id:'rb_white',  name:'Red Bull White',              unit:'0,25 L', icon:'⚪️'},
+    {id:'action_e',  name:'Action Energy / Power Up',    unit:'0,25 L', icon:'⚡'},
+    {id:'cola_red',  name:'Coca Cola',                   unit:'0,33 L', icon:'🔴'},
+    {id:'cola_zero', name:'Coca Cola Zero',              unit:'0,33 L', icon:'⚫'},
+    {id:'fanta',     name:'Fanta',                       unit:'0,33 L', icon:'🟠'},
+    {id:'sprite',    name:'Sprite',                      unit:'0,33 L', icon:'🟢'},
+    {id:'vio_stil',  name:'VIO Wasser Still',            unit:'0,50 L', icon:'💧'},
+    {id:'vio_med',   name:'VIO Wasser Med.',             unit:'0,50 L', icon:'🫧'},
+    {id:'gero_sp',   name:'Gerolsteiner Sprud.',         unit:'0,33 L', icon:'🌊'},
+    {id:'gero_med',  name:'Gerolsteiner Med.',           unit:'0,33 L', icon:'💦'},
+    {id:'durstl',    name:'Durstlöscher',                unit:'',       icon:'🥤'},
+  ]},
+  {cat:'Snacks', items:[
+    {id:'erdnuesse', name:'Erdnüsse',      unit:'20 St.', icon:'🥜'},
+    {id:'stuf',      name:'Studentenfutter',unit:'20 St.',icon:'🍿'},
+    {id:'snickers',  name:'Snickers',      unit:'24 St.', icon:'🍫'},
+    {id:'mars',      name:'Mars',          unit:'24 St.', icon:'🍬'},
+    {id:'twix',      name:'Twix',          unit:'30 St.', icon:'🍭'},
+    {id:'mnm',       name:'M&M',           unit:'24 St.', icon:'🟡'},
+    {id:'pringles',  name:'Pringles',      unit:'24 St.', icon:'🥫'},
+    {id:'kitkat',    name:'KitKat White',  unit:'24 St.', icon:'🤍'},
+    {id:'bifi_orig', name:'BIFI Original', unit:'40 St.', icon:'🌭'},
+    {id:'bifi_roll', name:'BIFI Roll',     unit:'24 St.', icon:'🥖'},
+  ]},
+];
+
+// ── NEON FARBEN ──
+const NEON = {
+  nettetal: {neon:'#00aaff', bg:'rgba(0,170,255,.10)',  bgD:'rgba(0,170,255,.05)',  border:'rgba(0,170,255,.35)'},
+  brüggen:  {neon:'#ff0055', bg:'rgba(255,0,85,.10)',   bgD:'rgba(255,0,85,.05)',   border:'rgba(255,0,85,.35)'},
+  viersen:  {neon:'#ff8800', bg:'rgba(255,136,0,.10)',  bgD:'rgba(255,136,0,.05)',  border:'rgba(255,136,0,.35)'},
+  köln:     {neon:'#cc00ff', bg:'rgba(204,0,255,.10)',  bgD:'rgba(204,0,255,.05)',  border:'rgba(204,0,255,.35)'},
+};
+const LAGER_NAMES = {nettetal:'Nettetal', brüggen:'Brüggen', viersen:'Viersen', köln:'Köln'};
+
+// ── STATE ──
+let currentLager    = 'brüggen';
+let currentZeitraum = '2026-06';
+let lieferungen     = []; // [{id, datum, items:{prodId:qty}}]
+let geraetEntries   = []; // [{id, datum, items:{prodId:qty}}]
+let thekeEntries    = []; // [{id, datum, items:{prodId:qty}}]
+let anfangsbestand  = {};
+let endbestandData  = {};
+
+let liefer_expanded  = false;
+let geraet_expanded  = false;
+let theke_expanded   = false;
+
+let formType        = 'geraet'; // 'geraet' | 'theke'
+let formItems       = {};
+let formEditId      = null; // null = new entry, else entry.id
+
+let currentAbProdId = null;
+
+// ── UTILS ──
+function showSpinner(){ document.getElementById('spinner').classList.add('show') }
+function hideSpinner(){ document.getElementById('spinner').classList.remove('show') }
+function showToast(msg, color){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  if(color) t.style.color = color; else t.style.color = '';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show'); document.getElementById('burger-btn').classList.toggle('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); document.getElementById('burger-btn').classList.remove('open'); }
+function toggleSubMenu(btn){ btn.closest('.nav-item').classList.toggle('open'); }
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('show');
+  document.addEventListener('click', function h(e){
+    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){ document.getElementById('user-dropdown').classList.remove('show'); document.removeEventListener('click',h); }
+  });
+}
+
+// ── LOAD DATA ──
+async function loadData(){
+  showSpinner();
+  currentLager    = document.getElementById('sel-lager').value;
+  currentZeitraum = document.getElementById('sel-zeitraum').value;
+
+  lieferungen   = [];
+  geraetEntries = [];
+  thekeEntries  = [];
+  anfangsbestand = {};
+  endbestandData = {};
+
+  try {
+    // Lieferungen (aus wareneingang collection, wie in lager.html)
+    const qL = db.collection('wareneingang')
+      .where('lager','==',currentLager)
+      .where('monat','==',currentZeitraum);
+    const snapL = await qL.get();
+    snapL.forEach(d=>lieferungen.push({id:d.id,...d.data()}));
+  } catch(e){}
+
+  try {
+    // Gerät-Einträge
+    const qG = db.collection('gs_geraet')
+      .where('lager','==',currentLager)
+      .where('monat','==',currentZeitraum);
+    const snapG = await qG.get();
+    snapG.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));
+    geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
+  } catch(e){}
+
+  try {
+    // Theke-Einträge
+    const qT = db.collection('gs_theke')
+      .where('lager','==',currentLager)
+      .where('monat','==',currentZeitraum);
+    const snapT = await qT.get();
+    snapT.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));
+    thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
+  } catch(e){}
+
+  try {
+    // Anfangsbestand
+    const abDoc = await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
+    if(abDoc.exists) anfangsbestand = abDoc.data();
+  } catch(e){}
+
+  try {
+    // Endbestand = letzter Inventur-Eintrag des Zeitraums
+    const invSnap = await db.collection('inventur')
+      .where('lager','==',currentLager)
+      .where('monat','==',currentZeitraum).get();
+    let lastDate = null; let lastItems = {};
+    invSnap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{};} });
+    endbestandData = lastItems;
+  } catch(e){}
+
+  hideSpinner();
+  renderTable();
+}
+
+// ── RENDER TABLE ──
+function renderTable(){
+  const cc = NEON[currentLager] || {neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
+  const neutralTh = 'color:var(--text-dim)';
+
+  // Alle einzigartigen Daten
+  const liefer_dates = [...new Set(lieferungen.map(w=>w.datum))].sort();
+  const geraet_dates = [...new Set(geraetEntries.map(e=>e.datum))].sort();
+  const theke_dates  = [...new Set(thekeEntries.map(e=>e.datum))].sort();
+
+  // ── HEADER ──
+  let thHTML = '<tr>';
+  thHTML += '<th class="col-artikel">Artikel</th>';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+
+  // Lieferungen – Lager-Farbe
+  thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
+    <div class="col-einkauf-wrap">
+      <span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
+      <span class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()" style="color:${cc.neon}">▶</span>
+    </div></th>`;
+  liefer_dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-col detail-liefer-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label} <span class="edit-date-icon">✏️</span></th>`;
+  });
+
+  // Gerät – neutral
+  thHTML += `<th class="num-cell col-einkauf-header th-col-geraet" style="${neutralTh}">
+    <div class="col-einkauf-wrap">
+      <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
+      <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
+    </div></th>`;
+  geraet_dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="color:var(--text-dim);font-size:.68rem" data-date="${d}" data-type="geraet">${label} <span class="edit-date-icon">✏️</span></th>`;
+  });
+
+  // Theke – neutral
+  thHTML += `<th class="num-cell col-einkauf-header th-col-theke" style="${neutralTh}">
+    <div class="col-einkauf-wrap">
+      <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
+      <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
+    </div></th>`;
+  theke_dates.forEach(d=>{
+    const label = d.slice(8)+'.'+d.slice(5,7)+'.';
+    thHTML += `<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.68rem" data-date="${d}" data-type="theke">${label} <span class="edit-date-icon">✏️</span></th>`;
+  });
+
+  // Endbestand
+  thHTML += '<th class="num-cell th-col-endbestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th>';
+  thHTML += '</tr>';
+  document.getElementById('gs-thead').innerHTML = thHTML;
+
+  // ── BODY ──
+  let tbHTML = '';
+  GS_PRODUCTS.forEach((catObj, ci)=>{
+    const isFirst = ci === 0;
+    const catOpen = isFirst ? 'open' : '';
+    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
+      <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
+
+    catObj.items.forEach(prod=>{
+      const prodHidden = isFirst ? '' : 'hidden';
+      const ab = anfangsbestand[prod.id] ?? '';
+      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
+
+      // Lieferungen gesamt
+      const totalLiefer = lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+      // Gerät gesamt
+      const totalGeraet = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      // Theke gesamt
+      const totalTheke  = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      // Endbestand
+      const eb = endbestandData[prod.id] !== undefined ? endbestandData[prod.id] : '—';
+      const ebStyle = eb !== '—' ? 'color:var(--neon-green)' : '';
+
+      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
+      tbHTML += `<td class="col-artikel"><div class="prod-info">
+        <div class="prod-icon">${prod.icon||'📦'}</div>
+        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
+      </div></td>`;
+
+      // Anfangsbestand – klickbar
+      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
+
+      // Lieferungen gesamt – Lager-Farbe
+      tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${totalLiefer||'—'}</td>`;
+      liefer_dates.forEach(d=>{
+        const we = lieferungen.find(w=>w.datum===d);
+        const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
+        tbHTML += `<td class="num-cell detail-col detail-liefer-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
+      });
+
+      // Gerät gesamt
+      tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalGeraet||'—'}</td>`;
+      geraet_dates.forEach(d=>{
+        const entry = geraetEntries.find(e=>e.datum===d);
+        const qty = entry&&entry.items&&entry.items[prod.id] ? entry.items[prod.id] : '—';
+        tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">${qty}</td>`;
+      });
+
+      // Theke gesamt
+      tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalTheke||'—'}</td>`;
+      theke_dates.forEach(d=>{
+        const entry = thekeEntries.find(e=>e.datum===d);
+        const qty = entry&&entry.items&&entry.items[prod.id] ? entry.items[prod.id] : '—';
+        tbHTML += `<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${qty}</td>`;
+      });
+
+      // Endbestand
+      tbHTML += `<td class="num-cell" style="${ebStyle}">${eb}</td>`;
+      tbHTML += '</tr>';
+    });
+  });
+
+  document.getElementById('gs-tbody').innerHTML = tbHTML;
+
+  // Zustand der aufgeklappten Spalten wiederherstellen
+  if(liefer_expanded)  applyDetailCols('liefer', true);
+  if(geraet_expanded)  applyDetailCols('geraet', true);
+  if(theke_expanded)   applyDetailCols('theke',  true);
+
+  // Klick-Handler für Datumsköpfe (Lieferungen bearbeiten)
+  document.querySelectorAll('.we-date-th').forEach(th=>{
+    th.addEventListener('click', ()=>openEditLieferung(th.dataset.date));
+  });
+  // Klick-Handler für Gerät/Theke-Datumsköpfe (Einträge bearbeiten)
+  document.querySelectorAll('.geraet-date-th').forEach(th=>{
+    th.addEventListener('click', ()=>openEditEntry('geraet', th.dataset.date));
+  });
+  document.querySelectorAll('.theke-date-th').forEach(th=>{
+    th.addEventListener('click', ()=>openEditEntry('theke', th.dataset.date));
+  });
+}
+
+// ── CATEGORY TOGGLE ──
+window.toggleCategory = function(row){
+  const ci = row.dataset.cat;
+  const isOpen = row.classList.toggle('open');
+  document.querySelectorAll(`#gs-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
+};
+
+// ── EXPAND COLS ──
+function applyDetailCols(type, show){
+  document.querySelectorAll(`.detail-${type}-th, .detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));
+  const btn = document.getElementById(`expand-${type}-btn`);
+  if(btn){ btn.textContent = show ? '◀' : '▶'; btn.classList.toggle('expanded', show); }
+}
+window.toggleLieferCols  = function(){ liefer_expanded = !liefer_expanded; applyDetailCols('liefer', liefer_expanded); };
+window.toggleGeraetCols  = function(){ geraet_expanded = !geraet_expanded; applyDetailCols('geraet', geraet_expanded); };
+window.toggleThekeCols   = function(){ theke_expanded  = !theke_expanded;  applyDetailCols('theke',  theke_expanded);  };
+
+// ── ANFANGSBESTAND ──
+window.openAnfangsbestandModal = function(prodId, prodName){
+  currentAbProdId = prodId;
+  document.getElementById('ab-prod-label').textContent = prodName;
+  document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
+  document.getElementById('modal-ab').classList.add('show');
+  setTimeout(()=>document.getElementById('ab-value').focus(), 100);
+};
+window.closeAbModal = function(){ document.getElementById('modal-ab').classList.remove('show'); };
+window.saveAnfangsbestand = async function(){
+  const val = parseInt(document.getElementById('ab-value').value);
+  if(isNaN(val)||val<0) return;
+  showSpinner();
+  anfangsbestand[currentAbProdId] = val;
+  try {
+    await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true});
+  } catch(e){}
+  hideSpinner();
+  closeAbModal();
+  renderTable();
+  showToast('Anfangsbestand gespeichert');
+};
+
+// ── FORMULAR: GERÄT / THEKE ──
+window.openForm = function(type, prefillItems, editId, prefillDate){
+  formType     = type;
+  formItems    = prefillItems ? {...prefillItems} : {};
+  formEditId   = editId || null;
+
+  const cc = NEON[currentLager] || {};
+  const isGeraet = type === 'geraet';
+  const titleColor = isGeraet ? 'var(--neon-cyan)' : 'var(--neon-magenta)';
+  const lagerName  = LAGER_NAMES[currentLager] || currentLager;
+  document.getElementById('form-title').innerHTML =
+    `${isGeraet ? '⚙️ Gerät' : '🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .5rem;border-radius:8px;background:${cc.bg||'rgba(0,0,0,.3)'};border:1px solid ${cc.border||'rgba(255,255,255,.1)'};color:${cc.neon||'var(--text)'}">${lagerName}</span>`;
+
+  // Datum
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('form-date').value = prefillDate || today;
+
+  // Produktliste aufbauen – nur Getränke & Snacks, erste Kategorie offen
+  let html = '';
+  GS_PRODUCTS.forEach((catObj,ci)=>{
+    const isFirst = ci === 0;
+    html += `<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}">
+      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
+        <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-arrow">▶</span>
+      </div>
+      <div class="modal-cat-items">`;
+    catObj.items.forEach(prod=>{
+      const hasPrefill = formItems[prod.id] !== undefined;
+      html += `<div class="modal-prod-row" id="frow-${prod.id}">
+        <div class="prod-checkbox${hasPrefill?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>
+          ${prod.unit ? `<span class="modal-prod-unit">${prod.unit}</span>` : ''}
+        </div>
+        <input class="qty-input${hasPrefill?' show':''}" id="fqty-${prod.id}" type="number" min="0" placeholder="St."
+          value="${hasPrefill ? formItems[prod.id] : ''}"
+          onchange="updateFormQty('${prod.id}',this.value)">
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('form-product-list').innerHTML = html;
+
+  document.getElementById('form-step2').style.display   = 'none';
+  document.getElementById('form-save-btn').textContent  = editId ? '✓ Änderungen speichern' : '✓ Speichern';
+
+  // Vorauswahl-Preview aktualisieren
+  updateFormPreview();
+
+  document.getElementById('modal-form').classList.add('show');
+};
+window.closeForm = function(){ document.getElementById('modal-form').classList.remove('show'); };
+
+window.toggleFormProd = function(prodId){
+  const cb  = document.getElementById('fcb-'+prodId);
+  const qty = document.getElementById('fqty-'+prodId);
+  const isChecked = cb.classList.toggle('checked');
+  qty.classList.toggle('show', isChecked);
+  if(isChecked){ qty.focus(); formItems[prodId]=0; }
+  else { delete formItems[prodId]; }
+  updateFormPreview();
+};
+window.updateFormQty = function(prodId, val){
+  formItems[prodId] = parseInt(val)||0;
+  updateFormPreview();
+};
+function updateFormPreview(){
+  const ids = Object.keys(formItems);
+  const sel = document.getElementById('form-selected-list');
+  if(!ids.length){ sel.style.display='none'; return; }
+  sel.style.display = 'block';
+  let html = ''; let lastCat = '';
+  GS_PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div class="selected-cat-label">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        html+=`<div class="selected-item">
+          <span class="selected-item-name">${prod.icon} ${prod.name}<span class="selected-item-unit">${prod.unit||''}</span></span>
+          <span class="selected-item-qty">${formItems[prod.id]||0}</span>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('form-selected-items').innerHTML = html;
+}
+
+window.buildFormConfirm = function(){
+  const ids = Object.keys(formItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  const date = document.getElementById('form-date').value;
+  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+
+  // Mengen aus DOM neu lesen
+  ids.forEach(id=>{ const inp=document.getElementById('fqty-'+id); if(inp) formItems[id]=parseInt(inp.value)||0; });
+
+  const d = new Date(date);
+  document.getElementById('form-confirm-date').textContent =
+    'Datum: ' + d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+
+  let html = ''; let lastCat = '';
+  GS_PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        html+=`<div class="confirm-item">
+          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span>
+          <span class="ci-qty">${formItems[prod.id]||0}</span>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('form-confirm-list').innerHTML = html;
+
+  // Schrittweise anzeigen
+  document.getElementById('form-product-list').closest('.field').style.display = 'none';
+  document.getElementById('form-selected-list').style.display = 'none';
+  document.querySelector('.modal-btn-row').style.display = 'none';
+  document.getElementById('form-step2').style.display = 'block';
+};
+
+window.backToFormEdit = function(){
+  document.getElementById('form-product-list').closest('.field').style.display = '';
+  document.getElementById('form-selected-list').style.display = Object.keys(formItems).length ? 'block' : 'none';
+  document.querySelector('.modal-btn-row').style.display = '';
+  document.getElementById('form-step2').style.display = 'none';
+};
+
+window.saveFormEntry = async function(){
+  const date  = document.getElementById('form-date').value;
+  const monat = date.slice(0,7);
+  const collection = formType === 'geraet' ? 'gs_geraet' : 'gs_theke';
+  const entry = { lager:currentLager, datum:date, monat, items:formItems, updatedAt:new Date().toISOString() };
+
+  showSpinner();
+  try {
+    if(formEditId){
+      await db.collection(collection).doc(formEditId).update(entry);
+      showToast('Eintrag aktualisiert ✓');
+    } else {
+      entry.createdAt = new Date().toISOString();
+      await db.collection(collection).add(entry);
+      showToast('Eintrag gespeichert ✓');
+    }
+    closeForm();
+    await loadData();
+  } catch(e){
+    hideSpinner();
+    showToast('Fehler beim Speichern: '+e.message, 'var(--neon-magenta)');
+  }
+};
+
+// ── LIEFERUNG BEARBEITEN (öffnet Wareneingang-Form) ──
+window.openEditLieferung = function(date){
+  const we = lieferungen.find(w=>w.datum===date);
+  if(!we) return;
+  // Öffne wareneingang.html oder leite zu lager.html weiter mit Datum-Parameter
+  window.open('lager.html?edit='+we.id, '_blank');
+};
+
+// ── GERÄT/THEKE EINTRAG BEARBEITEN ──
+window.openEditEntry = function(type, date){
+  const entries = type === 'geraet' ? geraetEntries : thekeEntries;
+  const entry = entries.find(e=>e.datum===date);
+  if(!entry) return;
+  openForm(type, entry.items, entry.id, entry.datum);
+};
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  // Anfangsbestand-Klick
+  document.getElementById('gs-tbody').addEventListener('click', e=>{
+    const cell = e.target.closest('.anfang-cell');
+    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
+  });
+
+  loadData();
+});
+
+</script>
+</body>
+</html>
