@@ -438,7 +438,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -700,6 +700,9 @@ let currentZeitraum = '2026-06';
 let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // {productId: value}
+let lieferungenData = {}; // {prodId: total}
+let geraetData      = {}; // {prodId: total}
+let thekeData       = {}; // {prodId: total}
 let currentAbProdId = null;
 
 // ── EXPOSE (assigned after function definitions below) ──
@@ -746,6 +749,7 @@ function renderTableActual(){
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
     thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
   });
+  thHTML += `<th class="num-cell" style="border-left:2px solid rgba(255,238,0,.3);min-width:80px"><span class="th-icon">&#x1F4C9;</span><span class="th-text" style="color:var(--neon-yellow)">Monatl.<br>Verbrauch</span></th>`;
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -784,6 +788,22 @@ function renderTableActual(){
         const qty = inv&&inv.items&&inv.items[prod.id] !== undefined ? inv.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-td" style="color:var(--neon-green)">${qty}</td>`;
       });
+
+      // Monatl. Verbrauch: f = a + b - c - d - e
+      const a_val = Number(anfangsbestand[prod.id]) || 0;
+      const b_val = Number(lieferungenData[prod.id]) || 0;
+      const c_val = Number(geraetData[prod.id]) || 0;
+      const d_val = Number(thekeData[prod.id]) || 0;
+      const lastInv = wareneingangs.filter(w=>w.items&&w.items[prod.id]!==undefined)
+        .sort((x,y)=>y.datum.localeCompare(x.datum))[0];
+      const e_val = lastInv ? Number(lastInv.items[prod.id]) : null;
+      let verbrauchCell = '<span style="color:var(--text-dim)">\u2014</span>';
+      if(e_val !== null){
+        const f = a_val + b_val - c_val - d_val - e_val;
+        const fColor = f>0 ? 'var(--neon-yellow)' : f<0 ? 'var(--neon-magenta)' : 'var(--text-dim)';
+        verbrauchCell = `<span style="color:${fColor};font-weight:700">${f}</span>`;
+      }
+      tbHTML += `<td class="num-cell" style="border-left:2px solid rgba(255,238,0,.15)">${verbrauchCell}</td>`;
 
       tbHTML += `</tr>`;
     });
@@ -854,6 +874,30 @@ async function loadData(){
         }
       }
     }
+  } catch(e){}
+
+  // Lieferungen
+  lieferungenData={};
+  try {
+    const snapL=await db.collection('wareneingang')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapL.forEach(d=>{const items=d.data().items||{};Object.entries(items).forEach(([p,q])=>{lieferungenData[p]=(lieferungenData[p]||0)+Number(q);});});
+  } catch(e){}
+
+  // Gerät
+  geraetData={};
+  try {
+    const snapG=await db.collection('gs_geraet')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapG.forEach(d=>{const items=d.data().items||{};Object.entries(items).forEach(([p,q])=>{geraetData[p]=(geraetData[p]||0)+Number(q);});});
+  } catch(e){}
+
+  // Theke
+  thekeData={};
+  try {
+    const snapT=await db.collection('gs_theke')
+      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapT.forEach(d=>{const items=d.data().items||{};Object.entries(items).forEach(([p,q])=>{thekeData[p]=(thekeData[p]||0)+Number(q);});});
   } catch(e){}
 
   hideSpinner();
