@@ -1193,6 +1193,57 @@ window.confirmWareneingang = async function(){
   } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
 }
 
+window.checkListAction = function(){
+  if(currentLager==='zentrallager') buildConfirm();
+  else buildConfirmLieferung();
+};
+
+window.buildConfirmLieferung = function(){
+  const ids=Object.keys(weSelectedItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  const date=document.getElementById('we-date').value;
+  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+  document.getElementById('we-step1').style.display='none';
+  document.getElementById('we-step2').style.display='block';
+  const d=new Date(date);
+  document.getElementById('confirm-date-label').textContent=
+    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
+      }
+    });
+  });
+  document.getElementById('confirm-list').innerHTML=html;
+  document.getElementById('confirm-shops').style.display='none';
+  const _cb=document.getElementById('btn-confirm-save');
+  if(_cb) _cb.textContent='✓ Änderungen speichern';
+};
+
+window.openEditLieferung = function(date){
+  const we=wareneingangs.find(w=>w.datum===date);
+  if(!we) return;
+  weSelectedItems={...we.items};
+  weShopRows=[...(we.shops||[])];
+  const lagerName=LAGER_NAMES[currentLager]||currentLager;
+  const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
+  document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
+  openWareneingang(date);
+  setTimeout(()=>{
+    Object.keys(weSelectedItems).forEach(prodId=>{
+      const cb=document.getElementById('we-cb-'+prodId);
+      const qi=document.getElementById('we-qty-'+prodId);
+      if(cb) cb.classList.add('checked');
+      if(qi){ qi.classList.add('show'); qi.value=weSelectedItems[prodId]; }
+    });
+    updateSelectedPreview();
+    buildConfirmLieferung();
+  },100);
+};
+
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
