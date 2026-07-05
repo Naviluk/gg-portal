@@ -510,7 +510,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="buildConfirm()">Einkaufsliste prüfen →</button>
+        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
       </div>
     </div>
@@ -521,7 +521,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
         <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
       </div>
     </div>
@@ -735,7 +735,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon};cursor:pointer" data-date="${d}" title="Einkauf bearbeiten">${label} <span style="font-size:.65rem;opacity:.7">✏️</span></th>`;
     });
     // Lieferungen neutral
     thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
@@ -748,13 +748,12 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}" title="Lieferung bearbeiten">${label} <span style="font-size:.65rem;opacity:.7">✏️</span></th>`;
     });
     // Gerät — neutral (no color)
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
-        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -764,7 +763,6 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
-        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -1009,6 +1007,8 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
   document.getElementById('modal-we').classList.add('show');
+  const _lb=document.getElementById('btn-check-list');
+  if(_lb) _lb.textContent=currentLager==='zentrallager'?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
 
   const isZentral = currentLager==='zentrallager';
   const lagerColors = {
@@ -1118,7 +1118,7 @@ window.removeShopRow = function(idx){
   weShopRows[idx]={removed:true};
 }
 
-window.buildConfirm = function(){
+window.buildConfirm = function(viewMode){
   const ids=Object.keys(weSelectedItems);
   if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
   const date=document.getElementById('we-date').value;
@@ -1164,6 +1164,8 @@ window.buildConfirm = function(){
         return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
       }).join('');
   } else { cs.style.display='none'; }
+  const _cb=document.getElementById('btn-confirm-save');
+  if(_cb) _cb.textContent=viewMode?'✓ Änderungen speichern':'✓ Bestätigen';
 }
 
 window.backToEdit = function(){
@@ -1196,21 +1198,17 @@ window.openEditWareneingang = function(date){
   if(!we) return;
   weSelectedItems={...we.items};
   weShopRows=[...(we.shops||[])];
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
-  document.getElementById('modal-we').classList.add('show');
-  document.getElementById('we-date').value=date;
-  // rebuild list with pre-checked items
   openWareneingang(date);
   setTimeout(()=>{
     Object.keys(weSelectedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
-      if(cb){cb.classList.add('checked');}
-      if(qi){qi.classList.add('show');qi.value=weSelectedItems[prodId];}
+      if(cb) cb.classList.add('checked');
+      if(qi){ qi.classList.add('show'); qi.value=weSelectedItems[prodId]; }
     });
     updateSelectedPreview();
-  },100);
+    buildConfirm(true);
+  }, 100);
 }
 
 // ── INIT ──
@@ -1232,6 +1230,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.confirmWareneingang   = confirmWareneingang;
   window.backToEdit            = backToEdit;
   window.openEditWareneingang  = openEditWareneingang;
+  window.openEditLieferung     = openEditLieferung;
+  window.buildConfirmLieferung = buildConfirmLieferung;
+  window.checkListAction       = checkListAction;
 
   loadData();
 
@@ -1239,7 +1240,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
-    if(th) openEditWareneingang(th.dataset.date);
+    if(th){
+      if(currentLager==='zentrallager') openEditWareneingang(th.dataset.date);
+      else openEditLieferung(th.dataset.date);
+    }
   });
 
 });
