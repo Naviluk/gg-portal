@@ -1240,40 +1240,50 @@ window.buildConfirmLieferung = function(){
 window.openEditLieferung = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  weSelectedItems={...we.items};
-  weShopRows=[...(we.shops||[])];
+  const savedItems = {...we.items};
+  const savedShops = [...(we.shops||[])];
   const lagerName=LAGER_NAMES[currentLager]||currentLager;
   const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
-  document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
   openWareneingang(date);
   setTimeout(()=>{
-    Object.keys(weSelectedItems).forEach(prodId=>{
+    weSelectedItems = savedItems;
+    weShopRows = savedShops;
+    Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=weSelectedItems[prodId]; }
+      if(qi){ qi.classList.add('show'); qi.value=savedItems[prodId]; }
     });
     updateSelectedPreview();
+    // Заголовок Lieferung
+    document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
     buildConfirmLieferung();
-  },100);
+  }, 300);
 };
 
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  weSelectedItems={...we.items};
-  weShopRows=[...(we.shops||[])];
+  // Сохраняем данные
+  const savedItems = {...we.items};
+  const savedShops = [...(we.shops||[])];
+  // Открываем модал (он сбросит weSelectedItems — восстановим ниже)
   openWareneingang(date);
+  // Ждём пока DOM построится, затем заполняем и показываем шаг 2
   setTimeout(()=>{
-    Object.keys(weSelectedItems).forEach(prodId=>{
+    weSelectedItems = savedItems;
+    weShopRows = savedShops;
+    // Восстанавливаем чекбоксы и числа
+    Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=weSelectedItems[prodId]; }
+      if(qi){ qi.classList.add('show'); qi.value=savedItems[prodId]; }
     });
     updateSelectedPreview();
+    // Переходим на шаг 2 — обзор
     buildConfirm(true);
-  }, 100);
+  }, 300);
 }
 
 // ── INIT ──
