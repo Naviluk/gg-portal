@@ -748,12 +748,13 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}" title="Lieferung bearbeiten">${label} <span style="font-size:.65rem;opacity:.7">✏️</span></th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
     // Gerät — neutral (no color)
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
+        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -763,6 +764,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
+        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -798,7 +800,7 @@ function renderTableActual(){
 
       // Anfangsbestand
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
+      tbHTML += `<td class="num-cell" style="color:var(--text)">${abDisplay}</td>`;
 
       const einkVal = totalEink || '—';
       if(isZentral){
@@ -1008,10 +1010,6 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('we-step2').style.display='none';
   document.getElementById('modal-we').classList.add('show');
 
-  // Текст кнопки: Einkaufsliste / Lieferliste
-  const _lb=document.getElementById('btn-check-list');
-  if(_lb) _lb.textContent=currentLager==='zentrallager'?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
-
   const isZentral = currentLager==='zentrallager';
   const lagerColors = {
     zentrallager: {name:'Zentrallager', color:'var(--neon-green)'},
@@ -1171,45 +1169,7 @@ window.buildConfirm = function(){
 window.backToEdit = function(){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
-  // Восстанавливаем текст кнопки в зависимости от контекста
-  const confirmBtn=document.getElementById('btn-confirm-save');
-  if(confirmBtn) confirmBtn.textContent='✓ Bestätigen';
 }
-
-window.buildConfirmLieferung = function(){
-  const ids=Object.keys(weSelectedItems);
-  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
-  const date=document.getElementById('we-date').value;
-  if(!date){ showToast('Bitte Datum auswählen.'); return; }
-
-  document.getElementById('we-step1').style.display='none';
-  document.getElementById('we-step2').style.display='block';
-
-  const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent=
-    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-
-  let html=''; let lastCat='';
-  PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){
-          html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;
-          lastCat=catObj.cat;
-        }
-        html+=`<div class="confirm-item">
-          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span>
-          <span class="ci-qty">${weSelectedItems[prod.id]||0}</span>
-        </div>`;
-      }
-    });
-  });
-  document.getElementById('confirm-list').innerHTML=html;
-  document.getElementById('confirm-shops').style.display='none';
-
-  const confirmBtn=document.getElementById('btn-confirm-save');
-  if(confirmBtn) confirmBtn.textContent='✓ Änderungen speichern';
-};
 
 window.confirmWareneingang = async function(){
   showSpinner();
@@ -1230,32 +1190,6 @@ window.confirmWareneingang = async function(){
     await loadData();
   } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
 }
-
-window.openEditLieferung = function(date){
-  const we=wareneingangs.find(w=>w.datum===date);
-  if(!we) return;
-  weSelectedItems={...we.items};
-  weShopRows=[...(we.shops||[])];
-
-  // Устанавливаем заголовок модала — Lieferung
-  const lagerName = LAGER_NAMES[currentLager]||currentLager;
-  document.getElementById('we-title').innerHTML =
-    'Lieferung erfassen – <span style="color:'+LAGER_NEON[currentLager]+'">'+(lagerName.toUpperCase())+'</span>';
-
-  // Строим шаг 1 с заполненными данными
-  openWareneingang(date);
-  setTimeout(()=>{
-    Object.keys(weSelectedItems).forEach(prodId=>{
-      const cb=document.getElementById('we-cb-'+prodId);
-      const qi=document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=weSelectedItems[prodId]; }
-    });
-    updateSelectedPreview();
-    // Переходим сразу на шаг 2 — обзор
-    buildConfirmLieferung();
-  }, 100);
-};
 
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
@@ -1298,22 +1232,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.confirmWareneingang   = confirmWareneingang;
   window.backToEdit            = backToEdit;
   window.openEditWareneingang  = openEditWareneingang;
-  window.openEditLieferung     = openEditLieferung;
-  window.buildConfirmLieferung = buildConfirmLieferung;
-  window.checkListAction       = checkListAction;
 
   loadData();
 
   document.getElementById('lager-tbody').addEventListener('click', e=>{
-    const cell = e.target.closest('.ab-cell');
-    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
   });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
-    if(th){
-      if(currentLager==='zentrallager') openEditWareneingang(th.dataset.date);
-      else openEditLieferung(th.dataset.date);
-    }
+    if(th) openEditWareneingang(th.dataset.date);
   });
 
 });

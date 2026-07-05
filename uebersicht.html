@@ -438,7 +438,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
+        <li><a href="wareneingang.html">Wareneingang</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -701,9 +701,6 @@ let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // {productId: value}
 let currentAbProdId = null;
-let lieferungenData = {}; // {prodId: total} — из wareneingang collection
-let geraetData      = {}; // {prodId: total} — из gs_geraet collection
-let thekeData       = {}; // {prodId: total} — из gs_theke collection
 
 // ── EXPOSE (assigned after function definitions below) ──
 
@@ -749,10 +746,6 @@ function renderTableActual(){
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
     thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
   });
-  // Monatl. Verbrauch Spalte
-  thHTML += `<th class="num-cell" style="border-left:2px solid rgba(255,238,0,.3);min-width:80px">
-    <span class="th-icon">📉</span><span class="th-text" style="color:var(--neon-yellow)">Monatl.<br>Verbrauch</span>
-  </th>`;
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -770,7 +763,8 @@ function renderTableActual(){
     catObj.items.forEach(prod=>{
       const prodHidden = isFirst ? '' : 'hidden';
       const ab = anfangsbestand[prod.id] ?? '';
-      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
+      const isJuni = currentZeitraum==='2026-06';
+      const abDisplay = ab !== '' ? ab : (isJuni ? '<span style="color:var(--text-dim);font-size:.7rem">+</span>' : '<span style="color:var(--text-dim)">—</span>');
       const safeName = prod.name.replace(/"/g,'&quot;');
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
@@ -779,8 +773,9 @@ function renderTableActual(){
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
-      // Anfangsbestand — editable if no previous inventur
-      tbHTML += `<td class="num-cell editable ab-cell" data-prod-id="${prod.id}" data-prod-name="${safeName}">
+      // Anfangsbestand — кликабельно только для июня (ручной ввод)
+      const abCellClass = isJuni ? 'num-cell editable ab-cell' : 'num-cell ab-cell-readonly';
+      tbHTML += `<td class="${abCellClass}" data-prod-id="${prod.id}" data-prod-name="${safeName}">
         <span class="edit-val">${abDisplay}</span></td>`;
 
       // Inventur date columns
@@ -789,24 +784,6 @@ function renderTableActual(){
         const qty = inv&&inv.items&&inv.items[prod.id] !== undefined ? inv.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-td" style="color:var(--neon-green)">${qty}</td>`;
       });
-
-      // ── Monatl. Verbrauch: f = a + b - c - d - e ──
-      // a = Anfangsbestand, b = Lieferungen, c = Gerät, d = Theke, e = letzter Inventurwert
-      const a_val = Number(anfangsbestand[prod.id]) || 0;
-      const b_val = Number(lieferungenData[prod.id]) || 0;
-      const c_val = Number(geraetData[prod.id]) || 0;
-      const d_val = Number(thekeData[prod.id]) || 0;
-      // e = последний по дате инвентур этого периода
-      const lastInv = wareneingangs.filter(w=>w.items&&w.items[prod.id]!==undefined)
-        .sort((x,y)=>y.datum.localeCompare(x.datum))[0];
-      const e_val = lastInv ? Number(lastInv.items[prod.id]) : null;
-      let verbrauchCell = '<span style="color:var(--text-dim)">—</span>';
-      if(e_val !== null) {
-        const f = a_val + b_val - c_val - d_val - e_val;
-        const fColor = f > 0 ? 'var(--neon-yellow)' : f < 0 ? 'var(--neon-magenta)' : 'var(--text-dim)';
-        verbrauchCell = `<span style="color:${fColor};font-weight:700">${f}</span>`;
-      }
-      tbHTML += `<td class="num-cell" style="border-left:2px solid rgba(255,238,0,.15)">${verbrauchCell}</td>`;
 
       tbHTML += `</tr>`;
     });
@@ -849,40 +826,34 @@ async function loadData(){
   anfangsbestand={};
   try {
     const abDoc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
-    if(abDoc.exists) anfangsbestand=abDoc.data();
-  } catch(e){}
-
-  // Lieferungen (wareneingang) für diesen Zeitraum
-  lieferungenData={};
-  try {
-    const snapL=await db.collection('wareneingang')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snapL.forEach(d=>{
-      const items=d.data().items||{};
-      Object.entries(items).forEach(([pid,qty])=>{lieferungenData[pid]=(lieferungenData[pid]||0)+Number(qty);});
-    });
-  } catch(e){}
-
-  // Gerät-Einträge
-  geraetData={};
-  try {
-    const snapG=await db.collection('gs_geraet')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snapG.forEach(d=>{
-      const items=d.data().items||{};
-      Object.entries(items).forEach(([pid,qty])=>{geraetData[pid]=(geraetData[pid]||0)+Number(qty);});
-    });
-  } catch(e){}
-
-  // Theke-Einträge
-  thekeData={};
-  try {
-    const snapT=await db.collection('gs_theke')
-      .where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
-    snapT.forEach(d=>{
-      const items=d.data().items||{};
-      Object.entries(items).forEach(([pid,qty])=>{thekeData[pid]=(thekeData[pid]||0)+Number(qty);});
-    });
+    if(abDoc.exists){
+      anfangsbestand=abDoc.data();
+    } else {
+      // Если не июнь 2026 — автоматически копируем Endbestand предыдущего месяца
+      const isFirstManualMonth = currentZeitraum==='2026-06';
+      if(!isFirstManualMonth){
+        // Вычисляем предыдущий месяц
+        const [yr,mo] = currentZeitraum.split('-').map(Number);
+        const prevMo = mo===1 ? 12 : mo-1;
+        const prevYr = mo===1 ? yr-1 : yr;
+        const prevZeitraum = prevYr+'-'+(String(prevMo).padStart(2,'0'));
+        // Берём последний инвентур предыдущего месяца как Endbestand
+        const invSnap = await db.collection('inventur')
+          .where('lager','==',currentLager)
+          .where('monat','==',prevZeitraum).get();
+        let lastDate=null, lastItems={};
+        invSnap.forEach(d=>{
+          const inv=d.data();
+          if(!lastDate||inv.datum>lastDate){lastDate=inv.datum;lastItems=inv.items||{};}
+        });
+        if(lastDate && Object.keys(lastItems).length>0){
+          anfangsbestand = lastItems;
+          // Автоматически сохраняем в Firebase чтобы lager.html тоже мог читать
+          await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(lastItems);
+          showToast('Anfangsbestand automatisch aus '+prevZeitraum+' übernommen');
+        }
+      }
+    }
   } catch(e){}
 
   hideSpinner();
@@ -1153,7 +1124,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   document.getElementById('lager-tbody').addEventListener('click', e=>{
     const cell = e.target.closest('.ab-cell');
-    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
+    if(cell && currentZeitraum==='2026-06') openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
   });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
