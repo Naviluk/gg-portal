@@ -1171,6 +1171,20 @@ window.buildConfirm = function(viewMode){
 window.backToEdit = function(){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
+  // Восстанавливаем состояние чекбоксов и полей ввода из weSelectedItems
+  setTimeout(()=>{
+    // Сначала сбрасываем все чекбоксы
+    document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
+    document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{ qi.classList.remove('show'); qi.value=''; });
+    // Затем восстанавливаем из weSelectedItems
+    Object.entries(weSelectedItems).forEach(([prodId, qty])=>{
+      const cb  = document.getElementById('we-cb-'+prodId);
+      const qi  = document.getElementById('we-qty-'+prodId);
+      if(cb) cb.classList.add('checked');
+      if(qi){ qi.classList.add('show'); qi.value=qty; }
+    });
+    updateSelectedPreview();
+  }, 50);
 }
 
 window.confirmWareneingang = async function(){
