@@ -427,24 +427,24 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
-/* Двойное окно плана */
-#modal-plan{display:none!important}
-#modal-plan.show{
-  display:flex!important;
-  flex-direction:row!important;
-  flex-wrap:wrap!important;
-  align-items:flex-start!important;
-  justify-content:center!important;
-  gap:1rem!important;
-  padding:1.5rem 1rem!important;
-  overflow-y:auto!important;
-  align-content:flex-start!important;
-}
-#plan-modal-left,#plan-modal-right{
-  position:relative;
-  flex:1;
-  align-self:flex-start!important;
-}
+/* Окно плана */
+#modal-plan{display:none}
+#modal-plan.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
+/* Колонки в форме плана */
+.plan-form-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px}
+.plan-form-row:hover{background:rgba(0,245,255,.03)}
+.plan-form-name{flex:1;font-size:.86rem;min-width:0}
+.plan-form-akt{width:52px;text-align:center;font-size:.82rem;color:var(--text-dim);flex-shrink:0}
+.plan-form-empf{width:52px;text-align:center;font-size:.88rem;color:var(--neon-cyan);font-weight:700;flex-shrink:0}
+.plan-form-neu{width:70px;flex-shrink:0;background:rgba(0,0,0,.4);border:1px solid var(--neon-cyan);
+  color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
+  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none}
+.plan-form-neu:focus{box-shadow:0 0 8px rgba(0,245,255,.3)}
+.plan-form-header{display:flex;gap:.5rem;padding:.3rem .5rem;margin-bottom:.2rem;border-bottom:1px solid var(--glass-border)}
+.pfh-name{flex:1;font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
+.pfh-akt{width:52px;text-align:center;font-size:.6rem;color:var(--text-dim);text-transform:uppercase}
+.pfh-empf{width:52px;text-align:center;font-size:.6rem;color:var(--neon-cyan);text-transform:uppercase}
+.pfh-neu{width:70px;text-align:center;font-size:.6rem;color:var(--neon-green);text-transform:uppercase}
 /* Таблица обзора */
 .plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
 .plan-overview-name{flex:1;font-size:.86rem}
@@ -615,38 +615,22 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- MODAL: PLANUNG — двойное окно (как в Erfassungen) -->
+<!-- MODAL: PLANUNG — одно окно -->
 <div class="modal-overlay" id="modal-plan">
-
-  <!-- Левое окно: обзор рекомендаций -->
-  <div class="modal" id="plan-modal-left" style="max-width:420px;flex:1;min-width:280px">
+  <div class="modal" id="plan-modal-right" style="max-width:620px;width:100%;max-height:90vh;overflow-y:auto">
     <button class="modal-close" onclick="closePlan()">✕</button>
-    <div class="modal-title" id="plan-title-left" style="margin-bottom:.5rem">Planungsübersicht</div>
-    <div id="plan-lager-badge-left" style="margin-bottom:1rem"></div>
-    <div id="plan-overview-list"></div>
-    <div class="modal-btn-row" style="margin-top:1.2rem">
-      <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
-      <button class="btn btn-primary" id="btn-open-plan-form" onclick="openPlanForm()">
-        <span id="btn-plan-form-label">Einkauf planen →</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Правое окно: форма редактирования (стиль Inventur Ausfüllen) -->
-  <div class="modal" id="plan-modal-right" style="max-width:560px;flex:1;min-width:300px;display:none;max-height:88vh;overflow-y:auto">
     <div class="modal-title" id="plan-title-right" style="margin-bottom:.4rem">Neue Bestellung</div>
     <div id="plan-lager-badge-right" style="margin-bottom:.8rem"></div>
     <div class="field" style="margin-bottom:.8rem">
       <label class="field-label">Datum</label>
       <input type="date" id="plan-date" style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
     </div>
-    <div id="plan-content" style="max-height:55vh;overflow-y:auto"></div>
+    <div id="plan-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
       <button class="btn btn-save" id="btn-save-plan" onclick="savePlan()">✓ Einkauf planen</button>
-      <button class="btn btn-ghost" onclick="closePlanForm()">← Zurück</button>
+      <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
     </div>
   </div>
-
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -842,7 +826,7 @@ function renderTable(){
     <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
       <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
       <span class="th-text" style="color:var(--neon-magenta)">${planLabel}</span>
-      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlan()" title="Planung bearbeiten">✎</button>
+      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>
     </th>
   </tr>`;
 
@@ -1043,20 +1027,30 @@ window.openPlan=function(){
   });
   document.getElementById('plan-overview-list').innerHTML=hasItems?ovHtml:
     '<p style="color:var(--text-dim);font-size:.85rem">Soll-Bestand zuerst konfigurieren.</p>';
-  document.getElementById('btn-open-plan-form').style.display=hasItems?'':'none';
-
-  // ── Правое окно: скрыто изначально ──
-  document.getElementById('plan-modal-right').style.display='none';
-
   document.getElementById('modal-plan').classList.add('show');
 };
 
 window.openPlanForm=function(){
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
+  const isE=planType==='einkauf';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+  const nc=NEON[currentLager]||NEON[LAGERS[0]]||{};
+  const lagerName=LAGER_NAMES[currentLager]||currentLager;
 
-  // Собираем empf-значения из левого окна (diff > 0)
-  const empfValues={};
+  // Заголовок и бейдж
+  document.getElementById('plan-title-right').textContent=isE?'Neuer Einkauf':'Neue Lieferung';
+  document.getElementById('btn-save-plan').textContent=isE?'✓ Einkauf planen':'✓ Lieferung planen';
+  const badge=`<span style="font-family:'Orbitron',sans-serif;font-size:.62rem;padding:.2rem .7rem;
+    border-radius:10px;background:${nc.bg||'rgba(0,0,0,.3)'};border:1px solid ${nc.border||'rgba(255,255,255,.1)'};
+    color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
+  document.getElementById('plan-lager-badge-right').innerHTML=badge;
+
+  // Дата
+  const _pd=document.getElementById('plan-date');
+  if(_pd) _pd.value=new Date().toISOString().slice(0,10);
+
+  // Собираем данные: akt и empf для каждого артикля
+  const aktValues={}, empfValues={};
   PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
       let soll=0,akt=0;
@@ -1064,13 +1058,21 @@ window.openPlanForm=function(){
         soll+=Number((sollData[lg]||{})[prod.id])||0;
         akt+=Number((bestandData[lg]||{})[prod.id])||0;
       });
+      aktValues[prod.id]=akt;
       const diff=Math.max(0,soll-akt);
       if(diff>0) empfValues[prod.id]=diff;
     });
   });
 
-  // Строим форму: все категории, все артикли, предзаполнено из empfValues
-  let html='';
+  // Строим форму с заголовком колонок и категориями
+  const headerHtml=`<div class="plan-form-header">
+    <span class="pfh-name">Artikel</span>
+    <span class="pfh-akt">Aktuell</span>
+    <span class="pfh-empf">Empf.</span>
+    <span class="pfh-neu">Neu</span>
+  </div>`;
+
+  let html=headerHtml;
   PRODUCTS.forEach((catObj,ci)=>{
     const isFirst=ci===0;
     html+=`<div class="modal-cat${isFirst?' open':''}" id="pcat-${ci}">
@@ -1080,33 +1082,30 @@ window.openPlanForm=function(){
       </div>
       <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
-      const prefill = empfValues[prod.id]||'';
-      const hasPre  = prefill!=='';
-      const inputStyle = hasPre
-        ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.08)'
-        : '';
-      html+=`<div class="soll-prod-row">
-        <div class="prod-icon" style="width:28px;height:28px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="modal-prod-name-block">
-          <span class="modal-prod-name">${prod.name}</span>
-          ${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}
+      const akt   = aktValues[prod.id]||0;
+      const empf  = empfValues[prod.id]||0;
+      const neuVal= empf||'';
+      const neuStyle = empf ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
+      html+=`<div class="plan-form-row">
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="plan-form-name">
+          <span style="font-size:.86rem">${prod.name}</span>
+          ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}
         </div>
-        <input class="plan-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St."
-          value="${prefill}" style="${inputStyle}">
+        <span class="plan-form-akt">${akt||'—'}</span>
+        <span class="plan-form-empf">${empf||'—'}</span>
+        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" placeholder="0"
+          value="${neuVal}" style="${neuStyle}">
       </div>`;
     });
     html+='</div></div>';
   });
 
   document.getElementById('plan-content').innerHTML=html;
-  const _pd=document.getElementById('plan-date');
-  if(_pd) _pd.value=new Date().toISOString().slice(0,10);
-  document.getElementById('plan-modal-right').style.display='';
+  document.getElementById('modal-plan').classList.add('show');
 };
 
-window.closePlanForm=function(){
-  document.getElementById('plan-modal-right').style.display='none';
-};
+
 
 window.closePlan=function(){
   document.getElementById('modal-plan').classList.remove('show');
