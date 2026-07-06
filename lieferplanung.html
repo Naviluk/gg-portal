@@ -398,6 +398,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   border-radius:6px;padding:.5rem .9rem;cursor:pointer;font-weight:700;
   box-shadow:0 0 10px rgba(255,238,0,.2);transition:all .2s;white-space:nowrap}
 .btn-gesamt:hover{box-shadow:0 0 22px rgba(255,238,0,.5);transform:translateY(-1px)}
+.btn-einkaeufe-style{border-color:var(--neon-cyan)!important;color:var(--neon-cyan)!important;
+  background:rgba(0,245,255,.08)!important;box-shadow:0 0 10px rgba(0,245,255,.2)!important}
 .btn-plan{
   display:inline-flex;align-items:center;gap:.3rem;
   background:rgba(0,255,136,.1);border:1px solid var(--neon-green);color:var(--neon-green);
@@ -636,7 +638,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
-    <div id="ctrl-buttons" style="display:flex;gap:.6rem;margin-left:auto;flex-wrap:wrap"></div>
+    <div id="ctrl-buttons" style="display:flex;gap:.6rem;margin-left:auto;flex-wrap:wrap;align-items:center"></div>
   </div>
   <div class="table-wrap-single">
     <table class="lager-table" id="lp-table">
@@ -647,8 +649,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </div>
 
 <!-- LIEFERUNGEN PANEL -->
-<div class="gesamt-panel" id="gesamt-panel">
-  <button class="gesamt-close" onclick="closeLieferungen()">✕</button>
+<div class="gesamt-panel" id="gesamt-panel" onclick="event.stopPropagation()">
+  <button class="gesamt-close" onclick="closeLieferungen()" style="z-index:10">✕</button>
   <div class="gesamt-panel-title">🚚 Alle Lieferungen</div>
   <!-- Переключатели складов -->
   <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem" id="lief-tabs">
@@ -736,6 +738,52 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="modal-btn-row" style="margin-top:1.2rem">
       <button class="btn btn-save" id="btn-plan-final" onclick="savePlan()">✓ Einkauf planen</button>
       <button class="btn btn-ghost" onclick="closePlanConfirm()">← Zurück zur Bearbeitung</button>
+    </div>
+  </div>
+</div>
+
+<!-- EINKÄUFE PANEL -->
+<div class="gesamt-panel" id="einkaeufe-panel" onclick="event.stopPropagation()" style="right:-101vw">
+  <button class="gesamt-close" onclick="closeEinkaeufe()">✕</button>
+  <div class="gesamt-panel-title">🛒 Einkäufe – Zentrallager</div>
+  <!-- Сортировка -->
+  <div style="display:flex;gap:.4rem;margin-bottom:1rem">
+    <button class="lief-tab active" id="ek-sort-artikel" onclick="switchEkSort('artikel')"
+      style="border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.1)">Nach Artikeln</button>
+    <button class="lief-tab" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
+  </div>
+  <!-- Шапка колонок -->
+  <div class="lief-col-header">
+    <span class="lch-name">Artikel</span>
+    <span class="lch-name" style="max-width:110px;min-width:90px;font-size:.62rem">Shop</span>
+    <span class="lch-gepl">Gepl.</span>
+    <span class="lch-pack" style="color:var(--neon-green)">✓</span>
+  </div>
+  <div id="einkaeufe-content"></div>
+  <div style="margin-top:1rem" id="ek-complete-wrap">
+    <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
+      style="width:100%">✓ Einkauf abschliessen</button>
+  </div>
+</div>
+
+<!-- MODAL: EINKAUF ABSCHLIESSEN -->
+<div class="modal-overlay" id="modal-complete-einkauf" onclick="if(event.target===this)document.getElementById('modal-complete-einkauf').classList.remove('show')">
+  <div class="modal" style="max-width:460px">
+    <button class="modal-close" onclick="document.getElementById('modal-complete-einkauf').classList.remove('show')">✕</button>
+    <div class="modal-title">✓ Einkauf abschliessen</div>
+    <div class="field" style="margin-bottom:.8rem">
+      <label class="field-label">Einkaufsdatum</label>
+      <input type="date" id="ek-complete-date"
+        style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);
+        font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
+    </div>
+    <div style="font-size:.9rem;color:var(--text);margin-bottom:1.2rem">
+      Einkauf abschliessen und Daten in <strong style="color:var(--neon-cyan)">Bestände</strong> einträgen?<br>
+      <span style="font-size:.78rem;color:var(--text-dim)">Die Spalte Gepl. Einkauf wird danach zurückgesetzt.</span>
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-save" onclick="confirmCompleteEinkauf()">✓ Bestätigen</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-complete-einkauf').classList.remove('show')">Abbrechen</button>
     </div>
   </div>
 </div>
@@ -926,10 +974,12 @@ async function loadData(){
 
 function updateButtons(){
   const div=document.getElementById('ctrl-buttons');
+  const ekBtn='<button class="btn-gesamt btn-einkaeufe-style" onclick="openEinkaeufe()">🛒 Einkäufe</button>';
+  const liefBtn='<button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
   if(currentLager==='zentrallager'){
-    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button><button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
+    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button>'+ekBtn+liefBtn;
   }else{
-    div.innerHTML='<button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
+    div.innerHTML=ekBtn+liefBtn;
   }
 }
 
@@ -945,13 +995,13 @@ function renderTable(){
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
     <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
-      <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
-      <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
+      <span class="th-icon" style="color:var(--neon-green);display:block;margin-bottom:.1rem">${empfIcon}</span>
+      <span class="th-text" style="color:var(--neon-green);display:block;line-height:1.2;white-space:normal">${empfLabel.replace(' ','<br>')}</span>
     </th>
     <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
-      <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
-      <span class="th-text" style="color:var(--neon-magenta)">${planLabel}</span>
-      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>
+      <span class="th-icon" style="color:var(--neon-magenta);display:block;margin-bottom:.1rem">${isZentral?'🛒':'🚚'}</span>
+      <span class="th-text" style="color:var(--neon-magenta);display:block;line-height:1.2;white-space:normal">${planLabel.replace(' ','<br>')}</span>
+      <button class="btn-plan" style="display:block;margin:.3rem auto 0;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>
     </th>
   </tr>`;
 
@@ -988,6 +1038,147 @@ function renderTable(){
 window.toggleCategory=function(row){
   const ci=row.dataset.cat;const o=row.classList.toggle('open');
   document.querySelectorAll(`#lp-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!o));
+};
+
+// ── EINKÄUFE STATE ──
+const SHOPS_ALL = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE','Penny','Trinkgut','Kaufland','Action','Centershop'];
+let ekSort = 'artikel';
+let ekState = {};
+let ekDefaultShops = {};
+
+window.openEinkaeufe = async function(){
+  try{
+    const doc = await db.collection('ek_defaults').doc('shops').get();
+    if(doc.exists) ekDefaultShops = doc.data();
+  }catch(e){}
+  // Загружаем сохранённые галочки
+  try{
+    const doc2 = await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).get();
+    if(doc2.exists){
+      const saved=doc2.data();
+      Object.keys(saved).forEach(id=>{ if(!ekState[id])ekState[id]={bought:false,shop:ekDefaultShops[id]||''}; ekState[id].bought=!!saved[id]; });
+    }
+  }catch(e){}
+  document.getElementById('einkaeufe-panel').classList.add('open');
+  renderEkContent();
+};
+window.closeEinkaeufe = function(){
+  document.getElementById('einkaeufe-panel').classList.remove('open');
+};
+window.switchEkSort = function(sort){
+  ekSort = sort;
+  ['artikel','shops'].forEach(s=>{
+    const btn=document.getElementById('ek-sort-'+s);
+    if(!btn) return;
+    btn.classList.toggle('active', s===sort);
+    btn.style.cssText = s===sort ? 'border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.1)' : '';
+  });
+  renderEkContent();
+};
+
+function buildEkRow(prod, gepl){
+  if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+  const st = ekState[prod.id];
+  const shopOpts = SHOPS_ALL.map(s=>`<option value="${s}" ${st.shop===s?'selected':''}>${s}</option>`).join('');
+  return `<div class="lief-row" id="ek-row-${prod.id}">
+    <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${prod.icon||'📦'}</div>
+    <div class="lief-row-name" style="font-size:.84rem">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
+    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)">
+      <option value="">— Shop —</option>${shopOpts}
+    </select>
+    <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px">${gepl}</span>
+    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"></div>
+  </div>`;
+}
+
+function renderEkContent(){
+  const lgPlan = planData['zentrallager']||{};
+  let html = '';
+  if(ekSort==='artikel'){
+    PRODUCTS.forEach((cat,ci)=>{
+      let catHtml='';
+      cat.items.forEach(prod=>{
+        const gepl=lgPlan[prod.id]||0; if(!gepl)return;
+        catHtml+=buildEkRow(prod,gepl);
+      });
+      if(catHtml){
+        const wid='ek-cat-wrap-'+ci;
+        html+=`<div class="lief-cat-wrap" id="${wid}">
+          <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${cat.cat}</div>
+          <div class="lief-cat-items">${catHtml}</div>
+        </div>`;
+      }
+    });
+  } else {
+    const byShop = {};
+    PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
+      const gepl=lgPlan[prod.id]||0; if(!gepl)return;
+      if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+      const shop=ekState[prod.id].shop||'Kein Shop';
+      if(!byShop[shop]) byShop[shop]=[];
+      byShop[shop].push({prod,gepl});
+    }));
+    Object.entries(byShop).sort(([a],[b])=>a.localeCompare(b)).forEach(([shop,items],si)=>{
+      const wid='ek-shop-wrap-'+si;
+      const catHtml=items.map(x=>buildEkRow(x.prod,x.gepl)).join('');
+      html+=`<div class="lief-cat-wrap" id="${wid}">
+        <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${shop}</div>
+        <div class="lief-cat-items">${catHtml}</div>
+      </div>`;
+    });
+  }
+  if(!html) html='<p style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">Keine geplanten Einkäufe.</p>';
+  document.getElementById('einkaeufe-content').innerHTML=html;
+}
+
+window.setEkShop = async function(prodId, shop){
+  if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
+  ekState[prodId].shop=shop;
+  ekDefaultShops[prodId]=shop;
+  try{ await db.collection('ek_defaults').doc('shops').set(ekDefaultShops,{merge:true}); }catch(e){}
+  if(ekSort==='shops') renderEkContent();
+};
+
+window.toggleEkCheck = function(prodId){
+  if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
+  ekState[prodId].bought=!ekState[prodId].bought;
+  const el=document.getElementById('ek-chk-'+prodId);
+  if(el) el.className='ek-check'+(ekState[prodId].bought?' bought':'');
+  const toSave={};
+  Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSave[id]=true; });
+  db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
+};
+
+window.openCompleteEinkauf = function(){
+  const dateEl=document.getElementById('ek-complete-date');
+  if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
+  document.getElementById('modal-complete-einkauf').classList.add('show');
+};
+
+window.confirmCompleteEinkauf = async function(){
+  const datum=document.getElementById('ek-complete-date').value||new Date().toISOString().slice(0,10);
+  const lgPlan=planData['zentrallager']||{};
+  const items={};
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{ const g=lgPlan[p.id]||0; if(g>0)items[p.id]=g; }));
+  showSpinner();
+  try{
+    await db.collection('wareneingang').add({
+      lager:'zentrallager',datum,monat:datum.slice(0,7),
+      items,type:'einkauf',createdAt:new Date().toISOString()
+    });
+    const snap=await db.collection('lp_planung').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
+    const batch=db.batch();
+    snap.forEach(d=>batch.delete(d.ref));
+    await batch.commit();
+    if(planData['zentrallager']) planData['zentrallager']={};
+    ekState={};
+    await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).delete();
+    document.getElementById('modal-complete-einkauf').classList.remove('show');
+    closeEinkaeufe();
+    showToast('Einkauf abgeschlossen ✓');
+    await loadData();
+  }catch(e){showToast('Fehler: '+e.message);}
+  hideSpinner();
 };
 
 // ── LIEFERUNGEN STATE ──
