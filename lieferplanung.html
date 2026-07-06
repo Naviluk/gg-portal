@@ -421,19 +421,27 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 /* Lieferung list rows */
 .lief-cat-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
-.lief-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .2rem;
+.lief-row{display:flex;align-items:center;gap:.4rem;padding:.45rem .2rem;
   border-bottom:1px solid rgba(255,255,255,.04)}
 .lief-row-name{flex:1;font-size:.86rem;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lief-row-gepl{width:42px;min-width:42px;text-align:center;font-size:.88rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0}
+.lief-row-gepl{width:52px;min-width:52px;text-align:center;font-size:.88rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0;padding:0 .3rem}
 .lief-col-header{display:flex;align-items:center;gap:.5rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem}
 .lch-name{flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.lch-gepl{width:42px;min-width:42px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700}
-.lch-pack{width:32px;min-width:32px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700}
-.lch-deliv{width:32px;min-width:32px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700}
+.lch-gepl{width:52px;min-width:52px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700}
+.lch-pack{width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700;margin:0 .15rem}
+.lch-deliv{width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700;margin:0 .15rem}
 /* Checkbox squares */
-.lief-check{width:26px;height:26px;border:2px solid var(--glass-border);border-radius:5px;
-  cursor:pointer;flex-shrink:0;min-width:26px;display:flex;align-items:center;justify-content:center;
-  transition:all .15s;background:rgba(0,0,0,.2)}
+.lief-check{width:36px;height:36px;border:2px solid var(--glass-border);border-radius:8px;
+  cursor:pointer;flex-shrink:0;min-width:36px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;background:rgba(0,0,0,.2);margin:0 .15rem}
+.lief-gepl-input{
+  width:48px;min-width:48px;background:transparent;border:none;border-bottom:1px solid rgba(255,0,204,.3);
+  color:var(--neon-magenta);font-family:'Rajdhani',sans-serif;font-size:.88rem;
+  font-weight:700;text-align:center;outline:none;padding:.1rem .2rem;
+  transition:border-color .2s,background .2s;border-radius:3px}
+.lief-gepl-input:focus{border-color:var(--neon-magenta);background:rgba(255,0,204,.06);border-bottom-width:2px}
+.lief-gepl-input::-webkit-outer-spin-button,.lief-gepl-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.lief-gepl-input[type=number]{-moz-appearance:textfield}
 .lief-check.packed{border-color:var(--neon-cyan);background:rgba(0,245,255,.15)}
 .lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
 .lief-check.delivered{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
@@ -1022,7 +1030,10 @@ function renderLiefContent(lg){
       catHtml += `<div class="lief-row" id="lief-row-${lg}-${prod.id}">
         <div class="prod-icon" style="width:24px;height:24px;font-size:.8rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="lief-row-name">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.25rem">${prod.unit||''}</span></div>
-        <span class="lief-row-gepl">${gepl}</span>
+        <input class="lief-gepl-input" type="number" min="0"
+          value="${gepl}" id="lief-gepl-${lg}-${prod.id}"
+          onchange="updateLiefGepl('${lg}','${prod.id}',this.value)"
+          onclick="event.stopPropagation()">
         <div class="lief-check${st.packed?' packed':''}" id="lchk-pack-${lg}-${prod.id}"
           onclick="toggleLiefCheck('${lg}','${prod.id}','packed')"></div>
         <div class="lief-check${st.delivered?' delivered':''}" id="lchk-deliv-${lg}-${prod.id}"
@@ -1035,6 +1046,23 @@ function renderLiefContent(lg){
   document.getElementById('lief-content').innerHTML = html;
   updateCompleteBtn(lg);
 }
+
+window.updateLiefGepl = async function(lg, prodId, val){
+  const qty = parseInt(val)||0;
+  if(!planData[lg]) planData[lg]={};
+  planData[lg][prodId] = qty;
+  // Сохраняем в Firebase
+  try{
+    const snap = await db.collection('lp_planung')
+      .where('lager','==', currentLager==='zentrallager'?lg:currentLager)
+      .where('monat','==',currentZeitraum).get();
+    if(!snap.empty){
+      const docRef = snap.docs[snap.docs.length-1].ref;
+      await docRef.update({[`items.${prodId}`]: qty});
+    }
+  }catch(e){ console.warn('gepl save:', e.message); }
+  updateCompleteBtn(lg);
+};
 
 window.toggleLiefCheck = function(lg, prodId, type){
   if(!liefState[lg]) liefState[lg]={};
@@ -1056,45 +1084,19 @@ function updateCompleteBtn(lg){
   const btn = document.getElementById('btn-lief-complete');
   if(!btn) return;
   const lgPlan = planData[lg]||{};
-  const anyDelivered = PRODUCTS.some(cat=>cat.items.some(p=>{
-    const gepl=lgPlan[p.id]||0;
-    return gepl>0 && liefState[lg]&&liefState[lg][p.id]&&liefState[lg][p.id].delivered;
-  }));
-  btn.disabled = !anyDelivered;
-  btn.style.opacity = anyDelivered ? '1' : '.4';
-  btn.style.cursor = anyDelivered ? 'pointer' : 'not-allowed';
+  // Все артикли с gepl>0 должны быть отмечены delivered
+  const items = PRODUCTS.flatMap(cat=>cat.items).filter(p=>(lgPlan[p.id]||0)>0);
+  const allDelivered = items.length>0 && items.every(p=>
+    liefState[lg]&&liefState[lg][p.id]&&liefState[lg][p.id].delivered
+  );
+  btn.disabled = !allDelivered;
+  btn.style.opacity = allDelivered ? '1' : '.4';
+  btn.style.cursor = allDelivered ? 'pointer' : 'not-allowed';
 }
 
 window.openCompleteDelivery = function(){
-  const lg = currentLiefLager;
-  const lgPlan = planData[lg]||{};
-  // Проверяем недоставленные
-  const missing=[];
-  PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
-    const gepl=lgPlan[prod.id]||0;
-    if(gepl>0 && !(liefState[lg]&&liefState[lg][prod.id]&&liefState[lg][prod.id].delivered)){
-      missing.push(prod);
-    }
-  }));
-  const missingBlock = document.getElementById('complete-missing-block');
-  const missingList = document.getElementById('complete-missing-list');
-  if(missing.length>0){
-    missingBlock.style.display='';
-    let html='';
-    missing.forEach(prod=>{
-      html+=`<div class="missing-row">
-        <div class="missing-row-name">${prod.icon||''} ${prod.name}</div>
-        <label class="missing-intentional">
-          <input type="checkbox" id="intentional-${prod.id}" style="width:14px;height:14px;cursor:pointer">
-          Absichtlich
-        </label>
-      </div>`;
-    });
-    missingList.innerHTML=html;
-  } else {
-    missingBlock.style.display='none';
-    missingList.innerHTML='';
-  }
+  // Кнопка уже заблокирована пока не все галки — missing block не нужен
+  document.getElementById('complete-missing-block').style.display='none';
   const dateEl=document.getElementById('complete-date');
   if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
   document.getElementById('modal-complete-delivery').classList.add('show');
@@ -1104,16 +1106,10 @@ window.confirmCompleteDelivery = async function(){
   const lg = currentLiefLager;
   const lgPlan = planData[lg]||{};
   const datum = document.getElementById('complete-date').value || new Date().toISOString().slice(0,10);
-  // Собираем итоговые данные
   const deliveredItems={};
   PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
     const gepl=lgPlan[prod.id]||0;
-    if(gepl>0){
-      const intentional=document.getElementById('intentional-'+prod.id);
-      const isDelivered=(liefState[lg]&&liefState[lg][prod.id]&&liefState[lg][prod.id].delivered)||
-        (intentional&&intentional.checked);
-      if(isDelivered) deliveredItems[prod.id]=gepl;
-    }
+    if(gepl>0) deliveredItems[prod.id]=gepl;
   }));
   showSpinner();
   try{
