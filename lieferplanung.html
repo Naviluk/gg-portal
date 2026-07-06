@@ -428,9 +428,23 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
 /* Двойное окно плана */
-#modal-plan{display:none;flex-direction:row;justify-content:center}
-#modal-plan.show{display:flex}
-#plan-modal-left,#plan-modal-right{position:relative}
+#modal-plan{display:none!important}
+#modal-plan.show{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:1rem!important;
+  padding:1.5rem 1rem!important;
+  overflow-y:auto!important;
+  align-content:flex-start!important;
+}
+#plan-modal-left,#plan-modal-right{
+  position:relative;
+  flex:1;
+  align-self:flex-start!important;
+}
 /* Таблица обзора */
 .plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
 .plan-overview-name{flex:1;font-size:.86rem}
@@ -602,7 +616,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </div>
 
 <!-- MODAL: PLANUNG — двойное окно (как в Erfassungen) -->
-<div class="modal-overlay" id="modal-plan" style="align-items:flex-start;padding-top:1.5rem;gap:1rem;flex-wrap:wrap">
+<div class="modal-overlay" id="modal-plan">
 
   <!-- Левое окно: обзор рекомендаций -->
   <div class="modal" id="plan-modal-left" style="max-width:420px;flex:1;min-width:280px">
