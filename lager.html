@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<script>
+// ── AUTH GUARD ──
+(function(){
+  const sess = sessionStorage.getItem('gg_user');
+  if(!sess){ window.location.replace('gg-portal.html'); return; }
+  try{
+    const user = JSON.parse(sess);
+    window.GG_USER = user;
+    const role = user.role;
+    const page = location.pathname.split('/').pop()||'index.html';
+
+    // Правила доступа
+    const rules = {
+      'lager.html':            ['Admin','Einkaufsleiter'],
+      'getraenke-snacks.html': ['Admin','Einkaufsleiter'],
+      'lieferplanung.html':    ['Admin','Einkaufsleiter'],
+      'uebersicht.html':       ['Admin','Einkaufsleiter'],
+      'erfassungen.html':      ['Admin','Einkaufsleiter'],
+      'statistik.html':        ['Admin','Einkaufsleiter','Kollege'],
+      'getraenke.html':        ['Admin','Einkaufsleiter'],
+    };
+    const allowed = rules[page];
+    if(allowed && !allowed.includes(role)){
+      window.location.replace('gg-portal.html');
+    }
+  }catch(e){
+    sessionStorage.removeItem('gg_user');
+    window.location.replace('gg-portal.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -413,7 +444,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html" style="color:var(--neon-cyan)">Bestände</a></li>
-        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
+        <li><a href="wareneingang.html">Wareneingang</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -510,7 +541,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
+        <button class="btn btn-primary" onclick="buildConfirm()">Einkaufsliste prüfen →</button>
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
       </div>
     </div>
@@ -521,7 +552,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-primary" onclick="confirmWareneingang()">✓ Bestätigen</button>
         <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
       </div>
     </div>
@@ -735,7 +766,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon};cursor:pointer" data-date="${d}" title="Einkauf bearbeiten">${label} <span style="font-size:.65rem;opacity:.7">✏️</span></th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
     // Lieferungen neutral
     thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
@@ -748,12 +779,13 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}" title="Lieferung bearbeiten">${label} <span style="font-size:.65rem;opacity:.7">✏️</span></th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
     });
     // Gerät — neutral (no color)
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
+        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -763,6 +795,7 @@ function renderTableActual(){
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
+        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -798,7 +831,7 @@ function renderTableActual(){
 
       // Anfangsbestand
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      tbHTML += `<td class="num-cell" style="color:var(--text)">${abDisplay}</td>`;
+      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
 
       const einkVal = totalEink || '—';
       if(isZentral){
@@ -1007,8 +1040,6 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
   document.getElementById('modal-we').classList.add('show');
-  const _lb=document.getElementById('btn-check-list');
-  if(_lb) _lb.textContent=currentLager==='zentrallager'?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
 
   const isZentral = currentLager==='zentrallager';
   const lagerColors = {
@@ -1118,7 +1149,7 @@ window.removeShopRow = function(idx){
   weShopRows[idx]={removed:true};
 }
 
-window.buildConfirm = function(viewMode){
+window.buildConfirm = function(){
   const ids=Object.keys(weSelectedItems);
   if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
   const date=document.getElementById('we-date').value;
@@ -1164,27 +1195,11 @@ window.buildConfirm = function(viewMode){
         return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
       }).join('');
   } else { cs.style.display='none'; }
-  const _cb=document.getElementById('btn-confirm-save');
-  if(_cb) _cb.textContent=viewMode?'✓ Änderungen speichern':'✓ Bestätigen';
 }
 
 window.backToEdit = function(){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
-  // Восстанавливаем состояние чекбоксов и полей ввода из weSelectedItems
-  setTimeout(()=>{
-    // Сначала сбрасываем все чекбоксы
-    document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
-    document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{ qi.classList.remove('show'); qi.value=''; });
-    // Затем восстанавливаем из weSelectedItems
-    Object.entries(weSelectedItems).forEach(([prodId, qty])=>{
-      const cb  = document.getElementById('we-cb-'+prodId);
-      const qi  = document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=qty; }
-    });
-    updateSelectedPreview();
-  }, 50);
 }
 
 window.confirmWareneingang = async function(){
@@ -1207,83 +1222,26 @@ window.confirmWareneingang = async function(){
   } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
 }
 
-window.checkListAction = function(){
-  if(currentLager==='zentrallager') buildConfirm();
-  else buildConfirmLieferung();
-};
-
-window.buildConfirmLieferung = function(){
-  const ids=Object.keys(weSelectedItems);
-  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
-  const date=document.getElementById('we-date').value;
-  if(!date){ showToast('Bitte Datum auswählen.'); return; }
-  document.getElementById('we-step1').style.display='none';
-  document.getElementById('we-step2').style.display='block';
-  const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent=
-    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-  let html=''; let lastCat='';
-  PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
-      }
-    });
-  });
-  document.getElementById('confirm-list').innerHTML=html;
-  document.getElementById('confirm-shops').style.display='none';
-  const _cb=document.getElementById('btn-confirm-save');
-  if(_cb) _cb.textContent='✓ Änderungen speichern';
-};
-
-window.openEditLieferung = function(date){
-  const we=wareneingangs.find(w=>w.datum===date);
-  if(!we) return;
-  const savedItems = {...we.items};
-  const savedShops = [...(we.shops||[])];
-  const lagerName=LAGER_NAMES[currentLager]||currentLager;
-  const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
-  openWareneingang(date);
-  setTimeout(()=>{
-    weSelectedItems = savedItems;
-    weShopRows = savedShops;
-    Object.keys(savedItems).forEach(prodId=>{
-      const cb=document.getElementById('we-cb-'+prodId);
-      const qi=document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=savedItems[prodId]; }
-    });
-    updateSelectedPreview();
-    // Заголовок Lieferung
-    document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
-    buildConfirmLieferung();
-  }, 300);
-};
-
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  // Сохраняем данные
-  const savedItems = {...we.items};
-  const savedShops = [...(we.shops||[])];
-  // Открываем модал (он сбросит weSelectedItems — восстановим ниже)
+  weSelectedItems={...we.items};
+  weShopRows=[...(we.shops||[])];
+  document.getElementById('we-step1').style.display='block';
+  document.getElementById('we-step2').style.display='none';
+  document.getElementById('modal-we').classList.add('show');
+  document.getElementById('we-date').value=date;
+  // rebuild list with pre-checked items
   openWareneingang(date);
-  // Ждём пока DOM построится, затем заполняем и показываем шаг 2
   setTimeout(()=>{
-    weSelectedItems = savedItems;
-    weShopRows = savedShops;
-    // Восстанавливаем чекбоксы и числа
-    Object.keys(savedItems).forEach(prodId=>{
+    Object.keys(weSelectedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      if(qi){ qi.classList.add('show'); qi.value=savedItems[prodId]; }
+      if(cb){cb.classList.add('checked');}
+      if(qi){qi.classList.add('show');qi.value=weSelectedItems[prodId];}
     });
     updateSelectedPreview();
-    // Переходим на шаг 2 — обзор
-    buildConfirm(true);
-  }, 300);
+  },100);
 }
 
 // ── INIT ──
@@ -1305,23 +1263,28 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.confirmWareneingang   = confirmWareneingang;
   window.backToEdit            = backToEdit;
   window.openEditWareneingang  = openEditWareneingang;
-  window.openEditLieferung     = openEditLieferung;
-  window.buildConfirmLieferung = buildConfirmLieferung;
-  window.checkListAction       = checkListAction;
 
   loadData();
 
   document.getElementById('lager-tbody').addEventListener('click', e=>{
+    const cell = e.target.closest('.ab-cell');
+    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
   });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
-    if(th){
-      if(currentLager==='zentrallager') openEditWareneingang(th.dataset.date);
-      else openEditLieferung(th.dataset.date);
-    }
+    if(th) openEditWareneingang(th.dataset.date);
   });
 
 });
+
+// ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
+document.addEventListener('DOMContentLoaded', function(){
+  const user = window.GG_USER;
+  if(!user) return;
+  const el = document.getElementById('hdr-username');
+  if(el) el.textContent = user.name;
+});
+
 </script>
 </body>
 </html>

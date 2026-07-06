@@ -653,19 +653,20 @@
       </ul>
     </li>
     <li class="nav-divider"></li>
-    <li class="nav-item">
+    <li class="nav-item" id="nav-inventur-admin">
       <button class="nav-link" onclick="toggleSubMenu(this)">
-        Handel
+        Inventur
         <svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="preise.html">Preise</a></li>
-        <li><a href="rechnungen.html">Rechnungen</a></li>
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html">Erfassungen</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='inventur.html'">Inventur</button></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
+    <li class="nav-item" id="nav-statistik-admin">
+      <button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button>
+    </li>
     <li class="nav-divider"></li>
     <li class="nav-item" id="nav-theken-admin">
       <button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button>
@@ -1019,6 +1020,8 @@ async function handleAdminPassword(){
     snap.forEach(d=>{ if(d.data().pin===pin) found=d.data(); });
     if(!found){ hideSpinner(); showErr('err-admin-pw','Falscher PIN. Bitte erneut versuchen.'); clearPinRow('pin-admin-row'); focusFirstPin('pin-admin-row'); return; }
     currentAdmin = { name: found.name, role: found.role };
+    // Сохраняем сессию для всех страниц
+    sessionStorage.setItem('gg_user', JSON.stringify({ name: found.name, role: found.role }));
     document.getElementById('hdr-admin-username').textContent = found.name;
     document.getElementById('hdr-admin-username-mob').textContent = found.name;
     // Apply role-based menu visibility
@@ -1038,16 +1041,44 @@ function backToAdminName(){
 }
 
 function applyAdminRoleMenu(role){
-  const showLager      = ['Admin','Einkaufsleiter'].includes(role);
-  const showTheken     = ['Admin','Einkaufsleiter'].includes(role);
-  document.getElementById('nav-lager').style.display      = showLager?'':'none';
-  document.getElementById('nav-theken-admin').style.display = showTheken?'':'none';
-  document.getElementById('nav-getr-admin').style.display   = showTheken?'':'none';
+  const isAdmin  = role==='Admin';
+  const isEink   = role==='Einkaufsleiter';
+  const isKoll   = role==='Kollege';
+  const showLager = isAdmin||isEink;
+  const showHand  = isAdmin||isEink;
+
+  // Lager submenu (Bestände, Getränke & Snacks, Lieferplanung)
+  const navLager = document.getElementById('nav-lager');
+  if(navLager) navLager.style.display = showLager?'':'none';
+
+  // Handel submenu
+  const navHand = document.getElementById('nav-theken-admin');
+  if(navHand) navHand.style.display = showHand?'':'none';
+
+  // Getränke link
+  const navGetr = document.getElementById('nav-getr-admin');
+  if(navGetr) navGetr.style.display = showHand?'':'none';
+
+  // Inventur submenu (Übersicht + Erfassungen)
+  const navInv = document.getElementById('nav-inventur-admin');
+  if(navInv) navInv.style.display = showLager?'':'none';
+
+  // Statistik — для всех
+  const navStat = document.getElementById('nav-statistik-admin');
+  if(navStat) navStat.style.display = '';
+
+  // Kollege видит только Statistik
+  if(isKoll){
+    ['nav-lager','nav-theken-admin','nav-getr-admin','nav-inventur-admin'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+  }
 }
 
 function logoutAdmin(){
   closeDropdown('admin');
   currentAdmin = null;
+  sessionStorage.removeItem('gg_user');
   showPage('welcome');
 }
 

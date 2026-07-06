@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<script>
+// ── AUTH GUARD ──
+(function(){
+  const sess = sessionStorage.getItem('gg_user');
+  if(!sess){ window.location.replace('gg-portal.html'); return; }
+  try{
+    const user = JSON.parse(sess);
+    window.GG_USER = user;
+    const role = user.role;
+    const page = location.pathname.split('/').pop()||'index.html';
+
+    // Правила доступа
+    const rules = {
+      'lager.html':            ['Admin','Einkaufsleiter'],
+      'getraenke-snacks.html': ['Admin','Einkaufsleiter'],
+      'lieferplanung.html':    ['Admin','Einkaufsleiter'],
+      'uebersicht.html':       ['Admin','Einkaufsleiter'],
+      'erfassungen.html':      ['Admin','Einkaufsleiter'],
+      'statistik.html':        ['Admin','Einkaufsleiter','Kollege'],
+      'getraenke.html':        ['Admin','Einkaufsleiter'],
+    };
+    const allowed = rules[page];
+    if(allowed && !allowed.includes(role)){
+      window.location.replace('gg-portal.html');
+    }
+  }catch(e){
+    sessionStorage.removeItem('gg_user');
+    window.location.replace('gg-portal.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -1689,6 +1720,15 @@ window.savePlan=async function(){
 };
 
 document.addEventListener('DOMContentLoaded',loadData);
+
+// ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
+document.addEventListener('DOMContentLoaded', function(){
+  const user = window.GG_USER;
+  if(!user) return;
+  const el = document.getElementById('hdr-username');
+  if(el) el.textContent = user.name;
+});
+
 </script>
 </body>
 </html>
