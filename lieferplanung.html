@@ -421,18 +421,18 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 /* Lieferung list rows */
 .lief-cat-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
-.lief-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .2rem;
+.lief-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .2rem;
   border-bottom:1px solid rgba(255,255,255,.04)}
-.lief-row-name{flex:1;font-size:.86rem;color:var(--text)}
-.lief-row-gepl{width:36px;text-align:center;font-size:.86rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0}
-.lief-col-header{display:flex;gap:.5rem;padding:.2rem .2rem .4rem;border-bottom:1px solid var(--glass-border);margin-bottom:.3rem}
-.lch-name{flex:1;font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
-.lch-gepl{width:36px;text-align:center;font-size:.58rem;color:var(--neon-magenta);text-transform:uppercase}
-.lch-pack{width:32px;text-align:center;font-size:.58rem;color:var(--neon-cyan);text-transform:uppercase}
-.lch-deliv{width:32px;text-align:center;font-size:.58rem;color:var(--neon-green);text-transform:uppercase}
+.lief-row-name{flex:1;font-size:.86rem;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lief-row-gepl{width:42px;min-width:42px;text-align:center;font-size:.88rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0}
+.lief-col-header{display:flex;align-items:center;gap:.5rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem}
+.lch-name{flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.lch-gepl{width:42px;min-width:42px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700}
+.lch-pack{width:32px;min-width:32px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700}
+.lch-deliv{width:32px;min-width:32px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700}
 /* Checkbox squares */
-.lief-check{width:22px;height:22px;border:2px solid var(--glass-border);border-radius:4px;
-  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+.lief-check{width:26px;height:26px;border:2px solid var(--glass-border);border-radius:5px;
+  cursor:pointer;flex-shrink:0;min-width:26px;display:flex;align-items:center;justify-content:center;
   transition:all .15s;background:rgba(0,0,0,.2)}
 .lief-check.packed{border-color:var(--neon-cyan);background:rgba(0,245,255,.15)}
 .lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
