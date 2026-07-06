@@ -425,19 +425,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="lager.html" style="color:var(--neon-cyan)">Bestände</a></li>
-        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
-      </ul>
-    </li>
-    <li class="nav-divider"></li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="toggleSubMenu(this)">
-        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
-      </button>
-      <ul class="nav-sub">
-        <li><a href="preise.html">Preise</a></li>
-        <li><a href="rechnungen.html">Rechnungen</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
@@ -450,12 +440,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <li><a href="erfassungen.html">Erfassungen</a></li>
       </ul>
     </li>
+    <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
     <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
-  </ul>
-</nav>
+    </ul>
+  </nav>
 
 <!-- MAIN -->
 <div class="main-content">
@@ -523,7 +514,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="buildConfirm()">Einkaufsliste prüfen →</button>
+        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
       </div>
     </div>
@@ -748,7 +739,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
     });
     // Lieferungen neutral
     thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
@@ -761,7 +752,7 @@ function renderTableActual(){
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon}" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
     });
     // Gerät — neutral (no color)
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
@@ -813,7 +804,7 @@ function renderTableActual(){
 
       // Anfangsbestand
       const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      tbHTML += `<td class="num-cell anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abDisplay}</span></td>`;
+      tbHTML += `<td class="num-cell" style="color:var(--text)">${abDisplay}</td>`;
 
       const einkVal = totalEink || '—';
       if(isZentral){
@@ -1182,6 +1173,17 @@ window.buildConfirm = function(){
 window.backToEdit = function(){
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
+  setTimeout(()=>{
+    document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
+    document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{qi.classList.remove('show');qi.value='';});
+    Object.entries(weSelectedItems).forEach(([prodId,qty])=>{
+      const cb=document.getElementById('we-cb-'+prodId);
+      const qi=document.getElementById('we-qty-'+prodId);
+      if(cb) cb.classList.add('checked');
+      if(qi){qi.classList.add('show');qi.value=qty;}
+    });
+    updateSelectedPreview();
+  },50);
 }
 
 window.confirmWareneingang = async function(){
@@ -1204,26 +1206,80 @@ window.confirmWareneingang = async function(){
   } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
 }
 
+const LAGER_NEON = {
+  zentrallager:'#00f5ff', nettetal:'#00aaff',
+  'brüggen':'#ff0055', viersen:'#ff8800', 'köln':'#cc00ff',
+};
+
+window.checkListAction = function(){
+  if(currentLager==='zentrallager') buildConfirm();
+  else buildConfirmLieferung();
+};
+
+window.buildConfirmLieferung = function(){
+  const ids=Object.keys(weSelectedItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  const date=document.getElementById('we-date').value;
+  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+  document.getElementById('we-step1').style.display='none';
+  document.getElementById('we-step2').style.display='block';
+  const d=new Date(date);
+  document.getElementById('confirm-date-label').textContent=
+    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;lastCat=catObj.cat;}
+        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
+      }
+    });
+  });
+  document.getElementById('confirm-list').innerHTML=html;
+  document.getElementById('confirm-shops').style.display='none';
+  const _cb=document.getElementById('btn-confirm-save');
+  if(_cb) _cb.textContent='✓ Änderungen speichern';
+};
+
+window.openEditLieferung = function(date){
+  const we=wareneingangs.find(w=>w.datum===date);
+  if(!we) return;
+  const savedItems={...we.items};
+  const savedShops=[...(we.shops||[])];
+  const lagerName=LAGER_NAMES[currentLager]||currentLager;
+  const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
+  openWareneingang(date);
+  setTimeout(()=>{
+    weSelectedItems=savedItems; weShopRows=savedShops;
+    Object.keys(savedItems).forEach(prodId=>{
+      const cb=document.getElementById('we-cb-'+prodId);
+      const qi=document.getElementById('we-qty-'+prodId);
+      if(cb) cb.classList.add('checked');
+      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
+    });
+    updateSelectedPreview();
+    document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
+    buildConfirmLieferung();
+  },300);
+};
+
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  weSelectedItems={...we.items};
-  weShopRows=[...(we.shops||[])];
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
-  document.getElementById('modal-we').classList.add('show');
-  document.getElementById('we-date').value=date;
-  // rebuild list with pre-checked items
+  const savedItems={...we.items};
+  const savedShops=[...(we.shops||[])];
   openWareneingang(date);
   setTimeout(()=>{
-    Object.keys(weSelectedItems).forEach(prodId=>{
+    weSelectedItems=savedItems; weShopRows=savedShops;
+    Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
-      if(cb){cb.classList.add('checked');}
-      if(qi){qi.classList.add('show');qi.value=weSelectedItems[prodId];}
+      if(cb) cb.classList.add('checked');
+      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     updateSelectedPreview();
-  },100);
+    buildConfirm(true);
+  },300);
 }
 
 // ── INIT ──
@@ -1245,6 +1301,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.confirmWareneingang   = confirmWareneingang;
   window.backToEdit            = backToEdit;
   window.openEditWareneingang  = openEditWareneingang;
+  window.openEditLieferung     = openEditLieferung;
+  window.buildConfirmLieferung = buildConfirmLieferung;
+  window.checkListAction       = checkListAction;
 
   loadData();
 
@@ -1254,7 +1313,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
-    if(th) openEditWareneingang(th.dataset.date);
+    if(th){
+      if(currentLager==='zentrallager') openEditWareneingang(th.dataset.date);
+      else openEditLieferung(th.dataset.date);
+    }
   });
 
 });
