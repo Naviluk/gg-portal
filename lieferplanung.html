@@ -443,11 +443,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .plan-form-neu:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(0,245,255,.3)}
 .plan-form-neu::-webkit-outer-spin-button,.plan-form-neu::-webkit-inner-spin-button{-webkit-appearance:none}
 .plan-form-neu[type=number]{-moz-appearance:textfield}
-.plan-form-header{display:flex;gap:.5rem;padding:.3rem .5rem;margin-bottom:.2rem;border-bottom:1px solid var(--glass-border)}
-.pfh-name{flex:1;font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
-.pfh-akt{width:46px;min-width:46px;text-align:center;font-size:.58rem;color:var(--text-dim);text-transform:uppercase}
-.pfh-empf{width:46px;min-width:46px;text-align:center;font-size:.58rem;color:var(--neon-cyan);text-transform:uppercase}
-.pfh-neu{width:68px;min-width:68px;text-align:center;font-size:.58rem;color:var(--neon-green);text-transform:uppercase}
+.plan-form-header{display:flex;gap:.5rem;padding:.4rem .5rem;margin-bottom:.3rem;border-bottom:2px solid var(--glass-border)}
+.pfh-name{flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.pfh-akt{width:46px;min-width:46px;text-align:center;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700}
+.pfh-empf{width:46px;min-width:46px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700}
+.pfh-neu{width:68px;min-width:68px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700}
 /* Таблица обзора */
 .plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
 .plan-overview-name{flex:1;font-size:.86rem}
@@ -622,16 +622,35 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="modal-overlay" id="modal-plan">
   <div class="modal" id="plan-modal-right" style="max-width:620px;width:100%;max-height:90vh;overflow-y:auto">
     <button class="modal-close" onclick="closePlan()">✕</button>
-    <div class="modal-title" id="plan-title-right" style="margin-bottom:.4rem">Neue Bestellung</div>
-    <div id="plan-lager-badge-right" style="margin-bottom:.8rem"></div>
+    <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem">
+      <div class="modal-title" id="plan-title-right" style="margin-bottom:0">Neue Bestellung</div>
+      <div id="plan-lager-badge-right"></div>
+    </div>
     <div class="field" style="margin-bottom:.8rem">
       <label class="field-label">Datum</label>
       <input type="date" id="plan-date" style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
     </div>
     <div id="plan-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-save" id="btn-save-plan" onclick="savePlan()">✓ Einkauf planen</button>
+      <button class="btn btn-primary" id="btn-prüfen-plan" onclick="openPlanConfirm()">Einkaufsliste prüfen →</button>
       <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PLAN BESTÄTIGUNG -->
+<div class="modal-overlay" id="modal-plan-confirm">
+  <div class="modal" style="max-width:580px;width:100%;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="closePlanConfirm()">✕</button>
+    <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem">
+      <div class="modal-title" id="plan-confirm-title" style="margin-bottom:0">Neuer Einkauf</div>
+      <div id="plan-confirm-badge"></div>
+    </div>
+    <div class="confirm-date" id="plan-confirm-date" style="font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem"></div>
+    <div id="plan-confirm-list"></div>
+    <div class="modal-btn-row" style="margin-top:1.2rem">
+      <button class="btn btn-save" id="btn-plan-final" onclick="savePlan()">✓ Einkauf planen</button>
+      <button class="btn btn-ghost" onclick="closePlanConfirm()">← Zurück zur Bearbeitung</button>
     </div>
   </div>
 </div>
@@ -1001,7 +1020,8 @@ window.openPlan=function(){
 
   // Текст кнопки
   document.getElementById('btn-plan-form-label').textContent=isE?'Einkauf planen →':'Lieferung planen →';
-  document.getElementById('btn-save-plan').textContent=isE?'✓ Einkauf planen':'✓ Lieferung planen';
+  const _pb=document.getElementById('btn-prüfen-plan');
+  if(_pb) _pb.textContent=isE?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
 
   // ── Левое окно: обзор рекомендаций ──
   let ovHtml='<div class="plan-overview-header">';
@@ -1042,7 +1062,8 @@ window.openPlanForm=function(){
 
   // Заголовок и бейдж
   document.getElementById('plan-title-right').textContent=isE?'Neuer Einkauf':'Neue Lieferung';
-  document.getElementById('btn-save-plan').textContent=isE?'✓ Einkauf planen':'✓ Lieferung planen';
+  const _pb=document.getElementById('btn-prüfen-plan');
+  if(_pb) _pb.textContent=isE?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
   const badge=`<span style="font-family:'Orbitron',sans-serif;font-size:.62rem;padding:.2rem .7rem;
     border-radius:10px;background:${nc.bg||'rgba(0,0,0,.3)'};border:1px solid ${nc.border||'rgba(255,255,255,.1)'};
     color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
@@ -1114,16 +1135,69 @@ window.closePlan=function(){
   document.getElementById('modal-plan').classList.remove('show');
   document.getElementById('plan-modal-right').style.display='none';
 };
-window.savePlan=async function(){
+window.openPlanConfirm=function(){
+  const isE=planType==='einkauf';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+  const nc=NEON[currentLager]||NEON[LAGERS[0]]||{};
+  const lagerName=LAGER_NAMES[currentLager]||currentLager;
+
+  // Читаем введённые значения
   const items={};
   PRODUCTS.forEach(c=>c.items.forEach(p=>{
     const i=document.getElementById('plan-'+p.id);
     if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)items[p.id]=v;}
   }));
-  if(!Object.keys(items).length){ showToast('Bitte mindestens einen Artikel ausfüllen.'); return; }
-  const dateEl=document.getElementById('plan-date');
-  const datum=dateEl?dateEl.value:new Date().toISOString().slice(0,10);
+  if(!Object.keys(items).length){showToast('Bitte mindestens einen Artikel ausfüllen.');return;}
+
+  // Заголовок и бейдж
+  document.getElementById('plan-confirm-title').textContent=isE?'Neuer Einkauf':'Neue Lieferung';
+  document.getElementById('btn-plan-final').textContent=isE?'✓ Einkauf planen':'✓ Lieferung planen';
+  const badge=`<span style="font-family:'Orbitron',sans-serif;font-size:.62rem;padding:.2rem .7rem;
+    border-radius:10px;background:${nc.bg||'rgba(0,0,0,.3)'};border:1px solid ${nc.border||'rgba(255,255,255,.1)'};
+    color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
+  document.getElementById('plan-confirm-badge').innerHTML=badge;
+
+  // Дата
+  const dateVal=document.getElementById('plan-date').value;
+  const d=dateVal?new Date(dateVal):new Date();
+  document.getElementById('plan-confirm-date').textContent=
+    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Список выбранных артиклей
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(items[prod.id]){
+        if(catObj.cat!==lastCat){
+          html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.6rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;
+          lastCat=catObj.cat;
+        }
+        html+=`<div class="confirm-item">
+          <span class="ci-name">${prod.icon||''} ${prod.name}<span class="ci-unit" style="margin-left:.3rem">${prod.unit||''}</span></span>
+          <span class="ci-qty">${items[prod.id]}</span>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('plan-confirm-list').innerHTML=html;
+
+  // Сохраняем items во временную переменную для savePlan
+  window._planConfirmItems=items;
+  window._planConfirmDate=dateVal;
+
+  document.getElementById('modal-plan-confirm').classList.add('show');
+};
+
+window.closePlanConfirm=function(){
+  document.getElementById('modal-plan-confirm').classList.remove('show');
+};
+
+window.savePlan=async function(){
+  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+  // Берём данные из окна подтверждения
+  const items=window._planConfirmItems||{};
+  const datum=window._planConfirmDate||new Date().toISOString().slice(0,10);
+  if(!Object.keys(items).length){ showToast('Keine Artikel ausgewählt.'); return; }
   const monat=datum.slice(0,7);
   showSpinner();
   try{
@@ -1133,7 +1207,7 @@ window.savePlan=async function(){
     });
     toLoad.forEach(lg=>{if(!planData[lg])planData[lg]={};Object.assign(planData[lg],items);});
     showToast(planType==='einkauf'?'Einkauf gespeichert ✓':'Lieferung gespeichert ✓');
-    closePlan();renderTable();
+    closePlanConfirm();closePlan();renderTable();
   }catch(e){showToast('Fehler: '+e.message);}
   hideSpinner();
 };
