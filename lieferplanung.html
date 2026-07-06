@@ -361,7 +361,16 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .th-text-mob{display:none}
 @media(max-width:640px){
   .th-text-mob{display:inline}
-  .th-col-anfang .th-text{display:none}
+  /* Актуальный Bestand — показываем нормальный текст */
+  .th-col-anfang .th-text{display:inline;font-size:.52rem;line-height:1.2;white-space:normal}
+  /* Monatl. Verbrauch — компактно */
+  .th-col-monatl .th-text{display:inline;font-size:.52rem;line-height:1.2;white-space:normal}
+  /* Empf. и Gepl. колонки — текст в несколько строк */
+  .th-col-empf .th-text,.th-col-plan .th-text{
+    display:inline;font-size:.52rem;line-height:1.2;white-space:normal;word-break:break-word}
+  .th-col-empf,.th-col-plan{min-width:60px;width:60px;vertical-align:top}
+  .th-col-empf .btn-plan,.th-col-plan .btn-plan{
+    display:block;margin:.2rem auto 0;padding:.2rem .3rem;font-size:.55rem}
 }
 /* Button text spans */
 .btn-line1{display:inline}
@@ -418,6 +427,21 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 /* Plan & Soll modal */
 .plan-modal{max-width:600px}
+/* Двойное окно плана */
+#modal-plan{display:none;flex-direction:row;justify-content:center}
+#modal-plan.show{display:flex}
+#plan-modal-left,#plan-modal-right{position:relative}
+/* Таблица обзора */
+.plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
+.plan-overview-name{flex:1;font-size:.86rem}
+.plan-overview-akt{width:55px;text-align:center;font-size:.82rem;color:var(--text-dim)}
+.plan-overview-empf{width:55px;text-align:center;font-size:.88rem;color:var(--neon-cyan);font-weight:700}
+.plan-overview-cat{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
+  color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
+.plan-overview-header{display:flex;gap:.5rem;padding:.2rem;margin-bottom:.3rem;border-bottom:1px solid var(--glass-border)}
+.plan-ov-h-name{flex:1;font-size:.6rem;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase}
+.plan-ov-h-akt{width:55px;text-align:center;font-size:.6rem;color:var(--text-dim);letter-spacing:.05em;text-transform:uppercase}
+.plan-ov-h-empf{width:55px;text-align:center;font-size:.6rem;color:var(--neon-cyan);letter-spacing:.05em;text-transform:uppercase}
 /* Soll / Plan form — идентично Wareneingang */
 .soll-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s}
 .soll-prod-row:hover{background:rgba(0,245,255,.04)}
@@ -577,18 +601,34 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- MODAL: PLANUNG -->
-<div class="modal-overlay" id="modal-plan">
-  <div class="modal plan-modal">
+<!-- MODAL: PLANUNG — двойное окно (как в Erfassungen) -->
+<div class="modal-overlay" id="modal-plan" style="align-items:flex-start;padding-top:1.5rem;gap:1rem;flex-wrap:wrap">
+
+  <!-- Левое окно: обзор рекомендаций -->
+  <div class="modal" id="plan-modal-left" style="max-width:420px;flex:1;min-width:280px">
     <button class="modal-close" onclick="closePlan()">✕</button>
-    <div class="modal-title" id="plan-title">Neue Lieferung planen</div>
-    <div style="font-size:.78rem;color:var(--text-dim);margin-bottom:.8rem" id="plan-subtitle"></div>
-    <div id="plan-content"></div>
-    <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-save" onclick="savePlan()">✓ Speichern</button>
-      <button class="btn btn-ghost" onclick="closePlan()">Abbrechen</button>
+    <div class="modal-title" id="plan-title-left" style="margin-bottom:.5rem">Planungsübersicht</div>
+    <div id="plan-lager-badge-left" style="margin-bottom:1rem"></div>
+    <div id="plan-overview-list"></div>
+    <div class="modal-btn-row" style="margin-top:1.2rem">
+      <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
+      <button class="btn btn-primary" id="btn-open-plan-form" onclick="openPlanForm()">
+        <span id="btn-plan-form-label">Einkauf planen →</span>
+      </button>
     </div>
   </div>
+
+  <!-- Правое окно: форма редактирования -->
+  <div class="modal" id="plan-modal-right" style="max-width:520px;flex:1;min-width:280px;display:none;max-height:88vh;overflow-y:auto">
+    <div class="modal-title" id="plan-title-right" style="margin-bottom:.5rem">Neue Bestellung</div>
+    <div id="plan-lager-badge-right" style="margin-bottom:1rem"></div>
+    <div id="plan-content"></div>
+    <div class="modal-btn-row" style="margin-top:1rem">
+      <button class="btn btn-save" id="btn-save-plan" onclick="savePlan()">✓ Einkauf planen</button>
+      <button class="btn btn-ghost" onclick="closePlanForm()">← Zurück</button>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -774,14 +814,14 @@ function renderTable(){
 
   document.getElementById('lp-thead').innerHTML=`<tr>
     <th class="col-artikel">Artikel</th>
-    <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktueller<br>Bestand</span></th>
-    <th class="num-cell"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbrauch</span></th>
-    <th class="num-cell" style="min-width:130px;background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
+    <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
+    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbr.</span></th>
+    <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
       <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
       <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
       <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-green);border-color:var(--neon-green);background:rgba(0,255,136,.1)" onclick="openPlan()" title="Planung erstellen">✎</button>
     </th>
-    <th class="num-cell" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
+    <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
       <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
       <span class="th-text" style="color:var(--neon-magenta)">${planLabel}</span>
       <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlan()" title="Planung bearbeiten">✎</button>
@@ -937,8 +977,64 @@ window.saveSoll=async function(){
 window.openPlan=function(){
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
   const isE=planType==='einkauf';
-  document.getElementById('plan-title').textContent=isE?'🛒 Neue Bestellung planen':'🚚 Neue Lieferung planen';
-  document.getElementById('plan-subtitle').textContent='Empfohlene Mengen vorausgefüllt – Werte können angepasst werden.';
+  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+  const nc=NEON[currentLager]||NEON[LAGERS[0]]||{};
+  const lagerName=LAGER_NAMES[currentLager]||currentLager;
+
+  // Заголовок левого окна
+  document.getElementById('plan-title-left').textContent=
+    isE?'Planungsübersicht – Einkauf':'Planungsübersicht – Lieferung';
+  document.getElementById('plan-title-right').textContent=
+    isE?'Neuer Einkauf':'Neue Lieferung';
+
+  // Бейдж склада
+  const badge=`<span style="font-family:'Orbitron',sans-serif;font-size:.62rem;padding:.2rem .7rem;
+    border-radius:10px;background:${nc.bg||'rgba(0,0,0,.3)'};border:1px solid ${nc.border||'rgba(255,255,255,.1)'};
+    color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
+  document.getElementById('plan-lager-badge-left').innerHTML=badge;
+  document.getElementById('plan-lager-badge-right').innerHTML=badge;
+
+  // Текст кнопки
+  document.getElementById('btn-plan-form-label').textContent=isE?'Einkauf planen →':'Lieferung planen →';
+  document.getElementById('btn-save-plan').textContent=isE?'✓ Einkauf planen':'✓ Lieferung planen';
+
+  // ── Левое окно: обзор рекомендаций ──
+  let ovHtml='<div class="plan-overview-header">';
+  ovHtml+='<span class="plan-ov-h-name">Artikel</span>';
+  ovHtml+='<span class="plan-ov-h-akt">Aktuell</span>';
+  ovHtml+='<span class="plan-ov-h-empf">Empf.</span></div>';
+  let hasItems=false;
+
+  PRODUCTS.forEach(catObj=>{
+    let catHtml='';
+    catObj.items.forEach(prod=>{
+      let soll=0,akt=0;
+      toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;});
+      if(soll===0)return;
+      const diff=Math.max(0,soll-akt);
+      if(diff<=0)return;
+      hasItems=true;
+      catHtml+=`<div class="plan-overview-row">
+        <div class="prod-icon" style="width:24px;height:24px;font-size:.8rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="plan-overview-name">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.25rem">${prod.unit||''}</span></div>
+        <span class="plan-overview-akt">${akt||'—'}</span>
+        <span class="plan-overview-empf">${diff}</span>
+      </div>`;
+    });
+    if(catHtml)ovHtml+=`<div class="plan-overview-cat">${catObj.cat}</div>${catHtml}`;
+  });
+  document.getElementById('plan-overview-list').innerHTML=hasItems?ovHtml:
+    '<p style="color:var(--text-dim);font-size:.85rem">Soll-Bestand zuerst konfigurieren.</p>';
+  document.getElementById('btn-open-plan-form').style.display=hasItems?'':'none';
+
+  // ── Правое окно: скрыто изначально ──
+  document.getElementById('plan-modal-right').style.display='none';
+
+  document.getElementById('modal-plan').classList.add('show');
+};
+
+window.openPlanForm=function(){
+  planType=currentLager==='zentrallager'?'einkauf':'lieferung';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   let html='';
   PRODUCTS.forEach(catObj=>{
@@ -948,6 +1044,7 @@ window.openPlan=function(){
       toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;plan+=Number((planData[lg]||{})[prod.id])||0;});
       if(soll===0)return;
       const diff=Math.max(0,soll-akt);
+      if(diff<=0)return;
       catHtml+=`<div class="plan-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
@@ -957,10 +1054,18 @@ window.openPlan=function(){
     });
     if(catHtml)html+=`<div class="plan-cat-label">${catObj.cat}</div>${catHtml}`;
   });
-  document.getElementById('plan-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Bitte zuerst Soll-Bestand konfigurieren.</p>';
-  document.getElementById('modal-plan').classList.add('show');
+  document.getElementById('plan-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Keine Empfehlungen.</p>';
+  document.getElementById('plan-modal-right').style.display='';
 };
-window.closePlan=function(){document.getElementById('modal-plan').classList.remove('show')};
+
+window.closePlanForm=function(){
+  document.getElementById('plan-modal-right').style.display='none';
+};
+
+window.closePlan=function(){
+  document.getElementById('modal-plan').classList.remove('show');
+  document.getElementById('plan-modal-right').style.display='none';
+};
 window.savePlan=async function(){
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   const items={};
