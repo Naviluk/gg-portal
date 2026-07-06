@@ -434,14 +434,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .lief-check{width:36px;height:36px;border:2px solid var(--glass-border);border-radius:8px;
   cursor:pointer;flex-shrink:0;min-width:36px;display:flex;align-items:center;justify-content:center;
   transition:all .15s;background:rgba(0,0,0,.2);margin:0 .15rem}
-.lief-gepl-input{
-  width:48px;min-width:48px;background:transparent;border:none;border-bottom:1px solid rgba(255,0,204,.3);
-  color:var(--neon-magenta);font-family:'Rajdhani',sans-serif;font-size:.88rem;
-  font-weight:700;text-align:center;outline:none;padding:.1rem .2rem;
-  transition:border-color .2s,background .2s;border-radius:3px}
-.lief-gepl-input:focus{border-color:var(--neon-magenta);background:rgba(255,0,204,.06);border-bottom-width:2px}
-.lief-gepl-input::-webkit-outer-spin-button,.lief-gepl-input::-webkit-inner-spin-button{-webkit-appearance:none}
-.lief-gepl-input[type=number]{-moz-appearance:textfield}
+.lief-gepl-span{
+  width:52px;min-width:52px;text-align:center;font-size:.88rem;color:var(--neon-magenta);
+  font-weight:700;cursor:pointer;padding:.2rem .3rem;border-radius:4px;
+  transition:background .15s}
+.lief-gepl-span:hover{background:rgba(255,0,204,.12)}
 .lief-check.packed{border-color:var(--neon-cyan);background:rgba(0,245,255,.15)}
 .lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
 .lief-check.delivered{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
@@ -734,6 +731,25 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+<!-- MODAL: GEPL BEARBEITEN -->
+<div class="modal-overlay" id="modal-lief-gepl" onclick="if(event.target===this)closeLiefGeplModal()">
+  <div class="modal" style="max-width:340px">
+    <button class="modal-close" onclick="closeLiefGeplModal()">✕</button>
+    <div class="modal-title" id="lief-gepl-modal-title" style="color:var(--neon-magenta)">Menge anpassen</div>
+    <div class="field">
+      <label class="field-label" id="lief-gepl-prod-label">Produkt</label>
+      <input type="number" id="lief-gepl-value" min="0"
+        style="width:100%;background:rgba(0,0,0,.35);border:2px solid var(--neon-magenta);
+        color:var(--neon-magenta);font-family:'Rajdhani',sans-serif;font-size:1.1rem;
+        padding:.5rem .8rem;border-radius:6px;outline:none;text-align:center">
+    </div>
+    <div class="modal-btn-row" style="margin-top:1rem">
+      <button class="btn" style="background:var(--neon-magenta);color:#000;font-weight:700" onclick="saveLiefGepl()">Speichern</button>
+      <button class="btn btn-ghost" onclick="closeLiefGeplModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
@@ -918,7 +934,7 @@ function renderTable(){
   document.getElementById('lp-thead').innerHTML=`<tr>
     <th class="col-artikel">Artikel</th>
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
-    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll-<br>Bestand</span></th>
+    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
       <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
       <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
@@ -1030,10 +1046,7 @@ function renderLiefContent(lg){
       catHtml += `<div class="lief-row" id="lief-row-${lg}-${prod.id}">
         <div class="prod-icon" style="width:24px;height:24px;font-size:.8rem;flex-shrink:0">${prod.icon||'📦'}</div>
         <div class="lief-row-name">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.25rem">${prod.unit||''}</span></div>
-        <input class="lief-gepl-input" type="number" min="0"
-          value="${gepl}" id="lief-gepl-${lg}-${prod.id}"
-          onchange="updateLiefGepl('${lg}','${prod.id}',this.value)"
-          onclick="event.stopPropagation()">
+        <span class="lief-gepl-span" onclick="openLiefGeplModal('${lg}','${prod.id}',${gepl})">${gepl}</span>
         <div class="lief-check${st.packed?' packed':''}" id="lchk-pack-${lg}-${prod.id}"
           onclick="toggleLiefCheck('${lg}','${prod.id}','packed')"></div>
         <div class="lief-check${st.delivered?' delivered':''}" id="lchk-deliv-${lg}-${prod.id}"
@@ -1047,11 +1060,26 @@ function renderLiefContent(lg){
   updateCompleteBtn(lg);
 }
 
-window.updateLiefGepl = async function(lg, prodId, val){
-  const qty = parseInt(val)||0;
+let _liefGeplLg=null, _liefGeplProdId=null;
+
+window.openLiefGeplModal = function(lg, prodId, currentVal){
+  _liefGeplLg=lg; _liefGeplProdId=prodId;
+  const prod = PRODUCTS.flatMap(c=>c.items).find(p=>p.id===prodId);
+  document.getElementById('lief-gepl-prod-label').textContent = prod ? prod.name : prodId;
+  document.getElementById('lief-gepl-value').value = currentVal||0;
+  document.getElementById('modal-lief-gepl').classList.add('show');
+  setTimeout(()=>document.getElementById('lief-gepl-value').select(),100);
+};
+
+window.closeLiefGeplModal = function(){
+  document.getElementById('modal-lief-gepl').classList.remove('show');
+};
+
+window.saveLiefGepl = async function(){
+  const qty = parseInt(document.getElementById('lief-gepl-value').value)||0;
+  const lg = _liefGeplLg, prodId = _liefGeplProdId;
   if(!planData[lg]) planData[lg]={};
   planData[lg][prodId] = qty;
-  // Сохраняем в Firebase
   try{
     const snap = await db.collection('lp_planung')
       .where('lager','==', currentLager==='zentrallager'?lg:currentLager)
@@ -1061,7 +1089,8 @@ window.updateLiefGepl = async function(lg, prodId, val){
       await docRef.update({[`items.${prodId}`]: qty});
     }
   }catch(e){ console.warn('gepl save:', e.message); }
-  updateCompleteBtn(lg);
+  closeLiefGeplModal();
+  renderLiefContent(lg);
 };
 
 window.toggleLiefCheck = function(lg, prodId, type){
