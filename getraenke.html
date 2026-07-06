@@ -56,6 +56,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .nav-link:hover{color:var(--accent);background:rgba(0,200,255,.05);padding-left:1.8rem}
 .nav-link.active{color:var(--accent);font-weight:700;background:rgba(0,200,255,.08)}
 .nav-divider{height:1px;background:rgba(0,200,255,.08);margin:.4rem 0}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;color:var(--text-dim);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.92rem;padding:.7rem 1.4rem;cursor:pointer;text-align:left;transition:color .2s,background .2s,padding-left .2s}
+.nav-arrow{transition:transform .25s;flex-shrink:0}
+.nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
+.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.15)}
+.nav-item.open>.nav-sub{display:block}
+.nav-sub li a{display:block;padding:.5rem 1.4rem .5rem 2.4rem;font-size:.88rem;color:var(--text-dim);text-decoration:none;transition:color .2s}
+.nav-sub li a:hover{color:var(--accent)}
 
 /* USER DD */
 .user-dd{display:none;position:fixed;top:calc(var(--header-h) + .4rem);right:.8rem;
@@ -251,17 +258,31 @@ input[type=date]:focus{border-color:var(--accent);background:rgba(255,255,255,.7
 <div class="toast" id="toast"></div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
-  <div style="padding:1.3rem 1.4rem .6rem;border-bottom:1px solid rgba(0,200,255,.08)">
-    <div style="font-family:Orbitron,sans-serif;font-size:.65rem;letter-spacing:.12em;color:var(--accent);font-weight:900;margin-bottom:.25rem" id="sidebar-org">GAME GALAXY</div>
-    <div style="font-size:.88rem;color:var(--text-dim);font-weight:600" id="sidebar-user">—</div>
-  </div>
   <ul class="nav-list">
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
-    <li class="nav-item"><button class="nav-link active" onclick="closeSidebar()">Getränke</button></li>
-    <li class="nav-divider"></li>
-    <li class="nav-item" id="nav-plus-side" style="display:none">
-      <button class="nav-link" style="color:var(--accent2)" onclick="window.location.href='plus-inventur.html'">＋ Inventur</button>
+    <li class="nav-item open">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s;flex-shrink:0"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
+        <li><a href="lieferplanung.html">Lieferplanung</a></li>
+      </ul>
     </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Inventur<svg class="nav-arrow" viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s;flex-shrink:0"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html">Erfassungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
+    <li class="nav-item"><button class="nav-link active">Getränke</button></li>
   </ul>
 </nav>
 <div class="user-dd" id="user-dd">
