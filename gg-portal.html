@@ -1210,6 +1210,9 @@ function clearErr(id){ const el=document.getElementById(id); if(el){ el.textCont
 // ON LOAD: Check saved org session
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', ()=>{
+  // Сначала скрываем всё — предотвращаем мигание
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+
   // Восстанавливаем Admin/Einkaufsleiter сессию если есть
   const savedUser = localStorage.getItem('gg_user');
   if(savedUser){
@@ -1222,16 +1225,18 @@ window.addEventListener('DOMContentLoaded', ()=>{
         applyAdminRoleMenu(user.role);
         showPage('admin');
         applyMobileHeader('admin');
-        return;
+        return; // Выходим — НЕ вызываем enterOrgPortal
       }
     }catch(e){ localStorage.removeItem('gg_user'); }
   }
-  // Иначе — стандартный вход Mitarbeiter
+  // Нет Admin сессии — стандартный вход Mitarbeiter
   const saved = localStorage.getItem('gg_org');
   if(saved){
     currentOrg = saved;
     document.getElementById('sel-org').value = saved;
     enterOrgPortal();
+  } else {
+    showPage('welcome');
   }
 });
 
