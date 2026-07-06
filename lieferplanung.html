@@ -431,20 +431,23 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 #modal-plan{display:none}
 #modal-plan.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
 /* Колонки в форме плана */
-.plan-form-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px}
+.plan-form-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;min-width:0}
 .plan-form-row:hover{background:rgba(0,245,255,.03)}
-.plan-form-name{flex:1;font-size:.86rem;min-width:0}
-.plan-form-akt{width:52px;text-align:center;font-size:.82rem;color:var(--text-dim);flex-shrink:0}
-.plan-form-empf{width:52px;text-align:center;font-size:.88rem;color:var(--neon-cyan);font-weight:700;flex-shrink:0}
-.plan-form-neu{width:70px;flex-shrink:0;background:rgba(0,0,0,.4);border:1px solid var(--neon-cyan);
+.plan-form-name{flex:1;font-size:.86rem;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.plan-form-akt{width:46px;min-width:46px;text-align:center;font-size:.82rem;color:var(--text-dim);flex-shrink:0}
+.plan-form-empf{width:46px;min-width:46px;text-align:center;font-size:.88rem;color:var(--neon-cyan);font-weight:700;flex-shrink:0}
+.plan-form-neu{width:68px;min-width:68px;max-width:68px;flex-shrink:0;
+  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);
   color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
-  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none}
-.plan-form-neu:focus{box-shadow:0 0 8px rgba(0,245,255,.3)}
+  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none;transition:border-color .15s}
+.plan-form-neu:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(0,245,255,.3)}
+.plan-form-neu::-webkit-outer-spin-button,.plan-form-neu::-webkit-inner-spin-button{-webkit-appearance:none}
+.plan-form-neu[type=number]{-moz-appearance:textfield}
 .plan-form-header{display:flex;gap:.5rem;padding:.3rem .5rem;margin-bottom:.2rem;border-bottom:1px solid var(--glass-border)}
-.pfh-name{flex:1;font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
-.pfh-akt{width:52px;text-align:center;font-size:.6rem;color:var(--text-dim);text-transform:uppercase}
-.pfh-empf{width:52px;text-align:center;font-size:.6rem;color:var(--neon-cyan);text-transform:uppercase}
-.pfh-neu{width:70px;text-align:center;font-size:.6rem;color:var(--neon-green);text-transform:uppercase}
+.pfh-name{flex:1;font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
+.pfh-akt{width:46px;min-width:46px;text-align:center;font-size:.58rem;color:var(--text-dim);text-transform:uppercase}
+.pfh-empf{width:46px;min-width:46px;text-align:center;font-size:.58rem;color:var(--neon-cyan);text-transform:uppercase}
+.pfh-neu{width:68px;min-width:68px;text-align:center;font-size:.58rem;color:var(--neon-green);text-transform:uppercase}
 /* Таблица обзора */
 .plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
 .plan-overview-name{flex:1;font-size:.86rem}
@@ -1087,7 +1090,7 @@ window.openPlanForm=function(){
       const neuVal= empf||'';
       const neuStyle = empf ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
       html+=`<div class="plan-form-row">
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${prod.icon||'📦'}</div>
         <div class="plan-form-name">
           <span style="font-size:.86rem">${prod.name}</span>
           ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}
