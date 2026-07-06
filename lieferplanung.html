@@ -480,11 +480,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .lief-tab{font-size:.68rem;padding:.35rem .6rem}
 }
 @media(max-width:640px){
-  .th-col-empf,.th-col-plan{vertical-align:middle;text-align:center}
+  .th-col-empf,.th-col-plan{vertical-align:middle;text-align:center;padding:.3rem .2rem}
   .th-col-empf .th-text,.th-col-plan .th-text{
-    display:block;font-size:.52rem;line-height:1.3;white-space:normal;text-align:center}
+    display:block;font-size:.5rem;line-height:1.25;white-space:normal;
+    text-align:center;margin-bottom:.2rem}
+  .th-col-empf .th-icon,.th-col-plan .th-icon{display:none}
   .th-col-empf .btn-plan,.th-col-plan .btn-plan{
-    display:block;margin:.2rem auto 0}
+    display:block!important;margin:.15rem auto 0;
+    font-size:.65rem;padding:.2rem .35rem}
 }
 .gesamt-panel-title{font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:.12em;
   color:var(--neon-yellow);margin-bottom:1rem}
@@ -1097,14 +1100,7 @@ function buildEkRow(prod, gepl){
       <option value="">— Shop —</option>${shopOpts}
     </select>
     <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px;text-align:center">${gepl}</span>
-    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"
-      style="width:36px;height:36px;min-width:36px;border:2px solid var(--glass-border);border-radius:7px;
-      cursor:pointer;display:flex;align-items:center;justify-content:center;
-      background:${st.bought?'rgba(0,255,136,.15)':'rgba(0,0,0,.2)'};
-      border-color:${st.bought?'var(--neon-green)':'var(--glass-border)'};
-      color:${st.bought?'var(--neon-green)':'transparent'};font-size:.85rem;font-weight:700">
-      ${st.bought?'✓':''}
-    </div>
+    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"></div>
   </div>`;
 }
 
