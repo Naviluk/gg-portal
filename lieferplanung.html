@@ -219,7 +219,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;
   width:70px;text-align:center;padding:.2rem .3rem;outline:none}
 
 /* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.92);z-index:500;
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.92);z-index:550;
   align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto}
 .modal-overlay.show{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
@@ -408,6 +408,41 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-save:hover{box-shadow:0 0 22px rgba(0,255,136,.5);transform:translateY(-1px)}
 .plan-value{color:var(--neon-magenta);font-weight:700}
 /* Gesamt sidebar */
+/* Lieferungen panel tabs */
+.lief-tab{
+  font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.08em;
+  padding:.3rem .65rem;border-radius:6px;cursor:pointer;
+  border:1px solid var(--glass-border);background:transparent;
+  color:var(--text-dim);transition:all .2s}
+.lief-tab.active{font-weight:700}
+.lief-tab[data-lg="brüggen"].active{border-color:#ff0055;color:#ff0055;background:rgba(255,0,85,.1)}
+.lief-tab[data-lg="viersen"].active{border-color:#ff8800;color:#ff8800;background:rgba(255,136,0,.1)}
+.lief-tab[data-lg="köln"].active{border-color:#cc00ff;color:#cc00ff;background:rgba(204,0,255,.1)}
+/* Lieferung list rows */
+.lief-cat-title{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.1em;
+  color:var(--neon-yellow);padding:.5rem 0 .2rem;text-transform:uppercase}
+.lief-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .2rem;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.lief-row-name{flex:1;font-size:.86rem;color:var(--text)}
+.lief-row-gepl{width:36px;text-align:center;font-size:.86rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0}
+.lief-col-header{display:flex;gap:.5rem;padding:.2rem .2rem .4rem;border-bottom:1px solid var(--glass-border);margin-bottom:.3rem}
+.lch-name{flex:1;font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em}
+.lch-gepl{width:36px;text-align:center;font-size:.58rem;color:var(--neon-magenta);text-transform:uppercase}
+.lch-pack{width:32px;text-align:center;font-size:.58rem;color:var(--neon-cyan);text-transform:uppercase}
+.lch-deliv{width:32px;text-align:center;font-size:.58rem;color:var(--neon-green);text-transform:uppercase}
+/* Checkbox squares */
+.lief-check{width:22px;height:22px;border:2px solid var(--glass-border);border-radius:4px;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;background:rgba(0,0,0,.2)}
+.lief-check.packed{border-color:var(--neon-cyan);background:rgba(0,245,255,.15)}
+.lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
+.lief-check.delivered{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
+.lief-check.delivered::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
+/* Missing article row in confirm modal */
+.missing-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.missing-row-name{flex:1;font-size:.85rem}
+.missing-intentional{display:flex;align-items:center;gap:.3rem;font-size:.75rem;color:var(--text-dim);cursor:pointer}
+
 .gesamt-panel{
   position:fixed;top:0;right:-380px;bottom:0;width:360px;
   background:rgba(17,24,39,.98);border-left:1px solid var(--glass-border);
@@ -434,13 +469,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .plan-form-row{display:flex;align-items:center;gap:.5rem;padding:.38rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);border-radius:4px;min-width:0}
 .plan-form-row:hover{background:rgba(0,245,255,.03)}
 .plan-form-name{flex:1;font-size:.86rem;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.plan-form-akt{width:46px;min-width:46px;text-align:center;font-size:.82rem;color:var(--text-dim);flex-shrink:0}
+.plan-form-akt{width:46px;min-width:46px;text-align:center;font-size:.9rem;color:var(--text);flex-shrink:0;font-weight:600}
 .plan-form-empf{width:46px;min-width:46px;text-align:center;font-size:.88rem;color:var(--neon-cyan);font-weight:700;flex-shrink:0}
 .plan-form-neu{width:68px;min-width:68px;max-width:68px;flex-shrink:0;
-  background:rgba(0,0,0,.4);border:1px solid var(--glass-border);
+  background:rgba(0,0,0,.4);border:1px solid var(--neon-green);
   color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
-  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none;transition:border-color .15s}
-.plan-form-neu:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(0,245,255,.3)}
+  padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none;transition:border-color .15s,box-shadow .15s}
+.plan-form-neu:focus{border-color:var(--neon-green);box-shadow:0 0 8px rgba(0,255,136,.3)}
 .plan-form-neu::-webkit-outer-spin-button,.plan-form-neu::-webkit-inner-spin-button{-webkit-appearance:none}
 .plan-form-neu[type=number]{-moz-appearance:textfield}
 .plan-form-header{display:flex;gap:.5rem;padding:.4rem .5rem;margin-bottom:.3rem;border-bottom:2px solid var(--glass-border)}
@@ -597,15 +632,51 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- GESAMT SIDEBAR -->
-<div class="gesamt-panel" id="gesamt-panel">
-  <button class="gesamt-close" onclick="closeGesamt()">✕</button>
-  <div class="gesamt-panel-title">📊 Gesamtlieferung – alle Lager</div>
-  <div id="gesamt-content"></div>
+<!-- LIEFERUNGEN PANEL -->
+<div class="gesamt-panel" id="gesamt-panel" style="width:420px;right:-440px">
+  <button class="gesamt-close" onclick="closeLieferungen()">✕</button>
+  <div class="gesamt-panel-title">🚚 Alle Lieferungen</div>
+  <!-- Переключатели складов -->
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem" id="lief-tabs">
+    <button class="lief-tab active" data-lg="nettetal" onclick="switchLiefTab('nettetal')" 
+      style="border-color:#00aaff;color:#00aaff;background:rgba(0,170,255,.1)">Nettetal</button>
+    <button class="lief-tab" data-lg="brüggen" onclick="switchLiefTab('brüggen')">Brüggen</button>
+    <button class="lief-tab" data-lg="viersen" onclick="switchLiefTab('viersen')">Viersen</button>
+    <button class="lief-tab" data-lg="köln" onclick="switchLiefTab('köln')">Köln</button>
+  </div>
+  <div id="lief-content"></div>
+  <!-- Кнопка завершить доставку -->
+  <div style="margin-top:1rem" id="lief-complete-wrap">
+    <button class="btn btn-save" id="btn-lief-complete" onclick="openCompleteDelivery()" 
+      disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Lieferung abschliessen</button>
+  </div>
+</div>
+
+<!-- MODAL: ДОСТАВКУ ЗАВЕРШИТЬ -->
+<div class="modal-overlay" id="modal-complete-delivery" onclick="if(event.target===this)document.getElementById('modal-complete-delivery').classList.remove('show')">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="document.getElementById('modal-complete-delivery').classList.remove('show')">✕</button>
+    <div class="modal-title">✓ Lieferung abschliessen</div>
+    <div id="complete-missing-block" style="display:none;margin-bottom:1rem">
+      <div style="font-size:.78rem;color:var(--neon-magenta);font-weight:700;margin-bottom:.5rem">Folgende Artikel wurden nicht geliefert:</div>
+      <div id="complete-missing-list"></div>
+    </div>
+    <div class="field" style="margin-bottom:.8rem">
+      <label class="field-label">Lieferdatum</label>
+      <input type="date" id="complete-date" style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
+    </div>
+    <div style="font-size:.9rem;color:var(--text);margin-bottom:1.2rem">
+      Lieferung abschliessen und Daten in <strong style="color:var(--neon-cyan)">Bestände</strong> eintragen?
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-save" onclick="confirmCompleteDelivery()">✓ Bestätigen</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-complete-delivery').classList.remove('show')">Abbrechen</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL: SOLL-BESTAND -->
-<div class="modal-overlay" id="modal-soll">
+<div class="modal-overlay" id="modal-soll" onclick="if(event.target===this)closeSoll()">
   <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="closeSoll()">✕</button>
     <div class="modal-title">⚙️ Soll-Bestand konfigurieren</div>
@@ -619,7 +690,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </div>
 
 <!-- MODAL: PLANUNG — одно окно -->
-<div class="modal-overlay" id="modal-plan">
+<div class="modal-overlay" id="modal-plan" onclick="if(event.target===this)closePlan()">
   <div class="modal" id="plan-modal-right" style="max-width:620px;width:100%;max-height:90vh;overflow-y:auto">
     <button class="modal-close" onclick="closePlan()">✕</button>
     <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem">
@@ -639,7 +710,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </div>
 
 <!-- MODAL: PLAN BESTÄTIGUNG -->
-<div class="modal-overlay" id="modal-plan-confirm">
+<div class="modal-overlay" id="modal-plan-confirm" onclick="if(event.target===this)closePlanConfirm()">
   <div class="modal" style="max-width:580px;width:100%;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="closePlanConfirm()">✕</button>
     <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem">
@@ -823,9 +894,9 @@ async function loadData(){
 function updateButtons(){
   const div=document.getElementById('ctrl-buttons');
   if(currentLager==='zentrallager'){
-    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button><button class="btn-gesamt" onclick="openGesamt()">📊 Gesamt</button>';
+    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button><button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
   }else{
-    div.innerHTML='<button class="btn-gesamt" onclick="openGesamt()">📊 Gesamt</button>';
+    div.innerHTML='<button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
   }
 }
 
@@ -843,7 +914,6 @@ function renderTable(){
     <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
       <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
       <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
-      <button class="btn-plan" style="margin-left:.4rem;color:var(--neon-green);border-color:var(--neon-green);background:rgba(0,255,136,.1)" onclick="openPlan()" title="Planung erstellen">✎</button>
     </th>
     <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
       <span class="th-icon" style="color:var(--neon-magenta)">${isZentral?'🛒':'🚚'}</span>
@@ -885,6 +955,182 @@ function renderTable(){
 window.toggleCategory=function(row){
   const ci=row.dataset.cat;const o=row.classList.toggle('open');
   document.querySelectorAll(`#lp-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!o));
+};
+
+// ── LIEFERUNGEN STATE ──
+let currentLiefLager = 'nettetal';
+const LIEF_NEON = {'nettetal':'#00aaff','brüggen':'#ff0055','viersen':'#ff8800','köln':'#cc00ff'};
+// {lager: {prodId: {packed:bool, delivered:bool}}}
+let liefState = {};
+
+window.openLieferungen = function(){
+  document.getElementById('gesamt-panel').classList.add('open');
+  renderLiefContent(currentLiefLager);
+};
+window.closeLieferungen = function(){
+  document.getElementById('gesamt-panel').classList.remove('open');
+};
+
+window.switchLiefTab = function(lg){
+  currentLiefLager = lg;
+  // Обновляем вкладки
+  document.querySelectorAll('.lief-tab').forEach(t=>{
+    const isActive = t.dataset.lg === lg;
+    t.classList.toggle('active', isActive);
+    if(isActive){
+      const nc = LIEF_NEON[lg]||'#00f5ff';
+      t.style.borderColor = nc;
+      t.style.color = nc;
+      t.style.background = nc.replace('#','rgba(').replace(/(..)(..)(..)/, (m,r,g,b)=>
+        `${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)}`) + ',.1)';
+    } else {
+      t.style.borderColor = '';
+      t.style.color = '';
+      t.style.background = '';
+    }
+  });
+  renderLiefContent(lg);
+};
+
+function renderLiefContent(lg){
+  if(!liefState[lg]) liefState[lg]={};
+  const lgPlan = planData[lg]||{};
+  // Только артикли где Gepl.Lieferung > 0
+  const hasData = PRODUCTS.some(cat=>cat.items.some(p=>lgPlan[p.id]>0));
+  if(!hasData){
+    document.getElementById('lief-content').innerHTML=
+      '<p style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">Keine geplanten Lieferungen.</p>';
+    document.getElementById('lief-complete-wrap').style.display='none';
+    return;
+  }
+  document.getElementById('lief-complete-wrap').style.display='';
+
+  let html = '<div class="lief-col-header">';
+  html += '<span class="lch-name">Artikel</span>';
+  html += '<span class="lch-gepl">Gepl.</span>';
+  html += '<span class="lch-pack" title="Gepackt">📦</span>';
+  html += '<span class="lch-deliv" title="Geliefert">✅</span>';
+  html += '</div>';
+
+  PRODUCTS.forEach(cat=>{
+    let catHtml='';
+    cat.items.forEach(prod=>{
+      const gepl = lgPlan[prod.id]||0;
+      if(!gepl) return;
+      if(!liefState[lg][prod.id]) liefState[lg][prod.id]={packed:false,delivered:false};
+      const st = liefState[lg][prod.id];
+      catHtml += `<div class="lief-row" id="lief-row-${lg}-${prod.id}">
+        <div class="prod-icon" style="width:24px;height:24px;font-size:.8rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="lief-row-name">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.25rem">${prod.unit||''}</span></div>
+        <span class="lief-row-gepl">${gepl}</span>
+        <div class="lief-check${st.packed?' packed':''}" id="lchk-pack-${lg}-${prod.id}"
+          onclick="toggleLiefCheck('${lg}','${prod.id}','packed')"></div>
+        <div class="lief-check${st.delivered?' delivered':''}" id="lchk-deliv-${lg}-${prod.id}"
+          onclick="toggleLiefCheck('${lg}','${prod.id}','delivered')"></div>
+      </div>`;
+    });
+    if(catHtml) html += `<div class="lief-cat-title">${cat.cat}</div>${catHtml}`;
+  });
+
+  document.getElementById('lief-content').innerHTML = html;
+  updateCompleteBtn(lg);
+}
+
+window.toggleLiefCheck = function(lg, prodId, type){
+  if(!liefState[lg]) liefState[lg]={};
+  if(!liefState[lg][prodId]) liefState[lg][prodId]={packed:false,delivered:false};
+  liefState[lg][prodId][type] = !liefState[lg][prodId][type];
+  // Если delivered — автоматически packed
+  if(type==='delivered' && liefState[lg][prodId].delivered){
+    liefState[lg][prodId].packed = true;
+  }
+  // Обновляем UI чекбоксов
+  const packEl = document.getElementById(`lchk-pack-${lg}-${prodId}`);
+  const delivEl = document.getElementById(`lchk-deliv-${lg}-${prodId}`);
+  if(packEl){ packEl.className='lief-check'+(liefState[lg][prodId].packed?' packed':''); }
+  if(delivEl){ delivEl.className='lief-check'+(liefState[lg][prodId].delivered?' delivered':''); }
+  updateCompleteBtn(lg);
+};
+
+function updateCompleteBtn(lg){
+  const btn = document.getElementById('btn-lief-complete');
+  if(!btn) return;
+  const lgPlan = planData[lg]||{};
+  const anyDelivered = PRODUCTS.some(cat=>cat.items.some(p=>{
+    const gepl=lgPlan[p.id]||0;
+    return gepl>0 && liefState[lg]&&liefState[lg][p.id]&&liefState[lg][p.id].delivered;
+  }));
+  btn.disabled = !anyDelivered;
+  btn.style.opacity = anyDelivered ? '1' : '.4';
+  btn.style.cursor = anyDelivered ? 'pointer' : 'not-allowed';
+}
+
+window.openCompleteDelivery = function(){
+  const lg = currentLiefLager;
+  const lgPlan = planData[lg]||{};
+  // Проверяем недоставленные
+  const missing=[];
+  PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
+    const gepl=lgPlan[prod.id]||0;
+    if(gepl>0 && !(liefState[lg]&&liefState[lg][prod.id]&&liefState[lg][prod.id].delivered)){
+      missing.push(prod);
+    }
+  }));
+  const missingBlock = document.getElementById('complete-missing-block');
+  const missingList = document.getElementById('complete-missing-list');
+  if(missing.length>0){
+    missingBlock.style.display='';
+    let html='';
+    missing.forEach(prod=>{
+      html+=`<div class="missing-row">
+        <div class="missing-row-name">${prod.icon||''} ${prod.name}</div>
+        <label class="missing-intentional">
+          <input type="checkbox" id="intentional-${prod.id}" style="width:14px;height:14px;cursor:pointer">
+          Absichtlich
+        </label>
+      </div>`;
+    });
+    missingList.innerHTML=html;
+  } else {
+    missingBlock.style.display='none';
+    missingList.innerHTML='';
+  }
+  const dateEl=document.getElementById('complete-date');
+  if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
+  document.getElementById('modal-complete-delivery').classList.add('show');
+};
+
+window.confirmCompleteDelivery = async function(){
+  const lg = currentLiefLager;
+  const lgPlan = planData[lg]||{};
+  const datum = document.getElementById('complete-date').value || new Date().toISOString().slice(0,10);
+  // Собираем итоговые данные
+  const deliveredItems={};
+  PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
+    const gepl=lgPlan[prod.id]||0;
+    if(gepl>0){
+      const intentional=document.getElementById('intentional-'+prod.id);
+      const isDelivered=(liefState[lg]&&liefState[lg][prod.id]&&liefState[lg][prod.id].delivered)||
+        (intentional&&intentional.checked);
+      if(isDelivered) deliveredItems[prod.id]=gepl;
+    }
+  }));
+  showSpinner();
+  try{
+    // Сохраняем как wareneingang (Lieferung в Bestände)
+    await db.collection('wareneingang').add({
+      lager:lg, datum, monat:datum.slice(0,7),
+      items:deliveredItems, type:'lieferung',
+      createdAt:new Date().toISOString()
+    });
+    document.getElementById('modal-complete-delivery').classList.remove('show');
+    closeLieferungen();
+    showToast('Lieferung abgeschlossen ✓');
+    await loadData();
+  }catch(e){
+    showToast('Fehler: '+e.message);
+  }
+  hideSpinner();
 };
 
 window.openGesamt=function(){
