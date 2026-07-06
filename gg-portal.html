@@ -1021,7 +1021,7 @@ async function handleAdminPassword(){
     if(!found){ hideSpinner(); showErr('err-admin-pw','Falscher PIN. Bitte erneut versuchen.'); clearPinRow('pin-admin-row'); focusFirstPin('pin-admin-row'); return; }
     currentAdmin = { name: found.name, role: found.role };
     // Сохраняем сессию для всех страниц
-    sessionStorage.setItem('gg_user', JSON.stringify({ name: found.name, role: found.role }));
+    localStorage.setItem('gg_user', JSON.stringify({ name: found.name, role: found.role }));
     document.getElementById('hdr-admin-username').textContent = found.name;
     document.getElementById('hdr-admin-username-mob').textContent = found.name;
     // Apply role-based menu visibility
@@ -1078,7 +1078,7 @@ function applyAdminRoleMenu(role){
 function logoutAdmin(){
   closeDropdown('admin');
   currentAdmin = null;
-  sessionStorage.removeItem('gg_user');
+  localStorage.removeItem('gg_user');
   showPage('welcome');
 }
 
@@ -1210,6 +1210,23 @@ function clearErr(id){ const el=document.getElementById(id); if(el){ el.textCont
 // ON LOAD: Check saved org session
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', ()=>{
+  // Восстанавливаем Admin/Einkaufsleiter сессию если есть
+  const savedUser = localStorage.getItem('gg_user');
+  if(savedUser){
+    try{
+      const user = JSON.parse(savedUser);
+      if(user && user.role && ['Admin','Einkaufsleiter','Kollege'].includes(user.role)){
+        currentAdmin = user;
+        document.getElementById('hdr-admin-username').textContent = user.name;
+        document.getElementById('hdr-admin-username-mob').textContent = user.name;
+        applyAdminRoleMenu(user.role);
+        showPage('admin');
+        applyMobileHeader('admin');
+        return;
+      }
+    }catch(e){ localStorage.removeItem('gg_user'); }
+  }
+  // Иначе — стандартный вход Mitarbeiter
   const saved = localStorage.getItem('gg_org');
   if(saved){
     currentOrg = saved;
