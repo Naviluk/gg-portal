@@ -444,11 +444,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .missing-intentional{display:flex;align-items:center;gap:.3rem;font-size:.75rem;color:var(--text-dim);cursor:pointer}
 
 .gesamt-panel{
-  position:fixed;top:0;right:-380px;bottom:0;width:360px;
+  position:fixed;top:0;right:-460px;bottom:0;width:440px;
   background:rgba(17,24,39,.98);border-left:1px solid var(--glass-border);
   z-index:400;transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;
   padding:calc(var(--header-h) + 1.5rem) 1.2rem 2rem}
-.gesamt-panel.open{right:0}
+.gesamt-panel.open{right:0!important}
 .gesamt-panel-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:.15em;
   color:var(--neon-yellow);margin-bottom:1.2rem}
 .gesamt-cat{margin-bottom:1rem}
@@ -633,7 +633,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </div>
 
 <!-- LIEFERUNGEN PANEL -->
-<div class="gesamt-panel" id="gesamt-panel" style="width:420px;right:-440px">
+<div class="gesamt-panel" id="gesamt-panel">
   <button class="gesamt-close" onclick="closeLieferungen()">✕</button>
   <div class="gesamt-panel-title">🚚 Alle Lieferungen</div>
   <!-- Переключатели складов -->
@@ -910,7 +910,7 @@ function renderTable(){
   document.getElementById('lp-thead').innerHTML=`<tr>
     <th class="col-artikel">Artikel</th>
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
-    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Monatl.<br>Verbr.</span></th>
+    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll-<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
       <span class="th-icon" style="color:var(--neon-green)">${empfIcon}</span>
       <span class="th-text" style="color:var(--neon-green)">${empfLabel}</span>
