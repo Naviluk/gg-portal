@@ -398,8 +398,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   border-radius:6px;padding:.5rem .9rem;cursor:pointer;font-weight:700;
   box-shadow:0 0 10px rgba(255,238,0,.2);transition:all .2s;white-space:nowrap}
 .btn-gesamt:hover{box-shadow:0 0 22px rgba(255,238,0,.5);transform:translateY(-1px)}
-.btn-einkaeufe-style{border-color:var(--neon-cyan)!important;color:var(--neon-cyan)!important;
-  background:rgba(0,245,255,.08)!important;box-shadow:0 0 10px rgba(0,245,255,.2)!important}
+.btn-einkaeufe-style{border-color:var(--neon-magenta)!important;color:var(--neon-magenta)!important;
+  background:rgba(255,0,204,.08)!important;box-shadow:0 0 10px rgba(255,0,204,.2)!important}
+.btn-einkaeufe-style:hover{box-shadow:0 0 22px rgba(255,0,204,.5)!important}
 .btn-plan{
   display:inline-flex;align-items:center;gap:.3rem;
   background:rgba(0,255,136,.1);border:1px solid var(--neon-green);color:var(--neon-green);
@@ -745,7 +746,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- EINKÄUFE PANEL -->
 <div class="gesamt-panel" id="einkaeufe-panel" onclick="event.stopPropagation()" style="right:-101vw">
   <button class="gesamt-close" onclick="closeEinkaeufe()">✕</button>
-  <div class="gesamt-panel-title">🛒 Einkäufe – Zentrallager</div>
+  <div class="gesamt-panel-title" style="color:var(--neon-magenta)">🛒 Einkäufe – Zentrallager</div>
   <!-- Сортировка -->
   <div style="display:flex;gap:.4rem;margin-bottom:1rem">
     <button class="lief-tab active" id="ek-sort-artikel" onclick="switchEkSort('artikel')"
@@ -753,11 +754,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <button class="lief-tab" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
   </div>
   <!-- Шапка колонок -->
-  <div class="lief-col-header">
-    <span class="lch-name">Artikel</span>
-    <span class="lch-name" style="max-width:110px;min-width:90px;font-size:.62rem">Shop</span>
-    <span class="lch-gepl">Gepl.</span>
-    <span class="lch-pack" style="color:var(--neon-green)">✓</span>
+  <div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem">
+    <span style="flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700">Artikel</span>
+    <span style="width:100px;min-width:80px;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;text-align:center">Shop</span>
+    <span style="width:44px;min-width:44px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700">Gepl.</span>
+    <span style="width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-green);font-weight:700">✓</span>
   </div>
   <div id="einkaeufe-content"></div>
   <div style="margin-top:1rem" id="ek-complete-wrap">
@@ -995,12 +996,10 @@ function renderTable(){
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
     <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
-      <span class="th-icon" style="color:var(--neon-green);display:block;margin-bottom:.1rem">${empfIcon}</span>
-      <span class="th-text" style="color:var(--neon-green);display:block;line-height:1.2;white-space:normal">${empfLabel.replace(' ','<br>')}</span>
+      <span class="th-text" style="color:var(--neon-green);display:block;line-height:1.3;white-space:normal">${empfLabel.replace(' ','<br>')}</span>
     </th>
     <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
-      <span class="th-icon" style="color:var(--neon-magenta);display:block;margin-bottom:.1rem">${isZentral?'🛒':'🚚'}</span>
-      <span class="th-text" style="color:var(--neon-magenta);display:block;line-height:1.2;white-space:normal">${planLabel.replace(' ','<br>')}</span>
+      <span class="th-text" style="color:var(--neon-magenta);display:block;line-height:1.3;white-space:normal">${planLabel.replace(' ','<br>')}</span>
       <button class="btn-plan" style="display:block;margin:.3rem auto 0;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>
     </th>
   </tr>`;
@@ -1082,12 +1081,12 @@ function buildEkRow(prod, gepl){
   const shopOpts = SHOPS_ALL.map(s=>`<option value="${s}" ${st.shop===s?'selected':''}>${s}</option>`).join('');
   return `<div class="lief-row" id="ek-row-${prod.id}">
     <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${prod.icon||'📦'}</div>
-    <div class="lief-row-name" style="font-size:.84rem">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
-    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)">
+    <div class="lief-row-name" style="font-size:.84rem;flex:1">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
+    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)" style="width:100px;min-width:80px">
       <option value="">— Shop —</option>${shopOpts}
     </select>
-    <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px">${gepl}</span>
-    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"></div>
+    <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px;text-align:center">${gepl}</span>
+    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')" style="width:36px;height:36px;min-width:36px"></div>
   </div>`;
 }
 
