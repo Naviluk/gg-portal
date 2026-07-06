@@ -618,11 +618,15 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </div>
   </div>
 
-  <!-- Правое окно: форма редактирования -->
-  <div class="modal" id="plan-modal-right" style="max-width:520px;flex:1;min-width:280px;display:none;max-height:88vh;overflow-y:auto">
-    <div class="modal-title" id="plan-title-right" style="margin-bottom:.5rem">Neue Bestellung</div>
-    <div id="plan-lager-badge-right" style="margin-bottom:1rem"></div>
-    <div id="plan-content"></div>
+  <!-- Правое окно: форма редактирования (стиль Inventur Ausfüllen) -->
+  <div class="modal" id="plan-modal-right" style="max-width:560px;flex:1;min-width:300px;display:none;max-height:88vh;overflow-y:auto">
+    <div class="modal-title" id="plan-title-right" style="margin-bottom:.4rem">Neue Bestellung</div>
+    <div id="plan-lager-badge-right" style="margin-bottom:.8rem"></div>
+    <div class="field" style="margin-bottom:.8rem">
+      <label class="field-label">Datum</label>
+      <input type="date" id="plan-date" style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
+    </div>
+    <div id="plan-content" style="max-height:55vh;overflow-y:auto"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
       <button class="btn btn-save" id="btn-save-plan" onclick="savePlan()">✓ Einkauf planen</button>
       <button class="btn btn-ghost" onclick="closePlanForm()">← Zurück</button>
@@ -1036,25 +1040,53 @@ window.openPlan=function(){
 window.openPlanForm=function(){
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
-  let html='';
+
+  // Собираем empf-значения из левого окна (diff > 0)
+  const empfValues={};
   PRODUCTS.forEach(catObj=>{
-    let catHtml='';
     catObj.items.forEach(prod=>{
-      let soll=0,akt=0,plan=0;
-      toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;plan+=Number((planData[lg]||{})[prod.id])||0;});
-      if(soll===0)return;
+      let soll=0,akt=0;
+      toLoad.forEach(lg=>{
+        soll+=Number((sollData[lg]||{})[prod.id])||0;
+        akt+=Number((bestandData[lg]||{})[prod.id])||0;
+      });
       const diff=Math.max(0,soll-akt);
-      if(diff<=0)return;
-      catHtml+=`<div class="plan-row">
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
-        <div class="plan-row-name" title="${prod.name}">${prod.name}<span style="font-size:.7rem;color:var(--text-dim);margin-left:.3rem">${prod.unit||''}</span></div>
-        <span class="plan-row-empf" title="Empfohlen">${diff>0?diff:'✓'}</span>
-        <input class="plan-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St." value="${plan||diff||''}">
+      if(diff>0) empfValues[prod.id]=diff;
+    });
+  });
+
+  // Строим форму: все категории, все артикли, предзаполнено из empfValues
+  let html='';
+  PRODUCTS.forEach((catObj,ci)=>{
+    const isFirst=ci===0;
+    html+=`<div class="modal-cat${isFirst?' open':''}" id="pcat-${ci}">
+      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
+        <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-arrow">▶</span>
+      </div>
+      <div class="modal-cat-items">`;
+    catObj.items.forEach(prod=>{
+      const prefill = empfValues[prod.id]||'';
+      const hasPre  = prefill!=='';
+      const inputStyle = hasPre
+        ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.08)'
+        : '';
+      html+=`<div class="soll-prod-row">
+        <div class="prod-icon" style="width:28px;height:28px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>
+          ${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}
+        </div>
+        <input class="plan-qty" id="plan-${prod.id}" type="number" min="0" placeholder="St."
+          value="${prefill}" style="${inputStyle}">
       </div>`;
     });
-    if(catHtml)html+=`<div class="plan-cat-label">${catObj.cat}</div>${catHtml}`;
+    html+='</div></div>';
   });
-  document.getElementById('plan-content').innerHTML=html||'<p style="color:var(--text-dim);font-size:.85rem">Keine Empfehlungen.</p>';
+
+  document.getElementById('plan-content').innerHTML=html;
+  const _pd=document.getElementById('plan-date');
+  if(_pd) _pd.value=new Date().toISOString().slice(0,10);
   document.getElementById('plan-modal-right').style.display='';
 };
 
@@ -1069,14 +1101,25 @@ window.closePlan=function(){
 window.savePlan=async function(){
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   const items={};
-  PRODUCTS.forEach(c=>c.items.forEach(p=>{const i=document.getElementById('plan-'+p.id);if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)items[p.id]=v;}}));
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{
+    const i=document.getElementById('plan-'+p.id);
+    if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)items[p.id]=v;}
+  }));
+  if(!Object.keys(items).length){ showToast('Bitte mindestens einen Artikel ausfüllen.'); return; }
+  const dateEl=document.getElementById('plan-date');
+  const datum=dateEl?dateEl.value:new Date().toISOString().slice(0,10);
+  const monat=datum.slice(0,7);
   showSpinner();
   try{
-    await db.collection('lp_planung').add({lager:currentLager,monat:currentZeitraum,items,type:planType,createdAt:new Date().toISOString()});
+    await db.collection('lp_planung').add({
+      lager:currentLager, monat, datum, items, type:planType,
+      createdAt:new Date().toISOString()
+    });
     toLoad.forEach(lg=>{if(!planData[lg])planData[lg]={};Object.assign(planData[lg],items);});
     showToast(planType==='einkauf'?'Einkauf gespeichert ✓':'Lieferung gespeichert ✓');
     closePlan();renderTable();
-  }catch(e){showToast('Fehler: '+e.message);}hideSpinner();
+  }catch(e){showToast('Fehler: '+e.message);}
+  hideSpinner();
 };
 
 document.addEventListener('DOMContentLoaded',loadData);
