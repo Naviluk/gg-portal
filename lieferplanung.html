@@ -374,16 +374,24 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .th-text-mob{display:none}
 @media(max-width:640px){
   .th-text-mob{display:inline}
-  /* Актуальный Bestand — показываем нормальный текст */
   .th-col-anfang .th-text{display:inline;font-size:.52rem;line-height:1.2;white-space:normal}
-  /* Monatl. Verbrauch — компактно */
   .th-col-monatl .th-text{display:inline;font-size:.52rem;line-height:1.2;white-space:normal}
-  /* Empf. и Gepl. колонки — текст в несколько строк */
-  .th-col-empf .th-text,.th-col-plan .th-text{
-    display:inline;font-size:.52rem;line-height:1.2;white-space:normal;word-break:break-word}
-  .th-col-empf,.th-col-plan{min-width:60px;width:60px;vertical-align:top}
-  .th-col-empf .btn-plan,.th-col-plan .btn-plan{
-    display:block;margin:.2rem auto 0;padding:.2rem .3rem;font-size:.55rem}
+  /* Empf./Gepl. — в ДВЕ строки: текст сверху, иконка снизу */
+  .th-col-empf,.th-col-plan{min-width:58px;width:58px;vertical-align:top;text-align:center;padding:.2rem .1rem}
+  .th-col-empf .th-text{display:block!important;font-size:.48rem;line-height:1.2;white-space:normal;color:var(--neon-green);margin-bottom:.15rem}
+  .th-col-plan .th-text{display:block!important;font-size:.48rem;line-height:1.2;white-space:normal;color:var(--neon-magenta);margin-bottom:.15rem}
+  .th-col-empf .btn-plan,.th-col-plan .btn-plan{display:block!important;margin:.1rem auto 0;padding:.2rem .3rem;font-size:.7rem}
+  /* Кнопки управления — в одну строку */
+  #ctrl-buttons{
+    width:100%!important;margin-left:0!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+    gap:.25rem!important}
+  #ctrl-buttons .btn-soll,#ctrl-buttons .btn-gesamt{
+    flex:1!important;min-width:0!important;
+    font-size:.44rem!important;padding:.38rem .15rem!important;
+    white-space:nowrap!important;letter-spacing:.04em!important;
+    display:inline-flex!important;align-items:center!important;
+    justify-content:center!important;gap:.15rem!important}
 }
 /* Button text spans */
 .btn-line1{display:inline}
@@ -463,6 +471,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
 .lief-check.delivered{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
 .lief-check.delivered::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
+/* Einkäufe checkboxes — same style as Lieferungen */
+.ek-check{width:36px;height:36px;border:2px solid var(--glass-border);border-radius:8px;
+  cursor:pointer;flex-shrink:0;min-width:36px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;background:rgba(0,0,0,.2);margin:0 .15rem}
+.ek-check.bought{border-color:var(--neon-green);background:rgba(0,255,136,.15)}
+.ek-check.bought::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
 /* Missing article row in confirm modal */
 .missing-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .missing-row-name{flex:1;font-size:.85rem}
@@ -480,14 +494,17 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .lief-tab{font-size:.68rem;padding:.35rem .6rem}
 }
 @media(max-width:640px){
-  .th-col-empf,.th-col-plan{vertical-align:middle;text-align:center;padding:.3rem .2rem}
-  .th-col-empf .th-text,.th-col-plan .th-text{
-    display:block;font-size:.5rem;line-height:1.25;white-space:normal;
-    text-align:center;margin-bottom:.2rem}
-  .th-col-empf .th-icon,.th-col-plan .th-icon{display:none}
+  .th-col-empf,.th-col-plan{
+    vertical-align:middle;text-align:center;padding:.25rem .15rem}
+  .th-col-empf .th-text{
+    display:block!important;font-size:.48rem;line-height:1.25;
+    white-space:normal;text-align:center;color:var(--neon-green)}
+  .th-col-plan .th-text{
+    display:block!important;font-size:.48rem;line-height:1.25;
+    white-space:normal;text-align:center;color:var(--neon-magenta)}
   .th-col-empf .btn-plan,.th-col-plan .btn-plan{
-    display:block!important;margin:.15rem auto 0;
-    font-size:.65rem;padding:.2rem .35rem}
+    display:block!important;margin:.2rem auto 0;
+    font-size:.7rem;padding:.2rem .3rem}
 }
 .gesamt-panel-title{font-family:'Orbitron',sans-serif;font-size:1rem;letter-spacing:.12em;
   color:var(--neon-yellow);margin-bottom:1rem}
@@ -569,6 +586,16 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   background:transparent;color:var(--text-dim);transition:all .2s}
 .soll-tab.active{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.08)}
 
+
+/* ── EINKÄUFE SHOP SELECT ── */
+.ek-shop-select{
+  max-width:105px;min-width:80px;flex-shrink:0;
+  background:#111827!important;border:1px solid rgba(0,245,255,.3)!important;
+  color:#e0e8ff!important;font-family:'Rajdhani',sans-serif;font-size:.78rem;
+  padding:.2rem .3rem;border-radius:4px;outline:none;cursor:pointer;
+  color-scheme:dark;-webkit-appearance:none;appearance:none}
+.ek-shop-select:focus{border-color:var(--neon-magenta)!important}
+.ek-shop-select option{background:#111827!important;color:#e0e8ff!important}
 </style>
 </head>
 <body>
@@ -1096,7 +1123,7 @@ function buildEkRow(prod, gepl){
   return `<div class="lief-row" id="ek-row-${prod.id}">
     <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${prod.icon||'📦'}</div>
     <div class="lief-row-name" style="font-size:.84rem;flex:1">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
-    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)" style="width:100px;min-width:80px">
+    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)" style="width:100px;min-width:80px;background:#111827;color:#e0e8ff;border:1px solid rgba(0,245,255,.3);color-scheme:dark">
       <option value="">— Shop —</option>${shopOpts}
     </select>
     <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px;text-align:center">${gepl}</span>
@@ -1190,6 +1217,10 @@ window.confirmCompleteEinkauf = async function(){
     closeEinkaeufe();
     showToast('Einkauf abgeschlossen ✓');
     await loadData();
+    // Открываем lager.html для создания Wareneingang (Zentrallager)
+    setTimeout(()=>{
+      window.location.href='lager.html?lager=zentrallager&openWE=1';
+    }, 1200);
   }catch(e){showToast('Fehler: '+e.message);}
   hideSpinner();
 };
@@ -1371,6 +1402,10 @@ window.confirmCompleteDelivery = async function(){
     closeLieferungen();
     showToast('Lieferung abgeschlossen ✓');
     await loadData();
+    // Открываем lager.html для создания нового Wareneingang (подтверждение поставки)
+    setTimeout(()=>{
+      window.location.href='lager.html?lager='+currentLiefLager+'&openWE=1';
+    }, 1200);
   }catch(e){
     showToast('Fehler: '+e.message);
   }

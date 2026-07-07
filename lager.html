@@ -1034,9 +1034,13 @@ let weShopRows = [];
 window.openWareneingang = function(prefillDate){
   weSelectedItems = {};
   weShopRows = [];
+  currentEditWeId = null; // режим создания
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
   document.getElementById('modal-we').classList.add('show');
+  // Восстанавливаем текст кнопки для новой записи
+  const _sb=document.getElementById('btn-confirm-save');
+  if(_sb) _sb.textContent='✓ Bestätigen';
 
   const isZentral = currentLager==='zentrallager';
   const lagerColors = {
@@ -1303,6 +1307,7 @@ window.openEditLieferung = function(date){
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
+  currentEditWeId = we.id; // режим редактирования
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
   openWareneingang(date);
@@ -1315,6 +1320,9 @@ window.openEditWareneingang = function(date){
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     updateSelectedPreview();
+    // Меняем кнопку на "Änderungen speichern"
+    const saveBtn=document.getElementById('btn-confirm-save');
+    if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
     buildConfirm(true);
   },300);
 }
@@ -1342,7 +1350,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.buildConfirmLieferung = buildConfirmLieferung;
   window.checkListAction       = checkListAction;
 
-  loadData();
+  // URL параметры от lieferplanung.html
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.get('openWE')==='1'){
+    const lagerParam = urlParams.get('lager');
+    if(lagerParam){
+      const selLager = document.getElementById('sel-lager');
+      if(selLager){ selLager.value = lagerParam; currentLager = lagerParam; }
+    }
+    window.history.replaceState({}, '', 'lager.html');
+    loadData().then(()=>{ setTimeout(openWareneingang, 400); });
+  } else {
+    loadData();
+  }
 
   document.getElementById('lager-tbody').addEventListener('click', e=>{
     const cell = e.target.closest('.ab-cell');
