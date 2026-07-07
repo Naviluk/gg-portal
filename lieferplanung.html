@@ -710,25 +710,46 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- MODAL: ДОСТАВКУ ЗАВЕРШИТЬ -->
-<div class="modal-overlay" id="modal-complete-delivery" onclick="if(event.target===this)document.getElementById('modal-complete-delivery').classList.remove('show')">
-  <div class="modal" style="max-width:500px">
-    <button class="modal-close" onclick="document.getElementById('modal-complete-delivery').classList.remove('show')">✕</button>
-    <div class="modal-title">✓ Lieferung abschliessen</div>
-    <div id="complete-missing-block" style="display:none;margin-bottom:1rem">
-      <div style="font-size:.78rem;color:var(--neon-magenta);font-weight:700;margin-bottom:.5rem">Folgende Artikel wurden nicht geliefert:</div>
-      <div id="complete-missing-list"></div>
+<!-- ═══ MODAL: WARENEINGANG (gemeinsame Form wie auf lager.html) ═══ -->
+<div class="modal-overlay" id="modal-we">
+  <div class="modal">
+    <button class="modal-close" onclick="closeWareneingang()">✕</button>
+    <div class="modal-title" id="we-title">Wareneingang erfassen</div>
+
+    <!-- Schritt 1: Auswahl -->
+    <div id="we-step1">
+      <div class="field">
+        <label class="field-label">Datum</label>
+        <input type="date" id="we-date">
+      </div>
+      <div class="field">
+        <label class="field-label">Waren auswählen</label>
+        <div id="we-product-list"></div>
+      </div>
+      <div id="we-selected-list" class="selected-list" style="display:none">
+        <div class="selected-list-title">Ausgewählte Waren</div>
+        <div id="we-selected-items"></div>
+      </div>
+      <div id="we-shops-section" class="shops-section" style="display:none">
+        <div class="shops-title" id="we-shops-title">Shops / Einkaufsorte</div>
+        <div id="we-shop-rows"></div>
+        <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
+        <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
+      </div>
     </div>
-    <div class="field" style="margin-bottom:.8rem">
-      <label class="field-label">Lieferdatum</label>
-      <input type="date" id="complete-date" style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
-    </div>
-    <div style="font-size:.9rem;color:var(--text);margin-bottom:1.2rem">
-      Lieferung abschliessen und Daten in <strong style="color:var(--neon-cyan)">Bestände</strong> eintragen?
-    </div>
-    <div class="modal-btn-row">
-      <button class="btn btn-save" onclick="confirmCompleteDelivery()">✓ Bestätigen</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('modal-complete-delivery').classList.remove('show')">Abbrechen</button>
+
+    <!-- Schritt 2: Bestätigung -->
+    <div id="we-step2" style="display:none">
+      <div class="confirm-date" id="confirm-date-label"></div>
+      <div class="confirm-list" id="confirm-list"></div>
+      <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
+      <div class="modal-btn-row">
+        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
+      </div>
     </div>
   </div>
 </div>
@@ -805,28 +826,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   <div style="margin-top:1rem" id="ek-complete-wrap">
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
       style="width:100%">✓ Einkauf abschliessen</button>
-  </div>
-</div>
-
-<!-- MODAL: EINKAUF ABSCHLIESSEN -->
-<div class="modal-overlay" id="modal-complete-einkauf" onclick="if(event.target===this)document.getElementById('modal-complete-einkauf').classList.remove('show')">
-  <div class="modal" style="max-width:460px">
-    <button class="modal-close" onclick="document.getElementById('modal-complete-einkauf').classList.remove('show')">✕</button>
-    <div class="modal-title">✓ Einkauf abschliessen</div>
-    <div class="field" style="margin-bottom:.8rem">
-      <label class="field-label">Einkaufsdatum</label>
-      <input type="date" id="ek-complete-date"
-        style="width:100%;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);color:var(--text);
-        font-family:'Rajdhani',sans-serif;font-size:.95rem;padding:.5rem .8rem;border-radius:6px;outline:none">
-    </div>
-    <div style="font-size:.9rem;color:var(--text);margin-bottom:1.2rem">
-      Einkauf abschliessen und Daten in <strong style="color:var(--neon-cyan)">Bestände</strong> einträgen?<br>
-      <span style="font-size:.78rem;color:var(--text-dim)">Die Spalte Gepl. Einkauf wird danach zurückgesetzt.</span>
-    </div>
-    <div class="modal-btn-row">
-      <button class="btn btn-save" onclick="confirmCompleteEinkauf()">✓ Bestätigen</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('modal-complete-einkauf').classList.remove('show')">Abbrechen</button>
-    </div>
   </div>
 </div>
 
@@ -1190,40 +1189,7 @@ window.toggleEkCheck = function(prodId){
 };
 
 window.openCompleteEinkauf = function(){
-  const dateEl=document.getElementById('ek-complete-date');
-  if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
-  document.getElementById('modal-complete-einkauf').classList.add('show');
-};
-
-window.confirmCompleteEinkauf = async function(){
-  const datum=document.getElementById('ek-complete-date').value||new Date().toISOString().slice(0,10);
-  const lgPlan=planData['zentrallager']||{};
-  const items={};
-  PRODUCTS.forEach(c=>c.items.forEach(p=>{ const g=lgPlan[p.id]||0; if(g>0)items[p.id]=g; }));
-  showSpinner();
-  try{
-    await db.collection('wareneingang').add({
-      lager:'zentrallager',datum,monat:datum.slice(0,7),
-      items,type:'einkauf',createdAt:new Date().toISOString()
-    });
-    const snap=await db.collection('lp_planung').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
-    const batch=db.batch();
-    snap.forEach(d=>batch.delete(d.ref));
-    await batch.commit();
-    if(planData['zentrallager']) planData['zentrallager']={};
-    ekState={};
-    await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).delete();
-    document.getElementById('modal-complete-einkauf').classList.remove('show');
-    closeEinkaeufe();
-    showToast('Einkauf abgeschlossen ✓');
-    await loadData();
-    // Открываем lager.html для создания Wareneingang (Zentrallager)
-    setTimeout(()=>{
-      localStorage.setItem('gg_openWE',JSON.stringify({lager:'zentrallager'}));
-      window.location.href='lager.html';
-    }, 1200);
-  }catch(e){showToast('Fehler: '+e.message);}
-  hideSpinner();
+  weOpenFromAbschluss('zentrallager','einkauf');
 };
 
 // ── LIEFERUNGEN STATE ──
@@ -1375,39 +1341,261 @@ function updateCompleteBtn(lg){
 }
 
 window.openCompleteDelivery = function(){
-  // Кнопка уже заблокирована пока не все галки — missing block не нужен
-  document.getElementById('complete-missing-block').style.display='none';
-  const dateEl=document.getElementById('complete-date');
-  if(dateEl) dateEl.value=new Date().toISOString().slice(0,10);
-  document.getElementById('modal-complete-delivery').classList.add('show');
+  weOpenFromAbschluss(currentLiefLager,'lieferung');
 };
 
-window.confirmCompleteDelivery = async function(){
-  const lg = currentLiefLager;
-  const lgPlan = planData[lg]||{};
-  const datum = document.getElementById('complete-date').value || new Date().toISOString().slice(0,10);
-  const deliveredItems={};
-  PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
-    const gepl=lgPlan[prod.id]||0;
-    if(gepl>0) deliveredItems[prod.id]=gepl;
-  }));
-  showSpinner();
-  try{
-    // Сохраняем как wareneingang (Lieferung в Bestände)
-    await db.collection('wareneingang').add({
-      lager:lg, datum, monat:datum.slice(0,7),
-      items:deliveredItems, type:'lieferung',
-      createdAt:new Date().toISOString()
+// ══════════════ WARENEINGANG MODAL (gemeinsame Form, wie auf lager.html) ══════════════
+// Einheitliche Logik für Einkäufe (Zentrallager) und Lieferungen (Filialen):
+// Klick auf „Einkauf/Lieferung abschließen" öffnet dieselbe Form „+Wareneingang erfassen",
+// direkt bei Schritt 2 (Bestätigung), mit den geplanten Artikeln vorausgefüllt.
+let weSelectedItems = {};
+let weShopRows = [];
+let weLpLager = 'zentrallager'; // welches Lager dieses Modal gerade bearbeitet
+let weLpMode  = 'einkauf';      // 'einkauf' (Zentrallager) | 'lieferung' (Filiale)
+
+const SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
+const SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+
+function weBuildProductList(){
+  let html='';
+  PRODUCTS.forEach((catObj,ci)=>{
+    html += `<div class="modal-cat" id="we-cat-${ci}">
+      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
+        <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-arrow">▶</span>
+      </div>
+      <div class="modal-cat-items">`;
+    catObj.items.forEach(prod=>{
+      const unitStr = prod.unit ? prod.unit : '';
+      html += `<div class="modal-prod-row" id="we-row-${prod.id}">
+        <div class="prod-checkbox" id="we-cb-${prod.id}" onclick="toggleWeProd('${prod.id}')"></div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>
+          ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
+        </div>
+        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
+      </div>`;
     });
-    document.getElementById('modal-complete-delivery').classList.remove('show');
-    closeLieferungen();
-    showToast('Lieferung abgeschlossen ✓');
+    html += `</div></div>`;
+  });
+  document.getElementById('we-product-list').innerHTML = html;
+}
+
+function weSetTitle(){
+  const isEinkauf = weLpMode==='einkauf';
+  const titleText = isEinkauf ? 'Einkauf erfassen' : 'Lieferung erfassen';
+  const lc = isEinkauf
+    ? {name:'Zentrallager', color:'var(--neon-green)'}
+    : {name:LAGER_NAMES[weLpLager]||weLpLager, color:(NEON[weLpLager]||{}).neon||'var(--neon-cyan)'};
+  document.getElementById('we-title').innerHTML =
+    `${titleText} — <span style="color:${lc.color};text-shadow:0 0 10px ${lc.color}">${lc.name}</span>`;
+  document.getElementById('we-shops-section').style.display = isEinkauf?'':'none';
+}
+
+function weApplySelectionToDom(){
+  document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
+  document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{qi.classList.remove('show');qi.value='';});
+  Object.entries(weSelectedItems).forEach(([prodId,qty])=>{
+    const cb=document.getElementById('we-cb-'+prodId);
+    const qi=document.getElementById('we-qty-'+prodId);
+    if(cb) cb.classList.add('checked');
+    if(qi){ qi.classList.add('show'); qi.value=qty; }
+  });
+}
+
+window.toggleWeProd = function(prodId){
+  const cb  = document.getElementById('we-cb-'+prodId);
+  const qty = document.getElementById('we-qty-'+prodId);
+  const isChecked = cb.classList.toggle('checked');
+  qty.classList.toggle('show', isChecked);
+  if(isChecked){ qty.focus(); weSelectedItems[prodId]=weSelectedItems[prodId]||0; }
+  else { delete weSelectedItems[prodId]; }
+  weUpdateSelectedPreview();
+}
+window.updateWeQty = function(prodId, val){
+  weSelectedItems[prodId] = parseInt(val)||0;
+  weUpdateSelectedPreview();
+}
+function weUpdateSelectedPreview(){
+  const ids = Object.keys(weSelectedItems);
+  const sel = document.getElementById('we-selected-list');
+  const items = document.getElementById('we-selected-items');
+  const shops = document.getElementById('we-shops-section');
+  if(!ids.length){ sel.style.display='none'; if(shops) shops.style.display='none'; return; }
+  sel.style.display='block';
+  if(weLpMode==='einkauf' && shops) shops.style.display='block';
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div class="selected-cat-label">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        const selQty = weSelectedItems[prod.id]||0;
+        const selUnit = prod.unit||'';
+        html+=`<div class="selected-item">
+          <span class="selected-item-name">${prod.icon} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
+          <span class="selected-item-qty">${selQty}</span>
+        </div>`;
+      }
+    });
+  });
+  items.innerHTML=html;
+}
+
+window.addShopRow = function(){
+  const idx = weShopRows.length;
+  weShopRows.push({shop:'',betrag:''});
+  const container = document.getElementById('we-shop-rows');
+  const priOpts = SHOPS_PRIMARY.map(s=>`<option value="${s}">${s}</option>`).join('');
+  const secOpts = SHOPS_SECONDARY.map(s=>`<option value="${s}">${s}</option>`).join('');
+  const div = document.createElement('div');
+  div.className='shop-row'; div.id='shop-row-'+idx;
+  div.innerHTML=`<select class="shop-select" onchange="weShopRows[${idx}].shop=this.value">
+    <option value="">— Shop wählen —</option>
+    <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
+    <optgroup label="Weitere">${secOpts}</optgroup>
+  </select>
+  <input class="betrag-input" type="number" placeholder="€" step="0.01" onchange="weShopRows[${idx}].betrag=this.value">
+  <button class="shop-remove" onclick="removeShopRow(${idx})">✕</button>`;
+  container.appendChild(div);
+}
+window.removeShopRow = function(idx){
+  const el=document.getElementById('shop-row-'+idx);
+  if(el) el.remove();
+  weShopRows[idx]={removed:true};
+}
+
+window.closeWareneingang = function(){
+  document.getElementById('modal-we').classList.remove('show');
+};
+
+window.buildConfirm = function(){
+  const ids=Object.keys(weSelectedItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  const date=document.getElementById('we-date').value;
+  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+
+  document.querySelectorAll('#we-shop-rows .shop-row').forEach((row,i)=>{
+    const sel = row.querySelector('select');
+    const inp = row.querySelector('input');
+    if(sel&&inp) weShopRows[i] = {shop:sel.value, betrag:inp.value};
+  });
+
+  document.getElementById('we-step1').style.display='none';
+  document.getElementById('we-step2').style.display='block';
+
+  const d=new Date(date);
+  document.getElementById('confirm-date-label').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        const unitTxt = prod.unit||'';
+        const qty = weSelectedItems[prod.id]||0;
+        html+=`<div class="confirm-item">
+          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+          <span class="ci-qty">${qty}</span>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('confirm-list').innerHTML=html;
+
+  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
+  const cs=document.getElementById('confirm-shops');
+  if(weLpMode==='einkauf' && activeShops.length){
+    cs.style.display='block';
+    cs.innerHTML='<div class="confirm-shops-title">Shops / Einkaufsorte</div>'+
+      activeShops.map(s=>{
+        const amt = parseFloat(s.betrag||0).toFixed(2);
+        return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
+      }).join('');
+  } else { cs.style.display='none'; }
+};
+
+window.backToEdit = function(){
+  document.getElementById('we-step1').style.display='block';
+  document.getElementById('we-step2').style.display='none';
+  setTimeout(()=>{
+    weApplySelectionToDom();
+    weUpdateSelectedPreview();
+  },50);
+};
+
+window.checkListAction = function(){
+  buildConfirm();
+};
+
+// Öffnet die Form direkt bei Schritt 2, vorausgefüllt mit den geplanten Artikeln
+// aus Einkäufe/Lieferungen (Скрин 1/2) — wie im TZ beschrieben.
+function weOpenFromAbschluss(lager, mode){
+  const lgPlan = planData[lager]||{};
+  const items = {};
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{ const g=lgPlan[p.id]||0; if(g>0) items[p.id]=g; }));
+  if(!Object.keys(items).length){ showToast('Keine geplanten Artikel vorhanden.'); return; }
+
+  weLpLager = lager;
+  weLpMode  = mode;
+  weSelectedItems = {...items};
+  weShopRows = [];
+
+  weBuildProductList();
+  weSetTitle();
+  document.getElementById('we-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('we-shop-rows').innerHTML='';
+
+  const saveBtn=document.getElementById('btn-confirm-save');
+  if(saveBtn) saveBtn.textContent='✓ Bestätigen';
+
+  document.getElementById('modal-we').classList.add('show');
+  document.getElementById('we-step1').style.display='block';
+  document.getElementById('we-step2').style.display='none';
+
+  setTimeout(()=>{
+    weApplySelectionToDom();
+    weUpdateSelectedPreview();
+    buildConfirm(); // direkt zu Schritt 2 (Bestätigung) springen — wie im TZ
+  },50);
+}
+
+window.confirmWareneingang = async function(){
+  const ids=Object.keys(weSelectedItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  showSpinner();
+  const date=document.getElementById('we-date').value || new Date().toISOString().slice(0,10);
+  const monat=date.slice(0,7);
+  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
+  const lager=weLpLager;
+  const entry={
+    lager, datum:date, monat,
+    items:{...weSelectedItems},
+    type: weLpMode==='einkauf' ? 'einkauf' : 'lieferung',
+    createdAt:new Date().toISOString()
+  };
+  if(weLpMode==='einkauf' && activeShops.length) entry.shops = activeShops;
+
+  try{
+    await db.collection('wareneingang').add(entry);
+
+    if(weLpMode==='einkauf'){
+      const snap=await db.collection('lp_planung').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
+      const batch=db.batch();
+      snap.forEach(d=>batch.delete(d.ref));
+      await batch.commit();
+      if(planData['zentrallager']) planData['zentrallager']={};
+      ekState={};
+      await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).delete().catch(()=>{});
+      closeEinkaeufe();
+      showToast('Einkauf abgeschlossen ✓');
+    } else {
+      closeLieferungen();
+      showToast('Lieferung abgeschlossen ✓');
+    }
+
+    document.getElementById('modal-we').classList.remove('show');
     await loadData();
-    // Открываем lager.html для создания нового Wareneingang (подтверждение поставки)
-    setTimeout(()=>{
-      localStorage.setItem('gg_openWE',JSON.stringify({lager:currentLiefLager}));
-      window.location.href='lager.html';
-    }, 1200);
   }catch(e){
     showToast('Fehler: '+e.message);
   }

@@ -525,7 +525,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
         <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
       </div>
     </div>
@@ -1350,36 +1350,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.buildConfirmLieferung = buildConfirmLieferung;
   window.checkListAction       = checkListAction;
 
-  // URL параметры от lieferplanung.html
-  // Проверяем запрос на открытие формы от lieferplanung
-  const _openWE = localStorage.getItem('gg_openWE');
-  if(_openWE){
-    localStorage.removeItem('gg_openWE');
-    try{
-      const weData=JSON.parse(_openWE);
-      if(weData.lager){
-        const selLager=document.getElementById('sel-lager');
-        if(selLager){selLager.value=weData.lager;currentLager=weData.lager;}
-      }
-      loadData();
-      setTimeout(()=>{openWareneingang();},1500);
-    }catch(e){loadData();}
-  } else {
-    const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.get('openWE')==='1'){
-    const lagerParam = urlParams.get('lager');
-    if(lagerParam){
-      const selLager = document.getElementById('sel-lager');
-      if(selLager){ selLager.value = lagerParam; currentLager = lagerParam; }
-    }
-    window.history.replaceState({}, '', 'lager.html');
-    loadData();
-    // Ждём загрузки данных и Firebase, потом открываем форму
-    setTimeout(()=>{
-      openWareneingang();
-    }, 1500);
-  }
-
   document.getElementById('lager-tbody').addEventListener('click', e=>{
     const cell = e.target.closest('.ab-cell');
     if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
@@ -1391,7 +1361,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       else openEditLieferung(th.dataset.date);
     }
   });
-
 });
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
