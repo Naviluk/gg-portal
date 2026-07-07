@@ -1579,17 +1579,22 @@ window.confirmWareneingang = async function(){
   try{
     await db.collection('wareneingang').add(entry);
 
+    // Geplante Menge zurücksetzen — diese Ware ist jetzt tatsächlich eingegangen
+    // und darf nicht länger als "geplant" erscheinen.
+    const snap=await db.collection('lp_planung').where('lager','==',lager).where('monat','==',currentZeitraum).get();
+    const batch=db.batch();
+    snap.forEach(d=>batch.delete(d.ref));
+    await batch.commit();
+    if(planData[lager]) planData[lager]={};
+
     if(weLpMode==='einkauf'){
-      const snap=await db.collection('lp_planung').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
-      const batch=db.batch();
-      snap.forEach(d=>batch.delete(d.ref));
-      await batch.commit();
-      if(planData['zentrallager']) planData['zentrallager']={};
       ekState={};
       await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).delete().catch(()=>{});
       closeEinkaeufe();
       showToast('Einkauf abgeschlossen ✓');
     } else {
+      liefState[lager]={};
+      updateCompleteBtn(lager);
       closeLieferungen();
       showToast('Lieferung abgeschlossen ✓');
     }
