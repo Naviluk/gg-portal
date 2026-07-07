@@ -1219,7 +1219,8 @@ window.confirmCompleteEinkauf = async function(){
     await loadData();
     // Открываем lager.html для создания Wareneingang (Zentrallager)
     setTimeout(()=>{
-      window.location.href='lager.html?lager=zentrallager&openWE=1';
+      localStorage.setItem('gg_openWE',JSON.stringify({lager:'zentrallager'}));
+      window.location.href='lager.html';
     }, 1200);
   }catch(e){showToast('Fehler: '+e.message);}
   hideSpinner();
@@ -1404,7 +1405,8 @@ window.confirmCompleteDelivery = async function(){
     await loadData();
     // Открываем lager.html для создания нового Wareneingang (подтверждение поставки)
     setTimeout(()=>{
-      window.location.href='lager.html?lager='+currentLiefLager+'&openWE=1';
+      localStorage.setItem('gg_openWE',JSON.stringify({lager:currentLiefLager}));
+      window.location.href='lager.html';
     }, 1200);
   }catch(e){
     showToast('Fehler: '+e.message);
