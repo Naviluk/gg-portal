@@ -532,22 +532,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<!-- ═══ MODAL: INLINE EDIT ANFANGSBESTAND ═══ -->
-<div class="modal-overlay" id="modal-ab">
-  <div class="modal" style="max-width:360px">
-    <button class="modal-close" onclick="document.getElementById('modal-ab').classList.remove('show')">✕</button>
-    <div class="modal-title">Anfangsbestand festlegen</div>
-    <div class="field">
-      <label class="field-label" id="ab-prod-label">Produkt</label>
-      <input type="number" id="ab-value" min="0" placeholder="Menge eingeben">
-    </div>
-    <div class="modal-btn-row">
-      <button class="btn btn-primary" onclick="saveAnfangsbestand()">Speichern</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('modal-ab').classList.remove('show')">Abbrechen</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
@@ -680,7 +664,6 @@ let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // from Inventur page
 let bestandData     = {}; // last inventur of period
-let currentAbProdId = null;
 
 // ── EXPOSE (assigned after function definitions below) ──
 
@@ -802,9 +785,9 @@ function renderTableActual(){
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
-      // Anfangsbestand
-      const abDisplay = ab !== '' ? ab : '<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      tbHTML += `<td class="num-cell" style="color:var(--text)">${abDisplay}</td>`;
+      // Anfangsbestand (automatisch = letzte Inventur, wie Bestand)
+      const abDisplay = ab !== '' ? `<span style="color:var(--neon-green)">${ab}</span>` : '—';
+      tbHTML += `<td class="num-cell">${abDisplay}</td>`;
 
       const einkVal = totalEink || '—';
       if(isZentral){
@@ -945,22 +928,17 @@ async function loadData(){
     }
   } catch(e){}
 
-  anfangsbestand={};
-  // Load Anfangsbestand from Inventur page (anfangsbestand collection)
-  try {
-    const abDoc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();
-    if(abDoc.exists) anfangsbestand=abDoc.data();
-  } catch(e){}
-
-  // Load Bestand from last inventur of current period
+  // Anfangsbestand = Bestand = letzte Inventur im gewählten Zeitraum (Monat oder ganzes Jahr)
   bestandData={};
   try {
-    const invQ=db.collection('inventur').where('lager','==',currentLager).where('monat','==',currentZeitraum.length===7?currentZeitraum:currentZeitraum);
-    const invSnap=await invQ.get();
     let lastInvDate=null; let lastInvItems={};
-    invSnap.forEach(d=>{ const inv=d.data(); if(!lastInvDate||inv.datum>lastInvDate){lastInvDate=inv.datum;lastInvItems=inv.items||{};} });
+    for(const mo of months){
+      const invSnap=await db.collection('inventur').where('lager','==',currentLager).where('monat','==',mo).get();
+      invSnap.forEach(d=>{ const inv=d.data(); if(!lastInvDate||inv.datum>lastInvDate){lastInvDate=inv.datum;lastInvItems=inv.items||{};} });
+    }
     bestandData=lastInvItems;
   } catch(e){}
+  anfangsbestand = bestandData;
 
   // Загружаем Gerät и Theke из отдельных коллекций
   window._geraetEntries = [];
@@ -1001,28 +979,6 @@ function applyDetailCols(show){
     btn.textContent = show ? '◀' : '▶';
     btn.classList.toggle('expanded', show);
   }
-}
-
-// ── ANFANGSBESTAND MODAL ──
-window.openAnfangsbestandModal = function(prodId, prodName){
-  currentAbProdId = prodId;
-  document.getElementById('ab-prod-label').textContent = prodName;
-  document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
-  document.getElementById('modal-ab').classList.add('show');
-  setTimeout(()=>document.getElementById('ab-value').focus(),100);
-}
-window.saveAnfangsbestand = async function(){
-  const val = parseInt(document.getElementById('ab-value').value);
-  if(isNaN(val)||val<0){ return; }
-  showSpinner();
-  anfangsbestand[currentAbProdId] = val;
-  try {
-    await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand, {merge:true});
-  } catch(e){}
-  hideSpinner();
-  document.getElementById('modal-ab').classList.remove('show');
-  renderTableActual();
-  showToast('Anfangsbestand gespeichert');
 }
 
 // ── WARENEINGANG MODAL ──
@@ -1375,8 +1331,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.renderTable           = renderTable;
   window.toggleCategory        = toggleCategory;
   window.toggleDetailCols      = toggleDetailCols;
-  window.openAnfangsbestandModal = openAnfangsbestandModal;
-  window.saveAnfangsbestand    = saveAnfangsbestand;
   window.openWareneingang      = openWareneingang;
   window.closeWareneingang     = closeWareneingang;
   window.addShopRow            = addShopRow;
@@ -1388,10 +1342,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.buildConfirmLieferung = buildConfirmLieferung;
   window.checkListAction       = checkListAction;
 
-  document.getElementById('lager-tbody').addEventListener('click', e=>{
-    const cell = e.target.closest('.ab-cell');
-    if(cell) openAnfangsbestandModal(cell.dataset.prodId, cell.dataset.prodName);
-  });
   document.getElementById('lager-thead').addEventListener('click', e=>{
     const th = e.target.closest('.we-date-th');
     if(th){
