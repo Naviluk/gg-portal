@@ -1150,6 +1150,32 @@ window.removeShopRow = function(idx){
   weShopRows[idx]={removed:true};
 }
 
+// Восстанавливает визуальные строки Shop в Schritt 1 из данных weShopRows (нужно при редактировании)
+function weRebuildShopRowsDom(){
+  const container = document.getElementById('we-shop-rows');
+  if(!container) return;
+  container.innerHTML='';
+  const rows = weShopRows.slice();
+  weShopRows = [];
+  rows.forEach(row=>{
+    if(!row || row.removed || !row.shop) return;
+    const idx = weShopRows.length;
+    weShopRows.push({shop:row.shop, betrag:row.betrag||''});
+    const priOpts = SHOPS_PRIMARY.map(s=>`<option value="${s}" ${s===row.shop?'selected':''}>${s}</option>`).join('');
+    const secOpts = SHOPS_SECONDARY.map(s=>`<option value="${s}" ${s===row.shop?'selected':''}>${s}</option>`).join('');
+    const div = document.createElement('div');
+    div.className='shop-row'; div.id='shop-row-'+idx;
+    div.innerHTML=`<select class="shop-select" onchange="weShopRows[${idx}].shop=this.value">
+      <option value="">— Shop wählen —</option>
+      <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
+      <optgroup label="Weitere">${secOpts}</optgroup>
+    </select>
+    <input class="betrag-input" type="number" placeholder="€" step="0.01" value="${row.betrag||''}" onchange="weShopRows[${idx}].betrag=this.value">
+    <button class="shop-remove" onclick="removeShopRow(${idx})">✕</button>`;
+    container.appendChild(div);
+  });
+}
+
 window.buildConfirm = function(){
   const ids=Object.keys(weSelectedItems);
   if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
@@ -1240,7 +1266,11 @@ window.confirmWareneingang = async function(){
     hideSpinner();
     document.getElementById('modal-we').classList.remove('show');
     await loadData();
-  } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
+  } catch(e){
+    hideSpinner();
+    console.error('Wareneingang Speicherfehler:', e);
+    showToast('Fehler beim Speichern: '+(e.message||e));
+  }
 }
 
 const LAGER_NEON = {
@@ -1281,13 +1311,15 @@ window.buildConfirmLieferung = function(){
 window.openEditLieferung = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  currentEditWeId = we.id; // сохраняем ID для обновления
+  const editId = we.id; // сохраняем ID для обновления
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
   const lagerName=LAGER_NAMES[currentLager]||currentLager;
   const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
   openWareneingang(date);
+  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
   setTimeout(()=>{
+    currentEditWeId = editId; // на всякий случай ещё раз
     weSelectedItems=savedItems; weShopRows=savedShops;
     Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
@@ -1295,6 +1327,7 @@ window.openEditLieferung = function(date){
       if(cb) cb.classList.add('checked');
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
+    weRebuildShopRowsDom();
     updateSelectedPreview();
     document.getElementById('we-title').innerHTML='Lieferung bearbeiten – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
     // Меняем кнопку подтверждения
@@ -1307,11 +1340,13 @@ window.openEditLieferung = function(date){
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  currentEditWeId = we.id; // режим редактирования
+  const editId = we.id; // режим редактирования
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
   openWareneingang(date);
+  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
   setTimeout(()=>{
+    currentEditWeId = editId; // на всякий случай ещё раз, после всех асинхронных операций
     weSelectedItems=savedItems; weShopRows=savedShops;
     Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
@@ -1319,6 +1354,7 @@ window.openEditWareneingang = function(date){
       if(cb) cb.classList.add('checked');
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
+    weRebuildShopRowsDom();
     updateSelectedPreview();
     // Меняем кнопку на "Änderungen speichern"
     const saveBtn=document.getElementById('btn-confirm-save');
