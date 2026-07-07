@@ -754,23 +754,23 @@ function renderTableActual(){
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
     });
-    // Gerät — neutral (no color)
+    // Gerät — без стрелок, собственные даты из gs_geraet
+    const geraetDates = [...new Set((window._geraetEntries||[]).map(e=>e.datum))].sort();
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
-        <span class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:var(--text)">▶</span>
       </div></th>`;
-    dates.forEach(d=>{
+    geraetDates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-geraet-th" style="color:var(--text-dim);font-size:.68rem">${label}</th>`;
     });
-    // Theke — neutral
+    // Theke — без стрелок, собственные даты из gs_theke
+    const thekeDates = [...new Set((window._thekeEntries||[]).map(e=>e.datum))].sort();
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
-        <span class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()" style="color:var(--text)">▶</span>
       </div></th>`;
-    dates.forEach(d=>{
+    thekeDates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-theke-th" style="color:var(--text-dim);font-size:.68rem">${label}</th>`;
     });
@@ -827,15 +827,23 @@ function renderTableActual(){
           const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
         });
-        // Gerät — neutral
-        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">—</td>`;
-        dates.forEach(d=>{
-          tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">—</td>`;
+        // Gerät — данные из gs_geraet
+        const geraetDatesB = [...new Set((window._geraetEntries||[]).map(e=>e.datum))].sort();
+        const totalGeraet = (window._geraetEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalGeraet||'—'}</td>`;
+        geraetDatesB.forEach(d=>{
+          const entry=(window._geraetEntries||[]).find(e=>e.datum===d);
+          const qty=entry&&entry.items&&entry.items[prod.id]?entry.items[prod.id]:'—';
+          tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">${qty}</td>`;
         });
-        // Theke — neutral
-        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">—</td>`;
-        dates.forEach(d=>{
-          tbHTML += `<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">—</td>`;
+        // Theke — данные из gs_theke
+        const thekeDatesB = [...new Set((window._thekeEntries||[]).map(e=>e.datum))].sort();
+        const totalTheke = (window._thekeEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalTheke||'—'}</td>`;
+        thekeDatesB.forEach(d=>{
+          const entry=(window._thekeEntries||[]).find(e=>e.datum===d);
+          const qty=entry&&entry.items&&entry.items[prod.id]?entry.items[prod.id]:'—';
+          tbHTML += `<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${qty}</td>`;
         });
       }
 
@@ -956,6 +964,22 @@ async function loadData(){
     bestandData=lastInvItems;
   } catch(e){}
 
+  // Загружаем Gerät и Theke из отдельных коллекций
+  window._geraetEntries = [];
+  window._thekeEntries  = [];
+  if(currentLager !== 'zentrallager'){
+    try{
+      const sg = await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+      sg.forEach(d=>window._geraetEntries.push({id:d.id,...d.data()}));
+      window._geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
+    }catch(e){}
+    try{
+      const st = await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+      st.forEach(d=>window._thekeEntries.push({id:d.id,...d.data()}));
+      window._thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
+    }catch(e){}
+  }
+
   hideSpinner();
   renderTableActual();
 }
@@ -1058,7 +1082,7 @@ window.openWareneingang = function(prefillDate){
   });
   document.getElementById('we-product-list').innerHTML = html;
 }
-window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); }
+window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
 
 window.toggleWeProd = function(prodId){
   const cb  = document.getElementById('we-cb-'+prodId);
@@ -1195,13 +1219,22 @@ window.confirmWareneingang = async function(){
     lager:currentLager, datum:date, monat,
     items:weSelectedItems,
     shops:activeShops,
-    createdAt:new Date().toISOString()
+    updatedAt:new Date().toISOString()
   };
   try {
-    await db.collection('wareneingang').add(entry);
+    if(currentEditWeId){
+      // Редактирование — обновляем существующую запись
+      await db.collection('wareneingang').doc(currentEditWeId).update(entry);
+      showToast('Lieferung aktualisiert ✓');
+    } else {
+      // Новая запись
+      entry.createdAt = new Date().toISOString();
+      await db.collection('wareneingang').add(entry);
+      showToast('Wareneingang erfolgreich eingetragen!');
+    }
+    currentEditWeId = null;
     hideSpinner();
     document.getElementById('modal-we').classList.remove('show');
-    showToast('Wareneingang erfolgreich eingetragen!');
     await loadData();
   } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
 }
@@ -1244,6 +1277,7 @@ window.buildConfirmLieferung = function(){
 window.openEditLieferung = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
+  currentEditWeId = we.id; // сохраняем ID для обновления
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
   const lagerName=LAGER_NAMES[currentLager]||currentLager;
@@ -1258,7 +1292,10 @@ window.openEditLieferung = function(date){
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     updateSelectedPreview();
-    document.getElementById('we-title').innerHTML='Lieferung erfassen – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
+    document.getElementById('we-title').innerHTML='Lieferung bearbeiten – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
+    // Меняем кнопку подтверждения
+    const saveBtn=document.getElementById('btn-confirm-save');
+    if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
     buildConfirmLieferung();
   },300);
 };
