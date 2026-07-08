@@ -998,25 +998,30 @@ async function loadData(){
   // Aktuel. Bestand = dieselbe End-Bestand-Formel wie auf lager.html (pro Filiale):
   // Getränke/Snacks: Anfangsbestand + Lieferungen − Gerät − Theke
   // Süssigkeiten/Haushaltsartikel: letzte Inventur des aktuellen Monats
-  for(const lg of toLoad){
+  // Alle Filialen werden PARALLEL geladen (statt nacheinander) — verhindert lange Wartezeiten/Hänger.
+  const perLagerLieferSum = {}; // wird unten für die Zentrallager-Formel wiederverwendet (kein erneuter Query)
+  await Promise.all(toLoad.map(async (lg)=>{
     bestandData[lg]={};
     try{
-      const abDoc = await db.collection('anfangsbestand').doc(lg+'_'+currentZeitraum).get();
+      const [abDoc, weSnap, geraetSnap, thekeSnap, invSnap] = await Promise.all([
+        db.collection('anfangsbestand').doc(lg+'_'+currentZeitraum).get(),
+        db.collection('wareneingang').where('lager','==',lg).where('monat','==',currentZeitraum).get(),
+        db.collection('gs_geraet').where('lager','==',lg).where('monat','==',currentZeitraum).get(),
+        db.collection('gs_theke').where('lager','==',lg).where('monat','==',currentZeitraum).get(),
+        db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get(),
+      ]);
       const ab = abDoc.exists ? abDoc.data() : {};
 
-      const weSnap = await db.collection('wareneingang').where('lager','==',lg).where('monat','==',currentZeitraum).get();
       const lieferSum = {};
       weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSum[pid]=(lieferSum[pid]||0)+(Number(items[pid])||0); }); });
+      perLagerLieferSum[lg]=lieferSum;
 
-      const geraetSnap = await db.collection('gs_geraet').where('lager','==',lg).where('monat','==',currentZeitraum).get();
       const geraetSum = {};
       geraetSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ geraetSum[pid]=(geraetSum[pid]||0)+(Number(items[pid])||0); }); });
 
-      const thekeSnap = await db.collection('gs_theke').where('lager','==',lg).where('monat','==',currentZeitraum).get();
       const thekeSum = {};
       thekeSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thekeSum[pid]=(thekeSum[pid]||0)+(Number(items[pid])||0); }); });
 
-      const invSnap = await db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get();
       let ld=null, li={};
       invSnap.forEach(d=>{ const inv=d.data(); if(!ld||inv.datum>ld){ ld=inv.datum; li=inv.items||{}; } });
 
@@ -1034,27 +1039,28 @@ async function loadData(){
         });
       });
     }catch(e){bestandData[lg]={}}
-  }
+  }));
 
   // Punkt 8 (Korrektur): Aktuel.Bestand für Zentrallager ist eine EXAKTE Kopie von
   // lager.html's End Bestand für Zentrallager (Anfangsbestand + Einkäufe − Lieferungen),
-  // KEINE Summe der 4 Filialen.
+  // KEINE Summe der 4 Filialen. Die Lieferungs-Summe der Filialen wird aus den oben
+  // bereits geladenen Daten wiederverwendet (kein erneuter Firestore-Query nötig).
   if(currentLager==='zentrallager'){
     bestandData['zentrallager']={};
     try{
-      const abDoc = await db.collection('anfangsbestand').doc('zentrallager_'+currentZeitraum).get();
+      const [abDoc, weSnap] = await Promise.all([
+        db.collection('anfangsbestand').doc('zentrallager_'+currentZeitraum).get(),
+        db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get(),
+      ]);
       const ab = abDoc.exists ? abDoc.data() : {};
-
-      const weSnap = await db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
       const einkaufSum = {};
       weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkaufSum[pid]=(einkaufSum[pid]||0)+(Number(items[pid])||0); }); });
 
-      // Lieferungen (Zentrallager) = Summe der Lieferungen aller 4 Filialen — genau wie auf lager.html
       const lieferSumZ = {};
-      for(const br of LAGERS){
-        const bs = await db.collection('wareneingang').where('lager','==',br).where('monat','==',currentZeitraum).get();
-        bs.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+(Number(items[pid])||0); }); });
-      }
+      LAGERS.forEach(br=>{
+        const ls = perLagerLieferSum[br] || {};
+        Object.keys(ls).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+ls[pid]; });
+      });
 
       PRODUCTS.forEach(catObj=>{
         catObj.items.forEach(prod=>{
@@ -1067,12 +1073,16 @@ async function loadData(){
     }catch(e){bestandData['zentrallager']={}}
   }
 
-  try{const doc=await db.collection('lp_soll').doc('config').get();if(doc.exists)sollData=doc.data();}catch(e){}
-  planData={};
   try{
-    const snap=await db.collection('lp_planung').where('monat','==',currentZeitraum).get();
-    snap.forEach(d=>{const plan=d.data();if(!planData[plan.lager])planData[plan.lager]={};Object.assign(planData[plan.lager],plan.items||{})});
+    const [sollDoc, planSnap] = await Promise.all([
+      db.collection('lp_soll').doc('config').get(),
+      db.collection('lp_planung').where('monat','==',currentZeitraum).get(),
+    ]);
+    if(sollDoc.exists) sollData=sollDoc.data();
+    planData={};
+    planSnap.forEach(d=>{const plan=d.data();if(!planData[plan.lager])planData[plan.lager]={};Object.assign(planData[plan.lager],plan.items||{})});
   }catch(e){}
+
   hideSpinner();
   updateButtons();
   renderTable();
@@ -1265,15 +1275,29 @@ const LIEF_NEON = {'nettetal':'#00aaff','brüggen':'#ff0055','viersen':'#ff8800'
 // {lager: {prodId: {packed:bool, delivered:bool}}}
 let liefState = {};
 
-window.openLieferungen = function(){
+window.openLieferungen = async function(){
   document.getElementById('gesamt-panel').classList.add('open');
+  await loadLiefState(currentLiefLager);
   renderLiefContent(currentLiefLager);
 };
 window.closeLieferungen = function(){
   document.getElementById('gesamt-panel').classList.remove('open');
 };
 
-window.switchLiefTab = function(lg){
+async function loadLiefState(lg){
+  if(!liefState[lg]) liefState[lg]={};
+  try{
+    const doc = await db.collection('lief_state').doc(lg+'_'+currentZeitraum).get();
+    if(doc.exists){
+      const saved = doc.data();
+      Object.keys(saved).forEach(id=>{
+        liefState[lg][id] = { packed: !!saved[id].packed, delivered: !!saved[id].delivered };
+      });
+    }
+  }catch(e){}
+}
+
+window.switchLiefTab = async function(lg){
   currentLiefLager = lg;
   // Обновляем вкладки
   document.querySelectorAll('.lief-tab').forEach(t=>{
@@ -1291,6 +1315,7 @@ window.switchLiefTab = function(lg){
       t.style.background = '';
     }
   });
+  await loadLiefState(lg);
   renderLiefContent(lg);
 };
 
@@ -1391,6 +1416,10 @@ window.toggleLiefCheck = function(lg, prodId, type){
   if(packEl){ packEl.className='lief-check'+(liefState[lg][prodId].packed?' packed':''); }
   if(delivEl){ delivEl.className='lief-check'+(liefState[lg][prodId].delivered?' delivered':''); }
   updateCompleteBtn(lg);
+  // Speichern, damit die Galken beim Verlassen/Wiederöffnen der Form erhalten bleiben
+  const toSave={};
+  Object.entries(liefState[lg]).forEach(([id,st])=>{ if(st.packed||st.delivered) toSave[id]={packed:!!st.packed,delivered:!!st.delivered}; });
+  db.collection('lief_state').doc(lg+'_'+currentZeitraum).set(toSave).catch(()=>{});
 };
 
 function updateCompleteBtn(lg){
@@ -1661,6 +1690,7 @@ window.confirmWareneingang = async function(){
       showToast('Einkauf abgeschlossen ✓');
     } else {
       liefState[lager]={};
+      await db.collection('lief_state').doc(lager+'_'+currentZeitraum).delete().catch(()=>{});
       updateCompleteBtn(lager);
       closeLieferungen();
       showToast('Lieferung abgeschlossen ✓');
