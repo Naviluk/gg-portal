@@ -451,7 +451,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="wareneingang.html">Wareneingang</a></li>
+        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -713,6 +713,9 @@ let currentZeitraum = '2026-06';
 let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
 let anfangsbestand  = {}; // {productId: value}
+let lieferungenData = {}; // {prodId: total} — für Monatl. Verbrauch
+let geraetData      = {}; // {prodId: total} — für Monatl. Verbrauch
+let thekeData       = {}; // {prodId: total} — für Monatl. Verbrauch
 let currentAbProdId = null;
 
 // ── EXPOSE (assigned after function definitions below) ──
@@ -759,6 +762,7 @@ function renderTableActual(){
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
     thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
   });
+  thHTML += `<th class="num-cell" style="border-left:2px solid rgba(255,238,0,.3);min-width:80px"><span class="th-icon">📉</span><span class="th-text" style="color:var(--neon-yellow)">Monatl.<br>Verbrauch</span></th>`;
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -795,6 +799,23 @@ function renderTableActual(){
         const qty = inv&&inv.items&&inv.items[prod.id] !== undefined ? inv.items[prod.id] : '—';
         tbHTML += `<td class="num-cell detail-td" style="color:var(--neon-green)">${qty}</td>`;
       });
+
+      // Monatl. Verbrauch: f = a + b - c - d - e
+      // a=Anfangsbestand, b=Lieferungen, c=Gerät, d=Theke, e=letzte Inventur des Zeitraums
+      const a_val = Number(anfangsbestand[prod.id]) || 0;
+      const b_val = Number(lieferungenData[prod.id]) || 0;
+      const c_val = Number(geraetData[prod.id]) || 0;
+      const d_val = Number(thekeData[prod.id]) || 0;
+      const lastInv = wareneingangs.filter(w=>w.items&&w.items[prod.id]!==undefined)
+        .sort((x,y)=>y.datum.localeCompare(x.datum))[0];
+      const e_val = lastInv ? Number(lastInv.items[prod.id]) : null;
+      let verbrauchCell = '<span style="color:var(--text-dim)">—</span>';
+      if(e_val !== null){
+        const f = a_val + b_val - c_val - d_val - e_val;
+        const fColor = f>0 ? 'var(--neon-yellow)' : f<0 ? 'var(--neon-magenta)' : 'var(--text-dim)';
+        verbrauchCell = `<span style="color:${fColor};font-weight:700">${f}</span>`;
+      }
+      tbHTML += `<td class="num-cell" style="border-left:2px solid rgba(255,238,0,.15)">${verbrauchCell}</td>`;
 
       tbHTML += `</tr>`;
     });
@@ -840,6 +861,55 @@ async function loadData(){
     if(abDoc.exists) anfangsbestand=abDoc.data();
   } catch(e){}
 
+  // Automatischer Übertrag: für alle Monate außer Juni 2026 (Basis-Monat) wird der
+  // Anfangsbestand automatisch aus der letzten Inventur des Vormonats übernommen.
+  // Falls im Vormonat KEINE echte Inventur erstellt wurde (nur der manuelle
+  // Anfangsbestand), wird stattdessen der Anfangsbestand des Vormonats selbst übernommen
+  // ("wenn außer dem ersten nichts da ist – dann eben der").
+  if(zeit.length===7 && zeit!=='2026-06' && Object.keys(anfangsbestand).length===0){
+    const [y,m] = zeit.split('-').map(Number);
+    let py=y, pm=m-1;
+    if(pm===0){ py=y-1; pm=12; }
+    const prevMonat = py+'-'+(pm<10?'0':'')+pm;
+    try{
+      let carried = null;
+      const prevSnap = await db.collection('inventur').where('lager','==',currentLager).where('monat','==',prevMonat).get();
+      let lastDate=null, lastItems={};
+      prevSnap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){ lastDate=inv.datum; lastItems=inv.items||{}; } });
+      if(lastDate){
+        carried = lastItems;
+      } else {
+        // Keine echte Inventur im Vormonat — Anfangsbestand des Vormonats selbst übernehmen
+        const prevAbDoc = await db.collection('anfangsbestand').doc(currentLager+'_'+prevMonat).get();
+        if(prevAbDoc.exists && Object.keys(prevAbDoc.data()).length>0) carried = prevAbDoc.data();
+      }
+      if(carried){
+        anfangsbestand = {...carried};
+        // Automatisch speichern, damit lager.html und getraenke-snacks.html denselben Wert lesen
+        await db.collection('anfangsbestand').doc(currentLager+'_'+zeit).set(anfangsbestand);
+      }
+    }catch(e){}
+  }
+
+  // Für Monatl. Verbrauch: Lieferungen (wareneingang), Gerät, Theke dieses Zeitraums
+  lieferungenData={};
+  try {
+    const snapL=await db.collection('wareneingang').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapL.forEach(d=>{ const items=d.data().items||{}; Object.entries(items).forEach(([pid,qty])=>{ lieferungenData[pid]=(lieferungenData[pid]||0)+Number(qty); }); });
+  } catch(e){}
+
+  geraetData={};
+  try {
+    const snapG=await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapG.forEach(d=>{ const items=d.data().items||{}; Object.entries(items).forEach(([pid,qty])=>{ geraetData[pid]=(geraetData[pid]||0)+Number(qty); }); });
+  } catch(e){}
+
+  thekeData={};
+  try {
+    const snapT=await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
+    snapT.forEach(d=>{ const items=d.data().items||{}; Object.entries(items).forEach(([pid,qty])=>{ thekeData[pid]=(thekeData[pid]||0)+Number(qty); }); });
+  } catch(e){}
+
   hideSpinner();
   renderTableActual();
 }
@@ -860,6 +930,10 @@ function applyDetailCols(show){
 
 // ── ANFANGSBESTAND MODAL ──
 window.openAnfangsbestandModal = function(prodId, prodName){
+  if(currentZeitraum !== '2026-06'){
+    showToast('Anfangsbestand wird automatisch aus dem Vormonat übernommen (nur Juni 2026 ist manuell editierbar).');
+    return;
+  }
   currentAbProdId = prodId;
   document.getElementById('ab-prod-label').textContent = prodName;
   document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
@@ -1114,7 +1188,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const th = e.target.closest('.we-date-th');
     if(th) openEditWareneingang(th.dataset.date);
   });
-  window.addEventListener('resize', ()=>{ if(window.innerWidth<=640) syncRowHeights(); });
 });
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──

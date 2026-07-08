@@ -299,7 +299,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
 <nav class="sidebar" id="sidebar">
   <ul class="nav-list">
     <li class="nav-item open">
-      <button class="nav-link active" onclick="toggleSubMenu(this)">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
         Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
@@ -311,20 +311,29 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
     <li class="nav-divider"></li>
     <li class="nav-item">
       <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html">Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
         Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
         <li><a href="uebersicht.html">Übersicht</a></li>
-        <li><a href="erfassungen.html">Erfassungen</a></li>
+        <li><a href="erfassungen.html" style="color:var(--neon-cyan)">Erfassungen</a></li>
       </ul>
     </li>
-    <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
     <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
-    </ul>
-  </nav>
+  </ul>
+</nav>
 
 <!-- MAIN -->
 <div class="main-content">
