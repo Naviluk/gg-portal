@@ -1874,6 +1874,7 @@ window.openPlan=function(){
 };
 
 window.openPlanForm=function(){
+  document.getElementById('plan-modal-right').style.display='';
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
   const isE=planType==='einkauf';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
