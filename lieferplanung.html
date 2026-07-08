@@ -1130,7 +1130,8 @@ function renderTable(){
       if(isZentral){ akt = Number((bestandData['zentrallager']||{})[prod.id])||0; }
       else { toShow.forEach(lg=>{akt+=Number((bestandData[lg]||{})[prod.id])||0}); }
       let soll=0; toShow.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0});
-      let plan=0; toShow.forEach(lg=>{plan+=Number((planData[lg]||{})[prod.id])||0});
+      // Gepl. wird NIE über Lager summiert — jedes Lager (auch Zentrallager) hat seine eigene Planung
+      let plan=Number((planData[currentLager]||{})[prod.id])||0;
       const aktD=akt>0?akt:'—';
       const sollD=soll>0?soll:'—';
       let empf='—', empfStyle='color:var(--text-dim)';
@@ -1391,7 +1392,7 @@ window.saveLiefGepl = async function(){
   planData[lg][prodId] = qty;
   try{
     const snap = await db.collection('lp_planung')
-      .where('lager','==', currentLager==='zentrallager'?lg:currentLager)
+      .where('lager','==', lg)
       .where('monat','==',currentZeitraum).get();
     if(!snap.empty){
       const docRef = snap.docs[snap.docs.length-1].ref;
@@ -2014,7 +2015,6 @@ window.closePlanConfirm=function(){
 };
 
 window.savePlan=async function(){
-  const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
   // Берём данные из окна подтверждения
   const items=window._planConfirmItems||{};
   const datum=window._planConfirmDate||new Date().toISOString().slice(0,10);
@@ -2026,7 +2026,9 @@ window.savePlan=async function(){
       lager:currentLager, monat, datum, items, type:planType,
       createdAt:new Date().toISOString()
     });
-    toLoad.forEach(lg=>{if(!planData[lg])planData[lg]={};Object.assign(planData[lg],items);});
+    // Nur das aktuell ausgewählte Lager aktualisieren — nichts wird zwischen Lagern vermischt
+    if(!planData[currentLager]) planData[currentLager]={};
+    Object.assign(planData[currentLager], items);
     showToast(planType==='einkauf'?'Einkauf gespeichert ✓':'Lieferung gespeichert ✓');
     closePlanConfirm();closePlan();renderTable();
   }catch(e){showToast('Fehler: '+e.message);}
