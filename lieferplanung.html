@@ -1036,6 +1036,37 @@ async function loadData(){
     }catch(e){bestandData[lg]={}}
   }
 
+  // Punkt 8 (Korrektur): Aktuel.Bestand für Zentrallager ist eine EXAKTE Kopie von
+  // lager.html's End Bestand für Zentrallager (Anfangsbestand + Einkäufe − Lieferungen),
+  // KEINE Summe der 4 Filialen.
+  if(currentLager==='zentrallager'){
+    bestandData['zentrallager']={};
+    try{
+      const abDoc = await db.collection('anfangsbestand').doc('zentrallager_'+currentZeitraum).get();
+      const ab = abDoc.exists ? abDoc.data() : {};
+
+      const weSnap = await db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get();
+      const einkaufSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkaufSum[pid]=(einkaufSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      // Lieferungen (Zentrallager) = Summe der Lieferungen aller 4 Filialen — genau wie auf lager.html
+      const lieferSumZ = {};
+      for(const br of LAGERS){
+        const bs = await db.collection('wareneingang').where('lager','==',br).where('monat','==',currentZeitraum).get();
+        bs.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+(Number(items[pid])||0); }); });
+      }
+
+      PRODUCTS.forEach(catObj=>{
+        catObj.items.forEach(prod=>{
+          const abNum=Number(ab[prod.id])||0;
+          const einkNum=Number(einkaufSum[prod.id])||0;
+          const liefNum=Number(lieferSumZ[prod.id])||0;
+          bestandData['zentrallager'][prod.id]=abNum+einkNum-liefNum;
+        });
+      });
+    }catch(e){bestandData['zentrallager']={}}
+  }
+
   try{const doc=await db.collection('lp_soll').doc('config').get();if(doc.exists)sollData=doc.data();}catch(e){}
   planData={};
   try{
@@ -1085,7 +1116,9 @@ function renderTable(){
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">${catObj.items.length}</span></div></td>
       <td colspan="99" style="background:rgba(0,0,0,.4)"></td></tr>`;
     catObj.items.forEach(prod=>{
-      let akt=0; toShow.forEach(lg=>{akt+=Number((bestandData[lg]||{})[prod.id])||0});
+      let akt=0;
+      if(isZentral){ akt = Number((bestandData['zentrallager']||{})[prod.id])||0; }
+      else { toShow.forEach(lg=>{akt+=Number((bestandData[lg]||{})[prod.id])||0}); }
       let soll=0; toShow.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0});
       let plan=0; toShow.forEach(lg=>{plan+=Number((planData[lg]||{})[prod.id])||0});
       const aktD=akt>0?akt:'—';
@@ -1788,7 +1821,10 @@ window.openPlan=function(){
     let catHtml='';
     catObj.items.forEach(prod=>{
       let soll=0,akt=0;
-      toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;akt+=Number((bestandData[lg]||{})[prod.id])||0;});
+      toLoad.forEach(lg=>{soll+=Number((sollData[lg]||{})[prod.id])||0;});
+      akt = currentLager==='zentrallager'
+        ? Number((bestandData['zentrallager']||{})[prod.id])||0
+        : Number((bestandData[currentLager]||{})[prod.id])||0;
       if(soll===0)return;
       const diff=Math.max(0,soll-akt);
       if(diff<=0)return;
@@ -1832,10 +1868,10 @@ window.openPlanForm=function(){
   PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
       let soll=0,akt=0;
-      toLoad.forEach(lg=>{
-        soll+=Number((sollData[lg]||{})[prod.id])||0;
-        akt+=Number((bestandData[lg]||{})[prod.id])||0;
-      });
+      toLoad.forEach(lg=>{ soll+=Number((sollData[lg]||{})[prod.id])||0; });
+      akt = currentLager==='zentrallager'
+        ? Number((bestandData['zentrallager']||{})[prod.id])||0
+        : Number((bestandData[currentLager]||{})[prod.id])||0;
       aktValues[prod.id]=akt;
       const diff=Math.max(0,soll-akt);
       if(diff>0) empfValues[prod.id]=diff;
