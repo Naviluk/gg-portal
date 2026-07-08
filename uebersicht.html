@@ -840,26 +840,6 @@ async function loadData(){
     if(abDoc.exists) anfangsbestand=abDoc.data();
   } catch(e){}
 
-  // Automatischer Übertrag: für alle Monate außer Juni 2026 (Basis-Monat) wird der
-  // Anfangsbestand automatisch aus der letzten Inventur des Vormonats übernommen,
-  // sofern noch kein Anfangsbestand für diesen Monat gespeichert ist.
-  if(zeit.length===7 && zeit!=='2026-06' && Object.keys(anfangsbestand).length===0){
-    const [y,m] = zeit.split('-').map(Number);
-    let py=y, pm=m-1;
-    if(pm===0){ py=y-1; pm=12; }
-    const prevMonat = py+'-'+(pm<10?'0':'')+pm;
-    try{
-      const prevSnap = await db.collection('inventur').where('lager','==',currentLager).where('monat','==',prevMonat).get();
-      let lastDate=null, lastItems={};
-      prevSnap.forEach(d=>{ const inv=d.data(); if(!lastDate||inv.datum>lastDate){ lastDate=inv.datum; lastItems=inv.items||{}; } });
-      if(lastDate){
-        anfangsbestand = {...lastItems};
-        // Automatisch speichern, damit lager.html und getraenke-snacks.html denselben Wert lesen
-        await db.collection('anfangsbestand').doc(currentLager+'_'+zeit).set(anfangsbestand);
-      }
-    }catch(e){}
-  }
-
   hideSpinner();
   renderTableActual();
 }
@@ -880,10 +860,6 @@ function applyDetailCols(show){
 
 // ── ANFANGSBESTAND MODAL ──
 window.openAnfangsbestandModal = function(prodId, prodName){
-  if(currentZeitraum !== '2026-06'){
-    showToast('Anfangsbestand wird automatisch aus dem Vormonat übernommen (nur Juni 2026 ist manuell editierbar).');
-    return;
-  }
   currentAbProdId = prodId;
   document.getElementById('ab-prod-label').textContent = prodName;
   document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
