@@ -559,7 +559,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
       <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
         <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
       </div>
     </div>
@@ -760,7 +760,7 @@ function renderTableActual(){
   // Inventur date columns
   dates.forEach(d=>{
     const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-    thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label}</th>`;
+    thHTML += `<th class="num-cell detail-th we-date-th" data-date="${d}" title="Klicken zum Bearbeiten">${label} ✏️</th>`;
   });
   thHTML += `<th class="num-cell" style="border-left:2px solid rgba(255,238,0,.3);min-width:80px"><span class="th-icon">📉</span><span class="th-text" style="color:var(--neon-yellow)">Monatl.<br>Verbrauch</span></th>`;
   thHTML += '</tr>';
@@ -957,10 +957,12 @@ window.saveAnfangsbestand = async function(){
 // ── WARENEINGANG MODAL ──
 let weSelectedItems = {}; // {prodId: qty}
 let weShopRows = [];
+let currentEditWeId = null; // ID редактируемой инвентуры (null = создание новой)
 
 window.openWareneingang = function(prefillDate){
   weSelectedItems = {};
   weShopRows = [];
+  currentEditWeId = null; // режим создания
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
   document.getElementById('modal-we').classList.add('show');
@@ -969,6 +971,8 @@ window.openWareneingang = function(prefillDate){
   document.getElementById('we-title').textContent = 'Inventur erstellen';
   document.getElementById('we-shops-section').style.display = 'none';
   document.getElementById('we-selected-list').style.display='none';
+  const _sb=document.getElementById('btn-confirm-save');
+  if(_sb) _sb.textContent='✓ Bestätigen';
 
   // Set date
   const today = new Date().toISOString().slice(0,10);
@@ -999,7 +1003,7 @@ window.openWareneingang = function(prefillDate){
   });
   document.getElementById('we-product-list').innerHTML = html;
 }
-window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); }
+window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
 
 window.toggleWeProd = function(prodId){
   const cb  = document.getElementById('we-cb-'+prodId);
@@ -1125,36 +1129,55 @@ window.confirmWareneingang = async function(){
     lager:currentLager, datum:date, monat,
     items:weSelectedItems,
     shops:activeShops,
-    createdAt:new Date().toISOString()
   };
   try {
-    await db.collection('inventur').add(entry);
+    if(currentEditWeId){
+      entry.updatedAt=new Date().toISOString();
+      await db.collection('inventur').doc(currentEditWeId).update(entry);
+      showToast('Änderungen gespeichert ✓');
+    } else {
+      entry.createdAt=new Date().toISOString();
+      await db.collection('inventur').add(entry);
+      showToast('Inventur erfolgreich eingetragen!');
+    }
+    currentEditWeId = null;
     hideSpinner();
     document.getElementById('modal-we').classList.remove('show');
-    showToast('Wareneingang erfolgreich eingetragen!');
     await loadData();
-  } catch(e){ hideSpinner(); showToast('Fehler beim Speichern. Bitte erneut versuchen.'); }
+  } catch(e){
+    hideSpinner();
+    console.error('Inventur Speicherfehler:', e);
+    showToast('Fehler beim Speichern: '+(e.message||e));
+  }
 }
 
 window.openEditWareneingang = function(date){
   const we=wareneingangs.find(w=>w.datum===date);
   if(!we) return;
-  weSelectedItems={...we.items};
-  weShopRows=[...(we.shops||[])];
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
-  document.getElementById('modal-we').classList.add('show');
-  document.getElementById('we-date').value=date;
-  // rebuild list with pre-checked items
-  openWareneingang(date);
+  const editId = we.id; // сохраняем ID для обновления
+  const savedItems = {...we.items};
+  const savedShops = [...(we.shops||[])];
+
+  openWareneingang(date); // строит список товаров, сбрасывает состояние (в т.ч. currentEditWeId)
+  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
+
+  document.getElementById('we-title').textContent = 'Inventur bearbeiten';
+  const saveBtn=document.getElementById('btn-confirm-save');
+  if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
+
   setTimeout(()=>{
-    Object.keys(weSelectedItems).forEach(prodId=>{
+    currentEditWeId = editId; // на всякий случай ещё раз, после всех асинхронных операций
+    weSelectedItems = savedItems;
+    weShopRows = savedShops;
+    Object.keys(savedItems).forEach(prodId=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb){cb.classList.add('checked');}
-      if(qi){qi.classList.add('show');qi.value=weSelectedItems[prodId];}
+      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     updateSelectedPreview();
+    // Сразу открываем Окно 2 (подтверждение) с заполненными данными
+    buildConfirm();
   },100);
 }
 
