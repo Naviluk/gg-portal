@@ -450,8 +450,18 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
+        <li><a href="getraenke-snacks.html" style="color:var(--neon-cyan)">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html">Rechnungen</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
@@ -464,13 +474,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <li><a href="erfassungen.html">Erfassungen</a></li>
       </ul>
     </li>
-    <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
     <li class="nav-divider"></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
     <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
-    </ul>
-  </nav>
+  </ul>
+</nav>
 
 <!-- MAIN -->
 <div class="main-content">
@@ -641,15 +650,13 @@ async function loadData(){
 
 function renderTable(){
   const cc=NEON[currentLager]||{neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
-  const liefer_dates=[...new Set(lieferungen.map(w=>w.datum))].sort();
   const geraet_dates=[...new Set(geraetEntries.map(e=>e.datum))].sort();
   const theke_dates=[...new Set(thekeEntries.map(e=>e.datum))].sort();
 
   let thHTML='<tr>';
   thHTML+='<th class="col-artikel">Artikel</th>';
   thHTML+='<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span><button class="expand-arrow" id="expand-liefer-btn" onclick="toggleLieferCols()" style="color:var(--text-dim)">▶</button></div></th>`;
-  liefer_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-liefer-th we-date-th" style="color:var(--text-dim);font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span></div></th>`;
   thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet" style="background:${cc.bg};border-bottom:2px solid ${cc.border}"><div class="col-einkauf-wrap"><span style="color:${cc.neon};font-weight:700"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:${cc.neon}">▶</button></div></th>`;
   geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="background:${cc.bgD};color:${cc.neon};font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
   thHTML+=`<th class="num-cell col-einkauf-header" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</button></div></th>`;
@@ -673,7 +680,6 @@ function renderTable(){
       tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${prod.icon||'📦'}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
       tbHTML+=`<td class="num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abD}</span></td>`;
       tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tL||'—'}</td>`;
-      liefer_dates.forEach(d=>{const we=lieferungen.find(w=>w.datum===d);const q=we&&we.items&&we.items[prod.id]?we.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-liefer-td" style="color:var(--text-dim)">${q}</td>`;});
       tbHTML+=`<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${tG||'—'}</td>`;
       geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td" style="background:${cc.bgD};color:${cc.neon}">${q}</td>`;});
       tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tT||'—'}</td>`;

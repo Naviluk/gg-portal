@@ -994,14 +994,48 @@ async function loadData(){
   currentZeitraum=document.getElementById('sel-zeitraum').value;
   bestandData={};
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
+
+  // Aktuel. Bestand = dieselbe End-Bestand-Formel wie auf lager.html (pro Filiale):
+  // Getränke/Snacks: Anfangsbestand + Lieferungen − Gerät − Theke
+  // Süssigkeiten/Haushaltsartikel: letzte Inventur des aktuellen Monats
   for(const lg of toLoad){
+    bestandData[lg]={};
     try{
-      const snap=await db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get();
-      let ld=null,li={};
-      snap.forEach(d=>{const inv=d.data();if(!ld||inv.datum>ld){ld=inv.datum;li=inv.items||{}}});
-      bestandData[lg]=li;
+      const abDoc = await db.collection('anfangsbestand').doc(lg+'_'+currentZeitraum).get();
+      const ab = abDoc.exists ? abDoc.data() : {};
+
+      const weSnap = await db.collection('wareneingang').where('lager','==',lg).where('monat','==',currentZeitraum).get();
+      const lieferSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSum[pid]=(lieferSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      const geraetSnap = await db.collection('gs_geraet').where('lager','==',lg).where('monat','==',currentZeitraum).get();
+      const geraetSum = {};
+      geraetSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ geraetSum[pid]=(geraetSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      const thekeSnap = await db.collection('gs_theke').where('lager','==',lg).where('monat','==',currentZeitraum).get();
+      const thekeSum = {};
+      thekeSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thekeSum[pid]=(thekeSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      const invSnap = await db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get();
+      let ld=null, li={};
+      invSnap.forEach(d=>{ const inv=d.data(); if(!ld||inv.datum>ld){ ld=inv.datum; li=inv.items||{}; } });
+
+      PRODUCTS.forEach(catObj=>{
+        catObj.items.forEach(prod=>{
+          if(catObj.cat==='Getränke' || catObj.cat==='Snacks'){
+            const abNum=Number(ab[prod.id])||0;
+            const liefNum=Number(lieferSum[prod.id])||0;
+            const gerNum=Number(geraetSum[prod.id])||0;
+            const thkNum=Number(thekeSum[prod.id])||0;
+            bestandData[lg][prod.id]=abNum+liefNum-gerNum-thkNum;
+          } else if(li[prod.id]!==undefined){
+            bestandData[lg][prod.id]=Number(li[prod.id])||0;
+          }
+        });
+      });
     }catch(e){bestandData[lg]={}}
   }
+
   try{const doc=await db.collection('lp_soll').doc('config').get();if(doc.exists)sollData=doc.data();}catch(e){}
   planData={};
   try{

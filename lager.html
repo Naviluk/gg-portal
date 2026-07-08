@@ -737,30 +737,20 @@ function renderTableActual(){
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
     });
-    // Gerät — без стрелок, собственные даты из gs_geraet
-    const geraetDates = [...new Set((window._geraetEntries||[]).map(e=>e.datum))].sort();
+    // Gerät — nur Gesamtsumme, keine Aufklappung nach Datum
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
       </div></th>`;
-    geraetDates.forEach(d=>{
-      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-geraet-th" style="color:var(--text-dim);font-size:.68rem">${label}</th>`;
-    });
-    // Theke — без стрелок, собственные даты из gs_theke
-    const thekeDates = [...new Set((window._thekeEntries||[]).map(e=>e.datum))].sort();
+    // Theke — nur Gesamtsumme, keine Aufklappung nach Datum
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
       </div></th>`;
-    thekeDates.forEach(d=>{
-      const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-theke-th" style="color:var(--text-dim);font-size:.68rem">${label}</th>`;
-    });
   }
 
   // Bestand last
-  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">Bestand</span></th>';
+  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End<br>Bestand</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -777,6 +767,7 @@ function renderTableActual(){
       const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
       const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const ab = anfangsbestand[prod.id] ?? '';
+      const abNum = Number(anfangsbestand[prod.id])||0;
       const prodHidden = isFirst ? '' : 'hidden';
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
@@ -785,11 +776,12 @@ function renderTableActual(){
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
-      // Anfangsbestand (automatisch = letzte Inventur, wie Bestand)
+      // Anfangsbestand (kommt von der Übersicht-Seite)
       const abDisplay = ab !== '' ? `<span style="color:var(--neon-green)">${ab}</span>` : '—';
       tbHTML += `<td class="num-cell">${abDisplay}</td>`;
 
       const einkVal = totalEink || '—';
+      let totalGeraet = 0, totalTheke = 0, zentralLiefer = 0;
       if(isZentral){
         // Einkäufe gesamt — neon green
         tbHTML += `<td class="num-cell" style="background:${zGreen.bg};color:${zGreen.neon};font-weight:700">${einkVal}</td>`;
@@ -799,8 +791,9 @@ function renderTableActual(){
           const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${zGreen.bgD};color:${zGreen.neon}">${qty}</td>`;
         });
-        // Lieferungen neutral
-        tbHTML += `<td class="num-cell">—</td>`;
+        // Lieferungen — Summe aus den 4 Filialen (automatisch)
+        zentralLiefer = Number((window._zentralLieferSum||{})[prod.id])||0;
+        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${zentralLiefer||'—'}</td>`;
       } else {
         // Lieferungen gesamt — lager neon color
         tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${einkVal}</td>`;
@@ -810,28 +803,27 @@ function renderTableActual(){
           const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
         });
-        // Gerät — данные из gs_geraet
-        const geraetDatesB = [...new Set((window._geraetEntries||[]).map(e=>e.datum))].sort();
-        const totalGeraet = (window._geraetEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+        // Gerät — nur Gesamtsumme (aus gs_geraet), keine Aufklappung
+        totalGeraet = (window._geraetEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
         tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalGeraet||'—'}</td>`;
-        geraetDatesB.forEach(d=>{
-          const entry=(window._geraetEntries||[]).find(e=>e.datum===d);
-          const qty=entry&&entry.items&&entry.items[prod.id]?entry.items[prod.id]:'—';
-          tbHTML += `<td class="num-cell detail-col detail-geraet-td" style="color:var(--text-dim)">${qty}</td>`;
-        });
-        // Theke — данные из gs_theke
-        const thekeDatesB = [...new Set((window._thekeEntries||[]).map(e=>e.datum))].sort();
-        const totalTheke = (window._thekeEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+        // Theke — nur Gesamtsumme (aus gs_theke), keine Aufklappung
+        totalTheke = (window._thekeEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
         tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalTheke||'—'}</td>`;
-        thekeDatesB.forEach(d=>{
-          const entry=(window._thekeEntries||[]).find(e=>e.datum===d);
-          const qty=entry&&entry.items&&entry.items[prod.id]?entry.items[prod.id]:'—';
-          tbHTML += `<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${qty}</td>`;
-        });
       }
 
-      // Bestand
-      const bestandVal = bestandData[prod.id] !== undefined ? bestandData[prod.id] : '—';
+      // End Bestand — Formel je nach Lager/Kategorie
+      let endBestand;
+      if(isZentral){
+        // Zentrallager: Anfangsbestand + Einkäufe − Lieferungen
+        endBestand = abNum + totalEink - zentralLiefer;
+      } else if(catObj.cat==='Getränke' || catObj.cat==='Snacks'){
+        // Filialen, Getränke/Snacks: Anfangsbestand + Lieferungen − Gerät − Theke
+        endBestand = abNum + totalEink - totalGeraet - totalTheke;
+      } else {
+        // Filialen, Süssigkeiten/Haushaltsartikel: letzte Inventur des aktuellen Monats
+        endBestand = bestandData[prod.id] !== undefined ? Number(bestandData[prod.id])||0 : null;
+      }
+      const bestandVal = endBestand===null ? '—' : endBestand;
       const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-green)' : '';
       tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
@@ -928,7 +920,8 @@ async function loadData(){
     }
   } catch(e){}
 
-  // Anfangsbestand = Bestand = letzte Inventur im gewählten Zeitraum (Monat oder ganzes Jahr)
+  // Bestand = letzte Inventur im gewählten Zeitraum (Monat oder ganzes Jahr)
+  // — wird für Süssigkeiten/Haushaltsartikel als End Bestand verwendet
   bestandData={};
   try {
     let lastInvDate=null; let lastInvItems={};
@@ -938,21 +931,44 @@ async function loadData(){
     }
     bestandData=lastInvItems;
   } catch(e){}
-  anfangsbestand = bestandData;
 
-  // Загружаем Gerät и Theke из отдельных коллекций
+  // Anfangsbestand — kommt von der Übersicht-Seite (gemeinsame Collection 'anfangsbestand')
+  anfangsbestand={};
+  try {
+    const abDoc = await db.collection('anfangsbestand').doc(currentLager+'_'+zeit).get();
+    if(abDoc.exists) anfangsbestand = abDoc.data();
+  } catch(e){}
+
+  // Загружаем Gerät и Theke из отдельных коллекций (заполняются со страницы getraenke-snacks.html)
   window._geraetEntries = [];
   window._thekeEntries  = [];
   if(currentLager !== 'zentrallager'){
     try{
       const sg = await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
       sg.forEach(d=>window._geraetEntries.push({id:d.id,...d.data()}));
-      window._geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
     }catch(e){}
     try{
       const st = await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();
       st.forEach(d=>window._thekeEntries.push({id:d.id,...d.data()}));
-      window._thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum));
+    }catch(e){}
+  }
+
+  // Für Zentrallager: „Lieferungen" = Summe der Lieferungen aller 4 Filialen (aus deren wareneingang)
+  window._zentralLieferSum = {};
+  if(currentLager === 'zentrallager'){
+    const branches = ['nettetal','brüggen','viersen','köln'];
+    try{
+      for(const br of branches){
+        for(const mo of months){
+          const bs = await db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get();
+          bs.forEach(d=>{
+            const items = d.data().items||{};
+            Object.keys(items).forEach(pid=>{
+              window._zentralLieferSum[pid] = (window._zentralLieferSum[pid]||0) + (Number(items[pid])||0);
+            });
+          });
+        }
+      }
     }catch(e){}
   }
 
