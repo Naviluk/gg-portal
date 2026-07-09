@@ -401,7 +401,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div class="hdr-center">
     <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">LAGER – Bestände</div>
+    <div class="hdr-page">LAGER – <span style="color:var(--neon-cyan);font-weight:700;font-size:.82rem;text-shadow:0 0 8px rgba(0,245,255,.5)">Bestände</span></div>
   </div>
   <div class="hdr-right">
     <div class="hdr-user" onclick="toggleUserDropdown()">
@@ -425,7 +425,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="lager.html" style="color:var(--neon-cyan);font-weight:700;font-size:.94rem;text-shadow:0 0 8px rgba(0,245,255,.5)">Bestände</a></li>
+        <li><a href="lager.html" style="color:var(--neon-cyan)">Bestände</a></li>
         <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
@@ -724,8 +724,8 @@ function renderTableActual(){
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
       thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
     });
-    // Lieferungen neutral
-    thHTML += '<th class="num-cell th-col-liefer"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
+    // Lieferungen neutral — nur bei Zentrallager, immer grau
+    thHTML += '<th class="num-cell th-col-liefer" style="color:var(--text-dim)"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
   } else {
     // Lieferungen — lager neon color
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
@@ -777,7 +777,7 @@ function renderTableActual(){
       </div></td>`;
 
       // Anfangsbestand (kommt von der Übersicht-Seite)
-      const abDisplay = ab !== '' ? `<span style="color:var(--neon-green)">${ab}</span>` : '—';
+      const abDisplay = ab !== '' ? `<span style="color:var(--neon-cyan)">${ab}</span>` : '—';
       tbHTML += `<td class="num-cell">${abDisplay}</td>`;
 
       const einkVal = totalEink || '—';
@@ -824,7 +824,7 @@ function renderTableActual(){
         endBestand = bestandData[prod.id] !== undefined ? Number(bestandData[prod.id])||0 : null;
       }
       const bestandVal = endBestand===null ? '—' : endBestand;
-      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-green)' : '';
+      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-cyan)' : '';
       tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
     });
