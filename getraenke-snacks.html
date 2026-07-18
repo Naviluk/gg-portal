@@ -649,7 +649,17 @@ async function loadData(){
   try{const s=await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const s=await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const doc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();if(doc.exists)anfangsbestand=doc.data()}catch(e){}
-  try{const s=await db.collection('inventur').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();let ld=null,li={};s.forEach(d=>{const inv=d.data();if(!ld||inv.datum>ld){ld=inv.datum;li=inv.items||{}}});endbestandData=li}catch(e){}
+  // End Bestand = dieselbe Formel wie auf lager.html für Getränke/Snacks:
+  // Anfangsbestand + Lieferungen − Gerät − Theke
+  GS_PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      const abNum = Number(anfangsbestand[prod.id])||0;
+      const liefNum = lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+      const gerNum = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      const thkNum = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      endbestandData[prod.id] = abNum + liefNum - gerNum - thkNum;
+    });
+  });
   hideSpinner();
   renderTable();
 }
