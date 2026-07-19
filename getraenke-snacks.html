@@ -768,7 +768,13 @@ window.toggleLieferCols=function(){liefer_expanded=!liefer_expanded;applyDetailC
 window.toggleGeraetCols=function(){geraet_expanded=!geraet_expanded;applyDetailCols('geraet',geraet_expanded)};
 window.toggleThekeCols=function(){theke_expanded=!theke_expanded;applyDetailCols('theke',theke_expanded)};
 
-window.openAnfangsbestandModal=function(prodId,prodName){currentAbProdId=prodId;document.getElementById('ab-prod-label').textContent=prodName;document.getElementById('ab-value').value=anfangsbestand[prodId]??'';document.getElementById('modal-ab').classList.add('show');setTimeout(()=>document.getElementById('ab-value').focus(),100)};
+window.openAnfangsbestandModal=function(prodId,prodName){
+  if(currentZeitraum !== '2026-06'){
+    showToast('Anfangsbestand wird automatisch aus dem Vormonat übernommen (nur Juni 2026 ist manuell editierbar).');
+    return;
+  }
+  currentAbProdId=prodId;document.getElementById('ab-prod-label').textContent=prodName;document.getElementById('ab-value').value=anfangsbestand[prodId]??'';document.getElementById('modal-ab').classList.add('show');setTimeout(()=>document.getElementById('ab-value').focus(),100)
+};
 window.saveAnfangsbestand=async function(){const val=parseFloat(document.getElementById('ab-value').value);if(isNaN(val)||val<0)return;showSpinner();anfangsbestand[currentAbProdId]=val;try{await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true})}catch(e){}hideSpinner();document.getElementById('modal-ab').classList.remove('show');renderTable();showToast('Anfangsbestand gespeichert')};
 
 window.openForm=function(type,prefillItems,editId,prefillDate){
