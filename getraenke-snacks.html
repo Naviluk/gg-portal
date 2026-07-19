@@ -640,6 +640,47 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 function toggleSubMenu(btn){btn.closest('.nav-item').classList.toggle('open')}
 function toggleUserDropdown(){document.getElementById('user-dropdown').classList.toggle('show');document.addEventListener('click',function h(e){if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){document.getElementById('user-dropdown').classList.remove('show');document.removeEventListener('click',h)}})}
 
+// Berechnet den Anfangsbestand (Getränke/Snacks) eines Monats aus dem End Bestand
+// des Vormonats, rekursiv bis Juni (dort = anfangsbestand-Collection, manuell).
+async function computeGSAnfangsbestandChain(lager, targetMonat){
+  const [ty, tmM] = targetMonat.split('-').map(Number);
+  const monthsChain = [];
+  let y=2026, m=6;
+  while(true){
+    monthsChain.push(y+'-'+(m<10?'0':'')+m);
+    if(y===ty && m===tmM) break;
+    m++; if(m>12){m=1;y++;}
+    if(monthsChain.length>60) break;
+  }
+
+  const juniDoc = await db.collection('anfangsbestand').doc(lager+'_2026-06').get();
+  let abGS = juniDoc.exists ? {...juniDoc.data()} : {};
+
+  for(let i=1;i<monthsChain.length;i++){
+    const mo = monthsChain[i-1];
+    const [weSnap, gSnap, tSnap] = await Promise.all([
+      db.collection('wareneingang').where('lager','==',lager).where('monat','==',mo).get(),
+      db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
+      db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
+    ]);
+    const liefSum = {};
+    weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ liefSum[pid]=(liefSum[pid]||0)+(Number(items[pid])||0); }); });
+    const gerSum = {};
+    gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
+    const thkSum = {};
+    tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thkSum[pid]=(thkSum[pid]||0)+(Number(items[pid])||0); }); });
+
+    const endBestandGS = {};
+    GS_PRODUCTS.forEach(catObj=>{
+      catObj.items.forEach(prod=>{
+        endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0);
+      });
+    });
+    abGS = endBestandGS;
+  }
+  return abGS;
+}
+
 async function loadData(){
   showSpinner();
   currentLager=document.getElementById('sel-lager').value;
@@ -649,6 +690,13 @@ async function loadData(){
   try{const s=await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const s=await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const doc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();if(doc.exists)anfangsbestand=doc.data()}catch(e){}
+  // Ab Juli: Anfangsbestand kommt automatisch aus dem End Bestand des Vormonats
+  // (alle Artikel hier sind Getränke/Snacks, daher ohne Kategorie-Filter).
+  if(currentZeitraum.length===7 && currentZeitraum!=='2026-06'){
+    try{
+      anfangsbestand = await computeGSAnfangsbestandChain(currentLager, currentZeitraum);
+    }catch(e){ console.warn('GS-Anfangsbestand-Kette fehlgeschlagen:', e.message); }
+  }
   // End Bestand = dieselbe Formel wie auf lager.html für Getränke/Snacks:
   // Anfangsbestand + Lieferungen − Gerät − Theke
   GS_PRODUCTS.forEach(catObj=>{
