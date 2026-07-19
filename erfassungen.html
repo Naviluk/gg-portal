@@ -1117,7 +1117,7 @@ window.openProcessForm = async function(){
         <div class="inv-form-icon">${prod.icon||'📦'}</div>
         <span class="inv-form-name">${prod.name}</span>
         <span class="inv-form-unit">${prod.unit||''}</span>
-        <input class="${cls}" type="number" min="0" placeholder="0" value="${val}" data-id="${prod.id}">
+        <input class="${cls}" type="number" min="0" step="0.1" placeholder="0" value="${val}" data-id="${prod.id}">
       </div>`;
     });
     html+='</div>';
@@ -1135,7 +1135,7 @@ window.finalizeInventur = async function(){
     // Collect items
     const items={};
     document.querySelectorAll('#form-products .inv-form-qty').forEach(inp=>{
-      if(inp.value) items[inp.dataset.id]=parseInt(inp.value);
+      if(inp.value) items[inp.dataset.id]=parseFloat(inp.value);
     });
 
     // Save to inventur collection (shows on uebersicht.html)
@@ -1427,8 +1427,8 @@ function renderAiList(){
         <div class="ai-item-icon">${prod.icon||'📦'}</div>
         <span class="ai-item-name">${prod.name}</span>
         <span class="ai-item-unit">${prod.unit||''}</span>
-        <input class="ai-item-qty" type="number" min="0" placeholder="0" value="${val}" data-id="${prod.id}"
-          onchange="aiItems[this.dataset.id]=this.value?parseInt(this.value):undefined">
+        <input class="ai-item-qty" type="number" min="0" step="0.1" placeholder="0" value="${val}" data-id="${prod.id}"
+          onchange="aiItems[this.dataset.id]=this.value?parseFloat(this.value):undefined">
       </div>`;
     });
     html+='</div></div>';
@@ -1438,7 +1438,7 @@ function renderAiList(){
 
 window.aiSaveList=function(){
   document.querySelectorAll('#ai-inv-list-container .ai-item-qty').forEach(inp=>{
-    if(inp.value) aiItems[inp.dataset.id]=parseInt(inp.value);
+    if(inp.value) aiItems[inp.dataset.id]=parseFloat(inp.value);
   });
   aiListDone=true;
   document.getElementById('ai-card-list').classList.add('done');

@@ -902,6 +902,71 @@ function renderTableActual(){
 }
 
 // called after data loads
+// Berechnet den Anfangsbestand für Getränke/Snacks eines bestimmten Monats,
+// indem die Kette von Juni bis zum Zielmonat durchgerechnet wird:
+// Anfangsbestand(Monat) = End Bestand(Vormonat), rekursiv bis Juni (dort = anfangsbestand-Collection).
+async function computeGSAnfangsbestandChain(lager, targetMonat){
+  const [ty, tmM] = targetMonat.split('-').map(Number);
+  const monthsChain = [];
+  let y=2026, m=6;
+  while(true){
+    monthsChain.push(y+'-'+(m<10?'0':'')+m);
+    if(y===ty && m===tmM) break;
+    m++; if(m>12){m=1;y++;}
+    if(monthsChain.length>60) break; // Sicherheitslimit
+  }
+
+  const juniDoc = await db.collection('anfangsbestand').doc(lager+'_2026-06').get();
+  let abGS = juniDoc.exists ? {...juniDoc.data()} : {};
+  const branches = ['nettetal','brüggen','viersen','köln'];
+
+  for(let i=1;i<monthsChain.length;i++){
+    const mo = monthsChain[i-1]; // Monat, dessen End Bestand berechnet wird
+
+    if(lager==='zentrallager'){
+      const [weSnap, ...branchSnaps] = await Promise.all([
+        db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',mo).get(),
+        ...branches.map(br=>db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get())
+      ]);
+      const einkSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkSum[pid]=(einkSum[pid]||0)+(Number(items[pid])||0); }); });
+      const lieferSumZ = {};
+      branchSnaps.forEach(bs=>bs.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+(Number(items[pid])||0); }); }));
+
+      const endBestandGS = {};
+      PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(einkSum[prod.id])||0) - (Number(lieferSumZ[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    } else {
+      const [weSnap, gSnap, tSnap] = await Promise.all([
+        db.collection('wareneingang').where('lager','==',lager).where('monat','==',mo).get(),
+        db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
+        db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
+      ]);
+      const liefSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ liefSum[pid]=(liefSum[pid]||0)+(Number(items[pid])||0); }); });
+      const gerSum = {};
+      gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
+      const thkSum = {};
+      tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thkSum[pid]=(thkSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      const endBestandGS = {};
+      PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    }
+  }
+  return abGS;
+}
+
 async function loadData(){
   showSpinner();
   currentLager    = document.getElementById('sel-lager').value;
@@ -936,6 +1001,21 @@ async function loadData(){
     const abDoc = await db.collection('anfangsbestand').doc(currentLager+'_'+zeit).get();
     if(abDoc.exists) anfangsbestand = abDoc.data();
   } catch(e){}
+
+  // Sonderregel ab Juli: für Getränke/Snacks wird der Anfangsbestand NICHT aus der
+  // 'anfangsbestand'-Collection genommen, sondern automatisch aus dem End Bestand
+  // des Vormonats berechnet (dieselbe Formel wie die End-Bestand-Spalte selbst).
+  if(zeit.length===7 && zeit!=='2026-06'){
+    try{
+      const gsAB = await computeGSAnfangsbestandChain(currentLager, zeit);
+      PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          anfangsbestand[prod.id] = gsAB[prod.id] ?? 0;
+        });
+      });
+    }catch(e){ console.warn('GS-Anfangsbestand-Kette fehlgeschlagen:', e.message); }
+  }
 
   // Загружаем Gerät и Theke из отдельных коллекций (заполняются со страницы getraenke-snacks.html)
   window._geraetEntries = [];
@@ -1047,7 +1127,7 @@ window.openWareneingang = function(prefillDate){
           <span class="modal-prod-name">${prod.name}</span>
           ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
         </div>
-        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
+        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
       </div>`;
     });
     html += `</div></div>`;
@@ -1066,7 +1146,7 @@ window.toggleWeProd = function(prodId){
   updateSelectedPreview();
 }
 window.updateWeQty = function(prodId, val){
-  weSelectedItems[prodId] = parseInt(val)||0;
+  weSelectedItems[prodId] = parseFloat(val)||0;
   updateSelectedPreview();
 }
 function updateSelectedPreview(){

@@ -821,9 +821,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="modal-title" id="lief-gepl-modal-title" style="color:var(--neon-magenta)">Menge anpassen</div>
     <div class="field">
       <label class="field-label" id="lief-gepl-prod-label">Produkt</label>
-      <input type="number" id="lief-gepl-value" min="0"
-        style="width:100%;background:rgba(0,0,0,.35);border:2px solid var(--neon-magenta);
-        color:var(--neon-magenta);font-family:'Rajdhani',sans-serif;font-size:1.1rem;
+      <input type="number" id="lief-gepl-value" min="0" step="0.1"
+        style="width:100%;background:#fff;border:2px solid var(--neon-magenta);
+        color:var(--neon-magenta);font-family:'Century Gothic',sans-serif;font-size:1.1rem;
         padding:.5rem .8rem;border-radius:6px;outline:none;text-align:center">
     </div>
     <div class="modal-btn-row" style="margin-top:1rem">
@@ -1371,7 +1371,7 @@ window.closeLiefGeplModal = function(){
 };
 
 window.saveLiefGepl = async function(){
-  const qty = parseInt(document.getElementById('lief-gepl-value').value)||0;
+  const qty = parseFloat(document.getElementById('lief-gepl-value').value)||0;
   const lg = _liefGeplLg, prodId = _liefGeplProdId;
   if(!planData[lg]) planData[lg]={};
   planData[lg][prodId] = qty;
@@ -1456,7 +1456,7 @@ function weBuildProductList(){
           <span class="modal-prod-name">${prod.name}</span>
           ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
         </div>
-        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
+        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
       </div>`;
     });
     html += `</div></div>`;
@@ -1496,7 +1496,7 @@ window.toggleWeProd = function(prodId){
   weUpdateSelectedPreview();
 }
 window.updateWeQty = function(prodId, val){
-  weSelectedItems[prodId] = parseInt(val)||0;
+  weSelectedItems[prodId] = parseFloat(val)||0;
   weUpdateSelectedPreview();
 }
 function weUpdateSelectedPreview(){
@@ -1768,7 +1768,7 @@ function renderSollContent(){
           <span class="modal-prod-name">${prod.name}</span>${unit}
         </div>
         <input class="soll-qty${shown}" id="soll-${sollModalLager}-${prod.id}"
-          type="number" min="0" placeholder="St." value="${hasVal?v:''}">
+          type="number" min="0" step="0.1" placeholder="St." value="${hasVal?v:''}">
       </div>`;
     });
     html+='</div></div>';
@@ -1791,7 +1791,7 @@ function saveSollLocal(){
   const d={};
   PRODUCTS.forEach(c=>c.items.forEach(p=>{
     const i=document.getElementById('soll-'+sollModalLager+'-'+p.id);
-    if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)d[p.id]=v;}
+    if(i&&i.value!==''){const v=parseFloat(i.value)||0;if(v>0)d[p.id]=v;}
   }));
   sollData[sollModalLager]=d;
 }
@@ -1925,7 +1925,7 @@ window.openPlanForm=function(){
         </div>
         <span class="plan-form-akt">${akt||'—'}</span>
         <span class="plan-form-empf">${empf||'—'}</span>
-        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" placeholder="0"
+        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="0"
           value="${neuVal}" style="${neuStyle}">
       </div>`;
     });
@@ -1952,7 +1952,7 @@ window.openPlanConfirm=function(){
   const items={};
   PRODUCTS.forEach(c=>c.items.forEach(p=>{
     const i=document.getElementById('plan-'+p.id);
-    if(i&&i.value!==''){const v=parseInt(i.value)||0;if(v>0)items[p.id]=v;}
+    if(i&&i.value!==''){const v=parseFloat(i.value)||0;if(v>0)items[p.id]=v;}
   }));
   if(!Object.keys(items).length){showToast('Bitte mindestens einen Artikel ausfüllen.');return;}
 
