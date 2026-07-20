@@ -800,11 +800,18 @@ function renderTableActual(){
       <td colspan="99" style="background:#e3e8f0"></td></tr>`;
 
     catObj.items.forEach(prod=>{
-      const prodWE = wareneingangs.filter(w=>w.items&&w.items[prod.id]);
-      const totalEink = prodWE.reduce((s,w)=>s+(Number(w.items[prod.id])||0),0);
       const ab = anfangsbestand[prod.id] ?? '';
       const abNum = Number(anfangsbestand[prod.id])||0;
       const prodHidden = isFirst ? '' : 'hidden';
+
+      // Werte pro Datum — GENAU EINE Eintragung pro Datum (wie manuell erfasst, wird NIE verändert).
+      // Die Gesamtsumme wird als Summe GENAU DIESER Werte berechnet, damit sie immer übereinstimmt.
+      const perDateVals = {};
+      dates.forEach(d=>{
+        const we = wareneingangs.find(w=>w.datum===d);
+        perDateVals[d] = we&&we.items&&we.items[prod.id] ? Number(we.items[prod.id])||0 : 0;
+      });
+      const totalEink = Object.values(perDateVals).reduce((s,v)=>s+v,0);
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
@@ -821,11 +828,9 @@ function renderTableActual(){
       if(isZentral){
         // Einkäufe gesamt — neon green
         tbHTML += `<td class="num-cell" style="background:${zGreen.bg};color:${zGreen.neon};font-weight:700">${einkVal}</td>`;
-        // Detail date cols
+        // Detail date cols — unverändert, so wie manuell erfasst
         dates.forEach(d=>{
-          const sameDate = wareneingangs.filter(w=>w.datum===d);
-          const qtySum = sameDate.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
-          const qty = qtySum || '—';
+          const qty = perDateVals[d] || '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${zGreen.bgD};color:${zGreen.neon}">${qty}</td>`;
         });
         // Lieferungen — Summe aus den 4 Filialen (automatisch)
@@ -834,11 +839,9 @@ function renderTableActual(){
       } else {
         // Lieferungen gesamt — lager neon color
         tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${einkVal}</td>`;
-        // Detail date cols
+        // Detail date cols — unverändert, so wie manuell erfasst
         dates.forEach(d=>{
-          const sameDate = wareneingangs.filter(w=>w.datum===d);
-          const qtySum = sameDate.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
-          const qty = qtySum || '—';
+          const qty = perDateVals[d] || '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
         });
         // Gerät — nur Gesamtsumme (aus gs_geraet), keine Aufklappung
