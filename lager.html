@@ -49,6 +49,35 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-top:.15rem}
 .hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
   display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-weight:700}
+
+/* Changelog Glocke */
+.hdr-bell{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;transition:background .2s;flex-shrink:0}
+.hdr-bell:hover{background:rgba(8,145,178,.08)}
+.hdr-bell svg{width:20px;height:20px;fill:none;stroke:var(--neon-cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hdr-bell-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;
+  background:var(--neon-magenta);border:2px solid #fff;display:none}
+.hdr-bell-dot.show{display:block}
+.changelog-modal{max-width:640px;max-height:82vh;overflow-y:auto}
+.cl-date-group{margin-bottom:.6rem}
+.cl-date-header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;
+  background:var(--bg3);border-radius:8px;cursor:pointer;border:1px solid var(--glass-border);transition:background .15s}
+.cl-date-header:hover{background:#e5eaf1}
+.cl-date-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;color:var(--neon-cyan);font-size:.9rem}
+.cl-date-arrow{transition:transform .2s;color:var(--text-dim);font-size:.75rem}
+.cl-date-group.open .cl-date-arrow{transform:rotate(90deg)}
+.cl-entries{display:none;padding:.8rem .3rem .4rem 1rem}
+.cl-date-group.open .cl-entries{display:block}
+.cl-entry{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--glass-border)}
+.cl-entry:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.cl-entry-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;color:var(--neon-magenta);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
+.cl-entry-type{display:inline-block;font-size:.66rem;font-weight:700;padding:.18rem .55rem;border-radius:4px;letter-spacing:.03em}
+.cl-type-added{background:rgba(5,150,105,.12);color:var(--neon-green)}
+.cl-type-fixed{background:rgba(8,145,178,.12);color:var(--neon-cyan)}
+.cl-type-improved{background:rgba(180,83,9,.12);color:var(--neon-yellow)}
+.cl-type-removed{background:rgba(219,39,119,.12);color:var(--neon-magenta)}
+.cl-entry-text{font-size:.88rem;color:var(--text);line-height:1.55;margin-top:.4rem}
 .hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
 .burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
 .burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s}
@@ -398,12 +427,25 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="hdr-page">LAGER – <span style="color:var(--neon-cyan);font-weight:700;font-size:.82rem;text-shadow:0 0 8px rgba(8,145,178,.35)">Bestände</span></div>
   </div>
   <div class="hdr-right">
+    <div class="hdr-bell" onclick="openChangelog()" title="Was ist neu?">
+      <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="hdr-bell-dot" id="hdr-bell-dot"></span>
+    </div>
     <div class="hdr-user" onclick="toggleUserDropdown()">
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
     </div>
   </div>
 </header>
+
+<!-- ═══ MODAL: CHANGELOG ═══ -->
+<div class="modal-overlay" id="modal-changelog" onclick="if(event.target===this)closeChangelog()">
+  <div class="modal changelog-modal">
+    <button class="modal-close" onclick="closeChangelog()">✕</button>
+    <div class="modal-title">🔔 Что нового</div>
+    <div id="changelog-content"></div>
+  </div>
+</div>
 
 <div class="user-dropdown" id="user-dropdown">
   <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
@@ -1444,6 +1486,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
 
+  // Склад запоминается между страницами и после обновления (localStorage)
+  const _savedLager = localStorage.getItem('gg_selected_lager');
+  const _selLagerEl = document.getElementById('sel-lager');
+  if(_savedLager && _selLagerEl && [..._selLagerEl.options].some(o=>o.value===_savedLager)){
+    _selLagerEl.value = _savedLager;
+  }
+  if(_selLagerEl){
+    _selLagerEl.addEventListener('change', e=>localStorage.setItem('gg_selected_lager', e.target.value));
+  }
+  // Aktueller Monat wird automatisch vorausgewählt (basierend auf dem echten Systemdatum)
+  const _selZeitraumEl = document.getElementById('sel-zeitraum');
+  if(_selZeitraumEl){
+    const _now = new Date();
+    const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+    if([..._selZeitraumEl.options].some(o=>o.value===_curMonat)){
+      _selZeitraumEl.value = _curMonat;
+    }
+  }
+
   // Erstladung der Tabelle beim Öffnen der Seite
   loadData();
 });
@@ -1454,6 +1515,99 @@ document.addEventListener('DOMContentLoaded', function(){
   if(!user) return;
   const el = document.getElementById('hdr-username');
   if(el) el.textContent = user.name;
+});
+
+// ══════════════════════════════════════════════════════
+// CHANGELOG — Liste der Verbesserungen (für Admin/Einkaufsleiter)
+// Neue Einträge einfach oben in der Liste ergänzen (neuestes Datum zuerst
+// oder am Ende — die Anzeige sortiert automatisch, neuestes Datum oben).
+// type: 'added' (Добавлено) | 'fixed' (Исправлено) | 'improved' (Улучшено) | 'removed' (Убрано)
+// ══════════════════════════════════════════════════════
+const CHANGELOG = [
+  {
+    date: '2026-07-20',
+    entries: [
+      { page: 'Все страницы (lager, lieferplanung, uebersicht, getraenke-snacks, erfassungen)', type: 'improved',
+        text: 'Полностью обновлён визуальный дизайн: светлая тема вместо тёмной, чёткие границы между колонками и строками, более крупный и жирный шрифт для цифр, увеличенные названия артиклей, единая узнаваемая цветовая палитра по складам (Zentrallager — зелёный, Nettetal — синий, Brüggen — красно-розовый, Viersen — оранжевый, Köln — фиолетовый). Цель — снизить утомляемость глаз при долгой работе и сделать таблицы легче читаемыми.' },
+      { page: 'lager.html', type: 'fixed',
+        text: 'Исправлена формула колонки «Anfangsbestand» для категорий Getränke и Snacks: начиная с июля она теперь автоматически рассчитывается из End Bestand предыдущего месяца, а не берётся из отдельной записи. Устраняет расхождения остатков при переходе между месяцами.' },
+      { page: 'lieferplanung.html', type: 'fixed',
+        text: 'Исправлена ошибка сохранения формы «Soll-Bestand konfigurieren»: при снятии галочек с товаров они не удалялись из базы данных (особенность метода записи Firestore, который не умеет удалять отсутствующие поля при слиянии). Теперь используется корректный метод обновления, который правильно удаляет то, что было отключено.' },
+      { page: 'lieferplanung.html', type: 'improved',
+        text: 'Колонка «Aktuel.Bestand» синхронизирована с новой формулой End Bestand на странице lager.html — цифры теперь полностью совпадают.' },
+      { page: 'lieferplanung.html', type: 'improved',
+        text: 'Колонки «Empf.» и «Gepl. Lieferung/Einkauf» теперь становятся неактивными (серыми, без значений) при просмотре уже прошедших месяцев — планирование задним числом не имеет практического смысла.' },
+      { page: 'lieferplanung.html', type: 'improved',
+        text: 'Запланированные закупки/доставки («Gepl.») больше не привязаны к конкретному месяцу: если процесс не был завершён, он автоматически переносится в следующий месяц и остаётся видимым, пока не будет закрыт через форму Lieferungen/Einkäufe.' },
+      { page: 'Все страницы', type: 'added',
+        text: 'Возможность вводить дробное количество товара (например, 1,5 или 0,5 шт.) — ранее система автоматически обрезала дробную часть при сохранении.' },
+      { page: 'Все страницы', type: 'added',
+        text: 'Выбранный склад теперь запоминается в браузере и сохраняется при переходе между страницами и после обновления страницы — не нужно каждый раз выбирать его заново.' },
+      { page: 'Все страницы', type: 'added',
+        text: 'Текущий месяц теперь подставляется автоматически на основе реальной даты устройства вместо фиксированного значения.' },
+      { page: 'lager.html', type: 'fixed',
+        text: 'Исправлена формула колонки «Einkäufe» у Zentrallager: если за один день было несколько отдельных закупок, в развёрнутой ячейке даты показывалась только первая запись — теперь суммируются все.' },
+      { page: 'lager.html', type: 'fixed',
+        text: 'Исправлен раздел «Shops» (разбивка расходов по магазинам): оставался забытый ярко-зелёный цвет из старой тёмной темы вместо розового, а итоговая сумма по каждому магазину вообще не выводилась (была ошибка в коде, из-за которой посчитанное число никуда не вставлялось).' },
+    ]
+  },
+];
+
+function renderChangelog(){
+  const cont = document.getElementById('changelog-content');
+  if(!CHANGELOG.length){
+    cont.innerHTML = '<p style="color:var(--text-dim);font-size:.88rem">Пока нет записей.</p>';
+    return;
+  }
+  const typeMap = {
+    added:    ['Добавлено',  'cl-type-added'],
+    fixed:    ['Исправлено', 'cl-type-fixed'],
+    improved: ['Улучшено',   'cl-type-improved'],
+    removed:  ['Убрано',     'cl-type-removed'],
+  };
+  const sorted = [...CHANGELOG].sort((a,b)=>b.date.localeCompare(a.date));
+  let html='';
+  sorted.forEach((day,i)=>{
+    const d = new Date(day.date+'T00:00:00');
+    const label = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+    html += `<div class="cl-date-group${i===0?' open':''}" id="cl-day-${i}">
+      <div class="cl-date-header" onclick="document.getElementById('cl-day-${i}').classList.toggle('open')">
+        <span class="cl-date-label">${label}</span>
+        <span class="cl-date-arrow">▶</span>
+      </div>
+      <div class="cl-entries">`;
+    day.entries.forEach(e=>{
+      const [typeLabel, typeClass] = typeMap[e.type] || ['Изменено','cl-type-fixed'];
+      html += `<div class="cl-entry">
+        <div class="cl-entry-page">${e.page}</div>
+        <span class="cl-entry-type ${typeClass}">${typeLabel}</span>
+        <div class="cl-entry-text">${e.text}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  cont.innerHTML = html;
+}
+
+window.openChangelog = function(){
+  renderChangelog();
+  document.getElementById('modal-changelog').classList.add('show');
+  document.getElementById('hdr-bell-dot').classList.remove('show');
+  localStorage.setItem('gg_changelog_seen', new Date().toISOString().slice(0,10));
+};
+window.closeChangelog = function(){
+  document.getElementById('modal-changelog').classList.remove('show');
+};
+
+// Автопоказ один раз в день при первом заходе
+document.addEventListener('DOMContentLoaded', function(){
+  if(!CHANGELOG.length) return;
+  const today = new Date().toISOString().slice(0,10);
+  const lastSeen = localStorage.getItem('gg_changelog_seen');
+  if(lastSeen !== today){
+    document.getElementById('hdr-bell-dot').classList.add('show');
+    setTimeout(()=>{ openChangelog(); }, 700);
+  }
 });
 
 </script>

@@ -1505,6 +1505,25 @@ window.confirmDelete = async function(){
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',()=>{
+  // Склад запоминается между страницами и после обновления (localStorage)
+  const _savedLager = localStorage.getItem('gg_selected_lager');
+  const _selLagerEl = document.getElementById('sel-lager');
+  if(_savedLager && _selLagerEl && [..._selLagerEl.options].some(o=>o.value===_savedLager)){
+    _selLagerEl.value = _savedLager;
+  }
+  if(_selLagerEl){
+    _selLagerEl.addEventListener('change', e=>localStorage.setItem('gg_selected_lager', e.target.value));
+  }
+  // Aktueller Monat wird automatisch vorausgewählt (basierend auf dem echten Systemdatum)
+  const _selZeitraumEl = document.getElementById('sel-zeitraum');
+  if(_selZeitraumEl){
+    const _now = new Date();
+    const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+    if([..._selZeitraumEl.options].some(o=>o.value===_curMonat)){
+      _selZeitraumEl.value = _curMonat;
+    }
+  }
+
   loadSubmissions();
 });
 </script>

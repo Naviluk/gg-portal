@@ -1150,7 +1150,7 @@ async function loadData(){
   try{
     const [sollDoc, planSnap] = await Promise.all([
       db.collection('lp_soll').doc('config').get(),
-      db.collection('lp_planung').where('monat','==',currentZeitraum).get(),
+      db.collection('lp_planung').get(), // KEIN monat-Filter mehr — Gepl. bleibt aktiv, bis der Vorgang abgeschlossen wird
     ]);
     if(sollDoc.exists) sollData=sollDoc.data();
     planData={};
@@ -1180,16 +1180,22 @@ function renderTable(){
   const empfLabel=isZentral?'Empf. Einkauf':'Empf. Lieferung';
   const planLabel=isZentral?'Gepl. Einkauf':'Gepl. Lieferung';
 
+  // Empf./Gepl. sind für vergangene Monate inaktiv (grau, ohne Werte) —
+  // Planung/Empfehlung ergibt für die Vergangenheit keinen Sinn.
+  const _now = new Date();
+  const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+  const isPastMonth = currentZeitraum.length===7 && currentZeitraum < _curMonat;
+
   document.getElementById('lp-thead').innerHTML=`<tr>
     <th class="col-artikel">Artikel</th>
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
     <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
-    <th class="num-cell th-col-empf" style="background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)">
-      <span class="th-text" style="color:var(--neon-green);display:block;line-height:1.3;white-space:normal">${empfLabel}</span>
+    <th class="num-cell th-col-empf" style="${isPastMonth?'background:var(--bg3);border-bottom:2px solid var(--glass-border)':'background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)'}">
+      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-green)'};display:block;line-height:1.3;white-space:normal">${empfLabel}</span>
     </th>
-    <th class="num-cell th-col-plan" style="background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)">
-      <span class="th-text" style="color:var(--neon-magenta);display:block;line-height:1.3">${planLabel}</span>
-      <button class="btn-plan" style="display:block;margin:.2rem auto 0;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>
+    <th class="num-cell th-col-plan" style="${isPastMonth?'background:var(--bg3);border-bottom:2px solid var(--glass-border)':'background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)'}">
+      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-magenta)'};display:block;line-height:1.3">${planLabel}</span>
+      ${isPastMonth ? '' : `<button class="btn-plan" style="display:block;margin:.2rem auto 0;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>`}
     </th>
   </tr>`;
 
@@ -1209,8 +1215,10 @@ function renderTable(){
       const aktD=akt>0?akt:'—';
       const sollD=soll>0?soll:'—';
       let empf='—', empfStyle='color:var(--text-dim)';
-      if(soll>0){const d=soll-akt;if(d>0){empf=d;empfStyle='color:var(--neon-yellow);font-weight:700';}else{empf='✓';empfStyle='color:var(--neon-green)';}}
-      const planD=plan>0?`<span class="plan-value">${plan}</span>`:'—';
+      if(!isPastMonth && soll>0){const d=soll-akt;if(d>0){empf=d;empfStyle='color:var(--neon-yellow);font-weight:700';}else{empf='✓';empfStyle='color:var(--neon-green)';}}
+      const planD=(!isPastMonth && plan>0)?`<span class="plan-value">${plan}</span>`:'—';
+      const empfCellStyle=isPastMonth?`background:var(--bg3);color:var(--text-dim)`:`background:rgba(0,255,136,.04);${empfStyle}`;
+      const planCellStyle=isPastMonth?`background:var(--bg3);color:var(--text-dim)`:`background:rgba(255,0,204,.04)`;
       tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}">
         <td class="col-artikel"><div class="prod-info">
           <div class="prod-icon">${prod.icon||'📦'}</div>
@@ -1218,8 +1226,8 @@ function renderTable(){
         </div></td>
         <td class="num-cell">${aktD}</td>
         <td class="num-cell" style="color:var(--text-dim)">${sollD}</td>
-        <td class="num-cell" style="background:rgba(0,255,136,.04);${empfStyle}">${empf}</td>
-        <td class="num-cell" style="background:rgba(255,0,204,.04)">${planD}</td>
+        <td class="num-cell" style="${empfCellStyle}">${isPastMonth?'—':empf}</td>
+        <td class="num-cell" style="${planCellStyle}">${isPastMonth?'—':planD}</td>
       </tr>`;
     });
   });
@@ -1466,8 +1474,7 @@ window.saveLiefGepl = async function(){
   planData[lg][prodId] = qty;
   try{
     const snap = await db.collection('lp_planung')
-      .where('lager','==', lg)
-      .where('monat','==',currentZeitraum).get();
+      .where('lager','==', lg).get();
     if(!snap.empty){
       const docRef = snap.docs[snap.docs.length-1].ref;
       await docRef.update({[`items.${prodId}`]: qty});
@@ -1751,8 +1758,9 @@ window.confirmWareneingang = async function(){
     await db.collection('wareneingang').add(entry);
 
     // Geplante Menge zurücksetzen — diese Ware ist jetzt tatsächlich eingegangen
-    // und darf nicht länger als "geplant" erscheinen.
-    const snap=await db.collection('lp_planung').where('lager','==',lager).where('monat','==',currentZeitraum).get();
+    // und darf nicht länger als "geplant" erscheinen. KEIN monat-Filter — der Plan
+    // kann aus einem früheren Monat übernommen worden sein.
+    const snap=await db.collection('lp_planung').where('lager','==',lager).get();
     const batch=db.batch();
     snap.forEach(d=>batch.delete(d.ref));
     await batch.commit();
@@ -2124,7 +2132,27 @@ window.savePlan=async function(){
   hideSpinner();
 };
 
-document.addEventListener('DOMContentLoaded',loadData);
+document.addEventListener('DOMContentLoaded', function(){
+  // Склад запоминается между страницами и после обновления (localStorage)
+  const _savedLager = localStorage.getItem('gg_selected_lager');
+  const _selLagerEl = document.getElementById('sel-lager');
+  if(_savedLager && _selLagerEl && [..._selLagerEl.options].some(o=>o.value===_savedLager)){
+    _selLagerEl.value = _savedLager;
+  }
+  if(_selLagerEl){
+    _selLagerEl.addEventListener('change', e=>localStorage.setItem('gg_selected_lager', e.target.value));
+  }
+  // Aktueller Monat wird automatisch vorausgewählt (basierend auf dem echten Systemdatum)
+  const _selZeitraumEl = document.getElementById('sel-zeitraum');
+  if(_selZeitraumEl){
+    const _now = new Date();
+    const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+    if([..._selZeitraumEl.options].some(o=>o.value===_curMonat)){
+      _selZeitraumEl.value = _curMonat;
+    }
+  }
+  loadData();
+});
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
 document.addEventListener('DOMContentLoaded', function(){
