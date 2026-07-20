@@ -107,7 +107,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
 .btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
 @media(max-width:640px){
-  .lager-controls{gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
+  .lager-controls{gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
   .ctrl-select{
     font-size:.75rem;
     padding:.4rem 1.5rem .4rem .5rem;
@@ -1030,7 +1030,8 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 
       const endBestandGS = {};
       PRODUCTS.forEach(catObj=>{
-        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        // Für Zentrallager gilt die Formel für ALLE Kategorien (keine Einschränkung
+        // auf Getränke/Snacks) — die Zentrallager-Formel ist kategorieunabhängig.
         catObj.items.forEach(prod=>{
           endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(einkSum[prod.id])||0) - (Number(lieferSumZ[prod.id])||0);
         });
@@ -1137,12 +1138,12 @@ async function loadData(){
         db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get(),
       ]);
       const ab = abDoc.exists ? abDoc.data() : {};
-      // Ab Juli: dieselbe Sonderregel für Getränke/Snacks wie oben
+      // Ab Juli: für Zentrallager gilt die Sonderregel für ALLE Kategorien (nicht nur
+      // Getränke/Snacks) — identisch mit lager.html.
       if(currentZeitraum.length===7 && currentZeitraum!=='2026-06'){
         try{
           const gsAB = await computeGSAnfangsbestandChain('zentrallager', currentZeitraum);
           PRODUCTS.forEach(catObj=>{
-            if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
             catObj.items.forEach(prod=>{ ab[prod.id] = gsAB[prod.id] ?? 0; });
           });
         }catch(e){}
