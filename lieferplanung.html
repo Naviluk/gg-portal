@@ -978,6 +978,23 @@ function toggleUserDropdown(){document.getElementById('user-dropdown').classList
 // Anfangsbestand(Monat) = End Bestand(Vormonat), rekursiv bis Juni (dort = anfangsbestand-Collection).
 // Identisch mit der Funktion auf lager.html — sorgt dafür, dass Aktuel.Bestand hier
 // exakt mit End Bestand dort übereinstimmt.
+// Summiert Firestore-Dokumente PRO ARTIKEL, dedupliziert nach Datum — genau EIN
+// Eintrag pro Datum (wie manuell erfasst), damit Summen mit lager.html übereinstimmen.
+function dedupSumFromSnap(snap){
+  const byDate = {};
+  snap.forEach(d=>{
+    const data = d.data();
+    const dt = data.datum;
+    if(dt && !byDate[dt]) byDate[dt] = data; // erste Eintragung pro Datum behalten
+  });
+  const sum = {};
+  Object.values(byDate).forEach(data=>{
+    const items = data.items||{};
+    Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
+  });
+  return sum;
+}
+
 async function computeGSAnfangsbestandChain(lager, targetMonat){
   const [ty, tmM] = targetMonat.split('-').map(Number);
   const monthsChain = [];
@@ -1001,10 +1018,12 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
         db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',mo).get(),
         ...branches.map(br=>db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get())
       ]);
-      const einkSum = {};
-      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkSum[pid]=(einkSum[pid]||0)+(Number(items[pid])||0); }); });
+      const einkSum = dedupSumFromSnap(weSnap);
       const lieferSumZ = {};
-      branchSnaps.forEach(bs=>bs.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+(Number(items[pid])||0); }); }));
+      branchSnaps.forEach(bs=>{
+        const s = dedupSumFromSnap(bs);
+        Object.keys(s).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+s[pid]; });
+      });
 
       const endBestandGS = {};
       PRODUCTS.forEach(catObj=>{
@@ -1020,8 +1039,7 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
         db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
         db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
       ]);
-      const liefSum = {};
-      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ liefSum[pid]=(liefSum[pid]||0)+(Number(items[pid])||0); }); });
+      const liefSum = dedupSumFromSnap(weSnap);
       const gerSum = {};
       gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
       const thkSum = {};
@@ -1076,8 +1094,7 @@ async function loadData(){
         }catch(e){}
       }
 
-      const lieferSum = {};
-      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSum[pid]=(lieferSum[pid]||0)+(Number(items[pid])||0); }); });
+      const lieferSum = dedupSumFromSnap(weSnap);
       perLagerLieferSum[lg]=lieferSum;
 
       const geraetSum = {};
@@ -1127,8 +1144,7 @@ async function loadData(){
           });
         }catch(e){}
       }
-      const einkaufSum = {};
-      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkaufSum[pid]=(einkaufSum[pid]||0)+(Number(items[pid])||0); }); });
+      const einkaufSum = dedupSumFromSnap(weSnap);
 
       const lieferSumZ = {};
       LAGERS.forEach(br=>{
