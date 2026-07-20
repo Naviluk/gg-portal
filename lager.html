@@ -120,8 +120,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
 
 /* ── TOP CONTROLS ── */
-.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem;
-  position:sticky;top:var(--header-h);z-index:50;background:var(--bg);padding:.6rem 0}
+.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
@@ -167,7 +166,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
   font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--neon-cyan);text-transform:uppercase;
   padding:.7rem .9rem;border-bottom:2px solid var(--glass-border);border-right:1px solid var(--glass-border);
-  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
+  white-space:nowrap;position:static;z-index:10;text-align:center;
   background:#eef2f6}
 .lager-table th:last-child,.lager-table td:last-child{border-right:none}
 .lager-table td{padding:.38rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
@@ -946,23 +945,7 @@ function renderTableActual(){
 
   tbody.innerHTML = tbHTML;
   if(detailExpanded) applyDetailCols(true);
-  updateStickyOffsets();
 }
-
-// Berechnet, wie weit die Tabellen-Kopfzeile unter Header + Filterleiste einrasten
-// muss — die Höhe der Filterleiste ist nicht fix (variiert je nach Bildschirmbreite),
-// daher wird sie live gemessen. requestAnimationFrame stellt sicher, dass der Browser
-// das Layout bereits fertig berechnet hat, bevor gemessen wird (verhindert falsche Werte).
-function updateStickyOffsets(){
-  requestAnimationFrame(()=>{
-    const controls = document.querySelector('.lager-controls');
-    if(!controls) return;
-    const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
-    const offset = headerH + controls.getBoundingClientRect().height;
-    document.querySelectorAll('.lager-table th').forEach(th=>{ th.style.top = offset + 'px'; });
-  });
-}
-window.addEventListener('resize', updateStickyOffsets);
 
 // called after data loads
 // Berechnet den Anfangsbestand für Getränke/Snacks eines bestimmten Monats,
