@@ -107,7 +107,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
 .btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
 @media(max-width:640px){
-  .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
+  .lager-controls{gap:.4rem;flex-wrap:wrap;align-items:center}
   .ctrl-select{
     font-size:.75rem;
     padding:.4rem 1.5rem .4rem .5rem;
@@ -367,7 +367,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .th-text-mob{display:none}
 @media(max-width:640px){
   .th-text-mob{display:inline}
-  .th-col-anfang .th-text{display:none}
 }
 /* Button text spans */
 .btn-line1{display:inline}
@@ -1193,8 +1192,8 @@ function renderTable(){
   const isZentral=currentLager==='zentrallager';
   const toShow=isZentral?LAGERS:[currentLager];
   const empfIcon=isZentral?'🛒':'🚚';
-  const empfLabel=isZentral?'Empf. Einkauf':'Empf. Lieferung';
-  const planLabel=isZentral?'Gepl. Einkauf':'Gepl. Lieferung';
+  const empfLabel=isZentral?'Empf.<br>Einkauf':'Empf.<br>Lieferung';
+  const planLabel=isZentral?'Gepl.<br>Einkauf':'Gepl.<br>Lieferung';
 
   // Empf./Gepl. sind für vergangene Monate inaktiv (grau, ohne Werte) —
   // Planung/Empfehlung ergibt für die Vergangenheit keinen Sinn.
