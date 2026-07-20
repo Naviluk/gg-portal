@@ -681,6 +681,16 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
   return abGS;
 }
 
+// Lieferungen-Summe pro Artikel — dedupliziert (genau 1 Eintrag pro Datum, wie manuell
+// erfasst) — identisch mit der Logik auf lager.html, damit die Summen übereinstimmen.
+function dedupedLiefSum(prodId){
+  const liefDatesGS = [...new Set(lieferungen.map(w=>w.datum))];
+  return liefDatesGS.reduce((s,d)=>{
+    const we = lieferungen.find(w=>w.datum===d);
+    return s + (we&&we.items&&we.items[prodId] ? Number(we.items[prodId])||0 : 0);
+  },0);
+}
+
 async function loadData(){
   showSpinner();
   currentLager=document.getElementById('sel-lager').value;
@@ -702,7 +712,7 @@ async function loadData(){
   GS_PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
       const abNum = Number(anfangsbestand[prod.id])||0;
-      const liefNum = lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+      const liefNum = dedupedLiefSum(prod.id);
       const gerNum = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const thkNum = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       endbestandData[prod.id] = abNum + liefNum - gerNum - thkNum;
@@ -735,7 +745,7 @@ function renderTable(){
     catObj.items.forEach(prod=>{
       const ab=anfangsbestand[prod.id]??'';
       const abD=ab!==''?ab:'<span style="color:var(--text-dim);font-size:.7rem">+</span>';
-      const tL=lieferungen.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+      const tL=dedupedLiefSum(prod.id);
       const tG=geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const tT=thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const eb=endbestandData[prod.id]!==undefined?endbestandData[prod.id]:'—';
