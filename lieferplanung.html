@@ -973,6 +973,73 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 function toggleSubMenu(btn){btn.closest('.nav-item').classList.toggle('open')}
 function toggleUserDropdown(){document.getElementById('user-dropdown').classList.toggle('show');document.addEventListener('click',function h(e){if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){document.getElementById('user-dropdown').classList.remove('show');document.removeEventListener('click',h)}})}
 
+// Berechnet den Anfangsbestand für Getränke/Snacks eines bestimmten Monats,
+// indem die Kette von Juni bis zum Zielmonat durchgerechnet wird:
+// Anfangsbestand(Monat) = End Bestand(Vormonat), rekursiv bis Juni (dort = anfangsbestand-Collection).
+// Identisch mit der Funktion auf lager.html — sorgt dafür, dass Aktuel.Bestand hier
+// exakt mit End Bestand dort übereinstimmt.
+async function computeGSAnfangsbestandChain(lager, targetMonat){
+  const [ty, tmM] = targetMonat.split('-').map(Number);
+  const monthsChain = [];
+  let y=2026, m=6;
+  while(true){
+    monthsChain.push(y+'-'+(m<10?'0':'')+m);
+    if(y===ty && m===tmM) break;
+    m++; if(m>12){m=1;y++;}
+    if(monthsChain.length>60) break;
+  }
+
+  const juniDoc = await db.collection('anfangsbestand').doc(lager+'_2026-06').get();
+  let abGS = juniDoc.exists ? {...juniDoc.data()} : {};
+  const branches = ['nettetal','brüggen','viersen','köln'];
+
+  for(let i=1;i<monthsChain.length;i++){
+    const mo = monthsChain[i-1];
+
+    if(lager==='zentrallager'){
+      const [weSnap, ...branchSnaps] = await Promise.all([
+        db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',mo).get(),
+        ...branches.map(br=>db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get())
+      ]);
+      const einkSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkSum[pid]=(einkSum[pid]||0)+(Number(items[pid])||0); }); });
+      const lieferSumZ = {};
+      branchSnaps.forEach(bs=>bs.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+(Number(items[pid])||0); }); }));
+
+      const endBestandGS = {};
+      PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(einkSum[prod.id])||0) - (Number(lieferSumZ[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    } else {
+      const [weSnap, gSnap, tSnap] = await Promise.all([
+        db.collection('wareneingang').where('lager','==',lager).where('monat','==',mo).get(),
+        db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
+        db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
+      ]);
+      const liefSum = {};
+      weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ liefSum[pid]=(liefSum[pid]||0)+(Number(items[pid])||0); }); });
+      const gerSum = {};
+      gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
+      const thkSum = {};
+      tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thkSum[pid]=(thkSum[pid]||0)+(Number(items[pid])||0); }); });
+
+      const endBestandGS = {};
+      PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    }
+  }
+  return abGS;
+}
+
 async function loadData(){
   showSpinner();
   currentLager=document.getElementById('sel-lager').value;
@@ -996,6 +1063,18 @@ async function loadData(){
         db.collection('inventur').where('lager','==',lg).where('monat','==',currentZeitraum).get(),
       ]);
       const ab = abDoc.exists ? abDoc.data() : {};
+      // Ab Juli: für Getränke/Snacks kommt der Anfangsbestand aus dem End Bestand
+      // des Vormonats (dieselbe Sonderregel wie auf lager.html), nicht mehr direkt
+      // aus der 'anfangsbestand'-Collection.
+      if(currentZeitraum.length===7 && currentZeitraum!=='2026-06'){
+        try{
+          const gsAB = await computeGSAnfangsbestandChain(lg, currentZeitraum);
+          PRODUCTS.forEach(catObj=>{
+            if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+            catObj.items.forEach(prod=>{ ab[prod.id] = gsAB[prod.id] ?? 0; });
+          });
+        }catch(e){}
+      }
 
       const lieferSum = {};
       weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lieferSum[pid]=(lieferSum[pid]||0)+(Number(items[pid])||0); }); });
@@ -1038,6 +1117,16 @@ async function loadData(){
         db.collection('wareneingang').where('lager','==','zentrallager').where('monat','==',currentZeitraum).get(),
       ]);
       const ab = abDoc.exists ? abDoc.data() : {};
+      // Ab Juli: dieselbe Sonderregel für Getränke/Snacks wie oben
+      if(currentZeitraum.length===7 && currentZeitraum!=='2026-06'){
+        try{
+          const gsAB = await computeGSAnfangsbestandChain('zentrallager', currentZeitraum);
+          PRODUCTS.forEach(catObj=>{
+            if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+            catObj.items.forEach(prod=>{ ab[prod.id] = gsAB[prod.id] ?? 0; });
+          });
+        }catch(e){}
+      }
       const einkaufSum = {};
       weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ einkaufSum[pid]=(einkaufSum[pid]||0)+(Number(items[pid])||0); }); });
 
@@ -1797,8 +1886,23 @@ function saveSollLocal(){
 }
 window.saveSoll=async function(){
   saveSollLocal();showSpinner();
-  try{await db.collection('lp_soll').doc('config').set(sollData,{merge:true});showToast('Soll-Bestand gespeichert ✓');closeSoll();renderTable();}
-  catch(e){showToast('Fehler: '+e.message);}hideSpinner();
+  try{
+    // WICHTIG: update() ersetzt jedes Top-Level-Feld (Lager) VOLLSTÄNDIG,
+    // im Gegensatz zu set(...,{merge:true}), das verschachtelte Maps tief
+    // zusammenführt und dadurch entfernte (abgehakte) Artikel NICHT löscht.
+    await db.collection('lp_soll').doc('config').update(sollData);
+  }catch(e){
+    // Dokument existiert evtl. noch nicht (erste Speicherung) — dann normal anlegen
+    try{
+      await db.collection('lp_soll').doc('config').set(sollData);
+    }catch(e2){
+      showToast('Fehler: '+e2.message);
+      hideSpinner();
+      return;
+    }
+  }
+  showToast('Soll-Bestand gespeichert ✓');closeSoll();renderTable();
+  hideSpinner();
 };
 
 window.openPlan=function(){
