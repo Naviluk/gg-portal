@@ -107,7 +107,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
 .btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
 @media(max-width:640px){
-  .lager-controls{gap:.4rem;flex-wrap:wrap;align-items:center}
+  .lager-controls{gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
   .ctrl-select{
     font-size:.75rem;
     padding:.4rem 1.5rem .4rem .5rem;
@@ -365,8 +365,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 /* Mobile: Anfangsbestand header split */
 .th-text-mob{display:none}
+.th-text-desktop{display:inline}
 @media(max-width:640px){
   .th-text-mob{display:inline}
+  .th-text-desktop{display:none}
 }
 /* Button text spans */
 .btn-line1{display:inline}
@@ -1194,8 +1196,10 @@ function renderTable(){
   const isZentral=currentLager==='zentrallager';
   const toShow=isZentral?LAGERS:[currentLager];
   const empfIcon=isZentral?'🛒':'🚚';
-  const empfLabel=isZentral?'Empf.<br>Einkauf':'Empf.<br>Lieferung';
-  const planLabel=isZentral?'Gepl.<br>Einkauf':'Gepl.<br>Lieferung';
+  const empfLabel=isZentral?'Empf. Einkauf':'Empf. Lieferung';
+  const planLabel=isZentral?'Gepl. Einkauf':'Gepl. Lieferung';
+  const empfLabelBr=isZentral?'Empf.<br>Einkauf':'Empf.<br>Lieferung';
+  const planLabelBr=isZentral?'Gepl.<br>Einkauf':'Gepl.<br>Lieferung';
 
   // Empf./Gepl. sind für vergangene Monate inaktiv (grau, ohne Werte) —
   // Planung/Empfehlung ergibt für die Vergangenheit keinen Sinn.
@@ -1208,10 +1212,14 @@ function renderTable(){
     <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
     <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="${isPastMonth?'background:var(--bg3);border-bottom:2px solid var(--glass-border)':'background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)'}">
-      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-green)'};display:block;line-height:1.3;white-space:normal">${empfLabel}</span>
+      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-green)'};display:block;line-height:1.3;white-space:normal">
+        <span class="th-text-desktop">${empfLabel}</span><span class="th-text-mob">${empfLabelBr}</span>
+      </span>
     </th>
     <th class="num-cell th-col-plan" style="${isPastMonth?'background:var(--bg3);border-bottom:2px solid var(--glass-border)':'background:rgba(255,0,204,.06);border-bottom:2px solid rgba(255,0,204,.3)'}">
-      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-magenta)'};display:block;line-height:1.3">${planLabel}</span>
+      <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-magenta)'};display:block;line-height:1.3">
+        <span class="th-text-desktop">${planLabel}</span><span class="th-text-mob">${planLabelBr}</span>
+      </span>
       ${isPastMonth ? '' : `<button class="btn-plan" style="display:block;margin:.2rem auto 0;color:var(--neon-magenta);border-color:var(--neon-magenta);background:rgba(255,0,204,.1)" onclick="openPlanForm()" title="Planung bearbeiten">✎</button>`}
     </th>
   </tr>`;
