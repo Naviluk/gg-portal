@@ -120,7 +120,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
 
 /* ── TOP CONTROLS ── */
-.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem;
+  position:sticky;top:var(--header-h);z-index:50;background:var(--bg);padding:.6rem 0}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
@@ -945,7 +946,20 @@ function renderTableActual(){
 
   tbody.innerHTML = tbHTML;
   if(detailExpanded) applyDetailCols(true);
+  updateStickyOffsets();
 }
+
+// Berechnet dynamisch, wie weit die Tabellen-Kopfzeile unter Header + Filterleiste
+// einrasten muss — die Höhe der Filterleiste ist nicht fix (variiert je nach
+// Bildschirmbreite/Inhalt), daher wird sie hier live gemessen statt fest verdrahtet.
+function updateStickyOffsets(){
+  const controls = document.querySelector('.lager-controls');
+  if(!controls) return;
+  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
+  const offset = headerH + controls.offsetHeight;
+  document.querySelectorAll('.lager-table th').forEach(th=>{ th.style.top = offset + 'px'; });
+}
+window.addEventListener('resize', updateStickyOffsets);
 
 // called after data loads
 // Berechnet den Anfangsbestand für Getränke/Snacks eines bestimmten Monats,
@@ -981,7 +995,8 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 
       const endBestandGS = {};
       PRODUCTS.forEach(catObj=>{
-        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        // Für Zentrallager gilt die Formel für ALLE Kategorien (keine Einschränkung
+        // auf Getränke/Snacks) — die Zentrallager-Formel ist kategorieunabhängig.
         catObj.items.forEach(prod=>{
           endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(einkSum[prod.id])||0) - (Number(lieferSumZ[prod.id])||0);
         });
@@ -1048,14 +1063,16 @@ async function loadData(){
     if(abDoc.exists) anfangsbestand = abDoc.data();
   } catch(e){}
 
-  // Sonderregel ab Juli: für Getränke/Snacks wird der Anfangsbestand NICHT aus der
-  // 'anfangsbestand'-Collection genommen, sondern automatisch aus dem End Bestand
-  // des Vormonats berechnet (dieselbe Formel wie die End-Bestand-Spalte selbst).
+  // Sonderregel ab Juli: für Getränke/Snacks (bei Filialen) bzw. für ALLE Kategorien
+  // (bei Zentrallager — dessen Formel ist kategorieunabhängig) wird der Anfangsbestand
+  // NICHT aus der 'anfangsbestand'-Collection genommen, sondern automatisch aus dem
+  // End Bestand des Vormonats berechnet (dieselbe Formel wie die End-Bestand-Spalte selbst).
   if(zeit.length===7 && zeit!=='2026-06'){
     try{
       const gsAB = await computeGSAnfangsbestandChain(currentLager, zeit);
+      const isZentralLager = currentLager==='zentrallager';
       PRODUCTS.forEach(catObj=>{
-        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        if(!isZentralLager && catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
         catObj.items.forEach(prod=>{
           anfangsbestand[prod.id] = gsAB[prod.id] ?? 0;
         });
