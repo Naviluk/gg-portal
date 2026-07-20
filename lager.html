@@ -159,7 +159,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
+.table-wrap-single{overflow-x:auto;overflow-y:visible;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
 
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
@@ -949,15 +949,18 @@ function renderTableActual(){
   updateStickyOffsets();
 }
 
-// Berechnet dynamisch, wie weit die Tabellen-Kopfzeile unter Header + Filterleiste
-// einrasten muss — die Höhe der Filterleiste ist nicht fix (variiert je nach
-// Bildschirmbreite/Inhalt), daher wird sie hier live gemessen statt fest verdrahtet.
+// Berechnet, wie weit die Tabellen-Kopfzeile unter Header + Filterleiste einrasten
+// muss — die Höhe der Filterleiste ist nicht fix (variiert je nach Bildschirmbreite),
+// daher wird sie live gemessen. requestAnimationFrame stellt sicher, dass der Browser
+// das Layout bereits fertig berechnet hat, bevor gemessen wird (verhindert falsche Werte).
 function updateStickyOffsets(){
-  const controls = document.querySelector('.lager-controls');
-  if(!controls) return;
-  const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
-  const offset = headerH + controls.offsetHeight;
-  document.querySelectorAll('.lager-table th').forEach(th=>{ th.style.top = offset + 'px'; });
+  requestAnimationFrame(()=>{
+    const controls = document.querySelector('.lager-controls');
+    if(!controls) return;
+    const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
+    const offset = headerH + controls.getBoundingClientRect().height;
+    document.querySelectorAll('.lager-table th').forEach(th=>{ th.style.top = offset + 'px'; });
+  });
 }
 window.addEventListener('resize', updateStickyOffsets);
 
@@ -1094,7 +1097,10 @@ async function loadData(){
     }catch(e){}
   }
 
-  // Für Zentrallager: „Lieferungen" = Summe der Lieferungen aller 4 Filialen (aus deren wareneingang)
+  // Für Zentrallager: „Lieferungen" = Summe der Lieferungen aller 4 Filialen (aus deren wareneingang).
+  // WICHTIG: pro Filiale und Datum wird dedupliziert (genau 1 Eintrag pro Datum, wie
+  // manuell erfasst) — identisch mit der Berechnung der Lieferungen-Spalte jeder Filiale,
+  // damit die Summe hier exakt mit der Summe der einzelnen Filial-Spalten übereinstimmt.
   window._zentralLieferSum = {};
   if(currentLager === 'zentrallager'){
     const branches = ['nettetal','brüggen','viersen','köln'];
@@ -1102,8 +1108,14 @@ async function loadData(){
       for(const br of branches){
         for(const mo of months){
           const bs = await db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get();
+          const byDate = {};
           bs.forEach(d=>{
-            const items = d.data().items||{};
+            const data = d.data();
+            const dt = data.datum;
+            if(dt && !byDate[dt]) byDate[dt] = data; // erste Eintragung pro Datum behalten
+          });
+          Object.values(byDate).forEach(data=>{
+            const items = data.items||{};
             Object.keys(items).forEach(pid=>{
               window._zentralLieferSum[pid] = (window._zentralLieferSum[pid]||0) + (Number(items[pid])||0);
             });
