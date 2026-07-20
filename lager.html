@@ -836,8 +836,9 @@ function renderTableActual(){
         tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${einkVal}</td>`;
         // Detail date cols
         dates.forEach(d=>{
-          const we = wareneingangs.find(w=>w.datum===d);
-          const qty = we&&we.items&&we.items[prod.id] ? we.items[prod.id] : '—';
+          const sameDate = wareneingangs.filter(w=>w.datum===d);
+          const qtySum = sameDate.reduce((s,w)=>s+(Number(w.items&&w.items[prod.id])||0),0);
+          const qty = qtySum || '—';
           tbHTML += `<td class="num-cell detail-col detail-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
         });
         // Gerät — nur Gesamtsumme (aus gs_geraet), keine Aufklappung
