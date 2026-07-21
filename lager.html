@@ -223,6 +223,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
   border:1px solid rgba(8,145,178,.18)}
 .prod-info{display:flex;align-items:center;gap:.6rem}
+.prod-reorder{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.prod-reorder-btn{background:none;border:none;cursor:pointer;color:var(--text-dim);
+  font-size:.6rem;line-height:1;padding:.15rem .3rem;border-radius:3px;transition:all .15s}
+.prod-reorder-btn:hover:not(:disabled){color:var(--neon-cyan);background:rgba(8,145,178,.1)}
+.prod-reorder-btn:disabled{opacity:.2;cursor:default}
+.editable-name{cursor:text;transition:background .15s;border-radius:4px;padding:.1rem .3rem;margin:-.1rem -.3rem}
+.editable-name:hover{background:rgba(8,145,178,.08)}
+.editable-name-input{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.98rem;font-weight:600;
+  color:var(--text);border:1px solid var(--neon-cyan);border-radius:4px;padding:.1rem .3rem;width:100%;outline:none}
+.btn-add-artikel{display:block;width:100%;background:none;border:1px dashed var(--glass-border);
+  border-radius:6px;color:var(--text-dim);font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin:.3rem 0}
+.btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
 
@@ -447,6 +460,33 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-add-product" onclick="if(event.target===this)closeAddProductModal()">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeAddProductModal()">✕</button>
+    <div class="modal-title">➕ Neuen Artikel hinzufügen</div>
+    <div class="field">
+      <label class="field-label">Kategorie</label>
+      <input type="text" id="ap-cat" readonly style="background:var(--bg3);color:var(--text-dim)">
+    </div>
+    <div class="field">
+      <label class="field-label">Artikelname</label>
+      <input type="text" id="ap-name" placeholder="z. B. Red Bull Sugarfree">
+    </div>
+    <div class="field">
+      <label class="field-label">Einheit (optional)</label>
+      <input type="text" id="ap-unit" placeholder="z. B. 0,25 L">
+    </div>
+    <div class="field">
+      <label class="field-label">Icon (optional, Emoji)</label>
+      <input type="text" id="ap-icon" placeholder="📦" maxlength="4">
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-primary" onclick="saveNewProduct()">Hinzufügen</button>
+      <button class="btn btn-ghost" onclick="closeAddProductModal()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div class="user-dropdown" id="user-dropdown">
   <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
   <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
@@ -585,7 +625,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ── PRODUCT DATA ──
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {cat:'Getränke', items:[
     {id:'rb_blue',   name:'Red Bull',                    unit:'0,25 L', icon:'🔵'},
     {id:'rb_zero',   name:'Red Bull Zero',               unit:'0,25 L', icon:'🩵'},
@@ -689,6 +729,7 @@ const PRODUCTS = [
     {id:'feuerzg',   name:'Feuerzeuge',             unit:'',        icon:'🔥'},
   ]},
 ];
+let PRODUCTS = DEFAULT_PRODUCTS;
 
 const SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
 const SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
@@ -799,7 +840,7 @@ function renderTableActual(){
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
       <td colspan="99" style="background:#e3e8f0"></td></tr>`;
 
-    catObj.items.forEach(prod=>{
+    catObj.items.forEach((prod, pIdx)=>{
       const ab = anfangsbestand[prod.id] ?? '';
       const abNum = Number(anfangsbestand[prod.id])||0;
       const prodHidden = isFirst ? '' : 'hidden';
@@ -816,7 +857,14 @@ function renderTableActual(){
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
-        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
+        <div class="prod-reorder">
+          <button class="prod-reorder-btn" ${pIdx===0?'disabled':''} onclick="event.stopPropagation();moveProduct('${catObj.cat}','${prod.id}',-1)" title="Nach oben">▲</button>
+          <button class="prod-reorder-btn" ${pIdx===catObj.items.length-1?'disabled':''} onclick="event.stopPropagation();moveProduct('${catObj.cat}','${prod.id}',1)" title="Nach unten">▼</button>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="prod-name editable-name" onclick="event.stopPropagation();editProductName('${prod.id}', this)">${prod.name}</div>
+          <div class="prod-unit">${prod.unit||'—'}</div>
+        </div>
       </div></td>`;
 
       // Anfangsbestand (kommt von der Übersicht-Seite)
@@ -869,6 +917,12 @@ function renderTableActual(){
       tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
     });
+
+    tbHTML += `<tr class="prod-row add-artikel-row ${isFirst?'':'hidden'}" data-cat="${ci}">
+      <td class="col-artikel" colspan="99">
+        <button class="btn-add-artikel" onclick="openAddProductModal('${catObj.cat}')">+ Artikel hinzufügen</button>
+      </td>
+    </tr>`;
   });
 
   // ── SHOPS SECTION (Zentrallager only) ──
@@ -1013,6 +1067,140 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
   }
   return abGS;
 }
+
+// Lädt die Artikelliste aus Firestore (Collection 'produkte'). Beim allerersten Aufruf
+// ist die Collection leer — dann wird die bisherige feste Liste (DEFAULT_PRODUCTS)
+// einmalig dorthin übertragen, damit nichts verloren geht und alle bestehenden Daten
+// (die über die ID verknüpft sind) unverändert weiter funktionieren.
+async function loadProducts(){
+  try{
+    const snap = await db.collection('produkte').get();
+    if(snap.empty){
+      const batch = db.batch();
+      DEFAULT_PRODUCTS.forEach(catObj=>{
+        catObj.items.forEach((prod,idx)=>{
+          const ref = db.collection('produkte').doc(prod.id);
+          batch.set(ref, {name:prod.name, unit:prod.unit||'', icon:prod.icon||'📦', cat:catObj.cat, order:idx});
+        });
+      });
+      await batch.commit();
+      PRODUCTS = DEFAULT_PRODUCTS.map(c=>({cat:c.cat, items:c.items.map(p=>({...p}))}));
+      return;
+    }
+    const byCat = {};
+    snap.forEach(d=>{
+      const p = d.data();
+      if(!byCat[p.cat]) byCat[p.cat] = [];
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+    });
+    const catOrder = DEFAULT_PRODUCTS.map(c=>c.cat);
+    // falls jemals eine neue Kategorie in Firestore auftaucht, die nicht in DEFAULT_PRODUCTS ist,
+    // wird sie trotzdem angehängt, damit keine Artikel verschwinden
+    Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
+    PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
+      cat,
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+    }));
+  }catch(e){
+    console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    PRODUCTS = DEFAULT_PRODUCTS;
+  }
+}
+
+// ── ARTIKEL: Name inline bearbeiten ──
+window.editProductName = function(prodId, el){
+  if(el.querySelector('input')) return;
+  const oldName = el.textContent;
+  el.innerHTML = '';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'editable-name-input';
+  inp.value = oldName;
+  el.appendChild(inp);
+  inp.focus();
+  inp.select();
+  let done = false;
+  const save = async ()=>{
+    if(done) return;
+    done = true;
+    const newName = inp.value.trim();
+    if(!newName || newName===oldName){ el.textContent = oldName; return; }
+    el.textContent = newName;
+    try{
+      await db.collection('produkte').doc(prodId).update({name:newName});
+      PRODUCTS.forEach(c=>c.items.forEach(p=>{ if(p.id===prodId) p.name=newName; }));
+      showToast('Artikelname gespeichert ✓');
+    }catch(e){
+      showToast('Fehler beim Speichern: '+e.message);
+      el.textContent = oldName;
+    }
+  };
+  const cancel = ()=>{ done = true; el.textContent = oldName; };
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter') inp.blur();
+    if(e.key==='Escape'){ inp.removeEventListener('blur', save); cancel(); }
+  });
+};
+
+// ── ARTIKEL: Reihenfolge innerhalb der Kategorie ändern ──
+window.moveProduct = async function(cat, prodId, direction){
+  const catObj = PRODUCTS.find(c=>c.cat===cat);
+  if(!catObj) return;
+  const idx = catObj.items.findIndex(p=>p.id===prodId);
+  const newIdx = idx + direction;
+  if(idx<0 || newIdx<0 || newIdx>=catObj.items.length) return;
+  [catObj.items[idx], catObj.items[newIdx]] = [catObj.items[newIdx], catObj.items[idx]];
+  renderTableActual();
+  try{
+    const batch = db.batch();
+    catObj.items.forEach((p,i)=>{ batch.update(db.collection('produkte').doc(p.id), {order:i}); });
+    await batch.commit();
+  }catch(e){
+    showToast('Fehler beim Speichern der Reihenfolge: '+e.message);
+  }
+};
+
+// ── ARTIKEL: Neu hinzufügen ──
+let _addProductCat = null;
+window.openAddProductModal = function(cat){
+  _addProductCat = cat;
+  document.getElementById('ap-cat').value = cat;
+  document.getElementById('ap-name').value = '';
+  document.getElementById('ap-unit').value = '';
+  document.getElementById('ap-icon').value = '';
+  document.getElementById('modal-add-product').classList.add('show');
+  setTimeout(()=>document.getElementById('ap-name').focus(), 100);
+};
+window.closeAddProductModal = function(){
+  document.getElementById('modal-add-product').classList.remove('show');
+};
+window.saveNewProduct = async function(){
+  const name = document.getElementById('ap-name').value.trim();
+  if(!name){ showToast('Bitte einen Artikelnamen eingeben'); return; }
+  const unit = document.getElementById('ap-unit').value.trim();
+  const icon = document.getElementById('ap-icon').value.trim() || '📦';
+  const cat = _addProductCat;
+  const umlaut = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss'};
+  const slug = name.toLowerCase()
+    .replace(/[äöüß]/g, m=>umlaut[m])
+    .replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,20);
+  const id = (slug||'artikel') + '_' + Date.now().toString(36).slice(-5);
+  const catObj = PRODUCTS.find(c=>c.cat===cat);
+  const order = catObj ? catObj.items.length : 0;
+
+  showSpinner();
+  try{
+    await db.collection('produkte').doc(id).set({name, unit, icon, cat, order});
+    if(catObj) catObj.items.push({id, name, unit, icon});
+    closeAddProductModal();
+    showToast('Artikel hinzugefügt ✓');
+    renderTableActual();
+  }catch(e){
+    showToast('Fehler: '+e.message);
+  }
+  hideSpinner();
+};
 
 async function loadData(){
   showSpinner();
@@ -1474,7 +1662,7 @@ window.openEditWareneingang = function(date){
 }
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
   // Expose all functions to window after they are defined
   window.toggleSidebar         = toggleSidebar;
   window.closeSidebar          = closeSidebar;
@@ -1521,7 +1709,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   }
 
-  // Erstladung der Tabelle beim Öffnen der Seite
+  // Artikelliste zuerst laden (aus Firestore, mit Erstmigration), dann Tabelle rendern
+  await loadProducts();
   loadData();
 });
 
