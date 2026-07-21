@@ -492,6 +492,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   background:#eef2f6;border:1px solid var(--neon-green);
   color:var(--neon-cyan);font-family:'Rajdhani',sans-serif;font-size:.9rem;
   padding:.3rem .4rem;border-radius:4px;text-align:center;outline:none;transition:border-color .15s,box-shadow .15s}
+.plan-form-neu::placeholder{color:var(--text-dim);opacity:.6}
 .plan-form-neu:focus{border-color:var(--neon-green);box-shadow:0 0 8px rgba(5,150,105,.3)}
 .plan-form-neu::-webkit-outer-spin-button,.plan-form-neu::-webkit-inner-spin-button{-webkit-appearance:none}
 .plan-form-neu[type=number]{-moz-appearance:textfield}
@@ -2118,7 +2119,7 @@ window.openPlanForm=function(){
         </div>
         <span class="plan-form-akt">${akt||'—'}</span>
         <span class="plan-form-empf">${empf||'—'}</span>
-        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="0"
+        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
           value="${neuVal}" style="${neuStyle}">
       </div>`;
     });
