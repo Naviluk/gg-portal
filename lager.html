@@ -154,8 +154,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .pcfg-cat.open .pcfg-cat-items{display:block}
 .pcfg-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--glass-border)}
 .pcfg-item:last-of-type{border-bottom:none}
+.pcfg-item-icon-col{display:flex;flex-direction:column;align-items:center;gap:.2rem;flex-shrink:0}
 .pcfg-item-icon{width:32px;height:32px;flex-shrink:0;border-radius:50%;background:rgba(8,145,178,.1);
-  display:flex;align-items:center;justify-content:center;font-size:1rem}
+  display:flex;align-items:center;justify-content:center;font-size:1rem;overflow:hidden}
+.pcfg-icon-upload-btn{cursor:pointer;font-size:.65rem;color:var(--text-dim);transition:color .15s;line-height:1}
+.pcfg-icon-upload-btn:hover{color:var(--neon-cyan)}
 .pcfg-item-name{flex:2;min-width:0;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
   padding:.4rem .6rem;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.88rem;color:var(--text);outline:none}
 .pcfg-item-name:focus{border-color:var(--neon-cyan)}
@@ -257,7 +260,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .prod-row.hidden{display:none}
 .prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18)}
+  border:1px solid rgba(8,145,178,.18);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
@@ -634,6 +637,8 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const CLOUDINARY_CLOUD_ADM = 'dxohdlnbd';
+const CLOUDINARY_PRESET_ADM = 'jitjn4w5';
 
 // ── PRODUCT DATA ──
 const DEFAULT_PRODUCTS = [
@@ -867,7 +872,7 @@ function renderTableActual(){
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
-        <div class="prod-icon">${prod.icon||'📦'}</div>
+        <div class="prod-icon">${iconHTML(prod.icon, 34)}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
@@ -1070,6 +1075,19 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 // ist die Collection leer — dann wird die bisherige feste Liste (DEFAULT_PRODUCTS)
 // einmalig dorthin übertragen, damit nichts verloren geht und alle bestehenden Daten
 // (die über die ID verknüpft sind) unverändert weiter funktionieren.
+// Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
+// Bei einem Foto wird über die Cloudinary-Transformation eine kleine, komprimierte
+// Version angefordert (kein separates Hochladen mehrerer Größen nötig).
+function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+function iconHTML(icon, sizePx){
+  sizePx = sizePx || 34;
+  if(isImageIcon(icon)){
+    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+  }
+  return icon || '📦';
+}
+
 async function loadProducts(){
   try{
     const snap = await db.collection('produkte').get();
@@ -1134,7 +1152,12 @@ function renderProductConfig(){
       <div class="pcfg-cat-items">`;
     catObj.items.forEach((prod, pIdx)=>{
       html += `<div class="pcfg-item">
-        <div class="pcfg-item-icon">${prod.icon||'📦'}</div>
+        <div class="pcfg-item-icon-col">
+          <div class="pcfg-item-icon" id="pcfg-icon-${ci}-${pIdx}">${iconHTML(prod.icon, 32)}</div>
+          <label class="pcfg-icon-upload-btn" title="Foto hochladen">📷
+            <input type="file" accept="image/*" style="display:none" onchange="pcfgUploadIcon(${ci},${pIdx},this)">
+          </label>
+        </div>
         <input type="text" class="pcfg-item-name" value="${(prod.name||'').replace(/"/g,'&quot;')}"
           placeholder="Artikelname" oninput="pcfgUpdateField(${ci},${pIdx},'name',this.value)">
         <input type="text" class="pcfg-item-unit" value="${(prod.unit||'').replace(/"/g,'&quot;')}"
@@ -1151,6 +1174,28 @@ function renderProductConfig(){
   });
   cont.innerHTML = html;
 }
+
+window.pcfgUploadIcon = async function(ci, pIdx, inputEl){
+  const file = inputEl.files[0];
+  if(!file) return;
+  showSpinner();
+  try{
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET_ADM);
+    fd.append('folder', 'produkte');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_ADM}/image/upload`, {method:'POST', body:fd});
+    const data = await res.json();
+    if(!data.secure_url) throw new Error(data.error?.message || 'Upload fehlgeschlagen');
+    _pcfgData[ci].items[pIdx].icon = data.secure_url;
+    const iconEl = document.getElementById(`pcfg-icon-${ci}-${pIdx}`);
+    if(iconEl) iconEl.innerHTML = iconHTML(data.secure_url, 32);
+    showToast('Foto hochgeladen ✓');
+  }catch(e){
+    showToast('Fehler beim Hochladen: '+e.message);
+  }
+  hideSpinner();
+};
 
 window.togglePcfgCat = function(cat){
   _pcfgOpenCats[cat] = !_pcfgOpenCats[cat];
