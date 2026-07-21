@@ -192,7 +192,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .prod-row.hidden{display:none}
 .prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18)}
+  border:1px solid rgba(8,145,178,.18);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
@@ -695,6 +695,17 @@ function dedupedLiefSum(prodId){
 // Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
 // Kategorien dieser Seite (Getränke/Snacks). Reine Leseoperation — die Konfiguration
 // (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+// Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
+function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+function iconHTML(icon, sizePx){
+  sizePx = sizePx || 34;
+  if(isImageIcon(icon)){
+    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+  }
+  return icon || '📦';
+}
+
 async function loadProducts(){
   const pageCats = DEFAULT_GS_PRODUCTS.map(c=>c.cat);
   try{
@@ -777,7 +788,7 @@ function renderTable(){
       const eb=endbestandData[prod.id]!==undefined?endbestandData[prod.id]:'—';
       const ebS=eb!=='—'?'color:var(--neon-green)':'';
       tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}">`;
-      tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${prod.icon||'📦'}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
+      tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${iconHTML(prod.icon,34)}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
       tbHTML+=`<td class="num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abD}</span></td>`;
       tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tL||'—'}</td>`;
       tbHTML+=`<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${tG||'—'}</td>`;
@@ -825,7 +836,7 @@ window.openForm=function(type,prefillItems,editId,prefillDate){
     html+=`<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-arrow">▶</span></div><div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
       const hasPre=formItems[prod.id]!==undefined;
-      html+=`<div class="modal-prod-row"><div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div><div class="modal-prod-name-block"><span class="modal-prod-name">${prod.name}</span>${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}</div><input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." value="${hasPre?formItems[prod.id]:''}" oninput="updateFormQty('${prod.id}',this.value)"></div>`;
+      html+=`<div class="modal-prod-row"><div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div><div class="modal-prod-name-block"><span class="modal-prod-name">${prod.name}</span>${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}</div><input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." value="${hasPre?formItems[prod.id]:''}" oninput="updateFormQty('${prod.id}',this.value)"></div>`;
     });
     html+=`</div></div>`;
   });
@@ -841,9 +852,9 @@ window.closeForm=function(){document.getElementById('modal-form').classList.remo
 
 window.toggleFormProd=function(prodId){const cb=document.getElementById('fcb-'+prodId);const inp=document.getElementById('fqty-'+prodId);const ok=cb.classList.toggle('checked');inp.classList.toggle('show',ok);if(ok){inp.focus();if(formItems[prodId]===undefined)formItems[prodId]=0;}else{delete formItems[prodId];}updateFormPreview()};
 window.updateFormQty=function(prodId,val){if(val!=='')formItems[prodId]=parseFloat(val)||0;updateFormPreview()};
-function updateFormPreview(){const ids=Object.keys(formItems);const sel=document.getElementById('form-selected-list');if(!ids.length){sel.style.display='none';return;}sel.style.display='block';let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div class="selected-cat-label">${c.cat}</div>`;lc=c.cat;}html+=`<div class="selected-item"><span class="selected-item-name">${p.icon} ${p.name}<span class="selected-item-unit">${p.unit||''}</span></span><span class="selected-item-qty">${formItems[p.id]||0}</span></div>`;}});});document.getElementById('form-selected-items').innerHTML=html}
+function updateFormPreview(){const ids=Object.keys(formItems);const sel=document.getElementById('form-selected-list');if(!ids.length){sel.style.display='none';return;}sel.style.display='block';let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div class="selected-cat-label">${c.cat}</div>`;lc=c.cat;}html+=`<div class="selected-item"><span class="selected-item-name">${iconHTML(p.icon,20)} ${p.name}<span class="selected-item-unit">${p.unit||''}</span></span><span class="selected-item-qty">${formItems[p.id]||0}</span></div>`;}});});document.getElementById('form-selected-items').innerHTML=html}
 
-window.buildFormConfirm=function(){const ids=Object.keys(formItems);if(!ids.length){showToast('Bitte mindestens einen Artikel auswählen.');return;}const date=document.getElementById('form-date').value;if(!date){showToast('Bitte Datum auswählen.');return;}ids.forEach(id=>{const inp=document.getElementById('fqty-'+id);if(inp&&inp.value!=='')formItems[id]=parseFloat(inp.value)||0;});const d=new Date(date);document.getElementById('form-confirm-date').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${c.cat}</div>`;lc=c.cat;}html+=`<div class="confirm-item"><span class="ci-name">${p.icon} ${p.name} <span class="ci-unit">${p.unit||''}</span></span><span class="ci-qty">${formItems[p.id]||0}</span></div>`;}}); });document.getElementById('form-confirm-list').innerHTML=html;document.getElementById('form-step1').style.display='none';document.getElementById('form-step2').style.display='';};
+window.buildFormConfirm=function(){const ids=Object.keys(formItems);if(!ids.length){showToast('Bitte mindestens einen Artikel auswählen.');return;}const date=document.getElementById('form-date').value;if(!date){showToast('Bitte Datum auswählen.');return;}ids.forEach(id=>{const inp=document.getElementById('fqty-'+id);if(inp&&inp.value!=='')formItems[id]=parseFloat(inp.value)||0;});const d=new Date(date);document.getElementById('form-confirm-date').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${c.cat}</div>`;lc=c.cat;}html+=`<div class="confirm-item"><span class="ci-name">${iconHTML(p.icon,20)} ${p.name} <span class="ci-unit">${p.unit||''}</span></span><span class="ci-qty">${formItems[p.id]||0}</span></div>`;}}); });document.getElementById('form-confirm-list').innerHTML=html;document.getElementById('form-step1').style.display='none';document.getElementById('form-step2').style.display='';};
 window.backToFormEdit=function(){document.getElementById('form-step1').style.display='';document.getElementById('form-step2').style.display='none'};
 window.saveFormEntry=async function(){const date=document.getElementById('form-date').value;const monat=date.slice(0,7);const col=formType==='geraet'?'gs_geraet':'gs_theke';const entry={lager:currentLager,datum:date,monat,items:{...formItems},updatedAt:new Date().toISOString()};showSpinner();try{if(formEditId){await db.collection(col).doc(formEditId).update(entry);showToast('Eintrag aktualisiert ✓');}else{entry.createdAt=new Date().toISOString();await db.collection(col).add(entry);showToast('Eintrag gespeichert ✓');}closeForm();await loadData();}catch(e){hideSpinner();showToast('Fehler: '+e.message)}};
 

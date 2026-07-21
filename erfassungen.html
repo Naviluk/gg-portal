@@ -192,7 +192,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .prod-row.hidden{display:none}
 .prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18)}
+  border:1px solid rgba(8,145,178,.18);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
@@ -473,7 +473,7 @@ svg.nav-arrow{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:
   color:var(--neon-yellow);text-transform:uppercase;padding:.4rem .6rem;background:#eef2f6;border-radius:6px;margin-bottom:.3rem}
 .inv-form-row{display:flex;align-items:center;gap:.5rem;padding:.28rem .3rem;border-radius:4px}
 .inv-form-row:hover{background:rgba(8,145,178,.03)}
-.inv-form-icon{width:22px;height:22px;border-radius:50%;background:rgba(8,145,178,.1);
+.inv-form-icon{width:22px;height:22px;border-radius:50%;overflow:hidden;background:rgba(8,145,178,.1);
   display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
 .inv-form-name{flex:1;font-size:.82rem}
 .inv-form-unit{font-size:.68rem;color:var(--text-dim);flex-shrink:0;min-width:40px}
@@ -542,7 +542,7 @@ input[type=date]:focus{border-color:var(--neon-cyan)}
 .ai-inv-cat.open .ai-inv-cat-items{display:block}
 .ai-inv-item-row{display:flex;align-items:center;gap:.5rem;padding:.32rem .4rem;border-radius:4px;transition:background .15s}
 .ai-inv-item-row:hover{background:rgba(8,145,178,.04)}
-.ai-item-icon{width:24px;height:24px;border-radius:50%;background:rgba(8,145,178,.12);
+.ai-item-icon{width:24px;height:24px;border-radius:50%;overflow:hidden;background:rgba(8,145,178,.12);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
 .ai-item-name{flex:1;font-size:.84rem;color:var(--text)}
 .ai-item-unit{font-size:.7rem;color:var(--text-dim);flex-shrink:0}
@@ -945,6 +945,17 @@ window.onFilterChange = loadSubmissions;
 // Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
 // Kategorien dieser Seite (Süssigkeiten/Haushaltsartikel). Reine Leseoperation — die
 // Konfiguration (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+// Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
+function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+function iconHTML(icon, sizePx){
+  sizePx = sizePx || 34;
+  if(isImageIcon(icon)){
+    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+  }
+  return icon || '📦';
+}
+
 async function loadProducts(){
   const pageCats = DEFAULT_ALL_PRODUCTS.map(c=>c.cat);
   try{
@@ -1113,7 +1124,7 @@ window.openProcessForm = async function(){
       const val = prefilled[prod.id]||'';
       const cls = val?'inv-form-qty prefilled':'inv-form-qty';
       html+=`<div class="inv-form-row">
-        <div class="inv-form-icon">${prod.icon||'📦'}</div>
+        <div class="inv-form-icon">${iconHTML(prod.icon,26)}</div>
         <span class="inv-form-name">${prod.name}</span>
         <span class="inv-form-unit">${prod.unit||''}</span>
         <input class="${cls}" type="number" min="0" step="0.1" placeholder="0" value="${val}" data-id="${prod.id}">
@@ -1231,7 +1242,7 @@ function renderConfigContent(){
     cat.items.forEach(prod=>{
       const checked=sel.has(prod.id)?'checked':'';
       html+=`<div class="config-item">
-        <label><input type="checkbox" value="${prod.id}" ${checked}>${prod.icon||'📦'} ${prod.name} <span style="color:var(--text-dim);font-size:.75rem">${prod.unit||''}</span></label>
+        <label><input type="checkbox" value="${prod.id}" ${checked}>${iconHTML(prod.icon,20)} ${prod.name} <span style="color:var(--text-dim);font-size:.75rem">${prod.unit||''}</span></label>
       </div>`;
     });
     html+='</div></div>';
@@ -1423,7 +1434,7 @@ function renderAiList(){
     cat.items.forEach(prod=>{
       const val=aiItems[prod.id]||'';
       html+=`<div class="ai-inv-item-row">
-        <div class="ai-item-icon">${prod.icon||'📦'}</div>
+        <div class="ai-item-icon">${iconHTML(prod.icon,26)}</div>
         <span class="ai-item-name">${prod.name}</span>
         <span class="ai-item-unit">${prod.unit||''}</span>
         <input class="ai-item-qty" type="number" min="0" step="0.1" placeholder="0" value="${val}" data-id="${prod.id}"

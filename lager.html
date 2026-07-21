@@ -141,6 +141,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .btn-icon-settings:hover{border-color:var(--neon-cyan);box-shadow:0 3px 8px rgba(8,145,178,.15);transform:translateY(-1px)}
 
 /* Artikel-Konfiguration Modal */
+.pcfg-tabs{display:flex;gap:.5rem;margin-bottom:1rem;border-bottom:1px solid var(--glass-border)}
+.pcfg-tab{background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;
+  padding:.5rem .3rem;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;
+  color:var(--text-dim);transition:all .15s}
+.pcfg-tab.active{color:var(--neon-cyan);border-bottom-color:var(--neon-cyan);font-weight:700}
+.pcfg-tab:hover:not(.active){color:var(--text)}
 .pcfg-cat{margin-bottom:.6rem;border:1px solid var(--glass-border);border-radius:8px;overflow:hidden}
 .pcfg-cat-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;
   background:var(--bg3);cursor:pointer;user-select:none}
@@ -489,10 +495,15 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="modal-overlay" id="modal-product-config" onclick="if(event.target===this)closeProductConfigModal()">
   <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="closeProductConfigModal()">✕</button>
-    <div class="modal-title">⚙️ Artikel konfigurieren</div>
+    <div class="modal-title">⚙️ Konfiguration</div>
+    <div class="pcfg-tabs">
+      <button class="pcfg-tab active" id="pcfg-tab-artikel" onclick="switchPcfgTab('artikel')">📦 Artikel</button>
+      <button class="pcfg-tab" id="pcfg-tab-shops" onclick="switchPcfgTab('shops')">🏪 Shops</button>
+    </div>
     <div id="pcfg-content"></div>
+    <div id="scfg-content" style="display:none"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveProductConfig()">💾 Speichern</button>
+      <button class="btn btn-primary" onclick="saveAllConfig()">💾 Speichern</button>
       <button class="btn btn-ghost" onclick="closeProductConfigModal()">Abbrechen</button>
     </div>
   </div>
@@ -747,8 +758,11 @@ const DEFAULT_PRODUCTS = [
 ];
 let PRODUCTS = DEFAULT_PRODUCTS;
 
-const SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
-const SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+const DEFAULT_SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
+const DEFAULT_SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+let SHOPS_PRIMARY = DEFAULT_SHOPS_PRIMARY;
+let SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
+let SHOPS_DATA = [];
 
 // ── STATE ──
 let currentLager    = 'zentrallager';
@@ -930,10 +944,16 @@ function renderTableActual(){
 
   // ── SHOPS SECTION (Zentrallager only) ──
   if(isZentral){
-    const allShops = new Set();
-    wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) allShops.add(s.shop); }); });
+    const usedShopNames = new Set();
+    wareneingangs.forEach(w=>{ if(w.shops) w.shops.forEach(s=>{ if(s.shop) usedShopNames.add(s.shop); }); });
+    // Reihenfolge kommt aus der Konfiguration (SHOPS_DATA), gefiltert auf tatsächlich benutzte Shops.
+    // Shops, die in alten Daten vorkommen, aber nicht mehr konfiguriert sind, werden trotzdem angehängt.
+    const allShops = SHOPS_DATA.filter(s=>usedShopNames.has(s.name)).map(s=>s.name);
+    usedShopNames.forEach(name=>{ if(!allShops.includes(name)) allShops.push(name); });
+    const shopIconLookup = {};
+    SHOPS_DATA.forEach(s=>{ shopIconLookup[s.name] = s.icon; });
 
-    if(allShops.size > 0){
+    if(allShops.length > 0){
       tbHTML += `<tr class="shops-separator"><td colspan="999" style="padding:0;height:2px;background:rgba(219,39,119,.35)"></td></tr>`;
       tbHTML += `<tr class="cat-row open shops-cat-row" data-shops="1" onclick="toggleShopsSection()">
         <td class="col-artikel"><div class="cat-label" style="color:var(--neon-magenta)"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
@@ -946,7 +966,7 @@ function renderTableActual(){
       allShops.forEach(shop=>{
         tbHTML += `<tr class="shop-row-item">`;
         tbHTML += `<td class="col-artikel"><div class="prod-info" style="gap:.4rem">
-          <div class="prod-icon" style="font-size:.8rem;background:rgba(219,39,119,.12);border-color:rgba(219,39,119,.3)">🏪</div>
+          <div class="prod-icon" style="font-size:.8rem;background:rgba(219,39,119,.12);border-color:rgba(219,39,119,.3)">${iconHTML(shopIconLookup[shop]||'🏪',26)}</div>
           <div><div class="prod-name" style="font-size:.82rem">${shop}</div></div>
         </div></td>`;
         // Anfangsbestand placeholder
@@ -1088,6 +1108,39 @@ function iconHTML(icon, sizePx){
   return icon || '📦';
 }
 
+// Lädt die Geschäfte-Liste aus Firestore (Collection 'shops'). Beim allerersten Aufruf
+// wird die bisherige feste Liste (DEFAULT_SHOPS_PRIMARY/SECONDARY) einmalig übertragen.
+async function loadShops(){
+  const slug = name => 'shop_' + name.toLowerCase().replace(/[äöüß]/g, m=>({ä:'ae',ö:'oe',ü:'ue',ß:'ss'}[m])).replace(/[^a-z0-9]+/g,'_');
+  try{
+    const snap = await db.collection('shops').get();
+    if(snap.empty){
+      const batch = db.batch();
+      DEFAULT_SHOPS_PRIMARY.forEach((name,idx)=>{ batch.set(db.collection('shops').doc(slug(name)), {name, icon:'🏪', group:'primary', order:idx}); });
+      DEFAULT_SHOPS_SECONDARY.forEach((name,idx)=>{ batch.set(db.collection('shops').doc(slug(name)), {name, icon:'🏪', group:'secondary', order:idx}); });
+      await batch.commit();
+      SHOPS_DATA = [
+        ...DEFAULT_SHOPS_PRIMARY.map((name,idx)=>({id:slug(name),name,icon:'🏪',group:'primary',order:idx})),
+        ...DEFAULT_SHOPS_SECONDARY.map((name,idx)=>({id:slug(name),name,icon:'🏪',group:'secondary',order:idx})),
+      ];
+    } else {
+      SHOPS_DATA = [];
+      snap.forEach(d=>{
+        const s = d.data();
+        SHOPS_DATA.push({id:d.id, name:s.name, icon:s.icon||'🏪', group:s.group||'primary', order:Number(s.order)||0});
+      });
+    }
+    SHOPS_DATA.sort((a,b)=>a.order-b.order);
+    SHOPS_PRIMARY = SHOPS_DATA.filter(s=>s.group==='primary').map(s=>s.name);
+    SHOPS_SECONDARY = SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>s.name);
+  }catch(e){
+    console.warn('Shops laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    SHOPS_PRIMARY = DEFAULT_SHOPS_PRIMARY;
+    SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
+    SHOPS_DATA = [];
+  }
+}
+
 async function loadProducts(){
   try{
     const snap = await db.collection('produkte').get();
@@ -1126,17 +1179,34 @@ async function loadProducts(){
 // ── ARTIKEL-KONFIGURATION (Modal): Name/Reihenfolge/Neue Artikel ──
 let _pcfgData = null;
 let _pcfgOpenCats = {};
+let _scfgData = null;
+let _scfgOpenGroups = {primary:true, secondary:false};
 
 window.openProductConfigModal = function(){
   _pcfgData = PRODUCTS.map(c=>({cat:c.cat, items:c.items.map(p=>({...p}))}));
   _pcfgOpenCats = {};
   _pcfgData.forEach((c,i)=>{ _pcfgOpenCats[c.cat] = i===0; });
   renderProductConfig();
+
+  _scfgData = {
+    primary:   SHOPS_DATA.filter(s=>s.group==='primary').map(s=>({...s})),
+    secondary: SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>({...s})),
+  };
+  renderShopsConfig();
+
+  switchPcfgTab('artikel');
   document.getElementById('modal-product-config').classList.add('show');
 };
 window.closeProductConfigModal = function(){
   document.getElementById('modal-product-config').classList.remove('show');
   _pcfgData = null;
+  _scfgData = null;
+};
+window.switchPcfgTab = function(tab){
+  document.getElementById('pcfg-tab-artikel').classList.toggle('active', tab==='artikel');
+  document.getElementById('pcfg-tab-shops').classList.toggle('active', tab==='shops');
+  document.getElementById('pcfg-content').style.display = tab==='artikel' ? '' : 'none';
+  document.getElementById('scfg-content').style.display = tab==='shops' ? '' : 'none';
 };
 
 function renderProductConfig(){
@@ -1221,10 +1291,94 @@ window.pcfgAddNew = function(ci){
   }, 50);
 };
 
-window.saveProductConfig = async function(){
+function renderShopsConfig(){
+  const cont = document.getElementById('scfg-content');
+  let html = '';
+  const groups = [['primary','Hauptgeschäfte'],['secondary','Weitere Geschäfte']];
+  groups.forEach(([key,label])=>{
+    const open = _scfgOpenGroups[key];
+    const items = _scfgData[key];
+    html += `<div class="pcfg-cat${open?' open':''}">
+      <div class="pcfg-cat-header" onclick="toggleScfgGroup('${key}')">
+        <span class="pcfg-cat-label">${label} <span class="pcfg-cat-count">(${items.length})</span></span>
+        <span class="pcfg-cat-arrow">▶</span>
+      </div>
+      <div class="pcfg-cat-items">`;
+    items.forEach((shop, sIdx)=>{
+      html += `<div class="pcfg-item">
+        <div class="pcfg-item-icon-col">
+          <div class="pcfg-item-icon" id="scfg-icon-${key}-${sIdx}">${iconHTML(shop.icon, 32)}</div>
+          <label class="pcfg-icon-upload-btn" title="Foto hochladen">📷
+            <input type="file" accept="image/*" style="display:none" onchange="scfgUploadIcon('${key}',${sIdx},this)">
+          </label>
+        </div>
+        <input type="text" class="pcfg-item-name" style="flex:2.5" value="${(shop.name||'').replace(/"/g,'&quot;')}"
+          placeholder="Geschäftsname" oninput="scfgUpdateField('${key}',${sIdx},'name',this.value)">
+        <div class="pcfg-item-arrows">
+          <button ${sIdx===0?'disabled':''} onclick="scfgMove('${key}',${sIdx},-1)" title="Nach oben">▲</button>
+          <button ${sIdx===items.length-1?'disabled':''} onclick="scfgMove('${key}',${sIdx},1)" title="Nach unten">▼</button>
+        </div>
+      </div>`;
+    });
+    html += `<button class="btn-add-artikel" onclick="scfgAddNew('${key}')">+ Geschäft hinzufügen</button>
+      </div>
+    </div>`;
+  });
+  cont.innerHTML = html;
+}
+
+window.toggleScfgGroup = function(key){
+  _scfgOpenGroups[key] = !_scfgOpenGroups[key];
+  renderShopsConfig();
+};
+window.scfgUpdateField = function(group, idx, field, val){
+  _scfgData[group][idx][field] = val;
+};
+window.scfgMove = function(group, idx, dir){
+  const items = _scfgData[group];
+  const newIdx = idx + dir;
+  if(newIdx<0 || newIdx>=items.length) return;
+  [items[idx], items[newIdx]] = [items[newIdx], items[idx]];
+  renderShopsConfig();
+};
+window.scfgAddNew = function(group){
+  const id = '__newshop_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  _scfgData[group].push({id, name:'', icon:'🏪', _isNew:true});
+  renderShopsConfig();
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('#scfg-content .pcfg-item-name');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  }, 50);
+};
+window.scfgUploadIcon = async function(group, idx, inputEl){
+  const file = inputEl.files[0];
+  if(!file) return;
+  showSpinner();
+  try{
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET_ADM);
+    fd.append('folder', 'shops');
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_ADM}/image/upload`, {method:'POST', body:fd});
+    const data = await res.json();
+    if(!data.secure_url) throw new Error(data.error?.message || 'Upload fehlgeschlagen');
+    _scfgData[group][idx].icon = data.secure_url;
+    const iconEl = document.getElementById(`scfg-icon-${group}-${idx}`);
+    if(iconEl) iconEl.innerHTML = iconHTML(data.secure_url, 32);
+    showToast('Foto hochgeladen ✓');
+  }catch(e){
+    showToast('Fehler beim Hochladen: '+e.message);
+  }
+  hideSpinner();
+};
+
+window.saveAllConfig = async function(){
   showSpinner();
   try{
     const batch = db.batch();
+    const umlaut = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss'};
+
+    // Artikel
     const validData = [];
     _pcfgData.forEach(catObj=>{
       const validItems = [];
@@ -1233,7 +1387,6 @@ window.saveProductConfig = async function(){
         if(!name) return; // leere (z.B. abgebrochene Neuanlage) werden ignoriert
         let id = p.id;
         if(p._isNew || id.startsWith('__new_')){
-          const umlaut = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss'};
           const slug = name.toLowerCase().replace(/[äöüß]/g,m=>umlaut[m]).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,20);
           id = (slug||'artikel') + '_' + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2,4);
         }
@@ -1243,10 +1396,32 @@ window.saveProductConfig = async function(){
       });
       validData.push({cat:catObj.cat, items:validItems});
     });
+
+    // Shops
+    const newShopsData = [];
+    ['primary','secondary'].forEach(group=>{
+      _scfgData[group].forEach((s, idx)=>{
+        const name = (s.name||'').trim();
+        if(!name) return;
+        let id = s.id;
+        if(s._isNew || id.startsWith('__newshop_')){
+          const slug = name.toLowerCase().replace(/[äöüß]/g,m=>umlaut[m]).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,20);
+          id = 'shop_' + (slug||'geschaeft') + '_' + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2,4);
+        }
+        const shopItem = {id, name, icon:s.icon||'🏪', group, order:idx};
+        newShopsData.push(shopItem);
+        batch.set(db.collection('shops').doc(id), {name:shopItem.name, icon:shopItem.icon, group, order:idx});
+      });
+    });
+
     await batch.commit();
     PRODUCTS = validData;
+    SHOPS_DATA = newShopsData;
+    SHOPS_PRIMARY = SHOPS_DATA.filter(s=>s.group==='primary').map(s=>s.name);
+    SHOPS_SECONDARY = SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>s.name);
+
     closeProductConfigModal();
-    showToast('Artikel gespeichert ✓');
+    showToast('Gespeichert ✓');
     renderTableActual();
   }catch(e){
     showToast('Fehler beim Speichern: '+e.message);
@@ -1420,7 +1595,7 @@ window.openWareneingang = function(prefillDate){
       const unitStr = prod.unit ? prod.unit : '';
       html += `<div class="modal-prod-row" id="we-row-${prod.id}">
         <div class="prod-checkbox" id="we-cb-${prod.id}" onclick="toggleWeProd('${prod.id}')"></div>
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div>
         <div class="modal-prod-name-block">
           <span class="modal-prod-name">${prod.name}</span>
           ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
@@ -1464,7 +1639,7 @@ function updateSelectedPreview(){
         const selQty = weSelectedItems[prod.id]||0;
         const selUnit = prod.unit||'';
         html+=`<div class="selected-item">
-          <span class="selected-item-name">${prod.icon} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
+          <span class="selected-item-name">${iconHTML(prod.icon,20)} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
           <span class="selected-item-qty">${selQty}</span>
         </div>`;
       }
@@ -1549,7 +1724,7 @@ window.buildConfirm = function(){
         const unitTxt = prod.unit||'';
         const qty = weSelectedItems[prod.id]||0;
         html+=`<div class="confirm-item">
-          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+          <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
           <span class="ci-qty">${qty}</span>
         </div>`;
       }
@@ -1648,7 +1823,7 @@ window.buildConfirmLieferung = function(){
     catObj.items.forEach(prod=>{
       if(ids.includes(prod.id)){
         if(catObj.cat!==lastCat){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;lastCat=catObj.cat;}
-        html+=`<div class="confirm-item"><span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
+        html+=`<div class="confirm-item"><span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
       }
     });
   });
@@ -1762,7 +1937,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
 
   // Artikelliste zuerst laden (aus Firestore, mit Erstmigration), dann Tabelle rendern
-  await loadProducts();
+  await Promise.all([loadProducts(), loadShops()]);
   loadData();
 });
 

@@ -192,7 +192,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .prod-row.hidden{display:none}
 .prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18)}
+  border:1px solid rgba(8,145,178,.18);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
@@ -683,8 +683,10 @@ const DEFAULT_PRODUCTS = [
 ];
 let PRODUCTS = DEFAULT_PRODUCTS;
 
-const SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
-const SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+const DEFAULT_SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
+const DEFAULT_SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+let SHOPS_PRIMARY = DEFAULT_SHOPS_PRIMARY;
+let SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
 
 // ── STATE ──
 let currentLager    = 'zentrallager';
@@ -764,7 +766,7 @@ function renderTableActual(){
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
-        <div class="prod-icon">${prod.icon||'📦'}</div>
+        <div class="prod-icon">${iconHTML(prod.icon,34)}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
@@ -821,6 +823,30 @@ window.toggleCategory = function(row){
 // Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
 // Kategorien dieser Seite (Süssigkeiten/Haushaltsartikel). Reine Leseoperation — die
 // Konfiguration (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+// Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
+function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+function iconHTML(icon, sizePx){
+  sizePx = sizePx || 34;
+  if(isImageIcon(icon)){
+    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+  }
+  return icon || '📦';
+}
+
+// Lädt die Geschäfte-Liste aus Firestore (read-only — die Konfiguration passiert auf lager.html)
+async function loadShops(){
+  try{
+    const snap = await db.collection('shops').get();
+    if(snap.empty) return;
+    const data = [];
+    snap.forEach(d=>{ const s=d.data(); data.push({id:d.id,name:s.name,icon:s.icon||'🏪',group:s.group||'primary',order:Number(s.order)||0}); });
+    data.sort((a,b)=>a.order-b.order);
+    SHOPS_PRIMARY = data.filter(s=>s.group==='primary').map(s=>s.name);
+    SHOPS_SECONDARY = data.filter(s=>s.group==='secondary').map(s=>s.name);
+  }catch(e){ console.warn('Shops laden fehlgeschlagen, nutze Standard-Liste:', e.message); }
+}
+
 async function loadProducts(){
   const pageCats = DEFAULT_PRODUCTS.map(c=>c.cat);
   try{
@@ -995,7 +1021,7 @@ window.openWareneingang = function(prefillDate){
       const unitStr = prod.unit ? prod.unit : '';
       html += `<div class="modal-prod-row" id="we-row-${prod.id}">
         <div class="prod-checkbox" id="we-cb-${prod.id}" onclick="toggleWeProd('${prod.id}')"></div>
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${prod.icon||'📦'}</div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div>
         <div class="modal-prod-name-block">
           <span class="modal-prod-name">${prod.name}</span>
           ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
@@ -1039,7 +1065,7 @@ function updateSelectedPreview(){
         const selQty = weSelectedItems[prod.id]||0;
         const selUnit = prod.unit||'';
         html+=`<div class="selected-item">
-          <span class="selected-item-name">${prod.icon} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
+          <span class="selected-item-name">${iconHTML(prod.icon,20)} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
           <span class="selected-item-qty">${selQty}</span>
         </div>`;
       }
@@ -1098,7 +1124,7 @@ window.buildConfirm = function(){
         const unitTxt = prod.unit||'';
         const qty = weSelectedItems[prod.id]||0;
         html+=`<div class="confirm-item">
-          <span class="ci-name">${prod.icon} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+          <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
           <span class="ci-qty">${qty}</span>
         </div>`;
       }
@@ -1224,7 +1250,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     }
   }
 
-  await loadProducts();
+  await Promise.all([loadProducts(), loadShops()]);
   loadData();
 
   document.getElementById('lager-tbody').addEventListener('click', e=>{
