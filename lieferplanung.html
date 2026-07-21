@@ -2105,8 +2105,11 @@ window.openPlanForm=function(){
     catObj.items.forEach(prod=>{
       const akt   = aktValues[prod.id]||0;
       const empf  = empfValues[prod.id]||0;
-      const neuVal= empf||'';
-      const neuStyle = empf ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
+      const gespeichert = Number((planData[currentLager]||{})[prod.id])||0;
+      // Bereits gespeicherter Plan-Wert hat Vorrang vor der Empfehlung — sonst sieht es
+      // beim erneuten Öffnen so aus, als wäre der gespeicherte Wert verschwunden.
+      const neuVal = gespeichert>0 ? gespeichert : (empf||'');
+      const neuStyle = neuVal ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
       html+=`<div class="plan-form-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
         <div class="plan-form-name">
@@ -2197,13 +2200,22 @@ window.savePlan=async function(){
   const monat=datum.slice(0,7);
   showSpinner();
   try{
-    await db.collection('lp_planung').add({
-      lager:currentLager, monat, datum, items, type:planType,
-      createdAt:new Date().toISOString()
-    });
     // Nur das aktuell ausgewählte Lager aktualisieren — nichts wird zwischen Lagern vermischt
     if(!planData[currentLager]) planData[currentLager]={};
     Object.assign(planData[currentLager], items);
+    // EIN Dokument pro Lager (deterministische ID = Lagername) statt bei jedem Speichern ein
+    // neues Dokument anzulegen — verhindert, dass sich mehrere Dokumente ansammeln, deren
+    // Zusammenführung beim Laden nicht eindeutig wäre (Firestore garantiert keine Reihenfolge).
+    // Alte Dokumente für dieses Lager entfernen (falls vor diesem Fix mehrere durch
+    // wiederholtes Speichern entstanden sind) und durch das eine, aktuelle ersetzen.
+    const oldSnap = await db.collection('lp_planung').where('lager','==',currentLager).get();
+    const cleanupBatch = db.batch();
+    oldSnap.forEach(d=>{ if(d.id!==currentLager) cleanupBatch.delete(d.ref); });
+    await cleanupBatch.commit();
+    await db.collection('lp_planung').doc(currentLager).set({
+      lager:currentLager, monat, datum, items:planData[currentLager], type:planType,
+      updatedAt:new Date().toISOString()
+    });
     showToast(planType==='einkauf'?'Einkauf gespeichert ✓':'Lieferung gespeichert ✓');
     closePlanConfirm();closePlan();renderTable();
   }catch(e){showToast('Fehler: '+e.message);}
