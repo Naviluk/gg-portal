@@ -833,7 +833,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const ALL_PRODUCTS = [
+const DEFAULT_ALL_PRODUCTS = [
   {cat:'Süssigkeiten', items:[
     {id:'croissant',name:'Croissants',unit:'5 St.',icon:'🥐'},
     {id:'madeleine',name:'Madeleines',unit:'',icon:'🧁'},
@@ -901,6 +901,7 @@ const ALL_PRODUCTS = [
     {id:'feuerzg',name:'Feuerzeuge',unit:'',icon:'🔥'},
   ]},
 ];
+let ALL_PRODUCTS = DEFAULT_ALL_PRODUCTS;
 
 const LAGERS = ['nettetal','brüggen','viersen','köln'];
 const LAGER_NAMES = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
@@ -941,6 +942,31 @@ window.closeFullPhoto = ()=>document.getElementById('photo-full').classList.remo
 
 // ── LOAD SUBMISSIONS ──
 window.onFilterChange = loadSubmissions;
+// Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
+// Kategorien dieser Seite (Süssigkeiten/Haushaltsartikel). Reine Leseoperation — die
+// Konfiguration (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+async function loadProducts(){
+  const pageCats = DEFAULT_ALL_PRODUCTS.map(c=>c.cat);
+  try{
+    const snap = await db.collection('produkte').get();
+    if(snap.empty){ ALL_PRODUCTS = DEFAULT_ALL_PRODUCTS; return; }
+    const byCat = {};
+    snap.forEach(d=>{
+      const p = d.data();
+      if(!pageCats.includes(p.cat)) return;
+      if(!byCat[p.cat]) byCat[p.cat] = [];
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+    });
+    ALL_PRODUCTS = pageCats.filter(cat=>byCat[cat]).map(cat=>({
+      cat,
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+    }));
+  }catch(e){
+    console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    ALL_PRODUCTS = DEFAULT_ALL_PRODUCTS;
+  }
+}
+
 async function loadSubmissions(){
   showSpinner();
   const lager   = document.getElementById('sel-lager').value;
@@ -1477,7 +1503,7 @@ window.confirmDelete = async function(){
 };
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
   // Склад запоминается между страницами и после обновления (localStorage)
   const _savedLager = localStorage.getItem('gg_selected_lager');
   const _selLagerEl = document.getElementById('sel-lager');
@@ -1497,6 +1523,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   }
 
+  await loadProducts();
   loadSubmissions();
 });
 </script>

@@ -135,6 +135,42 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
   box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
 .btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
+.btn-icon-settings{width:2.6rem;height:2.6rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid var(--glass-border);border-radius:8px;font-size:1.1rem;cursor:pointer;
+  transition:all .2s;box-shadow:0 1px 3px rgba(30,37,50,.06)}
+.btn-icon-settings:hover{border-color:var(--neon-cyan);box-shadow:0 3px 8px rgba(8,145,178,.15);transform:translateY(-1px)}
+
+/* Artikel-Konfiguration Modal */
+.pcfg-cat{margin-bottom:.6rem;border:1px solid var(--glass-border);border-radius:8px;overflow:hidden}
+.pcfg-cat-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;
+  background:var(--bg3);cursor:pointer;user-select:none}
+.pcfg-cat-header:hover{background:#e5eaf1}
+.pcfg-cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:.06em;color:var(--neon-yellow);text-transform:uppercase}
+.pcfg-cat-count{color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0}
+.pcfg-cat-arrow{font-size:.7rem;color:var(--text-dim);transition:transform .2s}
+.pcfg-cat.open .pcfg-cat-arrow{transform:rotate(90deg)}
+.pcfg-cat-items{display:none;padding:.6rem}
+.pcfg-cat.open .pcfg-cat-items{display:block}
+.pcfg-item{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid var(--glass-border)}
+.pcfg-item:last-of-type{border-bottom:none}
+.pcfg-item-icon{width:32px;height:32px;flex-shrink:0;border-radius:50%;background:rgba(8,145,178,.1);
+  display:flex;align-items:center;justify-content:center;font-size:1rem}
+.pcfg-item-name{flex:2;min-width:0;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  padding:.4rem .6rem;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.88rem;color:var(--text);outline:none}
+.pcfg-item-name:focus{border-color:var(--neon-cyan)}
+.pcfg-item-unit{flex:1;min-width:0;max-width:110px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  padding:.4rem .5rem;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;color:var(--text-dim);outline:none}
+.pcfg-item-unit:focus{border-color:var(--neon-cyan)}
+.pcfg-item-arrows{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.pcfg-item-arrows button{background:none;border:none;cursor:pointer;color:var(--text-dim);
+  font-size:.6rem;line-height:1;padding:.2rem .35rem;border-radius:3px;transition:all .15s}
+.pcfg-item-arrows button:hover:not(:disabled){color:var(--neon-cyan);background:rgba(8,145,178,.1)}
+.pcfg-item-arrows button:disabled{opacity:.2;cursor:default}
+.btn-add-artikel{display:block;width:100%;background:none;border:1px dashed var(--glass-border);
+  border-radius:6px;color:var(--text-dim);font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
+.btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 @media(max-width:640px){
   .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
   .ctrl-select{
@@ -223,19 +259,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
   border:1px solid rgba(8,145,178,.18)}
 .prod-info{display:flex;align-items:center;gap:.6rem}
-.prod-reorder{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
-.prod-reorder-btn{background:none;border:none;cursor:pointer;color:var(--text-dim);
-  font-size:.6rem;line-height:1;padding:.15rem .3rem;border-radius:3px;transition:all .15s}
-.prod-reorder-btn:hover:not(:disabled){color:var(--neon-cyan);background:rgba(8,145,178,.1)}
-.prod-reorder-btn:disabled{opacity:.2;cursor:default}
-.editable-name{cursor:text;transition:background .15s;border-radius:4px;padding:.1rem .3rem;margin:-.1rem -.3rem}
-.editable-name:hover{background:rgba(8,145,178,.08)}
-.editable-name-input{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.98rem;font-weight:600;
-  color:var(--text);border:1px solid var(--neon-cyan);border-radius:4px;padding:.1rem .3rem;width:100%;outline:none}
-.btn-add-artikel{display:block;width:100%;background:none;border:1px dashed var(--glass-border);
-  border-radius:6px;color:var(--text-dim);font-family:'Century Gothic','CenturyGothic',sans-serif;
-  font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin:.3rem 0}
-.btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 .prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
 
@@ -460,29 +483,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-add-product" onclick="if(event.target===this)closeAddProductModal()">
-  <div class="modal" style="max-width:420px">
-    <button class="modal-close" onclick="closeAddProductModal()">✕</button>
-    <div class="modal-title">➕ Neuen Artikel hinzufügen</div>
-    <div class="field">
-      <label class="field-label">Kategorie</label>
-      <input type="text" id="ap-cat" readonly style="background:var(--bg3);color:var(--text-dim)">
-    </div>
-    <div class="field">
-      <label class="field-label">Artikelname</label>
-      <input type="text" id="ap-name" placeholder="z. B. Red Bull Sugarfree">
-    </div>
-    <div class="field">
-      <label class="field-label">Einheit (optional)</label>
-      <input type="text" id="ap-unit" placeholder="z. B. 0,25 L">
-    </div>
-    <div class="field">
-      <label class="field-label">Icon (optional, Emoji)</label>
-      <input type="text" id="ap-icon" placeholder="📦" maxlength="4">
-    </div>
-    <div class="modal-btn-row">
-      <button class="btn btn-primary" onclick="saveNewProduct()">Hinzufügen</button>
-      <button class="btn btn-ghost" onclick="closeAddProductModal()">Abbrechen</button>
+<div class="modal-overlay" id="modal-product-config" onclick="if(event.target===this)closeProductConfigModal()">
+  <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeProductConfigModal()">✕</button>
+    <div class="modal-title">⚙️ Artikel konfigurieren</div>
+    <div id="pcfg-content"></div>
+    <div class="modal-btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveProductConfig()">💾 Speichern</button>
+      <button class="btn btn-ghost" onclick="closeProductConfigModal()">Abbrechen</button>
     </div>
   </div>
 </div>
@@ -551,7 +559,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-12">Dezember 2026</option>
       <option value="2026">Jahr 2026</option>
     </select>
-    <button class="btn-wareneingang" onclick="openWareneingang()">＋ Wareneingang erstellen</button>
+    <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+      <button class="btn-icon-settings" onclick="openProductConfigModal()" title="Artikel konfigurieren">⚙️</button>
+      <button class="btn-wareneingang" onclick="openWareneingang()" style="margin-left:0">＋ Wareneingang erstellen</button>
+    </div>
   </div>
 
   <!-- Table -->
@@ -857,14 +868,7 @@ function renderTableActual(){
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${prod.icon||'📦'}</div>
-        <div class="prod-reorder">
-          <button class="prod-reorder-btn" ${pIdx===0?'disabled':''} onclick="event.stopPropagation();moveProduct('${catObj.cat}','${prod.id}',-1)" title="Nach oben">▲</button>
-          <button class="prod-reorder-btn" ${pIdx===catObj.items.length-1?'disabled':''} onclick="event.stopPropagation();moveProduct('${catObj.cat}','${prod.id}',1)" title="Nach unten">▼</button>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div class="prod-name editable-name" onclick="event.stopPropagation();editProductName('${prod.id}', this)">${prod.name}</div>
-          <div class="prod-unit">${prod.unit||'—'}</div>
-        </div>
+        <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
 
       // Anfangsbestand (kommt von der Übersicht-Seite)
@@ -917,12 +921,6 @@ function renderTableActual(){
       tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
     });
-
-    tbHTML += `<tr class="prod-row add-artikel-row ${isFirst?'':'hidden'}" data-cat="${ci}">
-      <td class="col-artikel" colspan="99">
-        <button class="btn-add-artikel" onclick="openAddProductModal('${catObj.cat}')">+ Artikel hinzufügen</button>
-      </td>
-    </tr>`;
   });
 
   // ── SHOPS SECTION (Zentrallager only) ──
@@ -1107,97 +1105,106 @@ async function loadProducts(){
   }
 }
 
-// ── ARTIKEL: Name inline bearbeiten ──
-window.editProductName = function(prodId, el){
-  if(el.querySelector('input')) return;
-  const oldName = el.textContent;
-  el.innerHTML = '';
-  const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.className = 'editable-name-input';
-  inp.value = oldName;
-  el.appendChild(inp);
-  inp.focus();
-  inp.select();
-  let done = false;
-  const save = async ()=>{
-    if(done) return;
-    done = true;
-    const newName = inp.value.trim();
-    if(!newName || newName===oldName){ el.textContent = oldName; return; }
-    el.textContent = newName;
-    try{
-      await db.collection('produkte').doc(prodId).update({name:newName});
-      PRODUCTS.forEach(c=>c.items.forEach(p=>{ if(p.id===prodId) p.name=newName; }));
-      showToast('Artikelname gespeichert ✓');
-    }catch(e){
-      showToast('Fehler beim Speichern: '+e.message);
-      el.textContent = oldName;
-    }
-  };
-  const cancel = ()=>{ done = true; el.textContent = oldName; };
-  inp.addEventListener('blur', save);
-  inp.addEventListener('keydown', e=>{
-    if(e.key==='Enter') inp.blur();
-    if(e.key==='Escape'){ inp.removeEventListener('blur', save); cancel(); }
+// ── ARTIKEL-KONFIGURATION (Modal): Name/Reihenfolge/Neue Artikel ──
+let _pcfgData = null;
+let _pcfgOpenCats = {};
+
+window.openProductConfigModal = function(){
+  _pcfgData = PRODUCTS.map(c=>({cat:c.cat, items:c.items.map(p=>({...p}))}));
+  _pcfgOpenCats = {};
+  _pcfgData.forEach((c,i)=>{ _pcfgOpenCats[c.cat] = i===0; });
+  renderProductConfig();
+  document.getElementById('modal-product-config').classList.add('show');
+};
+window.closeProductConfigModal = function(){
+  document.getElementById('modal-product-config').classList.remove('show');
+  _pcfgData = null;
+};
+
+function renderProductConfig(){
+  const cont = document.getElementById('pcfg-content');
+  let html = '';
+  _pcfgData.forEach((catObj, ci)=>{
+    const open = _pcfgOpenCats[catObj.cat];
+    html += `<div class="pcfg-cat${open?' open':''}">
+      <div class="pcfg-cat-header" onclick="togglePcfgCat('${catObj.cat}')">
+        <span class="pcfg-cat-label">${catObj.cat} <span class="pcfg-cat-count">(${catObj.items.length})</span></span>
+        <span class="pcfg-cat-arrow">▶</span>
+      </div>
+      <div class="pcfg-cat-items">`;
+    catObj.items.forEach((prod, pIdx)=>{
+      html += `<div class="pcfg-item">
+        <div class="pcfg-item-icon">${prod.icon||'📦'}</div>
+        <input type="text" class="pcfg-item-name" value="${(prod.name||'').replace(/"/g,'&quot;')}"
+          placeholder="Artikelname" oninput="pcfgUpdateField(${ci},${pIdx},'name',this.value)">
+        <input type="text" class="pcfg-item-unit" value="${(prod.unit||'').replace(/"/g,'&quot;')}"
+          placeholder="Einheit" oninput="pcfgUpdateField(${ci},${pIdx},'unit',this.value)">
+        <div class="pcfg-item-arrows">
+          <button ${pIdx===0?'disabled':''} onclick="pcfgMove(${ci},${pIdx},-1)" title="Nach oben">▲</button>
+          <button ${pIdx===catObj.items.length-1?'disabled':''} onclick="pcfgMove(${ci},${pIdx},1)" title="Nach unten">▼</button>
+        </div>
+      </div>`;
+    });
+    html += `<button class="btn-add-artikel" onclick="pcfgAddNew(${ci})">+ Artikel hinzufügen</button>
+      </div>
+    </div>`;
   });
+  cont.innerHTML = html;
+}
+
+window.togglePcfgCat = function(cat){
+  _pcfgOpenCats[cat] = !_pcfgOpenCats[cat];
+  renderProductConfig();
+};
+window.pcfgUpdateField = function(ci, pIdx, field, val){
+  _pcfgData[ci].items[pIdx][field] = val;
+};
+window.pcfgMove = function(ci, pIdx, dir){
+  const items = _pcfgData[ci].items;
+  const newIdx = pIdx + dir;
+  if(newIdx<0 || newIdx>=items.length) return;
+  [items[pIdx], items[newIdx]] = [items[newIdx], items[pIdx]];
+  renderProductConfig();
+};
+window.pcfgAddNew = function(ci){
+  const id = '__new_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  _pcfgData[ci].items.push({id, name:'', unit:'', icon:'📦', _isNew:true});
+  renderProductConfig();
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('.pcfg-item-name');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  }, 50);
 };
 
-// ── ARTIKEL: Reihenfolge innerhalb der Kategorie ändern ──
-window.moveProduct = async function(cat, prodId, direction){
-  const catObj = PRODUCTS.find(c=>c.cat===cat);
-  if(!catObj) return;
-  const idx = catObj.items.findIndex(p=>p.id===prodId);
-  const newIdx = idx + direction;
-  if(idx<0 || newIdx<0 || newIdx>=catObj.items.length) return;
-  [catObj.items[idx], catObj.items[newIdx]] = [catObj.items[newIdx], catObj.items[idx]];
-  renderTableActual();
-  try{
-    const batch = db.batch();
-    catObj.items.forEach((p,i)=>{ batch.update(db.collection('produkte').doc(p.id), {order:i}); });
-    await batch.commit();
-  }catch(e){
-    showToast('Fehler beim Speichern der Reihenfolge: '+e.message);
-  }
-};
-
-// ── ARTIKEL: Neu hinzufügen ──
-let _addProductCat = null;
-window.openAddProductModal = function(cat){
-  _addProductCat = cat;
-  document.getElementById('ap-cat').value = cat;
-  document.getElementById('ap-name').value = '';
-  document.getElementById('ap-unit').value = '';
-  document.getElementById('ap-icon').value = '';
-  document.getElementById('modal-add-product').classList.add('show');
-  setTimeout(()=>document.getElementById('ap-name').focus(), 100);
-};
-window.closeAddProductModal = function(){
-  document.getElementById('modal-add-product').classList.remove('show');
-};
-window.saveNewProduct = async function(){
-  const name = document.getElementById('ap-name').value.trim();
-  if(!name){ showToast('Bitte einen Artikelnamen eingeben'); return; }
-  const unit = document.getElementById('ap-unit').value.trim();
-  const icon = document.getElementById('ap-icon').value.trim() || '📦';
-  const cat = _addProductCat;
-  const umlaut = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss'};
-  const slug = name.toLowerCase()
-    .replace(/[äöüß]/g, m=>umlaut[m])
-    .replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,20);
-  const id = (slug||'artikel') + '_' + Date.now().toString(36).slice(-5);
-  const catObj = PRODUCTS.find(c=>c.cat===cat);
-  const order = catObj ? catObj.items.length : 0;
-
+window.saveProductConfig = async function(){
   showSpinner();
   try{
-    await db.collection('produkte').doc(id).set({name, unit, icon, cat, order});
-    if(catObj) catObj.items.push({id, name, unit, icon});
-    closeAddProductModal();
-    showToast('Artikel hinzugefügt ✓');
+    const batch = db.batch();
+    const validData = [];
+    _pcfgData.forEach(catObj=>{
+      const validItems = [];
+      catObj.items.forEach((p, idx)=>{
+        const name = (p.name||'').trim();
+        if(!name) return; // leere (z.B. abgebrochene Neuanlage) werden ignoriert
+        let id = p.id;
+        if(p._isNew || id.startsWith('__new_')){
+          const umlaut = {'ä':'ae','ö':'oe','ü':'ue','ß':'ss'};
+          const slug = name.toLowerCase().replace(/[äöüß]/g,m=>umlaut[m]).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,20);
+          id = (slug||'artikel') + '_' + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2,4);
+        }
+        const item = {id, name, unit:(p.unit||'').trim(), icon:p.icon||'📦'};
+        validItems.push(item);
+        batch.set(db.collection('produkte').doc(id), {name:item.name, unit:item.unit, icon:item.icon, cat:catObj.cat, order:idx});
+      });
+      validData.push({cat:catObj.cat, items:validItems});
+    });
+    await batch.commit();
+    PRODUCTS = validData;
+    closeProductConfigModal();
+    showToast('Artikel gespeichert ✓');
     renderTableActual();
   }catch(e){
-    showToast('Fehler: '+e.message);
+    showToast('Fehler beim Speichern: '+e.message);
   }
   hideSpinner();
 };

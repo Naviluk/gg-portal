@@ -850,7 +850,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {cat:'Getränke', items:[
     {id:'rb_blue',   name:'Red Bull',                    unit:'0,25 L', icon:'🔵'},
     {id:'rb_zero',   name:'Red Bull Zero',               unit:'0,25 L', icon:'🩵'},
@@ -954,6 +954,7 @@ const PRODUCTS = [
     {id:'feuerzg',   name:'Feuerzeuge',             unit:'',        icon:'🔥'},
   ]},
 ];
+let PRODUCTS = DEFAULT_PRODUCTS;
 
 const LAGERS = ['nettetal','br\u00fcggen','viersen','k\u00f6ln'];
 const LAGER_NAMES = {zentrallager:'Zentrallager',nettetal:'Nettetal','br\u00fcggen':'Br\u00fcggen',viersen:'Viersen','k\u00f6ln':'K\u00f6ln'};
@@ -996,6 +997,31 @@ function dedupSumFromSnap(snap){
     Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
   });
   return sum;
+}
+
+// Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore. Reine Leseoperation —
+// die Erstmigration/das Anlegen der Collection passiert auf lager.html (dort wird auch
+// die Artikel-Konfiguration verwaltet).
+async function loadProducts(){
+  try{
+    const snap = await db.collection('produkte').get();
+    if(snap.empty){ PRODUCTS = DEFAULT_PRODUCTS; return; }
+    const byCat = {};
+    snap.forEach(d=>{
+      const p = d.data();
+      if(!byCat[p.cat]) byCat[p.cat] = [];
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+    });
+    const catOrder = DEFAULT_PRODUCTS.map(c=>c.cat);
+    Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
+    PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
+      cat,
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+    }));
+  }catch(e){
+    console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    PRODUCTS = DEFAULT_PRODUCTS;
+  }
 }
 
 async function computeGSAnfangsbestandChain(lager, targetMonat){
@@ -2158,7 +2184,7 @@ window.savePlan=async function(){
   hideSpinner();
 };
 
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', async function(){
   // Склад запоминается между страницами и после обновления (localStorage)
   const _savedLager = localStorage.getItem('gg_selected_lager');
   const _selLagerEl = document.getElementById('sel-lager');
@@ -2177,6 +2203,7 @@ document.addEventListener('DOMContentLoaded', function(){
       _selZeitraumEl.value = _curMonat;
     }
   }
+  await loadProducts();
   loadData();
 });
 

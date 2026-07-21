@@ -588,7 +588,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const GS_PRODUCTS = [
+const DEFAULT_GS_PRODUCTS = [
   {cat:'Getränke', items:[
     {id:'rb_blue',   name:'Red Bull',                 unit:'0,25 L', icon:'🔵'},
     {id:'rb_zero',   name:'Red Bull Zero',            unit:'0,25 L', icon:'🩵'},
@@ -617,6 +617,7 @@ const GS_PRODUCTS = [
     {id:'bifi_roll', name:'BIFI Roll',       unit:'24 St.', icon:'🥖'},
   ]},
 ];
+let GS_PRODUCTS = DEFAULT_GS_PRODUCTS;
 
 const NEON = {
   nettetal:{neon:'#2563eb',bg:'rgba(37,99,235,.08)', bgD:'rgba(37,99,235,.14)', border:'rgba(37,99,235,.35)'},
@@ -689,6 +690,31 @@ function dedupedLiefSum(prodId){
     const we = lieferungen.find(w=>w.datum===d);
     return s + (we&&we.items&&we.items[prodId] ? Number(we.items[prodId])||0 : 0);
   },0);
+}
+
+// Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
+// Kategorien dieser Seite (Getränke/Snacks). Reine Leseoperation — die Konfiguration
+// (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+async function loadProducts(){
+  const pageCats = DEFAULT_GS_PRODUCTS.map(c=>c.cat);
+  try{
+    const snap = await db.collection('produkte').get();
+    if(snap.empty){ GS_PRODUCTS = DEFAULT_GS_PRODUCTS; return; }
+    const byCat = {};
+    snap.forEach(d=>{
+      const p = d.data();
+      if(!pageCats.includes(p.cat)) return;
+      if(!byCat[p.cat]) byCat[p.cat] = [];
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+    });
+    GS_PRODUCTS = pageCats.filter(cat=>byCat[cat]).map(cat=>({
+      cat,
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+    }));
+  }catch(e){
+    console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    GS_PRODUCTS = DEFAULT_GS_PRODUCTS;
+  }
 }
 
 async function loadData(){
@@ -824,7 +850,7 @@ window.saveFormEntry=async function(){const date=document.getElementById('form-d
 window.openEditLieferung=function(date){const we=lieferungen.find(w=>w.datum===date);if(we)window.open('lager.html','_blank')};
 window.openEditEntry=function(type,date){const list=type==='geraet'?geraetEntries:thekeEntries;const entry=list.find(e=>e.datum===date);if(entry)openForm(type,entry.items,entry.id,entry.datum)};
 
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('gs-tbody').addEventListener('click',e=>{const cell=e.target.closest('.anfang-cell');if(cell)openAnfangsbestandModal(cell.dataset.prodId,cell.dataset.prodName)});
 
   // Склад запоминается между страницами и после обновления (localStorage)
@@ -846,6 +872,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   }
 
+  await loadProducts();
   loadData();
 });
 
