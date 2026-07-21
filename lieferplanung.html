@@ -2145,7 +2145,7 @@ window.openPlanConfirm=function(){
   const items={};
   PRODUCTS.forEach(c=>c.items.forEach(p=>{
     const i=document.getElementById('plan-'+p.id);
-    if(i&&i.value!==''){const v=parseFloat(i.value)||0;if(v>0)items[p.id]=v;}
+    if(i&&i.value!==''){const v=parseFloat(i.value)||0;items[p.id]=v;}
   }));
   if(!Object.keys(items).length){showToast('Bitte mindestens einen Artikel ausfüllen.');return;}
 
@@ -2167,7 +2167,7 @@ window.openPlanConfirm=function(){
   let html=''; let lastCat='';
   PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
-      if(items[prod.id]){
+      if(items[prod.id]!==undefined){
         if(catObj.cat!==lastCat){
           html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.6rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;
           lastCat=catObj.cat;
