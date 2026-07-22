@@ -222,6 +222,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .price-input::-webkit-outer-spin-button,.price-input::-webkit-inner-spin-button{-webkit-appearance:none}
 .price-input[type=number]{-moz-appearance:textfield}
 .price-eur{color:var(--text-dim);font-size:.85rem;font-weight:600}
+.kommentar-input{width:100%;max-width:220px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.82rem;font-weight:400;
+  padding:.4rem .6rem;text-align:left;outline:none;transition:border-color .15s}
+.kommentar-input:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(8,145,178,.2)}
+.kommentar-input::placeholder{color:var(--text-dim);opacity:.5}
 .num-cell.editable{cursor:pointer;transition:color .2s}
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
@@ -739,7 +744,7 @@ let SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
 
 // ── STATE ──
 let currentZeitraum = '2026-06';
-let priceDocs = []; // alle Preisänderungs-Dokumente aus Firestore
+let priceDocs = []; // alle Preisänderungs-Dokumente aus Firestore (enthalten auch den Kommentar pro Monat)
 
 // ── EXPOSE (assigned after function definitions below) ──
 
@@ -767,6 +772,7 @@ function renderTableActual(){
   // ── HEADER ──
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
+  thHTML += '<th class="num-cell" style="color:var(--text-dim)">Kommentar</th>';
   thHTML += '<th class="num-cell" style="color:var(--neon-cyan)">Einkaufspreis</th>';
   thHTML += '<th class="num-cell" style="color:var(--neon-magenta)">Verkaufspreis</th>';
   thHTML += '</tr>';
@@ -786,12 +792,16 @@ function renderTableActual(){
       const prodHidden = isFirst ? '' : 'hidden';
       const ek = getEffectivePrice(prod.id,'einkauf',zeit);
       const vk = getEffectivePrice(prod.id,'verkauf',zeit);
+      const kommentar = getKommentar(prod.id, zeit);
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${iconHTML(prod.icon,34)}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
       </div></td>`;
+      tbHTML += `<td class="num-cell"><input type="text" class="kommentar-input" id="kommentar-${prod.id}"
+          value="${kommentar.replace(/"/g,'&quot;')}" placeholder="—" maxlength="120"
+          onchange="saveKommentar('${prod.id}',this.value)"></td>`;
       tbHTML += `<td class="num-cell"><div class="price-input-wrap">
         <input type="number" min="0" step="0.01" class="price-input" id="price-ek-${prod.id}"
           value="${ek!==null?ek:''}" placeholder="—" onchange="savePrice('${prod.id}','einkauf',this.value)">
@@ -833,6 +843,32 @@ window.savePrice = async function(prodId, field, rawVal){
       await db.collection('preise').doc(docId).set({prodId, monat:zeit, [field]: val}, {merge:true});
     }
     showToast('Preis gespeichert ✓');
+    await loadData();
+  }catch(e){
+    showToast('Fehler beim Speichern: '+e.message);
+  }
+  hideSpinner();
+};
+
+// Kommentar: NUR für den jeweils angezeigten Monat gültig — im Unterschied zu den
+// Preisen wird er NICHT in Folgemonate übernommen (jeder Monat hat seinen eigenen).
+function getKommentar(prodId, month){
+  const doc = priceDocs.find(d=>d.prodId===prodId && d.monat===month);
+  return (doc && doc.kommentar) ? doc.kommentar : '';
+}
+
+window.saveKommentar = async function(prodId, rawVal){
+  const zeit = currentZeitraum;
+  const docId = prodId+'_'+zeit;
+  const val = rawVal.trim();
+  showSpinner();
+  try{
+    if(val===''){
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, kommentar: firebase.firestore.FieldValue.delete()}, {merge:true});
+    } else {
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, kommentar: val}, {merge:true});
+    }
+    showToast('Kommentar gespeichert ✓');
     await loadData();
   }catch(e){
     showToast('Fehler beim Speichern: '+e.message);
