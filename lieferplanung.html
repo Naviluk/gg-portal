@@ -2109,7 +2109,7 @@ window.openPlanForm=function(){
       const gespeichert = Number((planData[currentLager]||{})[prod.id])||0;
       // Bereits gespeicherter Plan-Wert hat Vorrang vor der Empfehlung — sonst sieht es
       // beim erneuten Öffnen so aus, als wäre der gespeicherte Wert verschwunden.
-      const neuVal = gespeichert>0 ? gespeichert : (empf||'');
+      const neuVal = gespeichert>0 ? gespeichert : '';
       const neuStyle = neuVal ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
       html+=`<div class="plan-form-row">
         <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
