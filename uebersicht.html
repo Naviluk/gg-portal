@@ -7,7 +7,7 @@
   try{
     var r=JSON.parse(u).role;
     var ok={'lager.html':1,'getraenke-snacks.html':1,'lieferplanung.html':1,
-            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1};
+            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1};
     var p=location.pathname.split('/').pop();
     if(ok[p]&&r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
     window.GG_USER=JSON.parse(u);
@@ -122,25 +122,24 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
     width:auto;
     min-width:0;
   }
-  .btn-wareneingang{
-    margin-left:0;
-    flex-shrink:0;
-    font-size:.52rem;
-    padding:.4rem .55rem;
-    line-height:1.4;
-    white-space:normal;
-    text-align:center;
-    width:115px;
-  }
-  .lager-controls-row2{gap:.4rem;margin-bottom:1rem}
+  .lager-controls-row2{gap:.4rem;margin-bottom:1rem;justify-content:flex-start}
   .btn-verbrauch{
     flex-shrink:0;
-    font-size:.52rem;
-    padding:.4rem .55rem;
-    line-height:1.4;
-    white-space:normal;
+    font-size:.6rem;
+    padding:.5rem .7rem;
+    white-space:nowrap;
     text-align:center;
-    width:100px;
+    width:auto;
+  }
+  .btn-wareneingang{
+    flex:1;
+    min-width:0;
+    font-size:.62rem;
+    padding:.5rem .5rem;
+    line-height:1.2;
+    white-space:nowrap;
+    text-align:center;
+    width:auto;
   }
 }
 
