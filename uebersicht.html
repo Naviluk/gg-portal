@@ -91,7 +91,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
 
 /* ── TOP CONTROLS ── */
-.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.6rem}
+.lager-controls-row2{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end;margin-bottom:1.5rem}
+.btn-verbrauch{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  background:#fff;color:var(--neon-yellow);border:1px solid var(--neon-yellow);border-radius:6px;padding:.5rem .9rem;
+  cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-verbrauch:hover{background:rgba(180,83,9,.08);box-shadow:0 3px 8px rgba(180,83,9,.15);transform:translateY(-1px)}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
@@ -117,7 +123,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
     min-width:0;
   }
   .btn-wareneingang{
-    margin-left:auto;
+    margin-left:0;
     flex-shrink:0;
     font-size:.52rem;
     padding:.4rem .55rem;
@@ -125,6 +131,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
     white-space:normal;
     text-align:center;
     width:115px;
+  }
+  .lager-controls-row2{gap:.4rem;margin-bottom:1rem}
+  .btn-verbrauch{
+    flex-shrink:0;
+    font-size:.52rem;
+    padding:.4rem .55rem;
+    line-height:1.4;
+    white-space:normal;
+    text-align:center;
+    width:100px;
   }
 }
 
@@ -441,6 +457,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </header>
 
+<div class="modal-overlay" id="modal-verbrauch" onclick="if(event.target===this)closeVerbrauchModal()">
+  <div class="modal" style="max-width:900px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeVerbrauchModal()">✕</button>
+    <div class="modal-title">📊 Monatlicher Verbrauch — alle Filialen</div>
+    <div id="verbrauch-content"></div>
+  </div>
+</div>
+
 <div class="user-dropdown" id="user-dropdown">
   <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
   <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
@@ -514,7 +538,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-12">Dezember 2026</option>
       <option value="2026">Jahr 2026</option>
     </select>
-    <button class="btn-wareneingang" onclick="openWareneingang()">＋ Inventur erstellen</button>
+  </div>
+  <div class="lager-controls-row2">
+    <button class="btn-verbrauch" onclick="openVerbrauchModal()">📊 Verbrauch</button>
+    <button class="btn-wareneingang" style="margin-left:0" onclick="openWareneingang()">＋ Inventur erstellen</button>
   </div>
 
   <!-- Table -->
@@ -868,6 +895,86 @@ async function loadProducts(){
     PRODUCTS = DEFAULT_PRODUCTS;
   }
 }
+
+// ── VERBRAUCH-ÜBERSICHT (alle Filialen außer Zentrallager) ──
+window.openVerbrauchModal = async function(){
+  document.getElementById('modal-verbrauch').classList.add('show');
+  const cont = document.getElementById('verbrauch-content');
+  cont.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-dim)">Lädt…</p>';
+
+  const zeit = document.getElementById('sel-zeitraum').value;
+  if(zeit.length!==7){
+    cont.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-dim)">Bitte oben einen einzelnen Monat wählen (nicht „Jahr“).</p>';
+    return;
+  }
+
+  const branches = ['nettetal','brüggen','viersen','köln'];
+  const branchLabels = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+
+  try{
+    const dataPerLager = {};
+    await Promise.all(branches.map(async lg=>{
+      const [abDoc, weSnap, gSnap, tSnap, invSnap] = await Promise.all([
+        db.collection('anfangsbestand').doc(lg+'_'+zeit).get(),
+        db.collection('wareneingang').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('gs_geraet').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('gs_theke').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('inventur').where('lager','==',lg).where('monat','==',zeit).get(),
+      ]);
+      const ab = abDoc.exists ? abDoc.data() : {};
+      const lief = {}; weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lief[pid]=(lief[pid]||0)+(Number(items[pid])||0); }); });
+      const ger = {}; gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ ger[pid]=(ger[pid]||0)+(Number(items[pid])||0); }); });
+      const thk = {}; tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thk[pid]=(thk[pid]||0)+(Number(items[pid])||0); }); });
+      const invDocs = []; invSnap.forEach(d=>invDocs.push(d.data()));
+      dataPerLager[lg] = {ab, lief, ger, thk, invDocs};
+    }));
+
+    let html = `<div style="overflow-x:auto"><table class="lager-table" style="min-width:700px">
+      <thead><tr>
+        <th class="col-artikel">Artikel</th>
+        ${branches.map(lg=>`<th class="num-cell">${branchLabels[lg]}</th>`).join('')}
+        <th class="num-cell" style="background:rgba(180,83,9,.08);color:var(--neon-yellow)">Gesamt</th>
+      </tr></thead><tbody>`;
+
+    PRODUCTS.forEach(catObj=>{
+      html += `<tr><td class="col-artikel" style="background:#e3e8f0"><div class="cat-label">${catObj.cat}</div></td>
+        <td colspan="99" style="background:#e3e8f0"></td></tr>`;
+      catObj.items.forEach(prod=>{
+        let rowTotal = 0, anyVal = false;
+        const cells = branches.map(lg=>{
+          const d = dataPerLager[lg];
+          const lastInv = d.invDocs.filter(inv=>inv.items&&inv.items[prod.id]!==undefined).sort((x,y)=>y.datum.localeCompare(x.datum))[0];
+          if(!lastInv) return '<td class="num-cell" style="color:var(--text-dim)">—</td>';
+          const a = Number(d.ab[prod.id])||0;
+          const b = Number(d.lief[prod.id])||0;
+          const c = Number(d.ger[prod.id])||0;
+          const dd = Number(d.thk[prod.id])||0;
+          const e = Number(lastInv.items[prod.id]);
+          const f = a+b-c-dd-e;
+          rowTotal += f; anyVal = true;
+          const fColor = f>0?'var(--neon-yellow)':f<0?'var(--neon-magenta)':'var(--text-dim)';
+          return `<td class="num-cell" style="color:${fColor};font-weight:700">${f}</td>`;
+        }).join('');
+        const totalDisplay = anyVal ? rowTotal : '—';
+        html += `<tr><td class="col-artikel"><div class="prod-info">
+            <div class="prod-icon">${iconHTML(prod.icon,28)}</div>
+            <div><div class="prod-name" style="font-size:.85rem">${prod.name}</div></div>
+          </div></td>
+          ${cells}
+          <td class="num-cell" style="background:rgba(180,83,9,.06);color:var(--neon-yellow);font-weight:700">${totalDisplay}</td>
+        </tr>`;
+      });
+    });
+
+    html += `</tbody></table></div>`;
+    cont.innerHTML = html;
+  }catch(e){
+    cont.innerHTML = `<p style="text-align:center;padding:2rem;color:var(--neon-magenta)">Fehler beim Laden: ${e.message}</p>`;
+  }
+};
+window.closeVerbrauchModal = function(){
+  document.getElementById('modal-verbrauch').classList.remove('show');
+};
 
 async function loadData(){
   showSpinner();
