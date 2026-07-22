@@ -910,6 +910,16 @@ window.openVerbrauchModal = async function(){
 
   const branches = ['nettetal','brüggen','viersen','köln'];
   const branchLabels = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+  const branchColors = {
+    nettetal: '#2563eb',
+    brüggen:  '#e11d48',
+    viersen:  '#ea580c',
+    köln:     '#7c3aed',
+  };
+  const monatLabels = {'01':'Januar','02':'Februar','03':'März','04':'April','05':'Mai','06':'Juni',
+    '07':'Juli','08':'August','09':'September','10':'Oktober','11':'November','12':'Dezember'};
+  const [zJahr, zMon] = zeit.split('-');
+  const monatLabel = `${monatLabels[zMon]} ${zJahr}`;
 
   try{
     const dataPerLager = {};
@@ -929,10 +939,11 @@ window.openVerbrauchModal = async function(){
       dataPerLager[lg] = {ab, lief, ger, thk, invDocs};
     }));
 
-    let html = `<div style="overflow-x:auto"><table class="lager-table" style="min-width:700px">
+    let html = `<div style="text-align:center;font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.08em;color:var(--neon-magenta);text-transform:uppercase;margin-bottom:1rem">${monatLabel}</div>`;
+    html += `<div style="overflow-x:auto"><table class="lager-table" style="min-width:700px">
       <thead><tr>
         <th class="col-artikel">Artikel</th>
-        ${branches.map(lg=>`<th class="num-cell">${branchLabels[lg]}</th>`).join('')}
+        ${branches.map(lg=>`<th class="num-cell" style="color:${branchColors[lg]}">${branchLabels[lg]}</th>`).join('')}
         <th class="num-cell" style="background:rgba(180,83,9,.08);color:var(--neon-yellow)">Gesamt</th>
       </tr></thead><tbody>`;
 
@@ -952,8 +963,7 @@ window.openVerbrauchModal = async function(){
           const e = Number(lastInv.items[prod.id]);
           const f = a+b-c-dd-e;
           rowTotal += f; anyVal = true;
-          const fColor = f>0?'var(--neon-yellow)':f<0?'var(--neon-magenta)':'var(--text-dim)';
-          return `<td class="num-cell" style="color:${fColor};font-weight:700">${f}</td>`;
+          return `<td class="num-cell" style="color:${branchColors[lg]};font-weight:700">${f}</td>`;
         }).join('');
         const totalDisplay = anyVal ? rowTotal : '—';
         html += `<tr><td class="col-artikel"><div class="prod-info">
