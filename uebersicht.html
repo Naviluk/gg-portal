@@ -896,7 +896,11 @@ async function loadData(){
   // Falls im Vormonat KEINE echte Inventur erstellt wurde (nur der manuelle
   // Anfangsbestand), wird stattdessen der Anfangsbestand des Vormonats selbst übernommen
   // ("wenn außer dem ersten nichts da ist – dann eben der").
-  if(zeit.length===7 && zeit!=='2026-06' && Object.keys(anfangsbestand).length===0){
+  // WICHTIG: läuft IMMER (nicht nur wenn der aktuelle Monat noch komplett leer ist) —
+  // sonst bleiben Monate mit teilweise/veralteten Testdaten dauerhaft falsch, weil der
+  // Übertrag dann übersprungen wurde. Manuelle Bearbeitung ist außerhalb Juni ohnehin
+  // gesperrt, es gibt also keine "echten" Werte, die hier versehentlich überschrieben würden.
+  if(zeit.length===7 && zeit!=='2026-06'){
     const [y,m] = zeit.split('-').map(Number);
     let py=y, pm=m-1;
     if(pm===0){ py=y-1; pm=12; }
