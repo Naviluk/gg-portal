@@ -7,7 +7,7 @@
   try{
     var r=JSON.parse(u).role;
     var ok={'lager.html':1,'getraenke-snacks.html':1,'lieferplanung.html':1,
-            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1};
+            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1,'rechnungen.html':1};
     var p=location.pathname.split('/').pop();
     if(ok[p]&&r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
     window.GG_USER=JSON.parse(u);
