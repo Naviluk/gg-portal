@@ -1,27 +1,1433 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
+<head><script>
+(function(){
+  var u=localStorage.getItem('gg_user');
+  if(!u){location.replace('gg-portal.html');return;}
+  try{
+    var r=JSON.parse(u).role;
+    var ok={'lager.html':1,'getraenke-snacks.html':1,'lieferplanung.html':1,
+            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1,'rechnungen.html':1};
+    var p=location.pathname.split('/').pop();
+    if(ok[p]&&r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
+    window.GG_USER=JSON.parse(u);
+  }catch(e){localStorage.removeItem('gg_user');location.replace('gg-portal.html');}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Rechnungen – GAME GALAXY</title>
+<title>HANDEL RECHNUNGEN – GAME GALAXY</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+:root{
+  --bg:#e4e8ef;--bg2:#ffffff;--bg3:#eef1f6;
+  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
+  --glass:#e9edf3;--glass-border:#c9d1dc;
+  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(8,145,178,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(8,145,178,0.035) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:rgba(255,255,255,0.92);border-bottom:1px solid var(--glass-border);
+  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 1px 3px rgba(30,37,50,.04)}
+.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent)}
+.hdr-left{display:flex;align-items:center}
+.hdr-center{flex:1;text-align:center}
+.hdr-right{display:flex;align-items:center;gap:.5rem}
+.hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:700;font-size:clamp(.68rem,1.5vw,.92rem);letter-spacing:.08em;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-top:.15rem}
+.hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
+  display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-weight:700}
+.hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
+.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
+.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* sidebar */
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:#ffffff;
+  border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 12px rgba(30,37,50,.06)}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
+.sidebar-overlay.show{display:block}
+.nav-list{list-style:none;padding:1rem 0}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);
+  text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(8,145,178,.08)}
+.nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
+.nav-sub{display:none;list-style:none;background:var(--bg3)}
+.nav-item.open>.nav-sub{display:block}
+.nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.02em;transition:color .2s}
+.nav-sub li a:hover{color:var(--neon-magenta)}
+.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 1.5rem}
+
+/* user dropdown */
+.user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
+  background:#ffffff;border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
+  display:none;z-index:300;min-width:180px;box-shadow:0 8px 24px rgba(30,37,50,.12)}
+.user-dropdown.show{display:block}
+.user-dropdown button{display:block;width:100%;padding:.7rem 1.2rem;text-align:left;background:none;border:none;
+  cursor:pointer;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--text-dim);letter-spacing:.02em;transition:background .15s,color .15s}
+.user-dropdown button:hover{background:rgba(8,145,178,.08);color:var(--neon-cyan)}
+.user-dropdown button.danger:hover{background:rgba(219,39,60,.08);color:#dc2626}
+
+/* ── MAIN ── */
+.main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
+
+/* ── TOP CONTROLS ── */
+.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.6rem}
+.lager-controls-row2{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:flex-end;margin-bottom:1.5rem}
+.btn-verbrauch{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  background:#fff;color:var(--neon-yellow);border:1px solid var(--neon-yellow);border-radius:6px;padding:.5rem .9rem;
+  cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-verbrauch:hover{background:rgba(180,83,9,.08);box-shadow:0 3px 8px rgba(180,83,9,.15);transform:translateY(-1px)}
+.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
+  outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
+  background-repeat:no-repeat;background-position:right .7rem center;
+  transition:border-color .2s;min-width:0;box-shadow:0 1px 2px rgba(30,37,50,.04)}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+.ctrl-select option{background:#fff;color:var(--text)}
+.btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  background:linear-gradient(135deg,var(--neon-magenta),#a3155e);color:#fff;
+  border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
+  box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
+.btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
+@media(max-width:640px){
+  .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
+  .ctrl-select{
+    font-size:.75rem;
+    padding:.4rem 1.5rem .4rem .5rem;
+    background-position:right .35rem center;
+    flex:0 0 auto;
+    width:auto;
+    min-width:0;
+  }
+  .lager-controls-row2{gap:.4rem;margin-bottom:1rem;justify-content:flex-start}
+  .btn-verbrauch{
+    flex-shrink:0;
+    font-size:.6rem;
+    padding:.5rem .7rem;
+    white-space:nowrap;
+    text-align:center;
+    width:auto;
+  }
+  .btn-wareneingang{
+    flex:1;
+    min-width:0;
+    font-size:.62rem;
+    padding:.5rem .5rem;
+    line-height:1.2;
+    white-space:nowrap;
+    text-align:center;
+    width:auto;
+  }
+}
+
+/* ── TABLE WRAPPER ── */
+.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
+
+/* ── SINGLE TABLE with sticky first column ── */
+.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
+.lager-table th{
+  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
+  font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--neon-cyan);text-transform:uppercase;
+  padding:.7rem .9rem;border-bottom:2px solid var(--glass-border);border-right:1px solid var(--glass-border);
+  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
+  background:#eef2f6}
+.lager-table th:last-child,.lager-table td:last-child{border-right:none}
+.lager-table td{padding:.38rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
+.lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
+.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(8,145,178,.06)}
+
+/* Sticky Artikel column */
+.col-artikel{
+  position:sticky;left:0;z-index:5;
+  background:#f7f9fb;
+  text-align:left!important;
+  border-right:2px solid var(--glass-border)!important;
+  min-width:200px;
+}
+.lager-table th.col-artikel{z-index:20;background:#eef2f6}
+.lager-table tr:hover td.col-artikel{background:#e3edf0}
+
+/* Desktop: icons hidden */
+.th-icon{display:none}
+.th-text{display:inline}
+.th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
+
+@media(max-width:640px){
+  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
+  .lager-table th{font-size:.55rem;letter-spacing:.01em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
+  .lager-table td{padding:.38rem .2rem}
+  .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
+  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
+  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
+  .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
+  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.58rem}
+  .num-cell{font-size:.92rem!important;font-weight:700}
+  .prod-name{font-size:.88rem;white-space:normal;word-break:break-word}
+  .prod-unit{font-size:.66rem}
+  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  .prod-info{gap:.28rem}
+  .main-content{padding:1rem .35rem}
+}
+
+/* category row */
+.cat-row td{background:#e3e8f0;padding:.4rem .9rem;cursor:pointer;user-select:none;border-bottom:2px solid var(--glass-border)}
+.cat-row:hover td{background:#dae1eb}
+.cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.1em;
+  color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
+.cat-row.open .cat-arrow{transform:rotate(90deg)}
+.cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
+
+/* product row */
+.prod-row{transition:background .15s}
+.prod-row.hidden{display:none}
+.prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
+  display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+  border:1px solid rgba(8,145,178,.18);overflow:hidden}
+.prod-info{display:flex;align-items:center;gap:.6rem}
+.prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
+.prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
+
+/* number cells */
+.num-cell{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.price-input-wrap{display:inline-flex;align-items:center;justify-content:center;gap:.3rem}
+.price-input{width:80px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;font-weight:700;
+  padding:.4rem .5rem;text-align:right;outline:none;transition:border-color .15s}
+.price-input:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(8,145,178,.2)}
+.price-input::-webkit-outer-spin-button,.price-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.price-input[type=number]{-moz-appearance:textfield}
+.price-eur{color:var(--text-dim);font-size:.85rem;font-weight:600}
+.kommentar-input{width:100%;max-width:220px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.82rem;font-weight:400;
+  padding:.4rem .6rem;text-align:left;outline:none;transition:border-color .15s}
+.kommentar-input:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(8,145,178,.2)}
+.kommentar-input::placeholder{color:var(--text-dim);opacity:.5}
+.num-cell.editable{cursor:pointer;transition:color .2s}
+.num-cell.editable:hover{color:var(--neon-cyan)}
+.num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
+
+/* Expand arrow */
+.col-einkauf-header{position:relative}
+.expand-arrow{display:inline-flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;margin-left:.3rem;
+  font-size:.7rem;color:var(--neon-magenta);transition:color .2s;
+  vertical-align:middle;flex-shrink:0;padding:0;line-height:1}
+.expand-arrow:hover{color:var(--text)}
+.expand-arrow.expanded{color:var(--neon-green)}
+.col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
+
+/* detail date columns */
+.detail-col{display:none}
+.detail-col.visible{display:table-cell}
+.detail-th{background:#f0fdf9;color:var(--neon-green);
+  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
+  font-weight:700;font-size:.95rem;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
+.detail-th:hover{color:var(--neon-cyan)}
+.detail-td{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--neon-green);background:#f4fdf9}
+
+/* inline edit input */
+.inline-input{background:#fff;border:1px solid var(--neon-cyan);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;
+  width:70px;text-align:center;padding:.2rem .3rem;outline:none}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
+  align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal{background:#ffffff;border:1px solid var(--glass-border);border-radius:12px;
+  padding:1.5rem;width:100%;max-width:600px;position:relative;box-shadow:0 20px 60px rgba(30,37,50,.2);
+  margin:auto}
+.modal-title{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.1em;
+  color:var(--neon-cyan);text-transform:uppercase;margin-bottom:1.2rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;
+  color:var(--text-dim);font-size:1.2rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--neon-magenta)}
+
+/* form elements in modal */
+.field-label{display:block;font-size:.75rem;letter-spacing:.08em;color:var(--text-dim);
+  text-transform:uppercase;margin-bottom:.35rem}
+.field{margin-bottom:1rem}
+input[type=date],input[type=text],input[type=number],.m-select{
+  width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.55rem .8rem;
+  outline:none;transition:border-color .2s}
+input:focus,.m-select:focus{border-color:var(--neon-cyan)}
+.m-select{appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
+  background-repeat:no-repeat;background-position:right .8rem center;padding-right:2rem}
+.m-select option{background:#fff}
+
+/* category in modal — all collapsed by default */
+.modal-cat-header{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;
+  background:var(--bg3);border-radius:6px;cursor:pointer;margin-bottom:.3rem;user-select:none;border:1px solid var(--glass-border)}
+.modal-cat-header:hover{background:#e3e8f0}
+.modal-cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:.1em;
+  color:var(--neon-yellow);text-transform:uppercase;flex:1}
+.modal-cat-arrow{font-size:.65rem;transition:transform .2s;color:var(--text-dim)}
+.modal-cat.open .modal-cat-arrow{transform:rotate(90deg)}
+.modal-cat-items{display:none;padding:0 0 .5rem .5rem}
+.modal-cat.open .modal-cat-items{display:block}
+
+/* product checkbox row in modal */
+.modal-prod-row{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border-radius:4px;transition:background .15s;overflow:hidden}
+.modal-prod-row:hover{background:#e3edf0}
+.prod-checkbox{width:18px;height:18px;border:2px solid var(--glass-border);border-radius:4px;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;background:#fff}
+.prod-checkbox.checked{border-color:var(--neon-green);background:rgba(5,150,105,.12)}
+.prod-checkbox.checked::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
+.qty-input{width:75px;min-width:75px;max-width:75px;flex-shrink:0;
+  background:#fff;border:1px solid var(--glass-border);border-radius:4px;
+  color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;
+  padding:.3rem .4rem;text-align:center;outline:none;display:none;transition:border-color .2s}
+.qty-input.show{display:block}
+.qty-input:focus{border-color:var(--neon-cyan)}
+.qty-input::-webkit-outer-spin-button,.qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.qty-input[type=number]{-moz-appearance:textfield}
+.betrag-input::-webkit-outer-spin-button,.betrag-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.betrag-input[type=number]{-moz-appearance:textfield}
+.modal-prod-name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem;overflow:hidden}
+.modal-prod-name{font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-prod-unit{font-size:.7rem;color:var(--text-dim)}
+
+/* selected list */
+.selected-list{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
+.selected-list-title{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.1em;
+  color:var(--neon-magenta);text-transform:uppercase;margin-bottom:.6rem}
+.selected-item{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;padding:.35rem 0;
+  border-bottom:1px solid var(--glass-border)}
+.selected-item-name{font-size:.88rem;color:var(--text)}
+.selected-item-unit{font-size:.72rem;color:var(--text-dim);margin-left:.2rem}
+.selected-item-qty{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;
+  color:var(--neon-green);font-weight:700;flex-shrink:0}
+.selected-cat-label{font-size:.62rem;color:var(--text-dim);letter-spacing:.06em;margin-top:.5rem;margin-bottom:.2rem}
+
+/* shops — shop select wider, betrag narrower */
+.shops-section{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
+.shops-title{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.1em;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:.6rem}
+.shop-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;width:100%}
+.shop-select{flex:1;min-width:0;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;padding:.5rem 1.8rem .5rem .7rem;
+  outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
+  background-repeat:no-repeat;background-position:right .5rem center;transition:border-color .2s}
+.shop-select:focus{border-color:var(--neon-cyan)}
+.shop-select option{background:#fff}
+.betrag-input{width:80px;min-width:80px;max-width:80px;flex-shrink:0;
+  background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:var(--neon-yellow);font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.85rem;padding:.5rem .4rem;text-align:right;outline:none}
+.betrag-input:focus{border-color:var(--neon-yellow)}
+.shop-remove{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;padding:.2rem;flex-shrink:0}
+.shop-remove:hover{color:#dc2626}
+.btn-add-shop{display:inline-flex;align-items:center;gap:.3rem;background:none;
+  border:1px dashed var(--glass-border);border-radius:6px;color:var(--text-dim);
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;padding:.4rem .8rem;cursor:pointer;transition:all .2s}
+.btn-add-shop:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+
+/* modal buttons */
+.modal-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  border:none;border-radius:6px;cursor:pointer;padding:.65rem 1.2rem;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--neon-cyan),#066a82);color:#fff;box-shadow:0 3px 10px rgba(8,145,178,.3)}
+.btn-primary:hover{box-shadow:0 5px 16px rgba(8,145,178,.45);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--glass-border);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;font-weight:600}
+.btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+.btn-danger{background:linear-gradient(135deg,#e11d48,#a3122f);color:#fff;font-weight:700}
+
+/* confirm view */
+.confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:baseline;
+  padding:.45rem 0;border-bottom:1px solid var(--glass-border);gap:.5rem}
+.confirm-item .ci-name{color:var(--text);font-size:.88rem;flex:1}
+.confirm-item .ci-unit{font-size:.7rem;color:var(--text-dim);margin-left:.2rem}
+.confirm-item .ci-qty{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-green);font-weight:700;flex-shrink:0}
+.confirm-item .ci-cat{font-size:.65rem;color:var(--text-dim);display:block}
+.confirm-shops{margin-top:.8rem;padding:.7rem;background:var(--bg3);border-radius:6px;border:1px solid var(--glass-border)}
+.confirm-shops-title{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.08em;color:var(--neon-cyan);text-transform:uppercase;margin-bottom:.5rem}
+.confirm-shop-row{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;padding:.25rem 0;border-bottom:1px solid var(--glass-border)}
+.confirm-shop-row:last-child{border-bottom:none}
+.confirm-shop-row .cs-name{color:var(--text-dim)}
+.confirm-shop-row .cs-amt{color:var(--neon-yellow);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.82rem;font-weight:700}
+.confirm-date{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.75rem;color:var(--neon-magenta);margin-bottom:.8rem}
+
+/* success toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
+  padding:.8rem 1.4rem;font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.06em;
+  color:var(--neon-green);z-index:999;display:none;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(5,150,105,.18)}
+.toast.show{display:block;animation:fadeInUp .3s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* spinner */
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:999;align-items:center;justify-content:center}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(8,145,178,.15);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile: Anfangsbestand header split */
+.th-text-mob{display:none}
+@media(max-width:640px){
+  .th-text-mob{display:inline}
+  .th-col-anfang .th-text{display:none}
+}
+/* Button text spans */
+.btn-line1{display:inline}
+.btn-line2{display:inline}
+.btn-wareneingang{white-space:nowrap}
+@media(max-width:640px){
+  .btn-line1{display:block}
+  .btn-line2{display:block}
+  .btn-wareneingang{white-space:normal}
+}
+.text-dim-small{color:var(--text-dim);font-size:.72rem}
+
+/* --- Datei-spezifische Regeln (übernommen, Farben angepasst) --- */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
-:root{--bg:#050510;--neon-cyan:#00f5ff;--neon-magenta:#ff00cc;--text:#e0e8ff;--text-dim:#7080a0}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
-.empty{text-align:center;position:relative;z-index:1}
-.empty h1{font-family:'Orbitron',sans-serif;font-size:1.4rem;letter-spacing:.2em;background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.8rem}
-.empty p{color:var(--text-dim);font-size:.9rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem}
-.back{font-family:'Orbitron',sans-serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:#000;background:linear-gradient(135deg,var(--neon-cyan),#0088cc);border:none;border-radius:6px;padding:.6rem 1.2rem;cursor:pointer;text-decoration:none;display:inline-block}
+:root{
+  --bg:#e4e8ef;--bg2:#eef1f6;--bg3:#eef1f6;
+  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
+  --glass:#e9edf3;--glass-border:#c9d1dc;
+  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
+}
+@keyframes scan{0%,100%{opacity:.3}
+50%{opacity:1}
+}
+.hdr-left{display:flex;align-items:center}
+.cat-arrow,.cat-arrow-r,.cat-arrow-r2{font-size:.7rem;transition:transform .2s;display:inline-block}
+.cat-row.open .cat-arrow,.cat-row.open .cat-arrow-r,.cat-row.open .cat-arrow-r2{transform:rotate(90deg)}
+
+/* Desktop Artikel column in right table */
+.td-artikel-desktop{display:none}
+#th-artikel-desktop{display:none}
+
+@media(max-width:640px){
+  .cat-row-r .td-artikel-desktop{
+    display:table-cell!important;
+    padding:.4rem .9rem;
+    background:#eef2f6;
+  }
+  .cat-row-r .cat-label-cell{display:none}
+  .cat-row-r .cat-label-cell{display:table-cell}
+  .table-right{overflow-x:auto}
+  .lager-table-right{width:max-content;min-width:0}
+  .td-artikel-desktop{display:table-cell;text-align:left;padding:.55rem .9rem;
+    width:22%;min-width:180px;border-bottom:1px solid rgba(8,145,178,.05);vertical-align:middle}
+  #th-artikel-desktop{display:table-cell!important;padding:.7rem .9rem;white-space:nowrap;text-align:left}
+  .cat-row-left{display:none!important}
+  .cat-row-r{display:none!important}
+}
 </style>
 </head>
 <body>
-<div class="empty">
-  <h1>Rechnungen</h1>
-  <p>Inhalt folgt</p>
-  <a class="back" href="javascript:history.back()">&#8592; Zurück</a>
+
+<div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="hdr-left">
+    <button class="burger" id="burger-btn" onclick="toggleSidebar()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-org">GAME GALAXY Betriebsportal</div>
+    <div class="hdr-page">HANDEL – <span style="color:var(--neon-cyan);font-weight:700;font-size:.82rem">Rechnungen</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-user" onclick="toggleUserDropdown()">
+      <span id="hdr-username">Admin</span>
+      <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+  </div>
+</header>
+
+<div class="modal-overlay" id="modal-verbrauch" onclick="if(event.target===this)closeVerbrauchModal()">
+  <div class="modal" style="max-width:900px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeVerbrauchModal()">✕</button>
+    <div class="modal-title">📊 Monatlicher Verbrauch — alle Filialen</div>
+    <div id="verbrauch-content"></div>
+  </div>
 </div>
+
+<div class="user-dropdown" id="user-dropdown">
+  <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
+  <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <ul class="nav-list">
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html">Bestände</a></li>
+        <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
+        <li><a href="lieferplanung.html">Lieferplanung</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html">Preise</a></li>
+        <li><a href="rechnungen.html" style="color:var(--neon-cyan)">Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="erfassungen.html">Erfassungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'">Statistik</button></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'">Thekenverkauf</button></li>
+    <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'">Getränke</button></li>
+  </ul>
+</nav>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- Controls -->
+  <div class="lager-controls">
+    <select class="ctrl-select" id="sel-zeitraum" onchange="renderTable()">
+      <option value="2026-01">Januar 2026</option>
+      <option value="2026-02">Februar 2026</option>
+      <option value="2026-03">März 2026</option>
+      <option value="2026-04">April 2026</option>
+      <option value="2026-05">Mai 2026</option>
+      <option value="2026-06" selected>Juni 2026</option>
+      <option value="2026-07">Juli 2026</option>
+      <option value="2026-08">August 2026</option>
+      <option value="2026-09">September 2026</option>
+      <option value="2026-10">Oktober 2026</option>
+      <option value="2026-11">November 2026</option>
+      <option value="2026-12">Dezember 2026</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <!-- Table wrapper: left fixed + right scrollable -->
+  <div class="table-wrap-single">
+    <table class="lager-table" id="lager-table">
+      <thead id="lager-thead"></thead>
+      <tbody id="lager-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ MODAL: WARENEINGANG ═══ -->
+<div class="modal-overlay" id="modal-we">
+  <div class="modal">
+    <button class="modal-close" onclick="closeWareneingang()">✕</button>
+    <div class="modal-title" id="we-title">Inventur erstellen</div>
+
+    <!-- Step 1: Auswahl -->
+    <div id="we-step1">
+      <div class="field">
+        <label class="field-label">Datum der Inventur</label>
+        <input type="date" id="we-date">
+      </div>
+      <div class="field">
+        <label class="field-label">Waren auswählen</label>
+        <div id="we-product-list"></div>
+      </div>
+      <div id="we-selected-list" class="selected-list" style="display:none">
+        <div class="selected-list-title">Ausgewählte Waren</div>
+        <div id="we-selected-items"></div>
+      </div>
+      <div id="we-shops-section" class="shops-section" style="display:none">
+        <div class="shops-title" id="we-shops-title">Shops / Einkaufsorte</div>
+        <div id="we-shop-rows"></div>
+        <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn btn-primary" onclick="buildConfirm()">Einkaufsliste prüfen →</button>
+        <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Confirm -->
+    <div id="we-step2" style="display:none">
+      <div class="confirm-date" id="confirm-date-label"></div>
+      <div class="confirm-list" id="confirm-list"></div>
+      <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
+      <div class="modal-btn-row">
+        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
+        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: INLINE EDIT ANFANGSBESTAND ═══ -->
+<div class="modal-overlay" id="modal-ab">
+  <div class="modal" style="max-width:360px">
+    <button class="modal-close" onclick="document.getElementById('modal-ab').classList.remove('show')">✕</button>
+    <div class="modal-title">Anfangsbestand festlegen</div>
+    <div class="field">
+      <label class="field-label" id="ab-prod-label">Produkt</label>
+      <input type="number" id="ab-value" min="0" step="0.1" placeholder="Menge eingeben">
+    </div>
+    <div class="modal-btn-row">
+      <button class="btn btn-primary" onclick="saveAnfangsbestand()">Speichern</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-ab').classList.remove('show')">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── PRODUCT DATA ──
+const DEFAULT_PRODUCTS = [
+  {cat:'Getränke', items:[
+    {id:'rb_blue',   name:'Red Bull',                    unit:'0,25 L', icon:'🔵'},
+    {id:'rb_zero',   name:'Red Bull Zero',               unit:'0,25 L', icon:'🩵'},
+    {id:'rb_white',  name:'Red Bull White',              unit:'0,25 L', icon:'⚪️'},
+    {id:'action_e',  name:'Action Energy / Power Up',    unit:'0,25 L', icon:'⚡'},
+    {id:'cola_red',  name:'Coca Cola',                   unit:'0,33 L', icon:'🔴'},
+    {id:'cola_zero', name:'Coca Cola Zero',              unit:'0,33 L', icon:'⚫'},
+    {id:'fanta',     name:'Fanta',                       unit:'0,33 L', icon:'🟠'},
+    {id:'sprite',    name:'Sprite',                      unit:'0,33 L', icon:'🟢'},
+    {id:'vio_stil',  name:'VIO Wasser Still',            unit:'0,50 L', icon:'💧'},
+    {id:'vio_med',   name:'VIO Wasser Med. (Brüggen)',   unit:'0,50 L', icon:'🫧'},
+    {id:'gero_sp',   name:'Gerolsteiner Sprud. (Viersen)',unit:'0,33 L',icon:'🌊'},
+    {id:'gero_med',  name:'Gerolsteiner Med. (Viersen)', unit:'0,33 L', icon:'💦'},
+    {id:'durstl',    name:'Durstlöscher Versch.Sort.',   unit:'',       icon:'🥤'},
+  ]},
+  {cat:'Snacks', items:[
+    {id:'erdnuesse', name:'Erdnüsse',          unit:'20 St.', icon:'🥜'},
+    {id:'stuf',      name:'Studentenfutter',   unit:'20 St.', icon:'🍿'},
+    {id:'snickers',  name:'Snickers',          unit:'24 St.', icon:'🍫'},
+    {id:'mars',      name:'Mars',              unit:'24 St.', icon:'🍬'},
+    {id:'twix',      name:'Twix',             unit:'30 St.', icon:'🍭'},
+    {id:'mnm',       name:'M&M',              unit:'24 St.', icon:'🟡'},
+    {id:'pringles',  name:'Pringles',         unit:'24 St.', icon:'🥫'},
+    {id:'kitkat',    name:'KitKat White',     unit:'24 St.', icon:'🤍'},
+    {id:'bifi_orig', name:'BIFI Original',    unit:'40 St.', icon:'🌭'},
+    {id:'bifi_roll', name:'BIFI Roll',        unit:'24 St.', icon:'🥖'},
+  ]},
+  {cat:'Süssigkeiten', items:[
+    {id:'croissant', name:'Croissants',           unit:'5 St.',   icon:'🥐'},
+    {id:'madeleine', name:'Madeleines / Küchlein',unit:'',        icon:'🧁'},
+    {id:'rollino',   name:'Rollino',              unit:'',        icon:'🍥'},
+    {id:'biscoff',   name:'Biscoff Gebäck',       unit:'300 St.', icon:'🍪'},
+    {id:'nimm2',     name:'Nimm 2 Soft',          unit:'345 g.',  icon:'🍬'},
+    {id:'risen',     name:'Risen Toffees',        unit:'900 g.',  icon:'🍫'},
+    {id:'milchb',    name:'Milch Boller',         unit:'345 g.',  icon:'🥛'},
+    {id:'werthers',  name:'Werthers',             unit:'245 g.',  icon:'🟡'},
+    {id:'melange',   name:'Melange Toffee',       unit:'400 g.',  icon:'🍮'},
+    {id:'haribo',    name:'Haribo Eimer',         unit:'1 KG',    icon:'🐻'},
+    {id:'ice_bon',   name:'ICE Bonbons',          unit:'400 g.',  icon:'🧊'},
+    {id:'brotchen',  name:'Brötchen',             unit:'',        icon:'🍞'},
+    {id:'minibox',   name:'MINI MIX Box',         unit:'3 Kg.',   icon:'📦'},
+    {id:'tee_100',   name:'TEE Versch. Sorten',   unit:'100 St.', icon:'🍵'},
+    {id:'tee_20',    name:'TEE Versch. Sorten',   unit:'20 St.',  icon:'🫖'},
+    {id:'susstoff',  name:'Süßstoff',             unit:'',        icon:'🍬'},
+    {id:'zucker',    name:'Zucker',               unit:'2 KG.',   icon:'🧂'},
+    {id:'kaffee',    name:'Kaffee Classic Grande', unit:'',       icon:'☕'},
+    {id:'cappuc',    name:'Cappuccino PURE Topping',unit:'',      icon:'🥛'},
+    {id:'kakao',     name:'Kakao PURE FS',        unit:'',        icon:'🍫'},
+  ]},
+  {cat:'Haushaltsartikel', items:[
+    {id:'glasrein',  name:'Glasreiniger',           unit:'',        icon:'🪟'},
+    {id:'spulmit',   name:'Spülmittel',             unit:'',        icon:'🧼'},
+    {id:'wc_rein',   name:'WC-Reiniger',            unit:'',        icon:'🚽'},
+    {id:'urin_kalk', name:'Urinstein- u. Kalklöser (WC)',unit:'',  icon:'🧪'},
+    {id:'wc_tab',    name:'WC-Tabletten (Duftstein)',unit:'',       icon:'💠'},
+    {id:'duft_wc',   name:'Duftspray WC',           unit:'',        icon:'🌸'},
+    {id:'duft_hall', name:'Duftspray Halle (Automat.)',unit:'',     icon:'🏛️'},
+    {id:'duftvase_g',name:'Duftvase Halle+WC (Gold)',unit:'90 ml', icon:'🏺'},
+    {id:'duftvase_t',name:'Duftvase Halle (Treesticks)',unit:'200 ml',icon:'🌿'},
+    {id:'luftpar',   name:'Lufterfrischer Paradise (WC)',unit:'',   icon:'🌺'},
+    {id:'geraet_d',  name:'Gerät für Duftspray autom.',unit:'',     icon:'🔧'},
+    {id:'seife_nf',  name:'Seife / Nachfüllung',    unit:'1-2 L',  icon:'🧴'},
+    {id:'seife_fl',  name:'Seife Flasche',          unit:'',        icon:'🧴'},
+    {id:'bad_rein',  name:'Bad reiniger Waschb.&Fliesen',unit:'',  icon:'🛁'},
+    {id:'boden_aj',  name:'Bodenreiniger AJAX',     unit:'',        icon:'🧹'},
+    {id:'allzweck',  name:'Allzweckreiniger',       unit:'',        icon:'✨'},
+    {id:'hygienr',   name:'Hygienereiniger',        unit:'',        icon:'🦠'},
+    {id:'bref',      name:'Bref gegen Kalk&Schmutz',unit:'',        icon:'💎'},
+    {id:'antilim',   name:'Anti Limescale',         unit:'',        icon:'⚗️'},
+    {id:'scheurm',   name:'Scheuermilch',           unit:'',        icon:'🥛'},
+    {id:'rohrrein',  name:'Rohrreiniger',           unit:'',        icon:'🔩'},
+    {id:'essig_r',   name:'Essig Reiniger',         unit:'',        icon:'🫙'},
+    {id:'toilp',     name:'Toilettenpapier',        unit:'',        icon:'🧻'},
+    {id:'kuchenr',   name:'Küchenrollen',           unit:'',        icon:'🧻'},
+    {id:'handtpap',  name:'Handtuchpapier (Papierträger)',unit:'',  icon:'📄'},
+    {id:'handsch_e', name:'Handschuhe Einmal.',     unit:'100 St.', icon:'🧤'},
+    {id:'handsch_m', name:'Handschuhe Mehrweg',     unit:'1 Paar',  icon:'🧤'},
+    {id:'feuchtt',   name:'Feuchte Allzwecktücher', unit:'',        icon:'🧻'},
+    {id:'handgesc',  name:'Handtücher & Geschirrtücher',unit:'',    icon:'🏳️'},
+    {id:'putztuch',  name:'Putztücher Mikrofaser',  unit:'',        icon:'🧽'},
+    {id:'swamme',    name:'Schwämme',               unit:'',        icon:'🧽'},
+    {id:'lappen',    name:'Lappen für Boden',       unit:'',        icon:'🧹'},
+    {id:'wischbez',  name:'Wischbezüge',            unit:'',        icon:'🪣'},
+    {id:'staubf',    name:'Staubfangtücher',        unit:'',        icon:'🪄'},
+    {id:'staubsb',   name:'Staubsauger Beutel',     unit:'',        icon:'🌀'},
+    {id:'buromат',   name:'Büromaterial (Vitrine)',  unit:'',        icon:'📎'},
+    {id:'mull120',   name:'Müllbeutel 120 L.',      unit:'15 St.',  icon:'🗑️'},
+    {id:'mull60',    name:'Müllbeutel 60 L.',       unit:'30 St.',  icon:'🗑️'},
+    {id:'mull50',    name:'Müllbeutel 50 L.',       unit:'30 St.',  icon:'🗑️'},
+    {id:'mull35',    name:'Müllbeutel 35/30 L.',    unit:'30 St.',  icon:'🗑️'},
+    {id:'mull25',    name:'Müllbeutel 25 L.',       unit:'30 St.',  icon:'🗑️'},
+    {id:'mull10',    name:'Müllbeutel 10 L.',       unit:'75 St.',  icon:'🗑️'},
+    {id:'hygient',   name:'Hygienetücher',          unit:'',        icon:'📋'},
+    {id:'togo_d',    name:'To Go Deckel',           unit:'100 St.', icon:'🫙'},
+    {id:'togo_b',    name:'To Go Becher',           unit:'50 St.',  icon:'🥤'},
+    {id:'urinam',    name:'Urinamatte',             unit:'',        icon:'🔵'},
+    {id:'kaffetab',  name:'Kaffee Reinigungs-Tabs', unit:'',        icon:'☕'},
+    {id:'desinfek',  name:'Desinfektor Pumpspray',  unit:'',        icon:'💉'},
+    {id:'batterie',  name:'Batterien AA',           unit:'',        icon:'🔋'},
+    {id:'streichh',  name:'Streichhölzer',          unit:'',        icon:'🔥'},
+    {id:'feuerzg',   name:'Feuerzeuge',             unit:'',        icon:'🔥'},
+  ]},
+];
+let PRODUCTS = DEFAULT_PRODUCTS;
+
+const DEFAULT_SHOPS_PRIMARY   = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE'];
+const DEFAULT_SHOPS_SECONDARY = ['Penny','Trinkgut','Kaufland','Action','Centershop'];
+let SHOPS_PRIMARY = DEFAULT_SHOPS_PRIMARY;
+let SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
+
+// ── STATE ──
+let currentZeitraum = '2026-06';
+let priceDocs = []; // alle Preisänderungs-Dokumente aus Firestore (enthalten auch den Kommentar pro Monat)
+
+// ── EXPOSE (assigned after function definitions below) ──
+
+// ── SPINNER ──
+function showSpinner(){ document.getElementById('spinner').classList.add('show') }
+function hideSpinner(){ document.getElementById('spinner').classList.remove('show') }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500) }
+
+// ── SIDEBAR ──
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('show'); document.getElementById('burger-btn').classList.toggle('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').classList.remove('show'); document.getElementById('burger-btn').classList.remove('open'); }
+function toggleSubMenu(btn){ btn.closest('.nav-item').classList.toggle('open') }
+function toggleUserDropdown(){ document.getElementById('user-dropdown').classList.toggle('show'); document.addEventListener('click',function h(e){ if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){ document.getElementById('user-dropdown').classList.remove('show'); document.removeEventListener('click',h); } }); }
+
+// ── RENDER TABLE (called by select onchange) ──
+function renderTable(){
+  loadData();
+}
+
+function renderTableActual(){
+  const thead = document.getElementById('lager-thead');
+  const tbody = document.getElementById('lager-tbody');
+  const zeit = currentZeitraum;
+  const categories = buildRechnungenCategories();
+  const fmt = v => v ? v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '—';
+  const fmtBold = v => v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+
+  // ── HEADER ──
+  let thHTML = '<tr>';
+  thHTML += '<th class="col-artikel">Artikel</th>';
+  BRANCHES.forEach(br=>{
+    thHTML += `<th class="num-cell" style="color:${BRANCH_COLORS[br]}">${BRANCH_LABELS[br]}</th>`;
+  });
+  thHTML += '<th class="num-cell" style="color:#111827;background:rgba(0,0,0,.04)">Gesamt</th>';
+  thHTML += '</tr>';
+  thead.innerHTML = thHTML;
+
+  // ── BODY ──
+  let tbHTML = '';
+  const grandTotals = {gesamt:0};
+  BRANCHES.forEach(br=>grandTotals[br]=0);
+
+  categories.forEach((catObj, ci)=>{
+    const isFirst = ci === 0;
+    const catOpen = isFirst ? 'open' : '';
+
+    const catTotals = {gesamt:0};
+    BRANCHES.forEach(br=>catTotals[br]=0);
+
+    const rowsHTML = catObj.items.map(prod=>{
+      const vk = getEffectivePrice(prod.id,'verkauf',zeit) || 0;
+      const perBranch = {};
+      let rowGesamt = 0;
+      BRANCHES.forEach(br=>{
+        const qty = Number((lieferungenPerBranch[br]||{})[prod.id]) || 0;
+        const val = qty * vk;
+        perBranch[br] = val;
+        rowGesamt += val;
+        catTotals[br] += val;
+        grandTotals[br] += val;
+      });
+      catTotals.gesamt += rowGesamt;
+      grandTotals.gesamt += rowGesamt;
+
+      const prodHidden = isFirst ? '' : 'hidden';
+      return `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">
+        <td class="col-artikel"><div class="prod-info">
+          <div class="prod-icon">${iconHTML(prod.icon,34)}</div>
+          <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
+        </div></td>
+        ${BRANCHES.map(br=>`<td class="num-cell" style="color:${BRANCH_COLORS[br]}">${fmt(perBranch[br])}</td>`).join('')}
+        <td class="num-cell" style="color:#111827;background:rgba(0,0,0,.03)">${fmt(rowGesamt)}</td>
+      </tr>`;
+    }).join('');
+
+    tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
+      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
+      ${BRANCHES.map(br=>`<td class="num-cell" style="background:#e3e8f0;color:${BRANCH_COLORS[br]};font-weight:700">${fmt(catTotals[br])}</td>`).join('')}
+      <td class="num-cell" style="background:#e3e8f0;color:#111827;font-weight:700">${fmt(catTotals.gesamt)}</td>
+    </tr>`;
+
+    tbHTML += rowsHTML;
+  });
+
+  // ── GESAMT-ZEILE (immer sichtbar, unabhängig vom Kategorie-Zustand) ──
+  tbHTML += `<tr style="border-top:2px solid var(--glass-border)">
+    <td class="col-artikel"><div class="prod-name" style="font-weight:700;text-transform:uppercase;font-size:.72rem;letter-spacing:.06em;color:#111827">Gesamt</div></td>
+    ${BRANCHES.map(br=>`<td class="num-cell" style="color:${BRANCH_COLORS[br]};font-weight:700">${fmtBold(grandTotals[br])}</td>`).join('')}
+    <td class="num-cell" style="color:#111827;font-weight:700;background:rgba(0,0,0,.05)">${fmtBold(grandTotals.gesamt)}</td>
+  </tr>`;
+
+  tbody.innerHTML = tbHTML;
+}
+
+// Ermittelt den zum gewählten Monat gültigen Preis: der zuletzt EXPLIZIT gesetzte Wert
+// in diesem Monat oder einem früheren Monat gilt so lange weiter, bis er in einem
+// späteren Monat erneut geändert wird.
+const BRANCHES = ['nettetal','brüggen','viersen','köln'];
+const BRANCH_LABELS = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+const BRANCH_COLORS = {nettetal:'#2563eb',brüggen:'#e11d48',viersen:'#ea580c',köln:'#7c3aed'};
+// Diese Artikel werden NUR auf dieser Seite in eine eigene Kategorie "Heißgetränke"
+// umsortiert — an der zentralen Artikel-Konfiguration (lager.html) ändert das nichts.
+const HEISSGETRAENKE_IDS = ['tee_100','tee_20','susstoff','zucker','kaffee','cappuc','kakao'];
+
+let lieferungenPerBranch = {}; // {branch: {prodId: qty}}
+
+// Summiert Firestore-Dokumente PRO ARTIKEL, dedupliziert nach Datum — genau EIN
+// Eintrag pro Datum (wie manuell erfasst) — identisch mit der Logik auf lager.html.
+function dedupSumFromSnap(snap){
+  const byDate = {};
+  snap.forEach(d=>{
+    const data = d.data();
+    const dt = data.datum;
+    if(dt && !byDate[dt]) byDate[dt] = data;
+  });
+  const sum = {};
+  Object.values(byDate).forEach(data=>{
+    const items = data.items||{};
+    Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
+  });
+  return sum;
+}
+
+// Baut eine eigene Kategorie-Gruppierung NUR für diese Seite.
+function buildRechnungenCategories(){
+  const heissItems = [];
+  const rest = PRODUCTS.map(catObj=>({
+    cat: catObj.cat,
+    items: catObj.items.filter(p=>{
+      if(HEISSGETRAENKE_IDS.includes(p.id)){ heissItems.push(p); return false; }
+      return true;
+    })
+  })).filter(catObj=>catObj.items.length>0);
+
+  const order = ['Getränke','Snacks','Heißgetränke','Süssigkeiten','Haushaltsartikel'];
+  const byName = {};
+  rest.forEach(c=>{ byName[c.cat]=c; });
+  if(heissItems.length) byName['Heißgetränke'] = {cat:'Heißgetränke', items:heissItems};
+  const finalOrder = order.filter(cat=>byName[cat]);
+  Object.keys(byName).forEach(cat=>{ if(!finalOrder.includes(cat)) finalOrder.push(cat); });
+  return finalOrder.map(cat=>byName[cat]);
+}
+
+function getEffectivePrice(prodId, field, month){
+  const candidates = priceDocs.filter(d=>d.prodId===prodId && d.monat<=month && d[field]!==undefined && d[field]!==null);
+  if(!candidates.length) return null;
+  candidates.sort((a,b)=>b.monat.localeCompare(a.monat));
+  return candidates[0][field];
+}
+
+window.savePrice = async function(prodId, field, rawVal){
+  const zeit = currentZeitraum;
+  const docId = prodId+'_'+zeit;
+  const val = rawVal===''? null : parseFloat(rawVal);
+  showSpinner();
+  try{
+    if(val===null || isNaN(val)){
+      // Leerung: Eintrag für DIESEN Monat entfernen, damit wieder der Preis aus einem
+      // früheren Monat "durchscheint" (statt eine Lücke zu erzeugen).
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, [field]: firebase.firestore.FieldValue.delete()}, {merge:true});
+    } else {
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, [field]: val}, {merge:true});
+    }
+    showToast('Preis gespeichert ✓');
+    await loadData();
+  }catch(e){
+    showToast('Fehler beim Speichern: '+e.message);
+  }
+  hideSpinner();
+};
+
+// Kommentar: NUR für den jeweils angezeigten Monat gültig — im Unterschied zu den
+// Preisen wird er NICHT in Folgemonate übernommen (jeder Monat hat seinen eigenen).
+function getKommentar(prodId, month){
+  const doc = priceDocs.find(d=>d.prodId===prodId && d.monat===month);
+  return (doc && doc.kommentar) ? doc.kommentar : '';
+}
+
+window.saveKommentar = async function(prodId, rawVal){
+  const zeit = currentZeitraum;
+  const docId = prodId+'_'+zeit;
+  const val = rawVal.trim();
+  showSpinner();
+  try{
+    if(val===''){
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, kommentar: firebase.firestore.FieldValue.delete()}, {merge:true});
+    } else {
+      await db.collection('preise').doc(docId).set({prodId, monat:zeit, kommentar: val}, {merge:true});
+    }
+    showToast('Kommentar gespeichert ✓');
+    await loadData();
+  }catch(e){
+    showToast('Fehler beim Speichern: '+e.message);
+  }
+  hideSpinner();
+};
+
+function getPrevMonthLabel(){ return '—'; }
+
+window.toggleShopsSection = function(){}  // not used in inventur
+
+// ── CATEGORY TOGGLE ──
+window.toggleCategory = function(row){
+  const ci = row.dataset.cat;
+  const isOpen = row.classList.toggle('open');
+  document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
+}
+// Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
+// Kategorien dieser Seite (Süssigkeiten/Haushaltsartikel). Reine Leseoperation — die
+// Konfiguration (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
+// Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
+function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+function iconHTML(icon, sizePx){
+  sizePx = sizePx || 34;
+  if(isImageIcon(icon)){
+    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+  }
+  return icon || '📦';
+}
+
+// Lädt die Geschäfte-Liste aus Firestore (read-only — die Konfiguration passiert auf lager.html)
+async function loadShops(){
+  try{
+    const snap = await db.collection('shops').get();
+    if(snap.empty) return;
+    const data = [];
+    snap.forEach(d=>{ const s=d.data(); data.push({id:d.id,name:s.name,icon:s.icon||'🏪',group:s.group||'primary',order:Number(s.order)||0}); });
+    data.sort((a,b)=>a.order-b.order);
+    SHOPS_PRIMARY = data.filter(s=>s.group==='primary').map(s=>s.name);
+    SHOPS_SECONDARY = data.filter(s=>s.group==='secondary').map(s=>s.name);
+  }catch(e){ console.warn('Shops laden fehlgeschlagen, nutze Standard-Liste:', e.message); }
+}
+
+async function loadProducts(){
+  const catOrderDefault = ['Getränke','Snacks','Süssigkeiten','Haushaltsartikel'];
+  try{
+    const snap = await db.collection('produkte').get();
+    if(snap.empty){ PRODUCTS = DEFAULT_PRODUCTS; return; }
+    const byCat = {};
+    snap.forEach(d=>{
+      const p = d.data();
+      if(!byCat[p.cat]) byCat[p.cat] = [];
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+    });
+    const catOrder = [...catOrderDefault];
+    Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
+    PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
+      cat,
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+    }));
+  }catch(e){
+    console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    PRODUCTS = DEFAULT_PRODUCTS;
+  }
+}
+
+// ── VERBRAUCH-ÜBERSICHT (alle Filialen außer Zentrallager) ──
+window.openVerbrauchModal = async function(){
+  document.getElementById('modal-verbrauch').classList.add('show');
+  const cont = document.getElementById('verbrauch-content');
+  cont.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-dim)">Lädt…</p>';
+
+  const zeit = document.getElementById('sel-zeitraum').value;
+  if(zeit.length!==7){
+    cont.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-dim)">Bitte oben einen einzelnen Monat wählen (nicht „Jahr“).</p>';
+    return;
+  }
+
+  const branches = ['nettetal','brüggen','viersen','köln'];
+  const branchLabels = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
+  const branchColors = {
+    nettetal: '#2563eb',
+    brüggen:  '#e11d48',
+    viersen:  '#ea580c',
+    köln:     '#7c3aed',
+  };
+  const monatLabels = {'01':'Januar','02':'Februar','03':'März','04':'April','05':'Mai','06':'Juni',
+    '07':'Juli','08':'August','09':'September','10':'Oktober','11':'November','12':'Dezember'};
+  const [zJahr, zMon] = zeit.split('-');
+  const monatLabel = `${monatLabels[zMon]} ${zJahr}`;
+
+  try{
+    const dataPerLager = {};
+    await Promise.all(branches.map(async lg=>{
+      const [abDoc, weSnap, gSnap, tSnap, invSnap] = await Promise.all([
+        db.collection('anfangsbestand').doc(lg+'_'+zeit).get(),
+        db.collection('wareneingang').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('gs_geraet').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('gs_theke').where('lager','==',lg).where('monat','==',zeit).get(),
+        db.collection('inventur').where('lager','==',lg).where('monat','==',zeit).get(),
+      ]);
+      const ab = abDoc.exists ? abDoc.data() : {};
+      const lief = {}; weSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ lief[pid]=(lief[pid]||0)+(Number(items[pid])||0); }); });
+      const ger = {}; gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ ger[pid]=(ger[pid]||0)+(Number(items[pid])||0); }); });
+      const thk = {}; tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thk[pid]=(thk[pid]||0)+(Number(items[pid])||0); }); });
+      const invDocs = []; invSnap.forEach(d=>invDocs.push(d.data()));
+      dataPerLager[lg] = {ab, lief, ger, thk, invDocs};
+    }));
+
+    let html = `<div style="text-align:center;font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.08em;color:var(--neon-magenta);text-transform:uppercase;margin-bottom:1rem">${monatLabel}</div>`;
+    html += `<div style="overflow-x:auto"><table class="lager-table" style="min-width:700px">
+      <thead><tr>
+        <th class="col-artikel">Artikel</th>
+        ${branches.map(lg=>`<th class="num-cell" style="color:${branchColors[lg]}">${branchLabels[lg]}</th>`).join('')}
+        <th class="num-cell" style="background:rgba(180,83,9,.08);color:var(--neon-yellow)">Gesamt</th>
+      </tr></thead><tbody>`;
+
+    PRODUCTS.forEach(catObj=>{
+      html += `<tr><td class="col-artikel" style="background:#e3e8f0"><div class="cat-label">${catObj.cat}</div></td>
+        <td colspan="99" style="background:#e3e8f0"></td></tr>`;
+      catObj.items.forEach(prod=>{
+        let rowTotal = 0, anyVal = false;
+        const cells = branches.map(lg=>{
+          const d = dataPerLager[lg];
+          const lastInv = d.invDocs.filter(inv=>inv.items&&inv.items[prod.id]!==undefined).sort((x,y)=>y.datum.localeCompare(x.datum))[0];
+          if(!lastInv) return '<td class="num-cell" style="color:var(--text-dim)">—</td>';
+          const a = Number(d.ab[prod.id])||0;
+          const b = Number(d.lief[prod.id])||0;
+          const c = Number(d.ger[prod.id])||0;
+          const dd = Number(d.thk[prod.id])||0;
+          const e = Number(lastInv.items[prod.id]);
+          const f = a+b-c-dd-e;
+          rowTotal += f; anyVal = true;
+          return `<td class="num-cell" style="color:${branchColors[lg]};font-weight:700">${f}</td>`;
+        }).join('');
+        const totalDisplay = anyVal ? rowTotal : '—';
+        html += `<tr><td class="col-artikel"><div class="prod-info">
+            <div class="prod-icon">${iconHTML(prod.icon,28)}</div>
+            <div><div class="prod-name" style="font-size:.85rem">${prod.name}</div></div>
+          </div></td>
+          ${cells}
+          <td class="num-cell" style="background:rgba(180,83,9,.06);color:var(--neon-yellow);font-weight:700">${totalDisplay}</td>
+        </tr>`;
+      });
+    });
+
+    html += `</tbody></table></div>`;
+    cont.innerHTML = html;
+  }catch(e){
+    cont.innerHTML = `<p style="text-align:center;padding:2rem;color:var(--neon-magenta)">Fehler beim Laden: ${e.message}</p>`;
+  }
+};
+window.closeVerbrauchModal = function(){
+  document.getElementById('modal-verbrauch').classList.remove('show');
+};
+
+async function loadData(){
+  showSpinner();
+  currentZeitraum = document.getElementById('sel-zeitraum').value;
+  const zeit = currentZeitraum;
+
+  // Alle Preisänderungen laden (für Verkaufspreis)
+  priceDocs = [];
+  try{
+    const snap = await db.collection('preise').get();
+    snap.forEach(d=>priceDocs.push(d.data()));
+  }catch(e){}
+
+  // Lieferungen aller 4 Filialen für den gewählten Monat (dedupliziert, wie auf lager.html)
+  lieferungenPerBranch = {};
+  if(zeit.length===7){
+    try{
+      await Promise.all(BRANCHES.map(async br=>{
+        const snap = await db.collection('wareneingang').where('lager','==',br).where('monat','==',zeit).get();
+        lieferungenPerBranch[br] = dedupSumFromSnap(snap);
+      }));
+    }catch(e){}
+  }
+
+  hideSpinner();
+  renderTableActual();
+}
+
+// ── DETAIL COLS TOGGLE ──
+window.toggleDetailCols = function(){
+  detailExpanded = !detailExpanded;
+  applyDetailCols(detailExpanded);
+}
+function applyDetailCols(show){
+  document.querySelectorAll('.detail-col').forEach(el=>el.classList.toggle('visible',show));
+  const btn = document.getElementById('expand-arrow-btn');
+  if(btn){
+    btn.textContent = show ? '◀' : '▶';
+    btn.classList.toggle('expanded', show);
+  }
+}
+
+// ── ANFANGSBESTAND MODAL ──
+window.openAnfangsbestandModal = function(prodId, prodName){
+  if(currentZeitraum !== '2026-06'){
+    showToast('Anfangsbestand wird automatisch aus dem Vormonat übernommen (nur Juni 2026 ist manuell editierbar).');
+    return;
+  }
+  currentAbProdId = prodId;
+  document.getElementById('ab-prod-label').textContent = prodName;
+  document.getElementById('ab-value').value = anfangsbestand[prodId] ?? '';
+  document.getElementById('modal-ab').classList.add('show');
+  setTimeout(()=>document.getElementById('ab-value').focus(),100);
+}
+window.saveAnfangsbestand = async function(){
+  const val = parseFloat(document.getElementById('ab-value').value);
+  if(isNaN(val)||val<0){ return; }
+  showSpinner();
+  anfangsbestand[currentAbProdId] = val;
+  try {
+    await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand, {merge:true});
+  } catch(e){}
+  hideSpinner();
+  document.getElementById('modal-ab').classList.remove('show');
+  renderTableActual();
+  showToast('Anfangsbestand gespeichert');
+}
+
+// ── WARENEINGANG MODAL ──
+let weSelectedItems = {}; // {prodId: qty}
+let weShopRows = [];
+let currentEditWeId = null; // ID редактируемой инвентуры (null = создание новой)
+
+window.openWareneingang = function(prefillDate){
+  weSelectedItems = {};
+  weShopRows = [];
+  currentEditWeId = null; // режим создания
+  document.getElementById('we-step1').style.display='block';
+  document.getElementById('we-step2').style.display='none';
+  document.getElementById('modal-we').classList.add('show');
+
+  const isZentral = currentLager==='zentrallager';
+  document.getElementById('we-title').textContent = 'Inventur erstellen';
+  document.getElementById('we-shops-section').style.display = 'none';
+  document.getElementById('we-selected-list').style.display='none';
+  const _sb=document.getElementById('btn-confirm-save');
+  if(_sb) _sb.textContent='✓ Bestätigen';
+
+  // Set date
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('we-date').value = prefillDate||today;
+
+  // Build product list — all categories collapsed by default
+  let html='';
+  PRODUCTS.forEach((catObj,ci)=>{
+    html += `<div class="modal-cat" id="we-cat-${ci}">
+      <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
+        <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-arrow">▶</span>
+      </div>
+      <div class="modal-cat-items">`;
+    catObj.items.forEach(prod=>{
+      const unitStr = prod.unit ? prod.unit : '';
+      html += `<div class="modal-prod-row" id="we-row-${prod.id}">
+        <div class="prod-checkbox" id="we-cb-${prod.id}" onclick="toggleWeProd('${prod.id}')"></div>
+        <div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div>
+        <div class="modal-prod-name-block">
+          <span class="modal-prod-name">${prod.name}</span>
+          ${unitStr ? `<span class="modal-prod-unit">${unitStr}</span>` : ''}
+        </div>
+        <input class="qty-input" id="we-qty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." onchange="updateWeQty('${prod.id}',this.value)">
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  document.getElementById('we-product-list').innerHTML = html;
+}
+window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
+
+window.toggleWeProd = function(prodId){
+  const cb  = document.getElementById('we-cb-'+prodId);
+  const qty = document.getElementById('we-qty-'+prodId);
+  const isChecked = cb.classList.toggle('checked');
+  qty.classList.toggle('show', isChecked);
+  if(isChecked){ qty.focus(); weSelectedItems[prodId]=0; }
+  else { delete weSelectedItems[prodId]; }
+  updateSelectedPreview();
+}
+window.updateWeQty = function(prodId, val){
+  weSelectedItems[prodId] = parseFloat(val)||0;
+  updateSelectedPreview();
+}
+function updateSelectedPreview(){
+  const ids = Object.keys(weSelectedItems);
+  const sel = document.getElementById('we-selected-list');
+  const items = document.getElementById('we-selected-items');
+  const shops = document.getElementById('we-shops-section');
+  if(!ids.length){ sel.style.display='none'; shops.style.display='none'; return; }
+  sel.style.display='block';
+  // No shops in Inventur
+  // Group by category
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div class="selected-cat-label">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        const selQty = weSelectedItems[prod.id]||0;
+        const selUnit = prod.unit||'';
+        html+=`<div class="selected-item">
+          <span class="selected-item-name">${iconHTML(prod.icon,20)} ${prod.name}<span class="selected-item-unit">${selUnit}</span></span>
+          <span class="selected-item-qty">${selQty}</span>
+        </div>`;
+      }
+    });
+  });
+  items.innerHTML=html;
+}
+
+window.addShopRow = function(){
+  const idx = weShopRows.length;
+  weShopRows.push({shop:'',betrag:''});
+  const container = document.getElementById('we-shop-rows');
+  const priOpts = SHOPS_PRIMARY.map(s=>`<option value="${s}">${s}</option>`).join('');
+  const secOpts = SHOPS_SECONDARY.map(s=>`<option value="${s}">${s}</option>`).join('');
+  const div = document.createElement('div');
+  div.className='shop-row'; div.id='shop-row-'+idx;
+  div.innerHTML=`<select class="shop-select" onchange="weShopRows[${idx}].shop=this.value">
+    <option value="">— Shop wählen —</option>
+    <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
+    <optgroup label="Weitere">${secOpts}</optgroup>
+  </select>
+  <input class="betrag-input" type="number" placeholder="€" step="0.01" onchange="weShopRows[${idx}].betrag=this.value">
+  <button class="shop-remove" onclick="removeShopRow(${idx})">✕</button>`;
+  container.appendChild(div);
+}
+window.removeShopRow = function(idx){
+  const el=document.getElementById('shop-row-'+idx);
+  if(el) el.remove();
+  weShopRows[idx]={removed:true};
+}
+
+window.buildConfirm = function(){
+  const ids=Object.keys(weSelectedItems);
+  if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
+  const date=document.getElementById('we-date').value;
+  if(!date){ showToast('Bitte Datum auswählen.'); return; }
+
+  // Read shop values directly from DOM (onchange may not have fired)
+  document.querySelectorAll('#we-shop-rows .shop-row').forEach((row,i)=>{
+    const sel = row.querySelector('select');
+    const inp = row.querySelector('input');
+    if(sel&&inp) weShopRows[i] = {shop:sel.value, betrag:inp.value};
+  });
+
+  document.getElementById('we-step1').style.display='none';
+  document.getElementById('we-step2').style.display='block';
+
+  const d=new Date(date);
+  document.getElementById('confirm-date-label').textContent='Inventur-Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+
+  let html=''; let lastCat='';
+  PRODUCTS.forEach(catObj=>{
+    catObj.items.forEach(prod=>{
+      if(ids.includes(prod.id)){
+        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
+        const unitTxt = prod.unit||'';
+        const qty = weSelectedItems[prod.id]||0;
+        html+=`<div class="confirm-item">
+          <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+          <span class="ci-qty">${qty}</span>
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('confirm-list').innerHTML=html;
+
+  // Shops — show in confirm view whenever shops were entered
+  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
+  const cs=document.getElementById('confirm-shops');
+  if(activeShops.length){
+    cs.style.display='block';
+    cs.innerHTML='<div class="confirm-shops-title">Shops / Einkaufsorte</div>'+
+      activeShops.map(s=>{
+        const amt = parseFloat(s.betrag||0).toFixed(2);
+        return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
+      }).join('');
+  } else { cs.style.display='none'; }
+}
+
+window.backToEdit = function(){
+  document.getElementById('we-step1').style.display='block';
+  document.getElementById('we-step2').style.display='none';
+}
+
+window.confirmWareneingang = async function(){
+  showSpinner();
+  const date=document.getElementById('we-date').value;
+  const monat=date.slice(0,7);
+  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
+  const entry={
+    lager:currentLager, datum:date, monat,
+    items:weSelectedItems,
+    shops:activeShops,
+  };
+  try {
+    if(currentEditWeId){
+      entry.updatedAt=new Date().toISOString();
+      await db.collection('inventur').doc(currentEditWeId).update(entry);
+      showToast('Änderungen gespeichert ✓');
+    } else {
+      entry.createdAt=new Date().toISOString();
+      await db.collection('inventur').add(entry);
+      showToast('Inventur erfolgreich eingetragen!');
+    }
+    currentEditWeId = null;
+    hideSpinner();
+    document.getElementById('modal-we').classList.remove('show');
+    await loadData();
+  } catch(e){
+    hideSpinner();
+    console.error('Inventur Speicherfehler:', e);
+    showToast('Fehler beim Speichern: '+(e.message||e));
+  }
+}
+
+window.openEditWareneingang = function(date){
+  const we=wareneingangs.find(w=>w.datum===date);
+  if(!we) return;
+  const editId = we.id; // сохраняем ID для обновления
+  const savedItems = {...we.items};
+  const savedShops = [...(we.shops||[])];
+
+  openWareneingang(date); // строит список товаров, сбрасывает состояние (в т.ч. currentEditWeId)
+  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
+
+  document.getElementById('we-title').textContent = 'Inventur bearbeiten';
+  const saveBtn=document.getElementById('btn-confirm-save');
+  if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
+
+  setTimeout(()=>{
+    currentEditWeId = editId; // на всякий случай ещё раз, после всех асинхронных операций
+    weSelectedItems = savedItems;
+    weShopRows = savedShops;
+    Object.keys(savedItems).forEach(prodId=>{
+      const cb=document.getElementById('we-cb-'+prodId);
+      const qi=document.getElementById('we-qty-'+prodId);
+      if(cb){cb.classList.add('checked');}
+      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
+    });
+    updateSelectedPreview();
+    // Сразу открываем Окно 2 (подтверждение) с заполненными данными
+    buildConfirm();
+  },100);
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',async()=>{
+  // Expose all functions to window after they are defined
+  window.toggleSidebar         = toggleSidebar;
+  window.closeSidebar          = closeSidebar;
+  window.toggleUserDropdown    = toggleUserDropdown;
+  window.toggleSubMenu         = toggleSubMenu;
+  window.renderTable           = renderTable;
+  window.toggleCategory        = toggleCategory;
+  window.toggleDetailCols      = toggleDetailCols;
+  window.openAnfangsbestandModal = openAnfangsbestandModal;
+  window.saveAnfangsbestand    = saveAnfangsbestand;
+  window.openWareneingang      = openWareneingang;
+  window.closeWareneingang     = closeWareneingang;
+  window.addShopRow            = addShopRow;
+  window.buildConfirm          = buildConfirm;
+  window.confirmWareneingang   = confirmWareneingang;
+  window.backToEdit            = backToEdit;
+  window.openEditWareneingang  = openEditWareneingang;
+
+  // Aktueller Monat wird automatisch vorausgewählt (basierend auf dem echten Systemdatum)
+  const _selZeitraumEl = document.getElementById('sel-zeitraum');
+  if(_selZeitraumEl){
+    const _now = new Date();
+    const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+    if([..._selZeitraumEl.options].some(o=>o.value===_curMonat)){
+      _selZeitraumEl.value = _curMonat;
+    }
+  }
+
+  await loadProducts();
+  loadData();
+});
+
+// ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
+document.addEventListener('DOMContentLoaded', function(){
+  const user = window.GG_USER;
+  if(!user) return;
+  const el = document.getElementById('hdr-username');
+  if(el) el.textContent = user.name;
+});
+
+</script>
 </body>
 </html>
