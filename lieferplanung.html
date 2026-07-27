@@ -2108,6 +2108,34 @@ async function loadPrevMonatVerbrauch(lager){
   }catch(e){ console.warn('Verbrauch Vormonat laden fehlgeschlagen:', e.message); return {}; }
 }
 
+// Verbr. für Zentrallager (Neuer Einkauf): einfache Kopie der Zentrallager-„Lieferungen"
+// (Summe der 4 Filialen, dedupliziert nach Datum — wie auf lager.html) für den VORMONAT.
+async function loadPrevMonatZentralLieferungen(){
+  const zeit = currentZeitraum;
+  if(!zeit || zeit.length!==7) return {};
+  const [y,m] = zeit.split('-').map(Number);
+  let py=y, pm=m-1;
+  if(pm===0){ py=y-1; pm=12; }
+  const prevMonat = py+'-'+(pm<10?'0':'')+pm;
+  try{
+    const result = {};
+    await Promise.all(LAGERS.map(async br=>{
+      const snap = await db.collection('wareneingang').where('lager','==',br).where('monat','==',prevMonat).get();
+      const byDate = {};
+      snap.forEach(d=>{
+        const data = d.data();
+        const dt = data.datum;
+        if(dt && !byDate[dt]) byDate[dt] = data;
+      });
+      Object.values(byDate).forEach(data=>{
+        const items = data.items||{};
+        Object.keys(items).forEach(pid=>{ result[pid]=(result[pid]||0)+(Number(items[pid])||0); });
+      });
+    }));
+    return result;
+  }catch(e){ console.warn('Verbrauch Vormonat (Zentrallager) laden fehlgeschlagen:', e.message); return {}; }
+}
+
 window.openPlanForm=async function(){
   document.getElementById('plan-modal-right').style.display='';
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
@@ -2132,7 +2160,7 @@ window.openPlanForm=async function(){
   // Verbr. (Vormonat) — nur für Neue Lieferung (Filialen), nicht für Zentrallager-Einkauf
   document.getElementById('modal-plan').classList.add('show');
   document.getElementById('plan-content').innerHTML='<p style="text-align:center;padding:2rem;color:var(--text-dim)">Lädt…</p>';
-  const verbrValues = isE ? {} : await loadPrevMonatVerbrauch(currentLager);
+  const verbrValues = isE ? await loadPrevMonatZentralLieferungen() : await loadPrevMonatVerbrauch(currentLager);
 
   // Собираем данные: akt и empf для каждого артикля
   const aktValues={}, empfValues={};
@@ -2153,7 +2181,7 @@ window.openPlanForm=async function(){
   const headerHtml=`<div class="plan-form-header">
     <span class="pfh-name">Artikel</span>
     <span class="pfh-akt">Aktuell</span>
-    ${!isE?'<span class="pfh-verbr">Verbr.</span>':''}
+    <span class="pfh-verbr">Verbr.</span>
     <span class="pfh-empf">Empf.</span>
     <span class="pfh-neu">Neu</span>
   </div>`;
@@ -2183,7 +2211,7 @@ window.openPlanForm=async function(){
           ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}
         </div>
         <span class="plan-form-akt">${akt||'—'}</span>
-        ${!isE?`<span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>`:''}
+        <span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>
         <span class="plan-form-empf">${empf||'—'}</span>
         <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
           value="${neuVal}" style="${neuStyle}">
