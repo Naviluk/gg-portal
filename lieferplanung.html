@@ -2087,13 +2087,23 @@ async function loadPrevMonatVerbrauch(lager){
     const invDocs=[]; invSnap.forEach(d=>invDocs.push(d.data()));
 
     const result = {};
-    PRODUCTS.forEach(catObj=>catObj.items.forEach(prod=>{
-      const lastInv = invDocs.filter(inv=>inv.items&&inv.items[prod.id]!==undefined).sort((a,b)=>b.datum.localeCompare(a.datum))[0];
-      if(!lastInv) return;
-      const a=Number(ab[prod.id])||0, b=Number(lief[prod.id])||0, c=Number(ger[prod.id])||0, d=Number(thk[prod.id])||0;
-      const e=Number(lastInv.items[prod.id]);
-      result[prod.id] = a+b-c-d-e;
-    }));
+    PRODUCTS.forEach(catObj=>{
+      const isGS = catObj.cat==='Getränke' || catObj.cat==='Snacks';
+      catObj.items.forEach(prod=>{
+        const c=Number(ger[prod.id])||0, d=Number(thk[prod.id])||0;
+        if(isGS){
+          // Für Getränke/Snacks: Verbr. = einfache Summe aus Gerät + Theke (Vormonat),
+          // statt der vollen Formel mit Anfangsbestand/Lieferungen/Inventur.
+          result[prod.id] = c + d;
+          return;
+        }
+        const lastInv = invDocs.filter(inv=>inv.items&&inv.items[prod.id]!==undefined).sort((a,b)=>b.datum.localeCompare(a.datum))[0];
+        if(!lastInv) return;
+        const a=Number(ab[prod.id])||0, b=Number(lief[prod.id])||0;
+        const e=Number(lastInv.items[prod.id]);
+        result[prod.id] = a+b-c-d-e;
+      });
+    });
     return result;
   }catch(e){ console.warn('Verbrauch Vormonat laden fehlgeschlagen:', e.message); return {}; }
 }
