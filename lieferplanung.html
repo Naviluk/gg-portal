@@ -1183,6 +1183,10 @@ async function loadData(){
             bestandData[lg][prod.id]=abNum+liefNum-gerNum-thkNum;
           } else if(li[prod.id]!==undefined){
             bestandData[lg][prod.id]=Number(li[prod.id])||0;
+          } else if(ab[prod.id]!==undefined){
+            // Noch keine Inventur in diesem Monat — ersatzweise den Anfangsbestand
+            // dieses Monats übernehmen (dieselbe Regel wie auf lager.html).
+            bestandData[lg][prod.id]=Number(ab[prod.id])||0;
           }
         });
       });

@@ -942,8 +942,17 @@ function renderTableActual(){
         // Filialen, Getränke/Snacks: Anfangsbestand + Lieferungen − Gerät − Theke
         endBestand = abNum + totalEink - totalGeraet - totalTheke;
       } else {
-        // Filialen, Süssigkeiten/Haushaltsartikel: letzte Inventur des aktuellen Monats
-        endBestand = bestandData[prod.id] !== undefined ? Number(bestandData[prod.id])||0 : null;
+        // Filialen, Süssigkeiten/Haushaltsartikel: letzte Inventur des aktuellen Monats.
+        // Falls in diesem Monat noch KEINE Inventur gemacht wurde, wird ersatzweise der
+        // Anfangsbestand dieses Monats übernommen (die einzige verfügbare Zahl für den
+        // Monat, solange keine Inventur vorliegt).
+        if(bestandData[prod.id] !== undefined){
+          endBestand = Number(bestandData[prod.id])||0;
+        } else if(anfangsbestand[prod.id] !== undefined){
+          endBestand = Number(anfangsbestand[prod.id])||0;
+        } else {
+          endBestand = null;
+        }
       }
       const bestandVal = endBestand===null ? '—' : endBestand;
       const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-cyan)' : '';
