@@ -227,6 +227,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   padding:.4rem .6rem;text-align:left;outline:none;transition:border-color .15s}
 .kommentar-input:focus{border-color:var(--neon-cyan);box-shadow:0 0 6px rgba(8,145,178,.2)}
 .kommentar-input::placeholder{color:var(--text-dim);opacity:.5}
+.kolli-input{width:56px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
+  color:#92400e;font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;font-weight:700;
+  padding:.4rem .3rem;text-align:center;outline:none;transition:border-color .15s}
+.kolli-input:focus{border-color:#92400e;box-shadow:0 0 6px rgba(146,64,14,.2)}
+.kolli-input::-webkit-outer-spin-button,.kolli-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.kolli-input[type=number]{-moz-appearance:textfield}
 .num-cell.editable{cursor:pointer;transition:color .2s}
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
@@ -542,6 +548,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
     </select>
+    <button class="btn-icon-settings" style="width:auto;padding:0 .9rem;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#92400e;border-color:#92400e"
+      onclick="importJuniPreiseAusExcel()" title="Einmaliger Import der Preise aus der Excel-Tabelle (Juni 2026)">
+      📥 Preise Juni importieren
+    </button>
   </div>
 
   <!-- Table -->
@@ -773,6 +783,7 @@ function renderTableActual(){
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
   thHTML += '<th class="num-cell" style="color:var(--text-dim)">Kommentar</th>';
+  thHTML += '<th class="num-cell" style="color:#92400e">Kolli</th>';
   thHTML += '<th class="num-cell" style="color:var(--neon-cyan)">Einkaufspreis</th>';
   thHTML += '<th class="num-cell" style="color:var(--neon-magenta)">Verkaufspreis</th>';
   thHTML += '</tr>';
@@ -793,6 +804,7 @@ function renderTableActual(){
       const ek = getEffectivePrice(prod.id,'einkauf',zeit);
       const vk = getEffectivePrice(prod.id,'verkauf',zeit);
       const kommentar = getKommentar(prod.id, zeit);
+      const kolli = prod.kolli || 1;
 
       tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
@@ -802,6 +814,8 @@ function renderTableActual(){
       tbHTML += `<td class="num-cell"><input type="text" class="kommentar-input" id="kommentar-${prod.id}"
           value="${kommentar.replace(/"/g,'&quot;')}" placeholder="—" maxlength="120"
           onchange="saveKommentar('${prod.id}',this.value)"></td>`;
+      tbHTML += `<td class="num-cell"><input type="number" min="1" step="1" class="kolli-input" id="kolli-${prod.id}"
+          value="${kolli}" onchange="saveKolli('${prod.id}',this.value)"></td>`;
       tbHTML += `<td class="num-cell"><div class="price-input-wrap">
         <input type="number" min="0" step="0.01" class="price-input" id="price-ek-${prod.id}"
           value="${ek!==null?ek:''}" placeholder="—" onchange="savePrice('${prod.id}','einkauf',this.value)">
@@ -856,6 +870,145 @@ function getKommentar(prodId, month){
   const doc = priceDocs.find(d=>d.prodId===prodId && d.monat===month);
   return (doc && doc.kommentar) ? doc.kommentar : '';
 }
+
+// Kolli (Stück pro Packung) ist eine feste Eigenschaft des Artikels — wird im
+// Artikel-Dokument selbst gespeichert (wie Name/Einheit/Icon), NICHT pro Monat.
+window.importJuniPreiseAusExcel = async function(){
+  if(!confirm('Preise und Kolli für Juni 2026 aus der Excel-Tabelle importieren? Das überschreibt vorhandene Juni-Preise für die betroffenen Artikel.')) return;
+  showSpinner();
+  // Daten aus AK_Tabelle.xlsx, Blatt "06" (Juni 2026): vk=Verkaufspreis (Spalte BO),
+  // ek=Einkaufspreis (Spalte BV), kolli=Stück pro Packung (Spalte BP, leer=1).
+  // "Mamba" aus der Excel-Tabelle existiert in unserem Artikelsystem nicht und wurde
+  // beim Import ausgelassen. "Kaffee Classic Grande" und "Brötchen" hatten in der
+  // Excel-Tabelle keine Preise und wurden ebenfalls ausgelassen.
+  const DATA = {
+  'rb_blue': {vk:1.48, ek:1.29, kolli:1},
+  'rb_zero': {vk:1.48, ek:0, kolli:1},
+  'rb_white': {vk:1.48, ek:1.64, kolli:1},
+  'action_e': {vk:0.98, ek:0.78, kolli:1},
+  'cola_red': {vk:0.98, ek:0.92, kolli:1},
+  'cola_zero': {vk:0.98, ek:0.92, kolli:1},
+  'fanta': {vk:0.98, ek:0.92, kolli:1},
+  'sprite': {vk:0.98, ek:0.92, kolli:1},
+  'vio_stil': {vk:0.98, ek:0.85, kolli:1},
+  'vio_med': {vk:0.98, ek:0.85, kolli:1},
+  'gero_sp': {vk:0.98, ek:0.84, kolli:1},
+  'gero_med': {vk:0.98, ek:0.84, kolli:1},
+  'durstl': {vk:0.98, ek:0.64, kolli:1},
+  'erdnuesse': {vk:19.98, ek:16.05, kolli:20},
+  'stuf': {vk:19.98, ek:16.05, kolli:20},
+  'snickers': {vk:23.98, ek:19, kolli:24},
+  'mars': {vk:23.98, ek:19, kolli:24},
+  'twix': {vk:29.98, ek:23.76, kolli:30},
+  'mnm': {vk:15.98, ek:14.76, kolli:16},
+  'pringles': {vk:17.98, ek:11.81, kolli:24},
+  'kitkat': {vk:17.98, ek:11.81, kolli:24},
+  'bifi_orig': {vk:19.98, ek:19.26, kolli:40},
+  'bifi_roll': {vk:23.98, ek:21.83, kolli:24},
+  'croissant': {vk:1.85, ek:1.79, kolli:1},
+  'madeleine': {vk:2.05, ek:1.99, kolli:1},
+  'rollino': {vk:1.54, ek:1.49, kolli:1},
+  'biscoff': {vk:14.97, ek:11.76, kolli:300},
+  'nimm2': {vk:2.05, ek:1.99, kolli:1},
+  'risen': {vk:8.25, ek:8, kolli:1},
+  'milchb': {vk:1.9, ek:1.84, kolli:1},
+  'werthers': {vk:1.85, ek:1.79, kolli:1},
+  'melange': {vk:2.36, ek:2.29, kolli:1},
+  'haribo': {vk:9.94, ek:9.29, kolli:1},
+  'ice_bon': {vk:1.95, ek:1.89, kolli:1},
+  'minibox': {vk:43.5, ek:37.79, kolli:1},
+  'tee_100': {vk:7.15, ek:6.94, kolli:1},
+  'tee_20': {vk:2.37, ek:2.3, kolli:1},
+  'susstoff': {vk:0.98, ek:0.95, kolli:1},
+  'zucker': {vk:2, ek:1.94, kolli:1},
+  'cappuc': {vk:7.99, ek:7.65, kolli:1},
+  'kakao': {vk:8.05, ek:7.79, kolli:1},
+  'glasrein': {vk:0.99, ek:0.95, kolli:1},
+  'spulmit': {vk:0.89, ek:0.85, kolli:1},
+  'wc_rein': {vk:0.99, ek:0.95, kolli:1},
+  'urin_kalk': {vk:1.39, ek:1.35, kolli:1},
+  'wc_tab': {vk:0.99, ek:0.95, kolli:1},
+  'duft_wc': {vk:0.99, ek:0.95, kolli:1},
+  'duft_hall': {vk:2.83, ek:2.75, kolli:1},
+  'duftvase_g': {vk:3.04, ek:2.95, kolli:1},
+  'duftvase_t': {vk:4.89, ek:4.75, kolli:1},
+  'luftpar': {vk:1.39, ek:1.35, kolli:1},
+  'geraet_d': {vk:4.07, ek:3.95, kolli:1},
+  'seife_nf': {vk:2.05, ek:1.99, kolli:1},
+  'seife_fl': {vk:0.68, ek:0.65, kolli:1},
+  'bad_rein': {vk:0.98, ek:0.95, kolli:1},
+  'boden_aj': {vk:1.91, ek:1.85, kolli:1},
+  'allzweck': {vk:0.98, ek:0.95, kolli:1},
+  'hygienr': {vk:1.7, ek:1.65, kolli:1},
+  'bref': {vk:2.63, ek:2.55, kolli:1},
+  'antilim': {vk:1.55, ek:null, kolli:1},
+  'scheurm': {vk:0.77, ek:0.75, kolli:1},
+  'rohrrein': {vk:1.29, ek:1.25, kolli:1},
+  'essig_r': {vk:0.77, ek:0.75, kolli:1},
+  'toilp': {vk:7.98, ek:7.75, kolli:20},
+  'kuchenr': {vk:5.1, ek:4.95, kolli:8},
+  'handtpap': {vk:14.95, ek:14.51, kolli:5},
+  'handsch_e': {vk:6.95, ek:6.18, kolli:1},
+  'handsch_m': {vk:0.57, ek:0.55, kolli:1},
+  'feuchtt': {vk:1.54, ek:1.49, kolli:1},
+  'handgesc': {vk:2.21, ek:2.15, kolli:1},
+  'putztuch': {vk:4.07, ek:3.95, kolli:5},
+  'swamme': {vk:0.69, ek:0.66, kolli:6},
+  'lappen': {vk:2.63, ek:2.55, kolli:1},
+  'wischbez': {vk:4.07, ek:3.95, kolli:2},
+  'staubf': {vk:3.04, ek:2.95, kolli:1},
+  'staubsb': {vk:14.37, ek:13.95, kolli:1},
+  'buromат': {vk:7.83, ek:7.6, kolli:1},
+  'mull120': {vk:1.49, ek:1.45, kolli:1},
+  'mull60': {vk:1.49, ek:1.45, kolli:1},
+  'mull50': {vk:0.81, ek:0.79, kolli:1},
+  'mull35': {vk:1.55, ek:1.49, kolli:1},
+  'mull25': {vk:1.05, ek:0.99, kolli:1},
+  'mull10': {vk:1.05, ek:0.99, kolli:1},
+  'hygient': {vk:1.05, ek:0.99, kolli:1},
+  'togo_d': {vk:4.59, ek:4.39, kolli:1},
+  'togo_b': {vk:4.16, ek:4.04, kolli:1},
+  'urinam': {vk:1.38, ek:1.34, kolli:1},
+  'kaffetab': {vk:9.26, ek:8.99, kolli:1},
+  'desinfek': {vk:1.49, ek:1.45, kolli:1},
+  'batterie': {vk:0.23, ek:null, kolli:1},
+  'streichh': {vk:0.12, ek:0.11, kolli:1},
+  'feuerzg': {vk:10, ek:9, kolli:50},
+
+  };
+  const batch = db.batch();
+  let count = 0;
+  Object.entries(DATA).forEach(([prodId, v])=>{
+    const fields = {prodId, monat:'2026-06'};
+    if(v.vk!==null) fields.verkauf = v.vk;
+    if(v.ek!==null) fields.einkauf = v.ek;
+    batch.set(db.collection('preise').doc(prodId+'_2026-06'), fields, {merge:true});
+    batch.set(db.collection('produkte').doc(prodId), {kolli: v.kolli||1}, {merge:true});
+    count++;
+  });
+  try{
+    await batch.commit();
+    showToast(`Import abgeschlossen ✓ (${count} Artikel)`);
+    await loadProducts();
+    await loadData();
+  }catch(e){
+    showToast('Fehler beim Import: '+e.message);
+  }
+  hideSpinner();
+};
+
+window.saveKolli = async function(prodId, rawVal){
+  const val = Math.max(1, parseInt(rawVal)||1);
+  showSpinner();
+  try{
+    await db.collection('produkte').doc(prodId).set({kolli: val}, {merge:true});
+    PRODUCTS.forEach(c=>c.items.forEach(p=>{ if(p.id===prodId) p.kolli=val; }));
+    showToast('Kolli gespeichert ✓');
+  }catch(e){
+    showToast('Fehler beim Speichern: '+e.message);
+  }
+  hideSpinner();
+};
 
 window.saveKommentar = async function(prodId, rawVal){
   const zeit = currentZeitraum;
@@ -922,13 +1075,13 @@ async function loadProducts(){
     snap.forEach(d=>{
       const p = d.data();
       if(!byCat[p.cat]) byCat[p.cat] = [];
-      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0, kolli:Number(p.kolli)||1});
     });
     const catOrder = [...catOrderDefault];
     Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
     PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
       cat,
-      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon,kolli:p.kolli}))
     }));
   }catch(e){
     console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);

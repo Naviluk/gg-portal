@@ -796,11 +796,14 @@ function renderTableActual(){
 
     const rowsHTML = catObj.items.map(prod=>{
       const vk = getEffectivePrice(prod.id,'verkauf',zeit) || 0;
+      const kolli = prod.kolli || 1;
       const perBranch = {};
       let rowGesamt = 0;
       BRANCHES.forEach(br=>{
         const qty = Number((lieferungenPerBranch[br]||{})[prod.id]) || 0;
-        const val = qty * vk;
+        // Verkaufspreis gilt für eine ganze Packung (Kolli Stück) — Lieferungen wird
+        // aber in Einzelstück gezählt, daher durch Kolli teilen (=Preis pro Stück).
+        const val = (qty * vk) / kolli;
         perBranch[br] = val;
         rowGesamt += val;
         catTotals[br] += val;
@@ -988,13 +991,13 @@ async function loadProducts(){
     snap.forEach(d=>{
       const p = d.data();
       if(!byCat[p.cat]) byCat[p.cat] = [];
-      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0, kolli:Number(p.kolli)||1});
     });
     const catOrder = [...catOrderDefault];
     Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
     PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
       cat,
-      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon,kolli:p.kolli}))
     }));
   }catch(e){
     console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
