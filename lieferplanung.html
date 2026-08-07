@@ -604,7 +604,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     justify-content:center!important;gap:.25rem!important}
   #ctrl-buttons .btn-soll{flex:0 0 auto!important}
   #ctrl-buttons .btn-gesamt{flex:1!important}
-  .gesamt-panel{width:100vw;padding:calc(var(--header-h) + 1rem) .8rem 2rem}
+  .gesamt-panel{width:100vw;padding:calc(var(--header-h) + .1rem) .8rem 2rem}
   .gesamt-panel-title{font-size:.95rem}
   .lief-tab{font-size:.68rem;padding:.35rem .6rem}
   .th-col-empf,.th-col-plan{
@@ -885,7 +885,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div style="margin-top:.6rem" id="ek-complete-wrap">
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
-      style="width:100%">✓ Einkauf abschliessen</button>
+      disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Einkauf abschliessen</button>
   </div>
 </div>
 
@@ -1478,6 +1478,18 @@ function renderEkContent(){
   }
   if(!html) html='<p style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">Keine geplanten Einkäufe.</p>';
   document.getElementById('einkaeufe-content').innerHTML=html;
+  updateEkCompleteBtn();
+}
+
+function updateEkCompleteBtn(){
+  const btn = document.getElementById('btn-ek-complete');
+  if(!btn) return;
+  // Aktiv sobald MINDESTENS EIN Artikel als gekauft (✓) markiert ist — nicht gekaufte
+  // Artikel bleiben beim Abschließen einfach im Plan stehen.
+  const anyBought = Object.values(ekState).some(st=>st&&st.bought);
+  btn.disabled = !anyBought;
+  btn.style.opacity = anyBought ? '1' : '.4';
+  btn.style.cursor = anyBought ? 'pointer' : 'not-allowed';
 }
 
 window.setEkShop = async function(prodId, shop){
@@ -1493,6 +1505,7 @@ window.toggleEkCheck = function(prodId){
   ekState[prodId].bought=!ekState[prodId].bought;
   const el=document.getElementById('ek-chk-'+prodId);
   if(el) el.className='ek-check'+(ekState[prodId].bought?' bought':'');
+  updateEkCompleteBtn();
   const toSave={};
   Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSave[id]=true; });
   db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
@@ -1651,14 +1664,15 @@ function updateCompleteBtn(lg){
   const btn = document.getElementById('btn-lief-complete');
   if(!btn) return;
   const lgPlan = planData[lg]||{};
-  // Все артикли с gepl>0 должны быть отмечены delivered
   const items = PRODUCTS.flatMap(cat=>cat.items).filter(p=>(lgPlan[p.id]||0)>0);
-  const allDelivered = items.length>0 && items.every(p=>
+  // Aktiv sobald MINDESTENS EIN Artikel als geliefert markiert ist — nicht mehr
+  // alle. Nicht-gelieferte Artikel bleiben beim Abschließen einfach im Plan stehen.
+  const anyDelivered = items.some(p=>
     liefState[lg]&&liefState[lg][p.id]&&liefState[lg][p.id].delivered
   );
-  btn.disabled = !allDelivered;
-  btn.style.opacity = allDelivered ? '1' : '.4';
-  btn.style.cursor = allDelivered ? 'pointer' : 'not-allowed';
+  btn.disabled = !anyDelivered;
+  btn.style.opacity = anyDelivered ? '1' : '.4';
+  btn.style.cursor = anyDelivered ? 'pointer' : 'not-allowed';
 }
 
 window.openCompleteDelivery = function(){
@@ -1856,8 +1870,28 @@ window.checkListAction = function(){
 function weOpenFromAbschluss(lager, mode){
   const lgPlan = planData[lager]||{};
   const items = {};
-  PRODUCTS.forEach(c=>c.items.forEach(p=>{ const g=lgPlan[p.id]||0; if(g>0) items[p.id]=g; }));
-  if(!Object.keys(items).length){ showToast('Keine geplanten Artikel vorhanden.'); return; }
+  if(mode==='lieferung'){
+    // Nur die als "geliefert" (✅) markierten Artikel werden hier bestätigt — der
+    // Rest (nur gepackt oder noch gar nicht abgehakt) bleibt als geplante Lieferung
+    // stehen und erscheint weiterhin in der Liste.
+    const st = liefState[lager]||{};
+    PRODUCTS.forEach(c=>c.items.forEach(p=>{
+      const g=lgPlan[p.id]||0;
+      if(g>0 && st[p.id] && st[p.id].delivered) items[p.id]=g;
+    }));
+  } else {
+    // Zentrallager-Einkauf: nur die als gekauft (✓) markierten Artikel — der Rest
+    // bleibt als geplanter Einkauf stehen.
+    PRODUCTS.forEach(c=>c.items.forEach(p=>{
+      const g=lgPlan[p.id]||0;
+      if(g>0 && ekState[p.id] && ekState[p.id].bought) items[p.id]=g;
+    }));
+  }
+  if(!Object.keys(items).length){
+    const msg = mode==='lieferung' ? 'Keine als geliefert markierten Artikel.' : 'Keine als gekauft markierten Artikel.';
+    showToast(msg);
+    return;
+  }
 
   weLpLager = lager;
   weLpMode  = mode;
@@ -1902,23 +1936,48 @@ window.confirmWareneingang = async function(){
   try{
     await db.collection('wareneingang').add(entry);
 
-    // Geplante Menge zurücksetzen — diese Ware ist jetzt tatsächlich eingegangen
-    // und darf nicht länger als "geplant" erscheinen. KEIN monat-Filter — der Plan
-    // kann aus einem früheren Monat übernommen worden sein.
-    const snap=await db.collection('lp_planung').where('lager','==',lager).get();
-    const batch=db.batch();
-    snap.forEach(d=>batch.delete(d.ref));
-    await batch.commit();
-    if(planData[lager]) planData[lager]={};
-
     if(weLpMode==='einkauf'){
-      ekState={};
-      await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).delete().catch(()=>{});
+      // Zentrallager-Einkauf: NUR die soeben bestätigten (als gekauft markierten)
+      // Artikel aus dem Plan entfernen — alles andere bleibt als geplanter Einkauf
+      // stehen, genau wie bei Lieferungen.
+      if(planData[lager]){ ids.forEach(id=>{ delete planData[lager][id]; }); }
+      const remainingEk = planData[lager]||{};
+      if(Object.keys(remainingEk).length){
+        await db.collection('lp_planung').doc(lager).set({
+          lager, monat, datum:date, items:remainingEk, type:'einkauf',
+          updatedAt:new Date().toISOString()
+        });
+      } else {
+        await db.collection('lp_planung').doc(lager).delete().catch(()=>{});
+      }
+      // Haken der soeben bestätigten Artikel entfernen — Haken der übrigen bleiben.
+      ids.forEach(id=>{ delete ekState[id]; });
+      const toSaveEk={};
+      Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSaveEk[id]=true; });
+      await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSaveEk).catch(()=>{});
+      updateEkCompleteBtn();
       closeEinkaeufe();
       showToast('Einkauf abgeschlossen ✓');
     } else {
-      liefState[lager]={};
-      await db.collection('lief_state').doc(lager+'_'+currentZeitraum).delete().catch(()=>{});
+      // Lieferung: NUR die soeben bestätigten (als geliefert markierten) Artikel
+      // aus dem Plan entfernen — alles andere (nur gepackt oder noch offen) bleibt
+      // als geplante Lieferung stehen.
+      if(planData[lager]){ ids.forEach(id=>{ delete planData[lager][id]; }); }
+      const remaining = planData[lager]||{};
+      if(Object.keys(remaining).length){
+        await db.collection('lp_planung').doc(lager).set({
+          lager, monat, datum:date, items:remaining, type:'lieferung',
+          updatedAt:new Date().toISOString()
+        });
+      } else {
+        await db.collection('lp_planung').doc(lager).delete().catch(()=>{});
+      }
+      // Haken der soeben bestätigten Artikel entfernen — Haken der übrigen (noch
+      // geplanten) Artikel bleiben erhalten.
+      if(liefState[lager]){ ids.forEach(id=>{ delete liefState[lager][id]; }); }
+      const toSaveState={};
+      Object.entries(liefState[lager]||{}).forEach(([id,st])=>{ if(st.packed||st.delivered) toSaveState[id]={packed:!!st.packed,delivered:!!st.delivered}; });
+      await db.collection('lief_state').doc(lager+'_'+currentZeitraum).set(toSaveState).catch(()=>{});
       updateCompleteBtn(lager);
       closeLieferungen();
       showToast('Lieferung abgeschlossen ✓');
