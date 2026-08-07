@@ -92,10 +92,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── TOP CONTROLS ── */
 .lp-hub{margin-bottom:1.5rem}
-.lp-hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;max-width:900px}
+.lp-hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;max-width:700px}
 .lp-hub-card{--card-color:#0891b2;aspect-ratio:1/1;max-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;
   background:#fff;border:2px solid var(--card-color);border-radius:14px;cursor:pointer;
   transition:all .2s;box-shadow:0 2px 8px rgba(30,37,50,.06);padding:1rem}
+.lp-hub-card.lp-hub-main{grid-column:1/-1;aspect-ratio:auto;max-height:130px;flex-direction:row;gap:1rem}
+.lp-hub-card.lp-hub-main .lp-hub-icon{font-size:2.6rem}
 .lp-hub-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px color-mix(in srgb, var(--card-color) 35%, transparent)}
 .lp-hub-icon{font-size:2.2rem;line-height:1}
 .lp-hub-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.88rem;
@@ -105,9 +107,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   padding:.5rem 1rem;cursor:pointer;transition:all .2s}
 .lp-hub-soll-link:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
 @media(max-width:640px){
-  .lp-hub-grid{grid-template-columns:repeat(2,1fr);gap:.7rem}
+  .lp-hub-grid{gap:.7rem}
   .lp-hub-card{max-height:130px;padding:.7rem}
+  .lp-hub-card.lp-hub-main{max-height:110px}
   .lp-hub-icon{font-size:1.7rem}
+  .lp-hub-card.lp-hub-main .lp-hub-icon{font-size:2rem}
   .lp-hub-label{font-size:.76rem}
 }
 .lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
@@ -347,6 +351,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
   border:none;border-radius:6px;cursor:pointer;padding:.65rem 1.2rem;transition:all .2s}
 .btn-primary{background:linear-gradient(135deg,var(--neon-cyan),#066a82);color:#fff;box-shadow:0 3px 10px rgba(8,145,178,.3)}
+.btn-outline-cyan{background:#fff;color:var(--neon-cyan);border:1.5px solid var(--neon-cyan);box-shadow:none}
+.btn-outline-cyan:hover{background:rgba(8,145,178,.06)}
 .btn-primary:hover{box-shadow:0 5px 16px rgba(8,145,178,.45);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--glass-border);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.85rem;font-weight:600}
 .btn-ghost:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
@@ -681,7 +687,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   <!-- ── HUB: große Aktions-Kacheln ── -->
   <div class="lp-hub">
     <div class="lp-hub-grid">
-      <button class="lp-hub-card" style="--card-color:#db2777" onclick="openHubAction('zentrallager','einkauf')">
+      <button class="lp-hub-card lp-hub-main" style="--card-color:#059669" onclick="openHubAction('zentrallager','einkauf')">
         <div class="lp-hub-icon">🛒</div>
         <div class="lp-hub-label">Zentrallager<br>Einkauf</div>
       </button>
@@ -740,19 +746,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- LIEFERUNGEN PANEL -->
 <div class="gesamt-panel" id="gesamt-panel" onclick="event.stopPropagation()">
   <button class="gesamt-close" onclick="closeLieferungen()" style="z-index:10">✕</button>
-  <div class="gesamt-panel-title">🚚 Alle Lieferungen</div>
-  <!-- Переключатели складов -->
-  <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem" id="lief-tabs">
-    <button class="lief-tab active" data-lg="nettetal" onclick="switchLiefTab('nettetal')" 
-      style="border-color:#2563eb;color:#2563eb;background:rgba(37,99,235,.08)">Nettetal</button>
-    <button class="lief-tab" data-lg="brüggen" onclick="switchLiefTab('brüggen')">Brüggen</button>
-    <button class="lief-tab" data-lg="viersen" onclick="switchLiefTab('viersen')">Viersen</button>
-    <button class="lief-tab" data-lg="köln" onclick="switchLiefTab('köln')">Köln</button>
-  </div>
+  <div class="gesamt-panel-title" id="lief-panel-title">🚚 Lieferung</div>
   <div id="lief-content"></div>
   <!-- Кнопка завершить доставку -->
   <div style="margin-top:1rem" id="lief-complete-wrap">
-    <button class="btn btn-primary" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('lieferung')">➕ Artikel hinzufügen</button>
+    <button class="btn btn-outline-cyan" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('lieferung')">➕ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-lief-complete" onclick="openCompleteDelivery()" 
       disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Lieferung abschliessen</button>
   </div>
@@ -830,7 +828,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </div>
     <div id="plan-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" id="btn-prüfen-plan" onclick="addArtikelDirekt()">➕ Artikel hinzufügen</button>
+      <button class="btn btn-outline-cyan" id="btn-prüfen-plan" onclick="addArtikelDirekt()">➕ Artikel hinzufügen</button>
       <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
     </div>
   </div>
@@ -872,7 +870,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div id="einkaeufe-content"></div>
   <div style="margin-top:1rem" id="ek-complete-wrap">
-    <button class="btn btn-primary" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('einkauf')">➕ Artikel hinzufügen</button>
+    <button class="btn btn-outline-cyan" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('einkauf')">➕ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
       style="width:100%">✓ Einkauf abschliessen</button>
   </div>
@@ -1498,6 +1496,7 @@ const LIEF_NEON = {'nettetal':'#2563eb','brüggen':'#e11d48','viersen':'#ea580c'
 let liefState = {};
 
 window.openLieferungen = async function(){
+  updateLiefPanelTitle(currentLiefLager);
   document.getElementById('gesamt-panel').classList.add('open');
   await loadLiefState(currentLiefLager);
   renderLiefContent(currentLiefLager);
@@ -1505,6 +1504,13 @@ window.openLieferungen = async function(){
 window.closeLieferungen = function(){
   document.getElementById('gesamt-panel').classList.remove('open');
 };
+
+function updateLiefPanelTitle(lg){
+  const nc = LIEF_NEON[lg]||'#0891b2';
+  const name = (LAGER_NAMES[lg]||lg).toUpperCase();
+  const titleEl = document.getElementById('lief-panel-title');
+  if(titleEl) titleEl.innerHTML = `🚚 <span style="color:${nc}">${name}</span> – Lieferung`;
+}
 
 async function loadLiefState(lg){
   if(!liefState[lg]) liefState[lg]={};
@@ -1521,22 +1527,7 @@ async function loadLiefState(lg){
 
 window.switchLiefTab = async function(lg){
   currentLiefLager = lg;
-  // Обновляем вкладки
-  document.querySelectorAll('.lief-tab').forEach(t=>{
-    const isActive = t.dataset.lg === lg;
-    t.classList.toggle('active', isActive);
-    if(isActive){
-      const nc = LIEF_NEON[lg]||'#0891b2';
-      t.style.borderColor = nc;
-      t.style.color = nc;
-      t.style.background = nc.replace('#','rgba(').replace(/(..)(..)(..)/, (m,r,g,b)=>
-        `${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)}`) + ',.1)';
-    } else {
-      t.style.borderColor = '';
-      t.style.color = '';
-      t.style.background = '';
-    }
-  });
+  updateLiefPanelTitle(lg);
   await loadLiefState(lg);
   renderLiefContent(lg);
 };
@@ -1982,7 +1973,6 @@ window.openHubAction = async function(lager, action){
   } else if(action==='lieferung'){
     currentLiefLager = lager;
     await openLieferungen();
-    switchLiefTab(lager);
   }
 };
 
