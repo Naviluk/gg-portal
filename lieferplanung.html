@@ -91,6 +91,25 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
 
 /* ── TOP CONTROLS ── */
+.lp-hub{margin-bottom:1.5rem}
+.lp-hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;max-width:900px}
+.lp-hub-card{--card-color:#0891b2;aspect-ratio:1/1;max-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;
+  background:#fff;border:2px solid var(--card-color);border-radius:14px;cursor:pointer;
+  transition:all .2s;box-shadow:0 2px 8px rgba(30,37,50,.06);padding:1rem}
+.lp-hub-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px color-mix(in srgb, var(--card-color) 35%, transparent)}
+.lp-hub-icon{font-size:2.2rem;line-height:1}
+.lp-hub-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.88rem;
+  color:var(--card-color);text-align:center;line-height:1.3}
+.lp-hub-soll-link{margin-top:1.2rem;background:none;border:1px solid var(--glass-border);border-radius:8px;
+  color:var(--text-dim);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.78rem;
+  padding:.5rem 1rem;cursor:pointer;transition:all .2s}
+.lp-hub-soll-link:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+@media(max-width:640px){
+  .lp-hub-grid{grid-template-columns:repeat(2,1fr);gap:.7rem}
+  .lp-hub-card{max-height:130px;padding:.7rem}
+  .lp-hub-icon{font-size:1.7rem}
+  .lp-hub-label{font-size:.76rem}
+}
 .lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
@@ -659,7 +678,34 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </nav>
 
 <div class="main-content">
-  <div class="lager-controls">
+  <!-- ── HUB: große Aktions-Kacheln ── -->
+  <div class="lp-hub">
+    <div class="lp-hub-grid">
+      <button class="lp-hub-card" style="--card-color:#db2777" onclick="openHubAction('zentrallager','einkauf')">
+        <div class="lp-hub-icon">🛒</div>
+        <div class="lp-hub-label">Zentrallager<br>Einkauf</div>
+      </button>
+      <button class="lp-hub-card" style="--card-color:#2563eb" onclick="openHubAction('nettetal','lieferung')">
+        <div class="lp-hub-icon">🚚</div>
+        <div class="lp-hub-label">Nettetal<br>Lieferung</div>
+      </button>
+      <button class="lp-hub-card" style="--card-color:#e11d48" onclick="openHubAction('brüggen','lieferung')">
+        <div class="lp-hub-icon">🚚</div>
+        <div class="lp-hub-label">Brüggen<br>Lieferung</div>
+      </button>
+      <button class="lp-hub-card" style="--card-color:#ea580c" onclick="openHubAction('viersen','lieferung')">
+        <div class="lp-hub-icon">🚚</div>
+        <div class="lp-hub-label">Viersen<br>Lieferung</div>
+      </button>
+      <button class="lp-hub-card" style="--card-color:#7c3aed" onclick="openHubAction('köln','lieferung')">
+        <div class="lp-hub-icon">🚚</div>
+        <div class="lp-hub-label">Köln<br>Lieferung</div>
+      </button>
+    </div>
+    <button class="lp-hub-soll-link" onclick="openHubAction('zentrallager','soll')">⚙️ Soll-Bestand konfigurieren</button>
+  </div>
+
+  <div class="lager-controls" style="display:none">
     <select class="ctrl-select" id="sel-lager" onchange="loadData()">
       <option value="zentrallager" selected>Zentrallager</option>
       <option value="nettetal">Nettetal</option>
@@ -683,7 +729,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </select>
     <div id="ctrl-buttons" style="display:flex;gap:.6rem;margin-left:auto;flex-wrap:wrap;align-items:center"></div>
   </div>
-  <div class="table-wrap-single">
+  <div class="table-wrap-single" style="display:none">
     <table class="lager-table" id="lp-table">
       <thead id="lp-thead"></thead>
       <tbody id="lp-tbody"></tbody>
@@ -706,6 +752,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   <div id="lief-content"></div>
   <!-- Кнопка завершить доставку -->
   <div style="margin-top:1rem" id="lief-complete-wrap">
+    <button class="btn btn-primary" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('lieferung')">➕ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-lief-complete" onclick="openCompleteDelivery()" 
       disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Lieferung abschliessen</button>
   </div>
@@ -783,7 +830,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </div>
     <div id="plan-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" id="btn-prüfen-plan" onclick="openPlanConfirm()">Einkaufsliste prüfen →</button>
+      <button class="btn btn-primary" id="btn-prüfen-plan" onclick="addArtikelDirekt()">➕ Artikel hinzufügen</button>
       <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
     </div>
   </div>
@@ -825,6 +872,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div id="einkaeufe-content"></div>
   <div style="margin-top:1rem" id="ek-complete-wrap">
+    <button class="btn btn-primary" style="width:100%;margin-bottom:.6rem" onclick="openPlanFormFromPanel('einkauf')">➕ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
       style="width:100%">✓ Einkauf abschliessen</button>
   </div>
@@ -1127,8 +1175,6 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 
 async function loadData(){
   showSpinner();
-  currentLager=document.getElementById('sel-lager').value;
-  currentZeitraum=document.getElementById('sel-zeitraum').value;
   bestandData={};
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
 
@@ -1923,6 +1969,23 @@ window.openGesamt=function(){
 };
 window.closeGesamt=function(){document.getElementById('gesamt-panel').classList.remove('open')};
 
+// ── HUB: Klick auf eine der großen Kacheln ──
+window.openHubAction = async function(lager, action){
+  currentLager = (action==='soll') ? 'zentrallager' : lager;
+  showSpinner();
+  try{ await loadData(); }catch(e){}
+  hideSpinner();
+  if(action==='soll'){
+    openSoll();
+  } else if(action==='einkauf'){
+    openEinkaeufe();
+  } else if(action==='lieferung'){
+    currentLiefLager = lager;
+    await openLieferungen();
+    switchLiefTab(lager);
+  }
+};
+
 window.openSoll=function(){
   sollModalLager=LAGERS[0];renderSollTabs();renderSollContent();
   document.getElementById('modal-soll').classList.add('show');
@@ -2031,7 +2094,7 @@ window.openPlan=function(){
   // Текст кнопки
   document.getElementById('btn-plan-form-label').textContent=isE?'Einkauf planen →':'Lieferung planen →';
   const _pb=document.getElementById('btn-prüfen-plan');
-  if(_pb) _pb.textContent=isE?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
+  if(_pb) _pb.textContent='➕ Artikel hinzufügen';
 
   // ── Левое окно: обзор рекомендаций ──
   let ovHtml='<div class="plan-overview-header">';
@@ -2140,6 +2203,15 @@ async function loadPrevMonatZentralLieferungen(){
   }catch(e){ console.warn('Verbrauch Vormonat (Zentrallager) laden fehlgeschlagen:', e.message); return {}; }
 }
 
+// Öffnet die Artikel-Auswahl direkt aus der Einkäufe-/Lieferungen-Ansicht heraus
+// (Button "Artikel hinzufügen"). Sorgt dafür, dass currentLager zum richtigen
+// Lager passt (bei Lieferungen: der aktuell offene Tab).
+window.openPlanFormFromPanel = async function(type){
+  if(type==='lieferung'){ currentLager = currentLiefLager; }
+  else { currentLager = 'zentrallager'; }
+  await openPlanForm();
+};
+
 window.openPlanForm=async function(){
   document.getElementById('plan-modal-right').style.display='';
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
@@ -2151,7 +2223,7 @@ window.openPlanForm=async function(){
   // Заголовок и бейдж
   document.getElementById('plan-title-right').textContent=isE?'Neuer Einkauf':'Neue Lieferung';
   const _pb=document.getElementById('btn-prüfen-plan');
-  if(_pb) _pb.textContent=isE?'Einkaufsliste prüfen →':'Lieferliste prüfen →';
+  if(_pb) _pb.textContent='➕ Artikel hinzufügen';
   const badge=`<span style="font-family:'Orbitron',sans-serif;font-size:.62rem;padding:.2rem .7rem;
     border-radius:10px;background:${nc.bg||'#e9edf3'};border:1px solid ${nc.border||'#c9d1dc'};
     color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
@@ -2233,6 +2305,44 @@ window.closePlan=function(){
   document.getElementById('modal-plan').classList.remove('show');
   document.getElementById('plan-modal-right').style.display='none';
 };
+// Speichert die im Formular eingetragenen Mengen DIREKT (ohne separaten
+// Bestätigungs-Bildschirm) und aktualisiert sofort die geöffnete Einkäufe-/
+// Lieferungen-Ansicht, damit neu hinzugefügte Artikel sofort sichtbar sind.
+window.addArtikelDirekt = async function(){
+  const items={};
+  PRODUCTS.forEach(c=>c.items.forEach(p=>{
+    const i=document.getElementById('plan-'+p.id);
+    if(i&&i.value!==''){const v=parseFloat(i.value)||0;items[p.id]=v;}
+  }));
+  if(!Object.keys(items).length){ showToast('Bitte mindestens einen Artikel ausfüllen.'); return; }
+
+  const dateVal=document.getElementById('plan-date').value;
+  const datum=dateVal||new Date().toISOString().slice(0,10);
+  const monat=datum.slice(0,7);
+
+  showSpinner();
+  try{
+    if(!planData[currentLager]) planData[currentLager]={};
+    Object.assign(planData[currentLager], items);
+    // EIN Dokument pro Lager (deterministische ID) — verhindert Ansammlung mehrerer
+    // Dokumente, wie bei savePlan() weiter unten.
+    const oldSnap = await db.collection('lp_planung').where('lager','==',currentLager).get();
+    const cleanupBatch = db.batch();
+    oldSnap.forEach(d=>{ if(d.id!==currentLager) cleanupBatch.delete(d.ref); });
+    await cleanupBatch.commit();
+    await db.collection('lp_planung').doc(currentLager).set({
+      lager:currentLager, monat, datum, items:planData[currentLager], type:planType,
+      updatedAt:new Date().toISOString()
+    });
+    showToast('Artikel hinzugefügt ✓');
+    closePlan();
+    // Die gerade geöffnete Ansicht sofort aktualisieren
+    if(planType==='einkauf'){ renderEkContent(); }
+    else { renderLiefContent(currentLiefLager); }
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
+
 window.openPlanConfirm=function(){
   const isE=planType==='einkauf';
   const toLoad=currentLager==='zentrallager'?LAGERS:[currentLager];
@@ -2321,26 +2431,16 @@ window.savePlan=async function(){
 };
 
 document.addEventListener('DOMContentLoaded', async function(){
-  // Склад запоминается между страницами и после обновления (localStorage)
-  const _savedLager = localStorage.getItem('gg_selected_lager');
-  const _selLagerEl = document.getElementById('sel-lager');
-  if(_savedLager && _selLagerEl && [..._selLagerEl.options].some(o=>o.value===_savedLager)){
-    _selLagerEl.value = _savedLager;
-  }
-  if(_selLagerEl){
-    _selLagerEl.addEventListener('change', e=>localStorage.setItem('gg_selected_lager', e.target.value));
-  }
-  // Aktueller Monat wird automatisch vorausgewählt (basierend auf dem echten Systemdatum)
+  // Aktueller Monat wird automatisch anhand des echten Systemdatums bestimmt —
+  // es gibt jetzt keine sichtbare Auswahl mehr, die Seite zeigt direkt die Kacheln.
+  const _now = new Date();
+  const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+  const _knownMonths = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+  currentZeitraum = _knownMonths.includes(_curMonat) ? _curMonat : '2026-06';
   const _selZeitraumEl = document.getElementById('sel-zeitraum');
-  if(_selZeitraumEl){
-    const _now = new Date();
-    const _curMonat = _now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
-    if([..._selZeitraumEl.options].some(o=>o.value===_curMonat)){
-      _selZeitraumEl.value = _curMonat;
-    }
-  }
+  if(_selZeitraumEl && _knownMonths.includes(currentZeitraum)) _selZeitraumEl.value = currentZeitraum;
+
   await Promise.all([loadProducts(), loadShops()]);
-  loadData();
 });
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
