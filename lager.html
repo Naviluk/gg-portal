@@ -136,6 +136,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── TOP CONTROLS ── */
 .lager-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ctrl-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 /* Segment-Steuerung: zwei Felder in einem Rahmen, mit Rubrik über dem Wert */
 .seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
   overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
@@ -291,7 +292,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline}
   td.num-cell,td.detail-td{font-size:.84rem!important;font-weight:600}
   .lager-table thead th .th-text,.lager-table thead th .th-text-mob{font-size:.56rem}
-  .prod-name{font-size:.84rem;white-space:normal;overflow-wrap:anywhere;line-height:1.18}
+  .col-artikel .prod-name{font-size:.82rem;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+  .col-artikel .prod-unit{font-size:.66rem}
   .prod-unit{font-size:.66rem}
   .prod-icon{width:28px;height:28px;font-size:.86rem;border-radius:8px}
   .prod-info{gap:.28rem}
@@ -658,7 +660,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026">Jahr 2026</option>
     </select></div>
     </div>
-    <div class="ctrl-actions" style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+    <div class="ctrl-actions">
       <button class="btn-icon-settings" onclick="openProductConfigModal()" title="Artikel konfigurieren">⚙️</button>
       <button class="btn-wareneingang" onclick="openWareneingang()" style="margin-left:0">＋ Wareneingang erstellen</button>
     </div>
