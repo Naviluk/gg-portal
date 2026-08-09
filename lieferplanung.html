@@ -535,6 +535,35 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .pfh-verbr{width:46px;min-width:46px;text-align:center;font-size:.72rem;color:#92400e;text-transform:uppercase;font-weight:700}
 .pfh-empf{width:46px;min-width:46px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700}
 .pfh-neu{width:68px;min-width:68px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700}
+/* ── Einkauf-Form: Spalte "Neu" mit Stück-Angabe + Packungs-Badge ── */
+.pfh-neu-wide{width:74px;min-width:74px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700}
+.pfh-st{width:24px;min-width:24px;text-align:left;font-size:.68rem;color:var(--text-dim);font-weight:700}
+.pfn-wrap{width:102px;min-width:102px;display:flex;align-items:center;gap:.25rem;flex-shrink:0}
+.pfn-wrap .plan-form-neu{width:74px;min-width:74px;max-width:74px}
+.pfn-st{width:24px;min-width:24px;font-size:.68rem;color:var(--text-dim);font-weight:700}
+.pack-badge{width:74px;min-width:74px;height:30px;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--neon-cyan);border-radius:6px;background:rgba(0,245,255,.08);
+  color:var(--neon-cyan);font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.plan-form-clickable{cursor:pointer;transition:color .15s}
+.plan-form-clickable:hover{color:var(--neon-cyan)}
+/* ── Einkauf-Panel: Zeile mit Preis-Infos ── */
+.ek-open{cursor:pointer}
+.ek-main{flex:1;min-width:0}
+.ek-main .lief-row-name:hover{color:var(--neon-cyan)}
+.ek-price-line{display:flex;align-items:center;gap:.3rem;margin-top:.22rem;flex-wrap:wrap}
+.ek-tag{font-size:.66rem;font-weight:700;color:#5b6472;background:#e9edf3;border-radius:10px;padding:.08rem .45rem;white-space:nowrap}
+.ek-total{font-size:.68rem;font-weight:700;color:#fff;background:var(--neon-green);border-radius:10px;padding:.08rem .5rem;white-space:nowrap}
+.ek-shop-sum{margin-left:auto;font-family:'Rajdhani',sans-serif;font-size:.78rem;font-weight:700;
+  color:#fff;background:var(--neon-green);border-radius:10px;padding:.1rem .55rem;letter-spacing:0;text-transform:none}
+/* ── Artikel-Detail-Modal ── */
+.ekd-input{background:#fff;border:1px solid #c9d1dc;border-radius:6px;color:#1e2532;
+  font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;padding:.5rem .6rem;outline:none}
+.ekd-input:focus{border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(8,145,178,.25)}
+.ekd-row{display:flex;align-items:center;gap:.5rem}
+.ekd-hint{margin-top:.45rem;font-size:.8rem;color:var(--neon-cyan);font-weight:700;min-height:1rem}
+.ekd-sum-box{display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  padding:.6rem .8rem;border-radius:8px;background:#eef2f6;margin-bottom:1rem}
+.ekd-sum-eur{font-weight:700;color:#fff;background:var(--neon-green);border-radius:8px;padding:.15rem .6rem;font-size:1rem}
 .plan-overview-row{display:flex;align-items:center;padding:.4rem .2rem;border-bottom:1px solid rgba(255,255,255,.05);gap:.5rem}
 .plan-overview-name{flex:1;font-size:.86rem}
 .plan-overview-akt{width:55px;text-align:center;font-size:.82rem;color:var(--text-dim)}
@@ -862,6 +891,51 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+<!-- MODAL: ARTIKEL-DETAIL (Einkauf) — Shop, Anzahl/Packung, Preis pro St. -->
+<div class="modal-overlay" id="modal-ek-detail" onclick="if(event.target===this)closeEkDetail()">
+  <div class="modal" style="max-width:420px;width:100%;max-height:92vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeEkDetail()">✕</button>
+    <div class="modal-title" id="ekd-title" style="margin-bottom:.15rem">Artikel</div>
+    <div id="ekd-sub" style="font-size:.75rem;color:var(--text-dim);margin-bottom:1rem"></div>
+
+    <div class="field">
+      <label class="field-label">Wo kaufen</label>
+      <select id="ekd-shop" class="ekd-input" style="width:100%"></select>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Anzahl &amp; Packungsart</label>
+      <div class="ekd-row">
+        <select id="ekd-mult" class="ekd-input" style="width:88px" onchange="ekdRecalc()"></select>
+        <input id="ekd-qty" class="ekd-input" type="number" min="0" step="1" placeholder="0"
+          style="flex:1;min-width:0;text-align:center" oninput="ekdRecalc()">
+        <span style="font-size:.9rem;color:var(--text-dim);font-weight:700">St.</span>
+      </div>
+      <div class="ekd-hint" id="ekd-hint"></div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Preis pro St. (Einkaufspreis)</label>
+      <div class="ekd-row">
+        <input id="ekd-price" class="ekd-input" type="number" min="0" step="0.01" placeholder="—"
+          style="flex:1;min-width:0" oninput="ekdRecalc()">
+        <span style="font-size:1rem;font-weight:700;color:var(--text-dim)">€</span>
+      </div>
+      <div style="margin-top:.35rem;font-size:.68rem;color:var(--text-dim)">Quelle: Preise → Einkaufspreis</div>
+    </div>
+
+    <div class="ekd-sum-box">
+      <span style="font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Gesamt</span>
+      <span class="ekd-sum-eur" id="ekd-total-eur">0,00 €</span>
+    </div>
+
+    <div class="modal-btn-row">
+      <button class="btn btn-save" onclick="confirmEkDetail()">✓ Bestätigen</button>
+      <button class="btn btn-ghost" onclick="closeEkDetail()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <!-- EINKÄUFE PANEL -->
 <div class="gesamt-panel" id="einkaeufe-panel" onclick="event.stopPropagation()" style="right:-101vw">
   <button class="gesamt-close" onclick="closeEinkaeufe()">✕</button>
@@ -875,8 +949,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   <!-- Шапка колонок -->
   <div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem">
     <span style="flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700">Artikel</span>
-    <span style="width:100px;min-width:80px;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;font-weight:700;text-align:center">Shop</span>
-    <span style="width:44px;min-width:44px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700">Gepl.</span>
+    <span style="width:64px;min-width:64px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700">Gepl.</span>
     <span style="width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-green);font-weight:700">✓</span>
   </div>
   <div id="einkaeufe-content"></div>
@@ -1395,11 +1468,77 @@ let ekSort = 'artikel';
 let ekState = {};
 let ekDefaultShops = {};
 
+// ── EINKAUFSPREISE (Quelle: Sammlung "preise" — Spalte Einkaufspreis auf preise.html) ──
+// Es gilt dieselbe Regel wie dort: der zuletzt EXPLIZIT gesetzte Preis in diesem oder
+// einem früheren Monat gilt weiter, bis er erneut geändert wird.
+let ekPriceDocs = [];
+let ekPricesLoaded = false;
+async function loadEkPreise(){
+  try{
+    const snap = await db.collection('preise').get();
+    ekPriceDocs = []; snap.forEach(d=>ekPriceDocs.push(d.data()));
+    ekPricesLoaded = true;
+  }catch(e){ console.warn('Preise laden fehlgeschlagen:', e.message); }
+}
+function getEinkaufspreis(prodId){
+  const c = ekPriceDocs.filter(d=>d.prodId===prodId && d.monat<=currentZeitraum && d.einkauf!==undefined && d.einkauf!==null);
+  if(!c.length) return null;
+  c.sort((a,b)=>b.monat.localeCompare(a.monat));
+  const v = Number(c[0].einkauf);
+  return isNaN(v) ? null : v;
+}
+function fmtEUR(v){ return (Number(v)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+
+// ── PACKUNGSART / KRATNOST: {prodId:{mult:3, qty:24}} — gespeichert in lp_packs/zentrallager.
+// Die Plan-Menge selbst bleibt IMMER die Gesamtstückzahl (3 × 24 = 72), damit alle
+// bestehenden Berechnungen unverändert weiterlaufen. Die Packung ist nur Anzeige-Info.
+let ekPacks = {};
+let ekPacksLoaded = false;
+async function loadEkPacks(){
+  try{
+    const d = await db.collection('lp_packs').doc('zentrallager').get();
+    ekPacks = d.exists ? (d.data()||{}) : {};
+    ekPacksLoaded = true;
+  }catch(e){ ekPacks = {}; }
+}
+async function saveEkPack(prodId, pack){
+  if(pack && pack.mult>1 && pack.qty>0) ekPacks[prodId] = {mult:pack.mult, qty:pack.qty};
+  else delete ekPacks[prodId];
+  try{
+    await db.collection('lp_packs').doc('zentrallager').set(ekPacks);
+  }catch(e){
+    // Nicht still scheitern lassen: sonst sieht es so aus, als hätte die Kratnost
+    // einfach "nicht funktioniert" (typische Ursache: Firestore-Rules kennen
+    // die Sammlung lp_packs noch nicht → permission-denied).
+    console.warn('Packungsart speichern fehlgeschlagen:', e.code||'', e.message);
+    showToast('Packungsart nicht gespeichert: '+(e.code||e.message));
+  }
+}
+function getEkPack(prodId, total){
+  const p = ekPacks[prodId];
+  if(!p || !(p.mult>1) || !(p.qty>0)) return null;
+  if(total!==undefined && total>0 && Math.abs(p.mult*p.qty-total)>0.001) return null;
+  return p;
+}
+function ekGeplLabel(prodId, gepl){
+  const p = getEkPack(prodId, gepl);
+  return p ? (p.mult+'x '+p.qty) : String(gepl);
+}
+function ekShopList(){
+  const l = [].concat(SHOPS_PRIMARY||[], SHOPS_SECONDARY||[]);
+  return l.length ? l : SHOPS_ALL;
+}
+function findProdById(id){
+  for(const c of PRODUCTS){ const p = c.items.find(x=>x.id===id); if(p) return p; }
+  return null;
+}
+
 window.openEinkaeufe = async function(){
   try{
     const doc = await db.collection('ek_defaults').doc('shops').get();
     if(doc.exists) ekDefaultShops = doc.data();
   }catch(e){}
+  await Promise.all([loadEkPreise(), loadEkPacks()]);
   // Загружаем сохранённые галочки
   try{
     const doc2 = await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).get();
@@ -1425,17 +1564,26 @@ window.switchEkSort = function(sort){
   renderEkContent();
 };
 
+// Die Spalte "Shop" gibt es nicht mehr — der Shop wird beim Hinzufügen/Bearbeiten des
+// Artikels im Detail-Fenster gesetzt und hier nur noch als kleines Tag angezeigt.
+// Klick auf Icon / Name / Menge öffnet dasselbe Detail-Fenster.
 function buildEkRow(prod, gepl){
   if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
   const st = ekState[prod.id];
-  const shopOpts = SHOPS_ALL.map(s=>`<option value="${s}" ${st.shop===s?'selected':''}>${s}</option>`).join('');
+  const price = getEinkaufspreis(prod.id);
+  const label = ekGeplLabel(prod.id, gepl);
+  const shopTag = ekSort==='shops' ? ''
+    : `<span class="ek-tag">🏪 ${st.shop||'— Shop —'}</span>`;
+  const priceTags = price!==null
+    ? `<span class="ek-tag">${fmtEUR(price)} / St.</span><span class="ek-total">🛒 ${fmtEUR(price*gepl)}</span>`
+    : `<span class="ek-tag" style="color:#b45309">Preis fehlt</span>`;
   return `<div class="lief-row" id="ek-row-${prod.id}">
-    <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
-    <div class="lief-row-name" style="font-size:.84rem;flex:1">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
-    <select class="ek-shop-select" id="ek-shop-${prod.id}" onchange="setEkShop('${prod.id}',this.value)" style="width:100px;min-width:80px;background:#fff;color:#1e2532;border:1px solid #c9d1dc">
-      <option value="">— Shop —</option>${shopOpts}
-    </select>
-    <span class="lief-gepl-span" onclick="openLiefGeplModal('zentrallager','${prod.id}',${gepl})" style="width:44px;min-width:44px;text-align:center">${gepl}</span>
+    <div class="prod-icon ek-open" onclick="openEkDetail('${prod.id}','panel')" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
+    <div class="ek-main">
+      <div class="lief-row-name ek-open" onclick="openEkDetail('${prod.id}','panel')" style="font-size:.84rem">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
+      <div class="ek-price-line">${shopTag}${priceTags}</div>
+    </div>
+    <span class="lief-gepl-span" onclick="openEkDetail('${prod.id}','panel')" style="width:64px;min-width:64px;text-align:center;font-size:.88rem">${label}</span>
     <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"></div>
   </div>`;
 }
@@ -1470,8 +1618,14 @@ function renderEkContent(){
     Object.entries(byShop).sort(([a],[b])=>a.localeCompare(b)).forEach(([shop,items],si)=>{
       const wid='ek-shop-wrap-'+si;
       const catHtml=items.map(x=>buildEkRow(x.prod,x.gepl)).join('');
+      // Gesamtsumme aller für diesen Shop geplanten Artikel (Menge × Einkaufspreis)
+      const sum = items.reduce((acc,x)=>{
+        const p = getEinkaufspreis(x.prod.id);
+        return acc + (p!==null ? p*x.gepl : 0);
+      },0);
       html+=`<div class="lief-cat-wrap" id="${wid}">
-        <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${shop}</div>
+        <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${shop}
+          <span class="ek-shop-sum">${items.length} Artikel · ${fmtEUR(sum)}</span></div>
         <div class="lief-cat-items">${catHtml}</div>
       </div>`;
     });
@@ -1514,6 +1668,137 @@ window.toggleEkCheck = function(prodId){
 window.openCompleteEinkauf = function(){
   weOpenFromAbschluss('zentrallager','einkauf');
 };
+
+// ── ARTIKEL-DETAIL-FENSTER (Einkauf) ───────────────────────────────────────────
+// mode 'form'  → geöffnet aus der Form "Artikel hinzufügen": Ergebnis landet in der
+//                Spalte "Neu" (bei Kratnost als Badge "3x 24").
+// mode 'panel' → geöffnet aus der Zentrallager-Einkauf-Ansicht: speichert direkt.
+let ekdCtx = null;
+
+window.openEkDetail = async function(prodId, mode){
+  const prod = findProdById(prodId); if(!prod) return;
+  if(!ekPricesLoaded) await loadEkPreise();
+  if(!ekPacksLoaded)  await loadEkPacks();
+  ekdCtx = {prodId, mode: mode||'panel'};
+
+  document.getElementById('ekd-title').textContent = prod.name;
+  document.getElementById('ekd-sub').textContent   = prod.unit || '';
+
+  // Shop — Vorauswahl ist immer der zuletzt gewählte Shop dieses Artikels
+  const curShop = (ekState[prodId] && ekState[prodId].shop) || ekDefaultShops[prodId] || '';
+  document.getElementById('ekd-shop').innerHTML =
+    '<option value="">— Shop wählen —</option>' +
+    ekShopList().map(s=>`<option value="${s}" ${s===curShop?'selected':''}>${s}</option>`).join('');
+
+  // Kratnost 1 (=„—", nur Stück) bis 24
+  let mOpts = '<option value="1">—</option>';
+  for(let i=2;i<=24;i++) mOpts += `<option value="${i}">${i}x</option>`;
+  document.getElementById('ekd-mult').innerHTML = mOpts;
+
+  // Aktuelle Gesamtmenge ermitteln
+  let total = 0;
+  if(ekdCtx.mode==='form'){
+    const inp = document.getElementById('plan-'+prodId);
+    total = (inp && inp.value!=='') ? (parseFloat(inp.value)||0) : 0;
+  } else {
+    total = Number((planData['zentrallager']||{})[prodId])||0;
+  }
+  const pk = getEkPack(prodId, total>0?total:undefined);
+  let mult = 1, qty = total;
+  if(pk && (total===0 || Math.abs(pk.mult*pk.qty-total)<0.001)){ mult = pk.mult; qty = pk.qty; }
+  document.getElementById('ekd-mult').value = String(mult);
+  document.getElementById('ekd-qty').value  = qty ? qty : '';
+
+  const pr = getEinkaufspreis(prodId);
+  document.getElementById('ekd-price').value = pr!==null ? pr : '';
+
+  ekdRecalc();
+  document.getElementById('modal-ek-detail').classList.add('show');
+};
+
+window.closeEkDetail = function(){
+  document.getElementById('modal-ek-detail').classList.remove('show');
+  ekdCtx = null;
+};
+
+window.ekdRecalc = function(){
+  const mult  = parseInt(document.getElementById('ekd-mult').value)||1;
+  const qty   = parseFloat(document.getElementById('ekd-qty').value)||0;
+  const price = parseFloat(document.getElementById('ekd-price').value)||0;
+  const total = mult*qty;
+  document.getElementById('ekd-hint').textContent =
+    mult>1 && qty>0 ? `${mult}x ${qty} St. = ${total} St.` : (total?`${total} St.`:'');
+  document.getElementById('ekd-total-eur').textContent = fmtEUR(total*price);
+};
+
+window.confirmEkDetail = async function(){
+  if(!ekdCtx) return;
+  const {prodId, mode} = ekdCtx;
+  const mult  = parseInt(document.getElementById('ekd-mult').value)||1;
+  const qty   = parseFloat(document.getElementById('ekd-qty').value)||0;
+  const total = mult*qty;
+  const shop  = document.getElementById('ekd-shop').value;
+  const priceRaw = document.getElementById('ekd-price').value;
+
+  showSpinner();
+  try{
+    // 1) Shop merken (wird beim nächsten Öffnen vorausgewählt)
+    if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
+    ekState[prodId].shop = shop;
+    ekDefaultShops[prodId] = shop;
+    try{ await db.collection('ek_defaults').doc('shops').set(ekDefaultShops,{merge:true}); }catch(e){}
+
+    // 2) Packungsart merken (nur Anzeige — gespeichert wird die Gesamtstückzahl)
+    await saveEkPack(prodId, mult>1 ? {mult, qty} : null);
+
+    // 3) Geänderter Einkaufspreis wird nach preise.html zurückgeschrieben
+    if(priceRaw!==''){
+      const pv = parseFloat(priceRaw);
+      if(!isNaN(pv) && pv!==getEinkaufspreis(prodId)){
+        try{
+          await db.collection('preise').doc(prodId+'_'+currentZeitraum)
+            .set({prodId, monat:currentZeitraum, einkauf:pv},{merge:true});
+          ekPriceDocs = ekPriceDocs.filter(d=>!(d.prodId===prodId && d.monat===currentZeitraum));
+          ekPriceDocs.push({prodId, monat:currentZeitraum, einkauf:pv});
+        }catch(e){ console.warn('Preis speichern fehlgeschlagen:', e.message); }
+      }
+    }
+
+    if(mode==='form'){
+      // Wert in die Spalte "Neu" der Form übernehmen
+      const inp = document.getElementById('plan-'+prodId);
+      if(inp){
+        inp.value = total>0 ? total : '';
+        inp.style.cssText = total>0 ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
+      }
+      updatePlanNeuCell(prodId, mult, qty);
+      showToast('Übernommen ✓');
+    } else {
+      // Direkt in der Einkauf-Ansicht speichern
+      if(!planData['zentrallager']) planData['zentrallager']={};
+      if(total>0) planData['zentrallager'][prodId]=total;
+      else delete planData['zentrallager'][prodId];
+      const datum = new Date().toISOString().slice(0,10);
+      await db.collection('lp_planung').doc('zentrallager').set({
+        lager:'zentrallager', monat:datum.slice(0,7), datum,
+        items:planData['zentrallager'], type:'einkauf', updatedAt:new Date().toISOString()
+      });
+      renderEkContent();
+      showToast('Gespeichert ✓');
+    }
+    closeEkDetail();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
+
+// Schaltet die Zelle "Neu" zwischen freier Stück-Eingabe und Packungs-Badge ("3x 24") um.
+function updatePlanNeuCell(prodId, mult, qty){
+  const badge = document.getElementById('packb-'+prodId);
+  const inp   = document.getElementById('plan-'+prodId);
+  if(!badge || !inp) return;
+  if(mult>1 && qty>0){ badge.textContent = mult+'x '+qty; badge.style.display=''; inp.style.display='none'; }
+  else { badge.style.display='none'; inp.style.display=''; }
+}
 
 // ── LIEFERUNGEN STATE ──
 let currentLiefLager = 'nettetal';
@@ -2299,6 +2584,16 @@ window.openPlanForm=async function(){
   document.getElementById('modal-plan').classList.add('show');
   document.getElementById('plan-content').innerHTML='<p style="text-align:center;padding:2rem;color:var(--text-dim)">Lädt…</p>';
   const verbrValues = isE ? await loadPrevMonatZentralLieferungen() : await loadPrevMonatVerbrauch(currentLager);
+  if(isE){
+    const pre=[];
+    if(!ekPricesLoaded) pre.push(loadEkPreise());
+    if(!ekPacksLoaded)  pre.push(loadEkPacks());
+    if(!Object.keys(ekDefaultShops).length){
+      pre.push(db.collection('ek_defaults').doc('shops').get()
+        .then(d=>{ if(d.exists) ekDefaultShops=d.data(); }).catch(()=>{}));
+    }
+    if(pre.length) await Promise.all(pre);
+  }
 
   // Собираем данные: akt и empf для каждого артикля
   const aktValues={}, empfValues={};
@@ -2316,13 +2611,23 @@ window.openPlanForm=async function(){
   });
 
   // Строим форму с заголовком колонок и категориями
-  const headerHtml=`<div class="plan-form-header">
-    <span class="pfh-name">Artikel</span>
-    <span class="pfh-akt">Aktuell</span>
-    <span class="pfh-verbr">Verbr.</span>
-    <span class="pfh-empf">Empf.</span>
-    <span class="pfh-neu">Neu</span>
-  </div>`;
+  // Zentrallager-Einkauf: KEINE Spalte "Empf." — dafür rechts neben "Neu" die
+  // Einheit "St." (Standard-Eingabe sind also immer Stück).
+  const headerHtml = isE
+    ? `<div class="plan-form-header">
+        <span class="pfh-name">Artikel</span>
+        <span class="pfh-akt">Aktuell</span>
+        <span class="pfh-verbr">Verbr.</span>
+        <span class="pfh-neu-wide">Neu</span>
+        <span class="pfh-st">St.</span>
+      </div>`
+    : `<div class="plan-form-header">
+        <span class="pfh-name">Artikel</span>
+        <span class="pfh-akt">Aktuell</span>
+        <span class="pfh-verbr">Verbr.</span>
+        <span class="pfh-empf">Empf.</span>
+        <span class="pfh-neu">Neu</span>
+      </div>`;
 
   let html=headerHtml;
   PRODUCTS.forEach((catObj,ci)=>{
@@ -2342,18 +2647,37 @@ window.openPlanForm=async function(){
       // beim erneuten Öffnen so aus, als wäre der gespeicherte Wert verschwunden.
       const neuVal = gespeichert>0 ? gespeichert : '';
       const neuStyle = neuVal ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
-      html+=`<div class="plan-form-row">
-        <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
-        <div class="plan-form-name">
-          <span style="font-size:.86rem">${prod.name}</span>
-          ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}
-        </div>
-        <span class="plan-form-akt">${akt||'—'}</span>
-        <span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>
-        <span class="plan-form-empf">${empf||'—'}</span>
-        <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
-          value="${neuVal}" style="${neuStyle}">
-      </div>`;
+      const nameHtml = `<span style="font-size:.86rem">${prod.name}</span>
+          ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}`;
+
+      if(isE){
+        // Klick auf Icon oder Name öffnet das Detail-Fenster (Shop / Anzahl / Preis)
+        const pk = getEkPack(prod.id, gespeichert>0?gespeichert:undefined);
+        const hasPack = !!(pk && gespeichert>0);
+        html+=`<div class="plan-form-row">
+          <div class="prod-icon plan-form-clickable" onclick="openEkDetail('${prod.id}','form')" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
+          <div class="plan-form-name plan-form-clickable" onclick="openEkDetail('${prod.id}','form')">${nameHtml}</div>
+          <span class="plan-form-akt">${akt||'—'}</span>
+          <span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>
+          <div class="pfn-wrap">
+            <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
+              value="${neuVal}" style="${neuStyle}${hasPack?';display:none':''}">
+            <div class="pack-badge" id="packb-${prod.id}" onclick="openEkDetail('${prod.id}','form')"
+              style="${hasPack?'':'display:none'}">${hasPack?(pk.mult+'x '+pk.qty):''}</div>
+            <span class="pfn-st">St.</span>
+          </div>
+        </div>`;
+      } else {
+        html+=`<div class="plan-form-row">
+          <div class="prod-icon" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
+          <div class="plan-form-name">${nameHtml}</div>
+          <span class="plan-form-akt">${akt||'—'}</span>
+          <span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>
+          <span class="plan-form-empf">${empf||'—'}</span>
+          <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
+            value="${neuVal}" style="${neuStyle}">
+        </div>`;
+      }
     });
     html+='</div></div>';
   });
@@ -2502,7 +2826,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   const _selZeitraumEl = document.getElementById('sel-zeitraum');
   if(_selZeitraumEl && _knownMonths.includes(currentZeitraum)) _selZeitraumEl.value = currentZeitraum;
 
-  await Promise.all([loadProducts(), loadShops()]);
+  await Promise.all([loadProducts(), loadShops(), loadEkPreise(), loadEkPacks()]);
 });
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
