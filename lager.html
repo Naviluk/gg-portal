@@ -212,14 +212,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .seg-group{flex:1 1 auto;min-width:0}
   .seg-cell{flex:1;min-width:0}
   .seg-cell .ctrl-select{font-size:.82rem;padding-right:1.1rem}
-  .ctrl-actions{width:100%;margin-left:0!important}
-  .ctrl-actions .btn-wareneingang{flex:1;width:auto!important}
-  .ctrl-select{
-    font-size:.75rem;
-    padding:.4rem 1.5rem .4rem .5rem;
-    background-position:right .35rem center;
-    flex:0 0 auto;
-    width:auto;
+  .lager-controls{position:relative;padding-right:3.1rem}
+  .ctrl-actions{display:contents}
+  .btn-icon-settings{position:absolute;top:0;right:0;width:2.9rem;height:2.9rem}
+  .btn-wareneingang{width:100%!important;margin-top:.1rem}
+  .seg-cell .ctrl-select{
+    font-size:.82rem;
+    padding:.05rem 1.1rem .05rem 0;
+    background-position:right .1rem center;
+    flex:1 1 auto;
+    width:100%;
     min-width:0;
   }
   .btn-wareneingang{
@@ -308,8 +310,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .prod-info{display:flex;align-items:center;gap:.6rem}
 .prod-name{font-size:.93rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.7rem;color:var(--text-dim);font-weight:500;letter-spacing:.06em;margin-top:.05rem}
-/* farbige Kante links: markiert die Artikelzeile */
-td.col-artikel{position:relative}
+/* farbige Kante links: markiert die Artikelzeile
+   (kein position:relative hier — das würde das sticky der Spalte aushebeln) */
 td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28rem;width:3px;
   border-radius:0 3px 3px 0;background:var(--lg-accent,var(--neon-cyan))}
 .cat-row td.col-artikel::before{display:none}
