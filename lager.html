@@ -208,7 +208,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 @media(max-width:640px){
-  .lager-controls{gap:.4rem;flex-wrap:nowrap;align-items:center}
+  .lager-controls{gap:.45rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+  .seg-group{flex:1 1 auto;min-width:0}
+  .seg-cell{flex:1;min-width:0}
+  .seg-cell .ctrl-select{font-size:.82rem;padding-right:1.1rem}
+  .ctrl-actions{width:100%;margin-left:0!important}
+  .ctrl-actions .btn-wareneingang{flex:1;width:auto!important}
   .ctrl-select{
     font-size:.75rem;
     padding:.4rem 1.5rem .4rem .5rem;
@@ -218,14 +223,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
     min-width:0;
   }
   .btn-wareneingang{
-    margin-left:auto;
-    flex-shrink:0;
-    font-size:.52rem;
+    margin-left:0;
+    flex-shrink:1;
+    font-size:.62rem;
     padding:.4rem .55rem;
     line-height:1.4;
     white-space:normal;
     text-align:center;
-    width:115px;
+    width:auto;
   }
 }
 
@@ -266,19 +271,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
 
 @media(max-width:640px){
-  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
+  .col-artikel{min-width:calc(43vw - 8px);width:calc(43vw - 8px);max-width:calc(43vw - 8px)}
   .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.42rem .2rem;line-height:1.25;white-space:normal}
   .lager-table td{padding:.38rem .2rem}
-  .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
-  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
-  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
+  .lager-table th:not(.col-artikel){min-width:58px;width:58px;text-align:center}
+  .lager-table td:not(.col-artikel){min-width:58px;width:58px;text-align:center}
+  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline;font-size:.54rem}
+  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:none}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.58rem}
   .num-cell,.detail-td{font-size:.84rem!important;font-weight:600}
   .prod-name{font-size:.84rem;white-space:normal;overflow-wrap:anywhere;line-height:1.18}
   .prod-unit{font-size:.66rem}
-  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  .prod-icon{width:28px;height:28px;font-size:.86rem;border-radius:8px}
   .prod-info{gap:.28rem}
   .main-content{padding:1rem .35rem}
 }
@@ -628,7 +633,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026">Jahr 2026</option>
     </select></div>
     </div>
-    <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+    <div class="ctrl-actions" style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
       <button class="btn-icon-settings" onclick="openProductConfigModal()" title="Artikel konfigurieren">⚙️</button>
       <button class="btn-wareneingang" onclick="openWareneingang()" style="margin-left:0">＋ Wareneingang erstellen</button>
     </div>
@@ -876,7 +881,7 @@ function renderTableActual(){
   thHTML += '<th class="col-artikel">Artikel</th>';
 
   // Anfangsbestand first
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.<br>Bestand</span></th>';
 
   if(isZentral){
     // Einkäufe — neon green
