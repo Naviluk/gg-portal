@@ -19,12 +19,17 @@
 <meta name="robots" content="noindex, nofollow">
 <title>LAGER – GAME GALAXY</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
-  --bg:#e4e8ef;--bg2:#ffffff;--bg3:#eef1f6;
-  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
-  --glass:#e9edf3;--glass-border:#c9d1dc;
-  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
+  --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
+  --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
+  --glass:#E7ECF4;--glass-border:#DCE3ED;
+  --text:#141B29;--text-dim:#66748C;--header-h:64px;
+  /* Gerüst */
+  --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* Hausfarbe je Lager */
+  --lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
@@ -35,20 +40,21 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── HEADER ── */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
-  background:rgba(255,255,255,0.92);border-bottom:1px solid var(--glass-border);
-  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
-  box-shadow:0 1px 3px rgba(30,37,50,.04)}
-.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent)}
+  background:var(--ink);border-bottom:none;
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 2px 10px rgba(16,26,46,.18)}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
 .hdr-left{display:flex;align-items:center}
 .hdr-center{flex:1;text-align:center}
 .hdr-right{display:flex;align-items:center;gap:.5rem}
 .hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:700;font-size:clamp(.68rem,1.5vw,.92rem);letter-spacing:.08em;
   background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-top:.15rem}
-.hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
-  display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-weight:700}
+.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:#8FA6C9;text-transform:uppercase;margin-top:.15rem}
+.hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
+  display:flex;align-items:center;gap:.4rem;white-space:nowrap;font-weight:600;
+  background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem}
 
 /* Changelog Glocke */
 .hdr-bell{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -80,15 +86,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .cl-entry-text{font-size:.88rem;color:var(--text);line-height:1.55;margin-top:.4rem}
 .hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
 .burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
-.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s}
+.burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
 .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .burger.open span:nth-child(2){opacity:0}
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* sidebar */
-.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:#ffffff;
-  border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
-  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 12px rgba(30,37,50,.06)}
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);
+  border-right:none;z-index:200;padding-top:var(--header-h);color:#AEBCD4;
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
 .sidebar.open{left:0}
 .sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
 .sidebar-overlay.show{display:block}
@@ -96,15 +102,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);
   text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
-.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(8,145,178,.08)}
+.nav-item>.nav-link{color:#5D6E8C}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#fff;background:rgba(78,199,235,.10)}
 .nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
 .nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
-.nav-sub{display:none;list-style:none;background:var(--bg3)}
+.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.18)}
 .nav-item.open>.nav-sub{display:block}
 .nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Century Gothic','CenturyGothic',sans-serif;
-  font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.02em;transition:color .2s}
-.nav-sub li a:hover{color:var(--neon-magenta)}
-.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 1.5rem}
+  font-size:.85rem;color:#AEBCD4;text-decoration:none;letter-spacing:.02em;transition:color .2s,background .2s}
+.nav-sub li a:hover{color:#fff;background:rgba(78,199,235,.10)}
+.nav-divider{height:1px;background:#22314F;margin:.5rem 1.5rem}
 
 /* user dropdown */
 .user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
@@ -121,22 +128,25 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── TOP CONTROLS ── */
 .lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
+.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:11px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
   background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
   background-repeat:no-repeat;background-position:right .7rem center;
   transition:border-color .2s;min-width:0;box-shadow:0 1px 2px rgba(30,37,50,.04)}
 .ctrl-select:focus{border-color:var(--neon-cyan)}
+/* Lager-Auswahl trägt die Hausfarbe des gewählten Lagers */
+#sel-lager{font-weight:700;color:var(--lg-ink,var(--text));background-color:var(--lg-tint,#fff);
+  border-color:var(--lg-line,var(--glass-border))}
 .ctrl-select option{background:#fff;color:var(--text)}
 .btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
-  background:linear-gradient(135deg,var(--neon-magenta),#a3155e);color:#fff;
-  border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
+  background:linear-gradient(100deg,var(--neon-magenta),#F0568F);color:#fff;
+  border:none;border-radius:11px;padding:.62rem 1rem;cursor:pointer;
   box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
 .btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
 .btn-icon-settings{width:2.6rem;height:2.6rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
-  background:#fff;border:1px solid var(--glass-border);border-radius:8px;font-size:1.1rem;cursor:pointer;
+  background:#fff;border:1px solid var(--glass-border);border-radius:11px;font-size:1.1rem;cursor:pointer;
   transition:all .2s;box-shadow:0 1px 3px rgba(30,37,50,.06)}
 .btn-icon-settings:hover{border-color:var(--neon-cyan);box-shadow:0 3px 8px rgba(8,145,178,.15);transform:translateY(-1px)}
 
@@ -203,31 +213,35 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;overflow-y:visible;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
+.table-wrap-single{overflow-x:auto;overflow-y:visible;border-radius:14px;border:1px solid var(--glass-border);
+  box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
 
 /* ── SINGLE TABLE with sticky first column ── */
-.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
+.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#fff}
 .lager-table th{
   font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
-  font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--neon-cyan);text-transform:uppercase;
-  padding:.7rem .9rem;border-bottom:2px solid var(--glass-border);border-right:1px solid var(--glass-border);
-  white-space:nowrap;position:static;z-index:10;text-align:center;
-  background:#eef2f6}
+  font-weight:800;font-size:.62rem;letter-spacing:.12em;color:#8FD8EE;text-transform:uppercase;
+  padding:.6rem .9rem;border-bottom:none;border-right:1px solid var(--ink3);
+  white-space:nowrap;position:static;z-index:10;text-align:center;line-height:1.25;
+  background:var(--ink2)}
 .lager-table th:last-child,.lager-table td:last-child{border-right:none}
-.lager-table td{padding:.38rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
+.lager-table td{padding:.42rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
 .lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
-.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(8,145,178,.06)}
+.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(14,143,184,.05)}
+/* Zebra — jede zweite Artikelzeile, damit die Zeile über die ganze Breite zusammenhält */
+.prod-row.zebra td{background:var(--zebra)}
+.prod-row.zebra td.col-artikel{background:var(--zebra)}
 
 /* Sticky Artikel column */
 .col-artikel{
   position:sticky;left:0;z-index:5;
-  background:#f7f9fb;
+  background:#fff;
   text-align:left!important;
   border-right:2px solid var(--glass-border)!important;
   min-width:200px;
 }
-.lager-table th.col-artikel{z-index:20;background:#eef2f6}
-.lager-table tr:hover td.col-artikel{background:#e3edf0}
+.lager-table th.col-artikel{z-index:20;background:var(--ink2);color:#8FA6C9;text-align:left!important}
+.lager-table tr:hover td.col-artikel{background:#EAF4F8}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
@@ -236,7 +250,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 @media(max-width:640px){
   .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
-  .lager-table th{font-size:.55rem;letter-spacing:.01em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
+  .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.42rem .2rem;line-height:1.25;white-space:normal}
   .lager-table td{padding:.38rem .2rem}
   .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
   .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
@@ -244,8 +258,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.58rem}
-  .num-cell{font-size:.92rem!important;font-weight:700}
-  .prod-name{font-size:.88rem;white-space:normal;word-break:break-word}
+  .num-cell,.detail-td{font-size:.84rem!important;font-weight:600}
+  .prod-name{font-size:.84rem;white-space:normal;overflow-wrap:anywhere;line-height:1.18}
   .prod-unit{font-size:.66rem}
   .prod-icon{width:26px;height:26px;font-size:.82rem}
   .prod-info{gap:.28rem}
@@ -253,10 +267,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* category row */
-.cat-row td{background:#e3e8f0;padding:.4rem .9rem;cursor:pointer;user-select:none;border-bottom:2px solid var(--glass-border)}
-.cat-row:hover td{background:#dae1eb}
-.cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.1em;
-  color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-row td{background:#E7ECF4;padding:.42rem .9rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--glass-border)}
+.cat-row:hover td{background:#DFE5EF}
+.cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:800;font-size:.66rem;letter-spacing:.14em;
+  color:var(--ink);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-label::after{content:'';width:6px;height:6px;border-radius:2px;background:var(--lg-accent,var(--neon-cyan));order:-1}
+.cat-arrow{color:var(--text-dim)}
 .cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
 .cat-row.open .cat-arrow{transform:rotate(90deg)}
 .cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
@@ -264,37 +280,49 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 /* product row */
 .prod-row{transition:background .15s}
 .prod-row.hidden{display:none}
-.prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
+.prod-icon{width:34px;height:34px;border-radius:10px;background:var(--icon-bg,#E6F4F9);
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18);overflow:hidden}
+  border:1px solid rgba(14,143,184,.14);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
-.prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
-.prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
+.prod-name{font-size:.93rem;color:var(--text);line-height:1.2;font-weight:600}
+.prod-unit{font-size:.7rem;color:var(--text-dim);font-weight:500;letter-spacing:.06em;margin-top:.05rem}
+/* farbige Kante links: markiert die Artikelzeile */
+td.col-artikel{position:relative}
+td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28rem;width:3px;
+  border-radius:0 3px 3px 0;background:var(--lg-accent,var(--neon-cyan))}
+.cat-row td.col-artikel::before{display:none}
 
 /* number cells */
-.num-cell{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.num-cell{text-align:center;font-family:var(--mono);font-size:.92rem;font-weight:600;
+  font-variant-numeric:tabular-nums;color:var(--text)}
 .num-cell.editable{cursor:pointer;transition:color .2s}
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
 
+/* Spaltengruppe (Einkäufe / Lieferungen) — Farbe kommt vom Lager */
+.lager-table th.grp-h{background:var(--g-head);color:#fff;border-right-color:rgba(255,255,255,.18)}
+.grp-c{background:var(--g-bg);color:var(--g-ink);font-weight:700}
+.grp-d{background:var(--g-bgD);color:var(--g-ink)}
+.prod-row.zebra td.grp-c{background:var(--g-bg2)}
+.prod-row.zebra td.grp-d{background:var(--g-bgD2)}
+
 /* Expand arrow */
 .col-einkauf-header{position:relative}
 .expand-arrow{display:inline-flex;align-items:center;justify-content:center;
-  background:none;border:none;cursor:pointer;margin-left:.3rem;
-  font-size:.7rem;color:var(--neon-magenta);transition:color .2s;
+  background:rgba(255,255,255,.16);border:none;cursor:pointer;margin-left:.35rem;
+  width:18px;height:18px;border-radius:5px;
+  font-size:.62rem;color:#fff;transition:background .2s;
   vertical-align:middle;flex-shrink:0;padding:0;line-height:1}
-.expand-arrow:hover{color:var(--text)}
-.expand-arrow.expanded{color:var(--neon-green)}
+.expand-arrow:hover{background:rgba(255,255,255,.3)}
 .col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
 
 /* detail date columns */
 .detail-col{display:none}
 .detail-col.visible{display:table-cell}
-.detail-th{background:#f0fdf9;color:var(--neon-green);
-  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
-  font-weight:700;font-size:.95rem;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
-.detail-th:hover{color:var(--neon-cyan)}
-.detail-td{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--neon-green);background:#f4fdf9}
+.detail-th{font-family:var(--mono);font-weight:700;font-size:.72rem;letter-spacing:.02em;
+  white-space:nowrap;cursor:pointer;color:#fff}
+.detail-th:hover{opacity:.85}
+.detail-td{text-align:center;font-family:var(--mono);font-size:.92rem;font-weight:600;font-variant-numeric:tabular-nums}
 
 /* inline edit input */
 .inline-input{background:#fff;border:1px solid var(--neon-cyan);border-radius:4px;
@@ -469,13 +497,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div class="hdr-center">
     <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">LAGER – <span style="color:var(--neon-cyan);font-weight:700;font-size:.82rem;text-shadow:0 0 8px rgba(8,145,178,.35)">Bestände</span></div>
+    <div class="hdr-page">LAGER – <span style="color:#4FD2F5;font-weight:700;font-size:.82rem">Bestände</span></div>
   </div>
   <div class="hdr-right">
-    <div class="hdr-bell" onclick="openChangelog()" title="Was ist neu?">
-      <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="hdr-bell-dot" id="hdr-bell-dot"></span>
-    </div>
     <div class="hdr-user" onclick="toggleUserDropdown()">
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
@@ -523,7 +547,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="lager.html" style="color:var(--neon-cyan)">Bestände</a></li>
+        <li><a href="lager.html" style="color:#fff;background:rgba(78,199,235,.14);box-shadow:inset 3px 0 0 var(--neon-cyan)">Bestände</a></li>
         <li><a href="getraenke-snacks.html">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
@@ -810,14 +834,17 @@ function renderTableActual(){
   const dates = [...new Set(wareneingangs.map(w=>w.datum))].sort();
 
   // Neon color map (angepasst für helles Theme — gedeckter, aber je Lager klar unterscheidbar)
+  // Hausfarbe je Lager: head = dunkler Spaltenkopf, bg/bgD = Zellton (bg2/bgD2 = Zebra-Variante),
+  // ink = Zahlenfarbe, accent = Kante links an der Artikelzelle.
   const neonMap = {
-    nettetal: {neon:'#2563eb',          bg:'rgba(37,99,235,.08)',   bgD:'rgba(37,99,235,.14)',   border:'rgba(37,99,235,.35)'},
-    brüggen:  {neon:'#e11d48',          bg:'rgba(225,29,72,.08)',   bgD:'rgba(225,29,72,.14)',   border:'rgba(225,29,72,.35)'},
-    viersen:  {neon:'#ea580c',          bg:'rgba(234,88,12,.08)',   bgD:'rgba(234,88,12,.14)',   border:'rgba(234,88,12,.35)'},
-    köln:     {neon:'#7c3aed',          bg:'rgba(124,58,237,.08)',  bgD:'rgba(124,58,237,.14)',  border:'rgba(124,58,237,.35)'},
+    nettetal: {accent:'#2563EB', head:'#1D4FB8', ink:'#1D4FB8', bg:'#E9F0FE', bg2:'#DFE9FC', bgD:'#E2EAFB', bgD2:'#D8E3F8'},
+    brüggen:  {accent:'#E11D48', head:'#A31038', ink:'#C4123E', bg:'#FDE8EE', bg2:'#F9DDE5', bgD:'#FADFE7', bgD2:'#F6D4DE'},
+    viersen:  {accent:'#EA580C', head:'#A8480A', ink:'#B4520C', bg:'#FDEEE1', bg2:'#F9E4D5', bgD:'#FAE6D5', bgD2:'#F6DCC9'},
+    köln:     {accent:'#7C3AED', head:'#5227A0', ink:'#5A2FB0', bg:'#F1EAFE', bg2:'#E9DFFC', bgD:'#EBE2FB', bgD2:'#E3D7F8'},
   };
-  const zGreen = {neon:'#059669', bg:'rgba(5,150,105,.08)', bgD:'rgba(5,150,105,.14)', border:'rgba(5,150,105,.35)'};
-  const cc = neonMap[lager] || {neon:'var(--text)', bg:'transparent', bgD:'transparent', border:'var(--glass-border)'};
+  const zGreen = {accent:'#0FA574', head:'#0C6F53', ink:'#0A8A66', bg:'#E9F8F2', bg2:'#DEF2E9', bgD:'#E4F2EA', bgD2:'#D9EADF'};
+  const cc = neonMap[lager] || zGreen;
+  const gv = isZentral ? zGreen : cc;
 
   // Neutral style (for Gerät, Theke, Bestand on non-zentral)
   const neutralTh = 'color:var(--text-dim)';
@@ -832,27 +859,27 @@ function renderTableActual(){
 
   if(isZentral){
     // Einkäufe — neon green
-    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf" style="background:${zGreen.bg};border-bottom:2px solid ${zGreen.border}">
+    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:${zGreen.neon};font-weight:700"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen" style="color:${zGreen.neon}">▶</span>
+        <span style="color:#fff;font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span></span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${zGreen.bgD};color:${zGreen.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} ✏️</th>`;
     });
     // Lieferungen neutral — nur bei Zentrallager, immer grau
     thHTML += '<th class="num-cell th-col-liefer" style="color:var(--text-dim)"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
   } else {
     // Lieferungen — lager neon color
-    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer" style="background:${cc.bg};border-bottom:2px solid ${cc.border}">
+    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:${cc.neon};font-weight:700"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen" style="color:${cc.neon}">▶</span>
+        <span style="color:#fff;font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
+        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th" style="background:${cc.bgD};color:${cc.neon};cursor:pointer" data-date="${d}">${label} ✏️</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} ✏️</th>`;
     });
     // Gerät — nur Gesamtsumme, keine Aufklappung nach Datum
     thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
@@ -871,6 +898,24 @@ function renderTableActual(){
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
+  const applyVars = el=>{
+    if(!el) return;
+    el.style.setProperty('--g-head', gv.head);
+    el.style.setProperty('--g-ink',  gv.ink);
+    el.style.setProperty('--g-bg',   gv.bg);
+    el.style.setProperty('--g-bg2',  gv.bg2);
+    el.style.setProperty('--g-bgD',  gv.bgD);
+    el.style.setProperty('--g-bgD2', gv.bgD2);
+    el.style.setProperty('--lg-accent', gv.accent);
+  };
+  applyVars(thead); applyVars(tbody);
+  const _selL = document.getElementById('sel-lager');
+  if(_selL){
+    _selL.style.setProperty('--lg-ink',  gv.head);
+    _selL.style.setProperty('--lg-tint', gv.bg);
+    _selL.style.setProperty('--lg-line', gv.accent);
+  }
+
   // ── BODY ──
   let tbHTML = '';
   PRODUCTS.forEach((catObj, ci)=>{
@@ -878,7 +923,7 @@ function renderTableActual(){
     const catOpen = isFirst ? 'open' : '';
     tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
-      <td colspan="99" style="background:#e3e8f0"></td></tr>`;
+      <td colspan="99" style="background:#E7ECF4"></td></tr>`;
 
     catObj.items.forEach((prod, pIdx)=>{
       const ab = anfangsbestand[prod.id] ?? '';
@@ -894,7 +939,7 @@ function renderTableActual(){
       });
       const totalEink = Object.values(perDateVals).reduce((s,v)=>s+v,0);
 
-      tbHTML += `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">`;
+      tbHTML += `<tr class="prod-row ${prodHidden} ${pIdx%2?'zebra':''}" data-cat="${ci}" data-prod="${prod.id}">`;
       tbHTML += `<td class="col-artikel"><div class="prod-info">
         <div class="prod-icon">${iconHTML(prod.icon, 34)}</div>
         <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
@@ -908,22 +953,22 @@ function renderTableActual(){
       let totalGeraet = 0, totalTheke = 0, zentralLiefer = 0;
       if(isZentral){
         // Einkäufe gesamt — neon green
-        tbHTML += `<td class="num-cell" style="background:${zGreen.bg};color:${zGreen.neon};font-weight:700">${einkVal}</td>`;
+        tbHTML += `<td class="num-cell grp-c">${einkVal}</td>`;
         // Detail date cols — unverändert, so wie manuell erfasst
         dates.forEach(d=>{
           const qty = perDateVals[d] || '—';
-          tbHTML += `<td class="num-cell detail-col detail-td" style="background:${zGreen.bgD};color:${zGreen.neon}">${qty}</td>`;
+          tbHTML += `<td class="num-cell detail-col detail-td grp-d">${qty}</td>`;
         });
         // Lieferungen — Summe aus den 4 Filialen (automatisch)
         zentralLiefer = Number((window._zentralLieferSum||{})[prod.id])||0;
         tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${zentralLiefer||'—'}</td>`;
       } else {
         // Lieferungen gesamt — lager neon color
-        tbHTML += `<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${einkVal}</td>`;
+        tbHTML += `<td class="num-cell grp-c">${einkVal}</td>`;
         // Detail date cols — unverändert, so wie manuell erfasst
         dates.forEach(d=>{
           const qty = perDateVals[d] || '—';
-          tbHTML += `<td class="num-cell detail-col detail-td" style="background:${cc.bgD};color:${cc.neon}">${qty}</td>`;
+          tbHTML += `<td class="num-cell detail-col detail-td grp-d">${qty}</td>`;
         });
         // Gerät — nur Gesamtsumme (aus gs_geraet), keine Aufklappung
         totalGeraet = (window._geraetEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
@@ -976,7 +1021,7 @@ function renderTableActual(){
       tbHTML += `<tr class="shops-separator"><td colspan="999" style="padding:0;height:2px;background:rgba(219,39,119,.35)"></td></tr>`;
       tbHTML += `<tr class="cat-row open shops-cat-row" data-shops="1" onclick="toggleShopsSection()">
         <td class="col-artikel"><div class="cat-label" style="color:var(--neon-magenta)"><span class="cat-arrow" style="color:var(--neon-magenta)">▶</span>Shops</div></td>
-        <td colspan="99" style="background:#e3e8f0"></td></tr>`;
+        <td colspan="99" style="background:#E7ECF4"></td></tr>`;
 
       const dateGrandTotals = {};
       dates.forEach(d=>{ dateGrandTotals[d]=0; });
@@ -2062,7 +2107,7 @@ function renderChangelog(){
 window.openChangelog = function(){
   renderChangelog();
   document.getElementById('modal-changelog').classList.add('show');
-  document.getElementById('hdr-bell-dot').classList.remove('show');
+  const _bd=document.getElementById('hdr-bell-dot'); if(_bd) _bd.classList.remove('show');
   localStorage.setItem('gg_changelog_seen', new Date().toISOString().slice(0,10));
 };
 window.closeChangelog = function(){
@@ -2075,7 +2120,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const today = new Date().toISOString().slice(0,10);
   const lastSeen = localStorage.getItem('gg_changelog_seen');
   if(lastSeen !== today){
-    document.getElementById('hdr-bell-dot').classList.add('show');
+    const _bd2=document.getElementById('hdr-bell-dot'); if(_bd2) _bd2.classList.add('show');
     setTimeout(()=>{ openChangelog(); }, 700);
   }
 });
