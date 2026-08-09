@@ -29,7 +29,7 @@
   --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   /* Hausfarbe je Lager */
-  --lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
+  --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
@@ -46,12 +46,16 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
 .hdr-left{display:flex;align-items:center}
-.hdr-center{flex:1;text-align:center}
+.hdr-center{flex:1;text-align:left;min-width:0}
 .hdr-right{display:flex;align-items:center;gap:.5rem}
-.hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:700;font-size:clamp(.68rem,1.5vw,.92rem);letter-spacing:.08em;
-  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:#8FA6C9;text-transform:uppercase;margin-top:.15rem}
+.hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:800;
+  font-size:.58rem;letter-spacing:.2em;color:#7E90AE;text-transform:uppercase;line-height:1.1}
+.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:1rem;letter-spacing:.02em;
+  color:#fff;font-weight:700;margin-top:.1rem;line-height:1.15}
+.hdr-page .hdr-page-pre{font-size:.62rem;letter-spacing:.18em;color:#7E90AE;text-transform:uppercase;font-weight:800}
+.hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
 .hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
   display:flex;align-items:center;gap:.4rem;white-space:nowrap;font-weight:600;
   background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem}
@@ -127,7 +131,21 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
 
 /* ── TOP CONTROLS ── */
-.lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.lager-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+/* Segment-Steuerung: zwei Felder in einem Rahmen, mit Rubrik über dem Wert */
+.seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.seg-cell{padding:.3rem .7rem .38rem;min-width:0;position:relative}
+.seg-cell+.seg-cell{border-left:1px solid var(--glass-border)}
+.seg-cell>label{display:block;font-family:'Century Gothic','CenturyGothic',sans-serif;
+  font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);font-weight:800;
+  pointer-events:none}
+.seg-cell .ctrl-select{border:none!important;border-radius:0;background-color:transparent!important;
+  box-shadow:none;padding:.05rem 1.5rem .05rem 0;font-size:.92rem;font-weight:700;width:100%;
+  background-position:right .2rem center}
+.seg-cell.lg-cell{background:var(--lg-tint,#fff)}
+.seg-cell.lg-cell>label{color:var(--lg-ink,var(--text-dim))}
+.seg-cell.lg-cell .ctrl-select{color:var(--lg-ink,var(--text))}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:11px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
@@ -136,8 +154,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   transition:border-color .2s;min-width:0;box-shadow:0 1px 2px rgba(30,37,50,.04)}
 .ctrl-select:focus{border-color:var(--neon-cyan)}
 /* Lager-Auswahl trägt die Hausfarbe des gewählten Lagers */
-#sel-lager{font-weight:700;color:var(--lg-ink,var(--text));background-color:var(--lg-tint,#fff);
-  border-color:var(--lg-line,var(--glass-border))}
+
 .ctrl-select option{background:#fff;color:var(--text)}
 .btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
@@ -496,8 +513,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </button>
   </div>
   <div class="hdr-center">
-    <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">LAGER – <span style="color:#4FD2F5;font-weight:700;font-size:.82rem">Bestände</span></div>
+    <div class="hdr-org">Game Galaxy · Lager</div>
+    <div class="hdr-page">Be<span style="color:#4FD2F5">stände</span></div>
   </div>
   <div class="hdr-right">
     <div class="hdr-user" onclick="toggleUserDropdown()">
@@ -585,13 +602,16 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
   <!-- Controls -->
   <div class="lager-controls">
+    <div class="seg-group">
+    <div class="seg-cell lg-cell" id="seg-lager"><label>Lager</label>
     <select class="ctrl-select" id="sel-lager" onchange="renderTable()">
       <option value="zentrallager">Zentrallager</option>
       <option value="nettetal">Nettetal</option>
       <option value="brüggen">Brüggen</option>
       <option value="viersen">Viersen</option>
       <option value="köln">Köln</option>
-    </select>
+    </select></div>
+    <div class="seg-cell"><label>Monat</label>
     <select class="ctrl-select" id="sel-zeitraum" onchange="renderTable()">
       <option value="2026-01">Januar 2026</option>
       <option value="2026-02">Februar 2026</option>
@@ -606,7 +626,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
       <option value="2026">Jahr 2026</option>
-    </select>
+    </select></div>
+    </div>
     <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
       <button class="btn-icon-settings" onclick="openProductConfigModal()" title="Artikel konfigurieren">⚙️</button>
       <button class="btn-wareneingang" onclick="openWareneingang()" style="margin-left:0">＋ Wareneingang erstellen</button>
@@ -882,12 +903,12 @@ function renderTableActual(){
       thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} ✏️</th>`;
     });
     // Gerät — nur Gesamtsumme, keine Aufklappung nach Datum
-    thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
+    thHTML += `<th class="num-cell col-einkauf-header" style="color:#B9A6F0">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span>
       </div></th>`;
     // Theke — nur Gesamtsumme, keine Aufklappung nach Datum
-    thHTML += `<th class="num-cell col-einkauf-header" style="${neutralTh}">
+    thHTML += `<th class="num-cell col-einkauf-header" style="color:#F8A6CE">
       <div class="col-einkauf-wrap">
         <span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span>
       </div></th>`;
@@ -972,10 +993,10 @@ function renderTableActual(){
         });
         // Gerät — nur Gesamtsumme (aus gs_geraet), keine Aufklappung
         totalGeraet = (window._geraetEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalGeraet||'—'}</td>`;
+        tbHTML += `<td class="num-cell" style="color:${totalGeraet?'var(--violet-role)':'#B7C2D2'}">${totalGeraet||'—'}</td>`;
         // Theke — nur Gesamtsumme (aus gs_theke), keine Aufklappung
         totalTheke = (window._thekeEntries||[]).reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-        tbHTML += `<td class="num-cell" style="color:var(--text-dim)">${totalTheke||'—'}</td>`;
+        tbHTML += `<td class="num-cell" style="color:${totalTheke?'var(--neon-magenta)':'#B7C2D2'}">${totalTheke||'—'}</td>`;
       }
 
       // End Bestand — Formel je nach Lager/Kategorie
