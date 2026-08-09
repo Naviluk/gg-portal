@@ -92,7 +92,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .cl-type-removed{background:rgba(219,39,119,.12);color:var(--neon-magenta)}
 .cl-entry-text{font-size:.88rem;color:var(--text);line-height:1.55;margin-top:.4rem}
 .hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
-.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
+.burger{background:rgba(255,255,255,.09);border:none;border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;padding:9px;align-items:center;justify-content:center}
 .burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
 .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .burger.open span:nth-child(2){opacity:0}
@@ -218,8 +219,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .ctrl-actions{display:contents}
   .btn-icon-settings{order:1;flex:0 0 2.9rem;width:2.9rem;height:2.9rem;align-self:center}
   .seg-group{order:0}
-  .btn-wareneingang{order:2;flex:1 1 100%;width:100%!important;margin:0!important;
-    justify-content:center;text-align:center;padding:.8rem 1rem}
+
   .seg-cell .ctrl-select{
     font-size:.82rem;
     padding:.05rem 1.1rem .05rem 0;
@@ -229,14 +229,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
     min-width:0;
   }
   .btn-wareneingang{
-    margin-left:0;
-    flex-shrink:1;
-    font-size:.62rem;
-    padding:.4rem .55rem;
-    line-height:1.4;
-    white-space:normal;
+    order:2;
+    flex:1 1 100%;
+    width:100%;
+    margin:0;
+    font-size:.68rem;
+    padding:.8rem 1rem;
+    line-height:1.3;
+    white-space:nowrap;
     text-align:center;
-    width:auto;
   }
 }
 
@@ -268,7 +269,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   border-right:2px solid var(--glass-border)!important;
   min-width:200px;
 }
-.lager-table th.col-artikel{z-index:20;background:var(--ink2);color:#8FA6C9;text-align:left!important}
+.lager-table th.col-artikel{position:sticky;left:0;z-index:20;background:var(--ink2);
+  color:#8FA6C9;text-align:left!important}
 .lager-table tr:hover td.col-artikel{background:#EAF4F8}
 
 /* Desktop: icons hidden */
@@ -545,7 +547,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="hdr-page">Be<span style="color:#4FD2F5">stände</span></div>
   </div>
   <div class="hdr-right">
-    <div class="hdr-user" onclick="toggleUserDropdown()">
+    <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
     </div>
