@@ -18,6 +18,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>LAGER – GAME GALAXY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
@@ -212,10 +215,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .seg-group{flex:1 1 auto;min-width:0}
   .seg-cell{flex:1;min-width:0}
   .seg-cell .ctrl-select{font-size:.82rem;padding-right:1.1rem}
-  .ctrl-actions{width:100%;margin-left:0!important;display:flex;gap:.45rem;align-items:stretch}
-  .btn-icon-settings{width:2.9rem;height:auto;min-height:2.6rem;flex:0 0 2.9rem}
-  .btn-wareneingang{flex:1 1 auto;width:auto!important;margin:0!important;
-    justify-content:center;text-align:center}
+  .ctrl-actions{display:contents}
+  .btn-icon-settings{order:1;flex:0 0 2.9rem;width:2.9rem;height:2.9rem;align-self:center}
+  .seg-group{order:0}
+  .btn-wareneingang{order:2;flex:1 1 100%;width:100%!important;margin:0!important;
+    justify-content:center;text-align:center;padding:.8rem 1rem}
   .seg-cell .ctrl-select{
     font-size:.82rem;
     padding:.05rem 1.1rem .05rem 0;
@@ -283,7 +287,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline}
   td.num-cell,td.detail-td{font-size:.84rem!important;font-weight:600}
-  .lager-table th .th-text,.lager-table th .th-text-mob{font-size:.56rem}
+  .lager-table thead th .th-text,.lager-table thead th .th-text-mob{font-size:.56rem}
   .prod-name{font-size:.84rem;white-space:normal;overflow-wrap:anywhere;line-height:1.18}
   .prod-unit{font-size:.66rem}
   .prod-icon{width:28px;height:28px;font-size:.86rem;border-radius:8px}
@@ -317,12 +321,22 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
   border-radius:0 3px 3px 0;background:var(--lg-accent,var(--neon-cyan))}
 .cat-row td.col-artikel::before{display:none}
 
+/* Spalten-Leiste über der Tabelle — nur Hinweis und Sprungziel, schaltet nichts */
+.col-pager{display:none;gap:.3rem;overflow-x:auto;padding:0 .1rem .55rem;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.col-pager::-webkit-scrollbar{display:none}
+.col-pager .pg{flex:0 0 auto;font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;padding:.3rem .6rem;border-radius:20px;
+  background:#E7EBF2;color:#93A0B2;white-space:nowrap;border:none;cursor:pointer}
+.col-pager .pg.on{background:#CFD7E2;color:#5D6B7E}
+@media(max-width:640px){.col-pager{display:flex}}
+
 /* number cells */
 .num-cell{text-align:center}
 td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
   font-variant-numeric:tabular-nums;color:var(--text)}
 /* alle Spaltenüberschriften gleich groß, egal welche Spalte */
-.lager-table th .th-text{font-size:.62rem;line-height:1.25;display:inline-block}
+.lager-table th .th-text,.lager-table th .th-text-mob{font-size:.62rem;line-height:1.25}
 .num-cell.editable{cursor:pointer;transition:color .2s}
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
@@ -647,6 +661,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
   <!-- Table -->
   <!-- Table wrapper: left fixed + right scrollable -->
+  <div class="col-pager" id="col-pager"></div>
   <div class="table-wrap-single">
     <table class="lager-table" id="lager-table">
       <thead id="lager-thead"></thead>
@@ -941,6 +956,7 @@ function renderTableActual(){
     el.style.setProperty('--lg-accent', gv.accent);
   };
   applyVars(thead); applyVars(tbody);
+  buildColPager();
   const _selL = document.getElementById('sel-lager');
   if(_selL){
     _selL.style.setProperty('--lg-ink',  gv.head);
@@ -1650,12 +1666,49 @@ window.toggleCategory = function(row){
 }
 
 // ── DETAIL COLS TOGGLE ──
+// Baut die Spalten-Leiste aus der fertigen Kopfzeile. Zusammenhängende Spalten
+// derselben Gruppe (Einkäufe / Lieferungen inkl. Datumsspalten) ergeben EINEN Chip;
+// ein Klick scrollt die Tabelle dorthin, geschaltet wird nur über den Pfeil im Kopf.
+function buildColPager(){
+  const pager = document.getElementById('col-pager');
+  const wrap  = document.querySelector('.table-wrap-single');
+  const thead = document.getElementById('lager-thead');
+  if(!pager || !wrap || !thead) return;
+  const ths = Array.from(thead.querySelectorAll('th')).filter(th=>!th.classList.contains('col-artikel'));
+  const chips = [];
+  ths.forEach(th=>{
+    const isGrp = th.classList.contains('grp-h');
+    const last  = chips[chips.length-1];
+    if(isGrp && last && last.grp){ last.ths.push(th); return; }
+    const t = th.querySelector('.th-text-mob') || th.querySelector('.th-text');
+    let label = (t ? t.innerText : th.innerText).replace(/\s+/g,' ').trim();
+    if(!label) label = '•';
+    chips.push({label, grp:isGrp, ths:[th]});
+  });
+  const open = !!detailExpanded;
+  pager.innerHTML = chips.map((c,i)=>{
+    const arrow = c.grp ? (open ? ' ◀' : ' ▶') : '';
+    const on    = c.grp && open ? ' on' : '';
+    return `<button class="pg${on}" data-i="${i}">${c.label}${arrow}</button>`;
+  }).join('');
+  const stick = wrap.querySelector('.col-artikel');
+  const stickW = stick ? stick.getBoundingClientRect().width : 0;
+  pager.querySelectorAll('.pg').forEach(btn=>{
+    btn.onclick = ()=>{
+      const c = chips[Number(btn.dataset.i)];
+      const target = c.ths[0];
+      wrap.scrollTo({left: Math.max(0, target.offsetLeft - stickW), behavior:'smooth'});
+    };
+  });
+}
+
 window.toggleDetailCols = function(){
   detailExpanded = !detailExpanded;
   applyDetailCols(detailExpanded);
 }
 function applyDetailCols(show){
   document.querySelectorAll('.detail-col').forEach(el=>el.classList.toggle('visible',show));
+  buildColPager();
   const btn = document.getElementById('expand-arrow-btn');
   if(btn){
     btn.textContent = show ? '◀' : '▶';
