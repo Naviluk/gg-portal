@@ -18,13 +18,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>HANDEL RECHNUNGEN – GAME GALAXY</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#101A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Game Galaxy">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
-  --bg:#e4e8ef;--bg2:#ffffff;--bg3:#eef1f6;
-  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
-  --glass:#e9edf3;--glass-border:#c9d1dc;
-  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
+  --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
+  --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
+  --glass:#E7ECF4;--glass-border:#DCE3ED;
+  --text:#141B29;--text-dim:#66748C;--header-h:64px;
+  --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --tbl-top:calc(var(--header-h) + .5rem);
+  /* Hausfarbe je Filiale */
+  --lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
@@ -35,31 +47,49 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── HEADER ── */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
-  background:rgba(255,255,255,0.92);border-bottom:1px solid var(--glass-border);
-  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
-  box-shadow:0 1px 3px rgba(30,37,50,.04)}
-.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent)}
+  background:var(--ink);border-bottom:none;
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 2px 10px rgba(16,26,46,.18)}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
 .hdr-left{display:flex;align-items:center}
-.hdr-center{flex:1;text-align:center}
+.hdr-center{flex:1;text-align:left;min-width:0}
 .hdr-right{display:flex;align-items:center;gap:.5rem}
-.hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:700;font-size:clamp(.68rem,1.5vw,.92rem);letter-spacing:.08em;
+.hdr-org{font-family:'Poppins','Century Gothic',sans-serif;font-weight:800;
+  font-size:.58rem;letter-spacing:.2em;color:#7E90AE;text-transform:uppercase;line-height:1.1;
+  --unused:0;
   background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-top:.15rem}
-.hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
+.hdr-page{font-family:'Poppins','Century Gothic',sans-serif;font-size:1rem;letter-spacing:.02em;
+  color:#fff;font-weight:700;margin-top:.1rem;line-height:1.15}
+.hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
+.hdr-user{font-family:'Poppins','Century Gothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
+  background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem;
   display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-weight:700}
 .hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
-.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
-.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s}
+.burger{background:rgba(255,255,255,.09);border:none;border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;padding:9px;align-items:center;justify-content:center}
+.burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
 .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .burger.open span:nth-child(2){opacity:0}
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* sidebar */
-.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:#ffffff;
-  border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
-  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 12px rgba(30,37,50,.06)}
+.side-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.1rem;
+  min-height:var(--header-h);border-bottom:1px solid #22314F;margin-bottom:.6rem}
+.side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;line-height:1;
+  box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-mark span{display:block;transform:translateY(.045em)}
+.side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;color:#fff;line-height:1.2}
+.side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);color:#AEBCD4;
+  border-right:none;z-index:200;padding-top:0;
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
 .sidebar.open{left:0}
 .sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
 .sidebar-overlay.show{display:block}
@@ -67,15 +97,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);
   text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
-.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(8,145,178,.08)}
+.nav-item>.nav-link{color:#5D6E8C}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#fff;background:rgba(78,199,235,.10)}
 .nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
 .nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
-.nav-sub{display:none;list-style:none;background:var(--bg3)}
+.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.18)}
 .nav-item.open>.nav-sub{display:block}
 .nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Century Gothic','CenturyGothic',sans-serif;
   font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.02em;transition:color .2s}
-.nav-sub li a:hover{color:var(--neon-magenta)}
-.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 1.5rem}
+.nav-sub li a{color:#AEBCD4}
+.nav-sub li a:hover{color:#fff;background:rgba(78,199,235,.10)}
+.nav-divider{height:1px;background:#22314F;margin:.5rem 1.5rem}
 
 /* user dropdown */
 .user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
@@ -144,31 +176,92 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
+
+/* ══ Steuerleiste ══ */
+.seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.seg-cell{padding:.3rem .7rem .38rem;min-width:0}
+.seg-cell+.seg-cell{border-left:1px solid var(--glass-border)}
+.seg-cell>label{display:block;font-family:'Poppins',sans-serif;font-size:.52rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--text-dim);font-weight:800;pointer-events:none}
+.seg-cell .ctrl-select{border:none!important;border-radius:0;background-color:transparent!important;
+  box-shadow:none;padding:.05rem 1.5rem .05rem 0;font-size:.92rem;font-weight:700;width:100%;
+  background-position:right .2rem center}
+
+/* ══ Summen je Filiale — die Zahlen, wegen derer man die Seite öffnet ══ */
+.kpi-row{display:flex;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap}
+.kpi{flex:1 1 130px;background:#fff;border:1px solid var(--glass-border);border-radius:12px;
+  padding:.6rem .8rem;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.kpi s{text-decoration:none;display:block;font-family:'Poppins',sans-serif;font-size:.54rem;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);font-weight:800}
+.kpi b{display:block;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:1.15rem;font-weight:700;margin-top:.2rem}
+.kpi.total{background:var(--ink);border-color:var(--ink)}
+.kpi.total s{color:#8FA6C9}
+.kpi.total b{color:#3EDCA9}
+
+/* ══ Spalten-Leiste (nur Handy) ══ */
+.col-pager{display:none;gap:.3rem;overflow-x:auto;padding:.4rem .1rem .5rem;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  position:sticky;top:var(--header-h);z-index:16;background:var(--bg)}
+.col-pager::-webkit-scrollbar{display:none}
+.col-pager .pg{flex:0 0 auto;font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;padding:.3rem .6rem;border-radius:20px;
+  background:#E7EBF2;color:#93A0B2;white-space:nowrap;border:none;cursor:pointer}
+@media(max-width:640px){.col-pager{display:flex}}
+
+/* ══ Gezeichnete Pfeile ══ */
+.arw-i{display:inline-block;width:0;height:0;border-style:solid;
+  border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
+  transition:transform .2s;flex-shrink:0}
+.cat-row.open .cat-arrow .arw-i{transform:rotate(90deg)}
+
+.table-wrap-single{overflow:auto;-webkit-overflow-scrolling:touch;
+  position:sticky;top:var(--tbl-top);
+  max-height:calc(100dvh - var(--tbl-top) - .75rem);
+  border-radius:14px;border:1px solid var(--glass-border);
+  box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
+@media(min-width:641px){
+  .main-content{height:calc(100dvh - var(--header-h));min-height:0;overflow:hidden;
+    display:flex;flex-direction:column}
+  .table-wrap-single{position:static;flex:1 1 auto;min-height:0;max-height:none}
+}
+.lager-table thead th{position:sticky;top:0;z-index:15}
+.lager-table th.col-artikel{top:0;z-index:25}
 
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
 .lager-table th{
-  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
-  font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--neon-cyan);text-transform:uppercase;
-  padding:.7rem .9rem;border-bottom:2px solid var(--glass-border);border-right:1px solid var(--glass-border);
-  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
-  background:#eef2f6}
+  font-family:'Poppins','Century Gothic',sans-serif;
+  font-weight:800;font-size:.62rem;letter-spacing:.12em;color:#8FD8EE;text-transform:uppercase;
+  padding:.6rem .9rem;border-bottom:none;border-right:1px solid var(--ink3);
+  white-space:nowrap;z-index:10;text-align:center;line-height:1.25;
+  background:var(--ink2)}
 .lager-table th:last-child,.lager-table td:last-child{border-right:none}
-.lager-table td{padding:.38rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
+.lager-table td{padding:.42rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
 .lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
-.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(8,145,178,.06)}
+.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(14,143,184,.05)}
+/* Zebra hält die Artikelzeile über die ganze Breite zusammen */
+.prod-row.zebra td{background:var(--zebra)}
+.prod-row.zebra td.col-artikel{background:var(--zebra)}
+.lager-table td:not(.col-artikel){position:relative;z-index:1}
 
 /* Sticky Artikel column */
 .col-artikel{
-  position:sticky;left:0;z-index:5;
-  background:#f7f9fb;
+  position:sticky;left:0;z-index:12;
+  background:#fff;
   text-align:left!important;
   border-right:2px solid var(--glass-border)!important;
   min-width:200px;
 }
-.lager-table th.col-artikel{z-index:20;background:#eef2f6}
-.lager-table tr:hover td.col-artikel{background:#e3edf0}
+.lager-table th.col-artikel{position:sticky;left:0;z-index:25;background:var(--ink2);
+  color:#8FA6C9;text-align:left!important}
+.lager-table tr:hover td.col-artikel{background:#EAF4F8}
+td.col-artikel{background-color:#fff}
+td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28rem;width:3px;
+  border-radius:0 3px 3px 0;background:var(--neon-cyan)}
+.cat-row td.col-artikel::before{display:none}
+.cat-row td.col-artikel{background:var(--ink2)}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
@@ -176,11 +269,29 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
 
 @media(max-width:640px){
-  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
-  .lager-table th{font-size:.55rem;letter-spacing:.01em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
-  .lager-table td{padding:.38rem .2rem}
-  .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
-  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
+  :root{--tbl-top:calc(var(--header-h) + 2.6rem)}
+  .app-header{padding:0 .55rem;gap:.5rem}
+  .hdr-user{padding:.3rem .5rem;font-size:.8rem}
+  .burger{padding:8px}
+  /* Größere Tippflächen */
+  .nav-item>.nav-link{padding:1rem 1.5rem;font-size:.75rem}
+  .nav-sub li a{padding:.9rem 1.5rem .9rem 2.5rem;font-size:.9rem}
+  .seg-group{flex:1 1 0;min-width:0}
+  .seg-cell{flex:1;min-width:0}
+  .kpi-row{gap:.4rem}
+  .kpi{flex:1 1 calc(50% - .2rem);padding:.5rem .6rem}
+  .kpi b{font-size:.95rem}
+  .lager-table{table-layout:fixed;width:auto;min-width:100%}
+  .col-artikel{min-width:calc(43vw - 8px);width:calc(43vw - 8px);max-width:calc(43vw - 8px)}
+  .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.85rem .2rem;line-height:1.3;white-space:normal}
+  .lager-table th.col-artikel{padding-left:.6rem;padding-right:.4rem}
+  .lager-table td{padding:.42rem .2rem}
+  .lager-table th:not(.col-artikel){min-width:64px;width:64px;text-align:center}
+  .lager-table td:not(.col-artikel){min-width:64px;width:64px;text-align:center}
+  td.num-cell{font-size:.76rem!important}
+  .col-artikel .prod-name{font-size:.82rem;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+  .col-artikel .prod-unit{font-size:.66rem}
+  .prod-icon{width:28px;height:28px;font-size:.86rem;border-radius:8px}
   .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
   .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
@@ -194,10 +305,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* category row */
-.cat-row td{background:#e3e8f0;padding:.4rem .9rem;cursor:pointer;user-select:none;border-bottom:2px solid var(--glass-border)}
-.cat-row:hover td{background:#dae1eb}
-.cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.1em;
-  color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-row td{background:var(--ink2);color:#fff;padding:.5rem .9rem;cursor:pointer;user-select:none;
+  border-bottom:1px solid var(--ink3);border-right-color:var(--ink3)}
+.cat-row:hover td{background:#24345A}
+.cat-label{font-family:'Poppins','Century Gothic',sans-serif;font-weight:800;font-size:.66rem;letter-spacing:.14em;
+  color:#fff;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;width:100%}
+.cat-label::after{content:'';width:6px;height:6px;border-radius:2px;background:#3EDCA9;order:-1}
+.cat-arrow{color:#8FA6C9}
+.cat-count{margin-left:auto;font-size:.62rem;font-weight:700;color:#8FA6C9;letter-spacing:.04em}
 .cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
 .cat-row.open .cat-arrow{transform:rotate(90deg)}
 .cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
@@ -205,15 +320,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 /* product row */
 .prod-row{transition:background .15s}
 .prod-row.hidden{display:none}
-.prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
+.prod-icon{width:34px;height:34px;border-radius:10px;background:var(--icon-bg,#E6F4F9);
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18);overflow:hidden}
+  border:1px solid rgba(14,143,184,.14);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
-.prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
+.prod-name{font-size:.93rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
 
 /* number cells */
-.num-cell{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.num-cell{text-align:center}
+td.num-cell{font-family:var(--mono);font-size:.9rem;font-weight:600;
+  font-variant-numeric:tabular-nums;color:var(--text)}
 .price-input-wrap{display:inline-flex;align-items:center;justify-content:center;gap:.3rem}
 .price-input{width:80px;background:#fff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--text);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;font-weight:700;
@@ -289,7 +406,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .modal-cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.65rem;letter-spacing:.1em;
   color:var(--neon-yellow);text-transform:uppercase;flex:1}
 .modal-cat-arrow{font-size:.65rem;transition:transform .2s;color:var(--text-dim)}
-.modal-cat.open .modal-cat-arrow{transform:rotate(90deg)}
+.modal-cat.open .modal-cat-arrow .arw-i{transform:rotate(90deg)}
 .modal-cat-items{display:none;padding:0 0 .5rem .5rem}
 .modal-cat.open .modal-cat-items{display:block}
 
@@ -421,7 +538,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .hdr-left{display:flex;align-items:center}
 .cat-arrow,.cat-arrow-r,.cat-arrow-r2{font-size:.7rem;transition:transform .2s;display:inline-block}
-.cat-row.open .cat-arrow,.cat-row.open .cat-arrow-r,.cat-row.open .cat-arrow-r2{transform:rotate(90deg)}
+.cat-row.open .cat-arrow .arw-i,.cat-row.open .cat-arrow-r .arw-i,.cat-row.open .cat-arrow-r2 .arw-i{transform:rotate(90deg)}
 
 /* Desktop Artikel column in right table */
 .td-artikel-desktop{display:none}
@@ -458,11 +575,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </button>
   </div>
   <div class="hdr-center">
-    <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">HANDEL – <span style="color:var(--neon-cyan);font-weight:700;font-size:.82rem">Rechnungen</span></div>
+    <div class="hdr-org">Handel</div>
+    <div class="hdr-page">Rech<span style="color:#4FD2F5">nungen</span></div>
   </div>
   <div class="hdr-right">
-    <div class="hdr-user" onclick="toggleUserDropdown()">
+    <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
     </div>
@@ -485,6 +602,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
+  <div class="side-brand">
+    <div class="side-mark"><span>G</span></div>
+    <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
+  </div>
   <ul class="nav-list">
     <li class="nav-item">
       <button class="nav-link" onclick="toggleSubMenu(this)">
@@ -503,7 +624,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="preise.html">Preise</a></li>
-        <li><a href="rechnungen.html" style="color:var(--neon-cyan)">Rechnungen</a></li>
+        <li><a href="rechnungen.html" style="color:#fff;background:rgba(78,199,235,.14);box-shadow:inset 3px 0 0 var(--neon-cyan)">Rechnungen</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
@@ -528,6 +649,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
   <!-- Controls -->
   <div class="lager-controls">
+    <div class="seg-group">
+    <div class="seg-cell"><label>Monat</label>
     <select class="ctrl-select" id="sel-zeitraum" onchange="renderTable()">
       <option value="2026-01">Januar 2026</option>
       <option value="2026-02">Februar 2026</option>
@@ -541,8 +664,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-10">Oktober 2026</option>
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
-    </select>
+    </select></div>
+    </div>
   </div>
+  <div class="kpi-row" id="kpi-row"></div>
+  <div class="col-pager" id="col-pager"></div>
 
   <!-- Table -->
   <!-- Table wrapper: left fixed + right scrollable -->
@@ -776,9 +902,9 @@ function renderTableActual(){
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
   BRANCHES.forEach(br=>{
-    thHTML += `<th class="num-cell" style="color:${BRANCH_COLORS[br]}">${BRANCH_LABELS[br]}</th>`;
+    thHTML += `<th class="num-cell" style="background:${BRANCH_HEAD[br]};color:${BRANCH_FG[br]};border-right-color:rgba(255,255,255,.18)">${BRANCH_LABELS[br]}</th>`;
   });
-  thHTML += '<th class="num-cell" style="color:#111827;background:rgba(0,0,0,.04)">Gesamt</th>';
+  thHTML += '<th class="num-cell" style="background:#0B5F49;color:#B7F0DC;border-right-color:rgba(255,255,255,.18)">Gesamt</th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -794,7 +920,7 @@ function renderTableActual(){
     const catTotals = {gesamt:0};
     BRANCHES.forEach(br=>catTotals[br]=0);
 
-    const rowsHTML = catObj.items.map(prod=>{
+    const rowsHTML = catObj.items.map((prod,pIdx)=>{
       const vk = getEffectivePrice(prod.id,'verkauf',zeit) || 0;
       const kolli = prod.kolli || 1;
       const perBranch = {};
@@ -813,33 +939,42 @@ function renderTableActual(){
       grandTotals.gesamt += rowGesamt;
 
       const prodHidden = isFirst ? '' : 'hidden';
-      return `<tr class="prod-row ${prodHidden}" data-cat="${ci}" data-prod="${prod.id}">
+      return `<tr class="prod-row ${prodHidden} ${pIdx%2?'zebra':''}" data-cat="${ci}" data-prod="${prod.id}">
         <td class="col-artikel"><div class="prod-info">
           <div class="prod-icon">${iconHTML(prod.icon,34)}</div>
           <div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div>
         </div></td>
         ${BRANCHES.map(br=>`<td class="num-cell" style="color:${BRANCH_COLORS[br]}">${fmt(perBranch[br])}</td>`).join('')}
-        <td class="num-cell" style="color:#111827;background:rgba(0,0,0,.03)">${fmt(rowGesamt)}</td>
+        <td class="num-cell" style="color:var(--neon-green);font-weight:700;background:#F2FAF7">${fmt(rowGesamt)}</td>
       </tr>`;
     }).join('');
 
     tbHTML += `<tr class="cat-row ${catOpen}" onclick="toggleCategory(this)" data-cat="${ci}">
-      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td>
-      ${BRANCHES.map(br=>`<td class="num-cell" style="background:#e3e8f0;color:${BRANCH_COLORS[br]};font-weight:700">${fmt(catTotals[br])}</td>`).join('')}
-      <td class="num-cell" style="background:#e3e8f0;color:#111827;font-weight:700">${fmt(catTotals.gesamt)}</td>
+      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow"><i class="arw-i"></i></span>${catObj.cat}<span class="cat-count">${catObj.items.length}</span></div></td>
+      ${BRANCHES.map(br=>`<td class="num-cell" style="background:var(--ink2);color:#fff;font-weight:700;border-right-color:var(--ink3)">${fmt(catTotals[br])}</td>`).join('')}
+      <td class="num-cell" style="background:var(--ink2);color:#3EDCA9;font-weight:700">${fmt(catTotals.gesamt)}</td>
     </tr>`;
 
     tbHTML += rowsHTML;
   });
 
   // ── GESAMT-ZEILE (immer sichtbar, unabhängig vom Kategorie-Zustand) ──
-  tbHTML += `<tr style="border-top:2px solid var(--glass-border)">
-    <td class="col-artikel"><div class="prod-name" style="font-weight:700;text-transform:uppercase;font-size:.72rem;letter-spacing:.06em;color:#111827">Gesamt</div></td>
-    ${BRANCHES.map(br=>`<td class="num-cell" style="color:${BRANCH_COLORS[br]};font-weight:700">${fmtBold(grandTotals[br])}</td>`).join('')}
-    <td class="num-cell" style="color:#111827;font-weight:700;background:rgba(0,0,0,.05)">${fmtBold(grandTotals.gesamt)}</td>
+  tbHTML += `<tr class="total-row">
+    <td class="col-artikel" style="background:#E4F6EE"><div class="prod-name" style="font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.1em;color:#0A8A66">Gesamt</div></td>
+    ${BRANCHES.map(br=>`<td class="num-cell" style="background:#E4F6EE;color:${BRANCH_COLORS[br]};font-weight:700">${fmtBold(grandTotals[br])}</td>`).join('')}
+    <td class="num-cell" style="background:#D8EFE5;color:#0A8A66;font-weight:700">${fmtBold(grandTotals.gesamt)}</td>
   </tr>`;
 
   tbody.innerHTML = tbHTML;
+
+  // Summen je Filiale nach oben spiegeln — dort sucht man sie zuerst
+  const kpi = document.getElementById('kpi-row');
+  if(kpi){
+    kpi.innerHTML = BRANCHES.map(br=>
+      `<div class="kpi"><s>${BRANCH_LABELS[br]}</s><b style="color:${BRANCH_COLORS[br]}">${fmt(grandTotals[br])}</b></div>`
+    ).join('') + `<div class="kpi total"><s>Gesamt</s><b>${fmt(grandTotals.gesamt)}</b></div>`;
+  }
+  buildColPager();
 }
 
 // Ermittelt den zum gewählten Monat gültigen Preis: der zuletzt EXPLIZIT gesetzte Wert
@@ -847,7 +982,11 @@ function renderTableActual(){
 // späteren Monat erneut geändert wird.
 const BRANCHES = ['nettetal','brüggen','viersen','köln'];
 const BRANCH_LABELS = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
-const BRANCH_COLORS = {nettetal:'#2563eb',brüggen:'#e11d48',viersen:'#ea580c',köln:'#7c3aed'};
+const BRANCH_COLORS = {nettetal:'#1D4FB8',brüggen:'#C4123E',viersen:'#B4520C',köln:'#5A2FB0'};
+// Kopfzeile: dunkler Grund je Filiale, heller Text darauf — dieselbe Logik
+// wie bei den Spaltengruppen auf lager.html
+const BRANCH_HEAD = {nettetal:'#1D4FB8',brüggen:'#A31038',viersen:'#A8480A',köln:'#5227A0'};
+const BRANCH_FG   = {nettetal:'#CADEFF',brüggen:'#FFD1DD',viersen:'#FFE0C4',köln:'#DFD2FF'};
 // Diese Artikel werden NUR auf dieser Seite in eine eigene Kategorie "Heißgetränke"
 // umsortiert — an der zentralen Artikel-Konfiguration (lager.html) ändert das nichts.
 const HEISSGETRAENKE_IDS = ['tee_100','tee_20','susstoff','zucker','kaffee','cappuc','kakao'];
@@ -950,6 +1089,24 @@ function getPrevMonthLabel(){ return '—'; }
 window.toggleShopsSection = function(){}  // not used in inventur
 
 // ── CATEGORY TOGGLE ──
+// Leiste über der Tabelle: listet die Spalten und springt hin, schaltet nichts.
+function buildColPager(){
+  const pager=document.getElementById('col-pager');
+  const wrap=document.querySelector('.table-wrap-single');
+  const thead=document.getElementById('lager-thead');
+  if(!pager||!wrap||!thead) return;
+  const ths=Array.from(thead.querySelectorAll('th')).filter(th=>!th.classList.contains('col-artikel'));
+  pager.innerHTML=ths.map((th,i)=>`<button class="pg" data-i="${i}">${th.innerText.trim()}</button>`).join('');
+  const stick=wrap.querySelector('.col-artikel');
+  const stickW=stick?stick.getBoundingClientRect().width:0;
+  pager.querySelectorAll('.pg').forEach(btn=>{
+    btn.onclick=()=>{
+      const th=ths[Number(btn.dataset.i)];
+      wrap.scrollTo({left:Math.max(0,th.offsetLeft-stickW),behavior:'smooth'});
+    };
+  });
+}
+
 window.toggleCategory = function(row){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
@@ -1131,7 +1288,6 @@ function applyDetailCols(show){
   document.querySelectorAll('.detail-col').forEach(el=>el.classList.toggle('visible',show));
   const btn = document.getElementById('expand-arrow-btn');
   if(btn){
-    btn.textContent = show ? '◀' : '▶';
     btn.classList.toggle('expanded', show);
   }
 }
@@ -1192,7 +1348,7 @@ window.openWareneingang = function(prefillDate){
     html += `<div class="modal-cat" id="we-cat-${ci}">
       <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
         <span class="modal-cat-label">${catObj.cat}</span>
-        <span class="modal-cat-arrow">▶</span>
+        <span class="modal-cat-arrow"><i class="arw-i"></i></span>
       </div>
       <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
