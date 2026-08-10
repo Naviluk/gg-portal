@@ -596,6 +596,26 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .confirm-shop-row .cs-name{color:var(--text);font-weight:600}
 .confirm-shop-row .cs-amt{font-family:var(--mono);color:var(--neon-green);font-size:.86rem}
 
+.we-body .field-label{font-size:.55rem;letter-spacing:.16em;font-weight:800;color:var(--text-dim);
+  margin-bottom:.35rem}
+/* Knöpfe im Fenster in normaler Schreibweise, nicht in Versalien */
+.we-foot .btn{text-transform:none;letter-spacing:.02em;font-size:.82rem}
+
+/* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
+   Das Datum steht über beiden, die Knopfleiste unter beiden. */
+@media(min-width:900px){
+  #modal-we .we-modal{max-width:900px}
+  #we-step1{display:grid;grid-template-columns:minmax(0,1fr) 300px;
+    column-gap:1rem;align-items:start}
+  #we-step1 > .field:first-child{grid-column:1 / -1}
+  #we-step1 > .field:nth-of-type(2){grid-column:1;grid-row:2 / span 2}
+  #we-selected-list{grid-column:2;grid-row:2;margin-top:0;border-top:none;padding-top:0;
+    background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem}
+  #we-shops-section{grid-column:2;grid-row:3;margin-top:.8rem}
+  #we-step1 > .we-foot{grid-column:1 / -1}
+  #we-step2 .confirm-list{max-width:none}
+}
+
 #we-date{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;
   text-align:left;border-radius:11px;padding:.62rem .8rem;
   font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600}
@@ -617,9 +637,34 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .expand-arrow .arw-i{border-width:4px 0 4px 6px}
 .expand-arrow.expanded .arw-i{transform:rotate(180deg)}
 /* Kalender-Symbol im Datumsfeld selbst zeichnen */
+.we-body .field-label{font-size:.55rem;letter-spacing:.16em;font-weight:800;color:var(--text-dim);
+  margin-bottom:.35rem}
+/* Knöpfe im Fenster in normaler Schreibweise, nicht in Versalien */
+.we-foot .btn{text-transform:none;letter-spacing:.02em;font-size:.82rem}
+
+/* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
+   Das Datum steht über beiden, die Knopfleiste unter beiden. */
+@media(min-width:900px){
+  #modal-we .we-modal{max-width:900px}
+  #we-step1{display:grid;grid-template-columns:minmax(0,1fr) 300px;
+    column-gap:1rem;align-items:start}
+  #we-step1 > .field:first-child{grid-column:1 / -1}
+  #we-step1 > .field:nth-of-type(2){grid-column:1;grid-row:2 / span 2}
+  #we-selected-list{grid-column:2;grid-row:2;margin-top:0;border-top:none;padding-top:0;
+    background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem}
+  #we-shops-section{grid-column:2;grid-row:3;margin-top:.8rem}
+  #we-step1 > .we-foot{grid-column:1 / -1}
+  #we-step2 .confirm-list{max-width:none}
+}
+
 #we-date{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2366748C' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.4rem}
 #we-date::-webkit-calendar-picker-indicator{opacity:0}
+.cal-i{display:inline-block;width:14px;height:14px;flex-shrink:0;
+  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E")}
 
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
@@ -839,7 +884,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <div id="we-selected-items"></div>
       </div>
       <div id="we-shops-section" class="shops-section" style="display:none">
-        <div class="shops-title" id="we-shops-title">🏪 Shops / Einkaufsorte
+        <div class="shops-title" id="we-shops-title">🏪 Shops
           <span class="shops-sum" id="we-shops-sum"></span></div>
         <div id="we-shop-rows"></div>
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
@@ -1963,6 +2008,7 @@ function weSetStep(n){
   if(!s1||!s2) return;
   s1.className = 'we-step ' + (n===1?'on':'done');
   s2.className = 'we-step ' + (n===2?'on':'');
+  const i1=s1.querySelector('i'); if(i1) i1.textContent = (n===2?'✓':'1');
 }
 
 window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
@@ -2109,7 +2155,7 @@ window.buildConfirm = function(){
   weSetStep(2);
   const d=new Date(date);
   document.getElementById('confirm-date-label').innerHTML =
-    '<span class="we-datechip">🗓 '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
+    '<span class="we-datechip"><i class="cal-i"></i>'+d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
 
   let html='';
   PRODUCTS.forEach(catObj=>{
@@ -2135,7 +2181,7 @@ window.buildConfirm = function(){
   if(activeShops.length){
     cs.style.display='block';
     const _csTotal = activeShops.reduce((a,x)=>a+(parseFloat(x.betrag)||0),0);
-    cs.innerHTML='<div class="confirm-shops-title">🏪 Shops / Einkaufsorte<span class="cs-total">'+
+    cs.innerHTML='<div class="confirm-shops-title">🏪 Shops<span class="cs-total">'+
       _csTotal.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €</span></div>'+
       activeShops.map(s=>{
         const amt = parseFloat(s.betrag||0).toFixed(2);
@@ -2217,16 +2263,20 @@ window.buildConfirmLieferung = function(){
   if(!date){ showToast('Bitte Datum auswählen.'); return; }
   document.getElementById('we-step1').style.display='none';
   document.getElementById('we-step2').style.display='block';
+  weSetStep(2);
   const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent=
-    'Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
-  let html=''; let lastCat='';
+  document.getElementById('confirm-date-label').innerHTML=
+    '<span class="we-datechip"><i class="cal-i"></i>'+
+    d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
+  let html='';
   PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`;lastCat=catObj.cat;}
-        html+=`<div class="confirm-item"><span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
-      }
+    const rows = catObj.items.filter(pr=>ids.includes(pr.id));
+    if(!rows.length) return;
+    const catQty = rows.reduce((a,pr)=>a+(Number(weSelectedItems[pr.id])||0),0);
+    html+=`<div class="confirm-cat"><i></i>${catObj.cat}
+      <span class="n">${rows.length} · ${catQty.toLocaleString('de-DE')} St.</span></div>`;
+    rows.forEach((prod,ri)=>{
+      html+=`<div class="confirm-item${ri%2?' zeb':''}"><span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${prod.unit||''}</span></span><span class="ci-qty">${weSelectedItems[prod.id]||0}</span></div>`;
     });
   });
   document.getElementById('confirm-list').innerHTML=html;
