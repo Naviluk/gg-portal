@@ -31,6 +31,7 @@
   /* Gerüst */
   --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --tbl-top:calc(var(--header-h) + .5rem);
   /* Hausfarbe je Lager */
   --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
@@ -224,6 +225,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 @media(max-width:640px){
+  :root{--tbl-top:calc(var(--header-h) + 2.6rem)}
   .cur{display:none}
   .app-header{padding:0 .55rem;gap:.5rem}
   .hdr-user{padding:.3rem .5rem;font-size:.8rem}
@@ -261,9 +263,20 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;
+.table-wrap-single{overflow:auto;-webkit-overflow-scrolling:touch;
+  position:sticky;top:var(--tbl-top);
+  max-height:calc(100dvh - var(--tbl-top) - .75rem);
   border-radius:14px;border:1px solid var(--glass-border);
   box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
+@media(min-width:641px){
+  .main-content{height:calc(100dvh - var(--header-h));min-height:0;overflow:hidden;
+    display:flex;flex-direction:column}
+  .table-wrap-single{position:static;flex:1 1 auto;min-height:0;max-height:none}
+}
+/* Innerhalb des Rahmens bleibt die Kopfzeile oben stehen … */
+.lager-table thead th{position:sticky;top:0;z-index:15}
+/* … und die Ecke links oben in beide Richtungen */
+.lager-table th.col-artikel{top:0;z-index:25}
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#fff}
 .lager-table th{
