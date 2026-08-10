@@ -18,13 +18,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>GETRÄNKE &amp; SNACKS – GAME GALAXY</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#101A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Game Galaxy">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
-  --bg:#e4e8ef;--bg2:#ffffff;--bg3:#eef1f6;
-  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
-  --glass:#e9edf3;--glass-border:#c9d1dc;
-  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
+  --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
+  --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
+  --glass:#E7ECF4;--glass-border:#DCE3ED;
+  --text:#141B29;--text-dim:#66748C;--header-h:64px;
+  /* Gerüst */
+  --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --violet-role:#6D4AC7;
+  --tbl-top:calc(var(--header-h) + .5rem);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Century Gothic','CenturyGothic','AppleGothic','Poppins','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
@@ -35,31 +47,49 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── HEADER ── */
 .app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
-  background:rgba(255,255,255,0.92);border-bottom:1px solid var(--glass-border);
-  backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
-  box-shadow:0 1px 3px rgba(30,37,50,.04)}
-.app-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent)}
+  background:var(--ink);border-bottom:none;
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 2px 10px rgba(16,26,46,.18)}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
 .hdr-left{display:flex;align-items:center}
-.hdr-center{flex:1;text-align:center}
+.hdr-center{flex:1;text-align:left;min-width:0}
 .hdr-right{display:flex;align-items:center;gap:.5rem}
-.hdr-org{font-family:'Century Gothic','CenturyGothic','Poppins',sans-serif;font-weight:700;font-size:clamp(.68rem,1.5vw,.92rem);letter-spacing:.08em;
+.hdr-org{font-family:'Poppins','Century Gothic',sans-serif;font-weight:800;
+  font-size:.58rem;letter-spacing:.2em;color:#7E90AE;text-transform:uppercase;line-height:1.1;
+  --unused:0;
   background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
-.hdr-page{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.72rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-top:.15rem}
-.hdr-user{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-cyan);cursor:pointer;
+.hdr-page{font-family:'Poppins','Century Gothic',sans-serif;font-size:1rem;letter-spacing:.02em;
+  color:#fff;font-weight:700;margin-top:.1rem;line-height:1.15}
+.hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
+.hdr-user{font-family:'Poppins','Century Gothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
+  background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem;
   display:flex;align-items:center;gap:.3rem;white-space:nowrap;font-weight:700}
 .hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
-.burger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
-.burger span{display:block;width:22px;height:2px;background:var(--neon-cyan);border-radius:2px;transition:all .25s}
+.burger{background:rgba(255,255,255,.09);border:none;border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;padding:9px;align-items:center;justify-content:center}
+.burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
 .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .burger.open span:nth-child(2){opacity:0}
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* sidebar */
-.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:#ffffff;
-  border-right:1px solid var(--glass-border);z-index:200;padding-top:var(--header-h);
-  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 12px rgba(30,37,50,.06)}
+.side-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.1rem;
+  min-height:var(--header-h);border-bottom:1px solid #22314F;margin-bottom:.6rem}
+.side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;line-height:1;
+  box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-mark span{display:block;transform:translateY(.045em)}
+.side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;color:#fff;line-height:1.2}
+.side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);color:#AEBCD4;
+  border-right:none;z-index:200;padding-top:0;
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
 .sidebar.open{left:0}
 .sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
 .sidebar-overlay.show{display:block}
@@ -67,15 +97,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
   font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);
   text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
-.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:var(--neon-cyan);background:rgba(8,145,178,.08)}
+.nav-item>.nav-link{color:#5D6E8C}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#fff;background:rgba(78,199,235,.10)}
 .nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
 .nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
-.nav-sub{display:none;list-style:none;background:var(--bg3)}
+.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.18)}
 .nav-item.open>.nav-sub{display:block}
 .nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Century Gothic','CenturyGothic',sans-serif;
   font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.02em;transition:color .2s}
-.nav-sub li a:hover{color:var(--neon-magenta)}
-.nav-divider{height:1px;background:var(--glass-border);margin:.5rem 1.5rem}
+.nav-sub li a{color:#AEBCD4}
+.nav-sub li a:hover{color:#fff;background:rgba(78,199,235,.10)}
+.nav-divider{height:1px;background:#22314F;margin:.5rem 1.5rem}
 
 /* user dropdown */
 .user-dropdown{position:absolute;top:calc(var(--header-h) + 4px);right:1.2rem;
@@ -129,31 +161,99 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;border-radius:8px;border:1px solid var(--glass-border);box-shadow:0 1px 4px rgba(30,37,50,.05)}
+
+/* ══ Steuerleiste ══ */
+.ctrl-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+.seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.seg-cell{padding:.3rem .7rem .38rem;min-width:0;position:relative}
+.seg-cell+.seg-cell{border-left:1px solid var(--glass-border)}
+.seg-cell>label{display:block;font-family:'Poppins',sans-serif;font-size:.52rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--text-dim);font-weight:800;pointer-events:none}
+.seg-cell .ctrl-select{border:none!important;border-radius:0;background-color:transparent!important;
+  box-shadow:none;padding:.05rem 1.5rem .05rem 0;font-size:.92rem;font-weight:700;width:100%;
+  background-position:right .2rem center}
+.seg-cell.lg-cell{background:var(--lg-tint,#fff)}
+.seg-cell.lg-cell>label{color:var(--lg-ink,var(--text-dim))}
+.seg-cell.lg-cell .ctrl-select{color:var(--lg-ink,var(--text))}
+
+/* ══ Spalten-Leiste (nur Handy) ══ */
+.col-pager{display:none;gap:.3rem;overflow-x:auto;padding:.4rem .1rem .5rem;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  position:sticky;top:var(--header-h);z-index:16;background:var(--bg)}
+.col-pager::-webkit-scrollbar{display:none}
+.col-pager .pg{flex:0 0 auto;font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;padding:.3rem .6rem;border-radius:20px;
+  background:#E7EBF2;color:#93A0B2;white-space:nowrap;border:none;cursor:pointer}
+.col-pager .pg.on{background:#CFD7E2;color:#5D6B7E}
+@media(max-width:640px){.col-pager{display:flex}}
+
+/* ══ Gezeichnete Pfeile statt Zeichen (auf iOS sonst Emoji) ══ */
+.arw-i{display:inline-block;width:0;height:0;border-style:solid;
+  border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
+  transition:transform .2s;flex-shrink:0}
+.modal-cat.open .modal-cat-arrow .arw-i,
+.cat-row.open .cat-arrow .arw-i{transform:rotate(90deg)}
+.expand-arrow.expanded .arw-i{transform:rotate(180deg)}
+
+/* ══ Spaltengruppe — Farbe kommt vom Lager ══ */
+.lager-table th.grp-h{background:var(--g-head);color:var(--g-fg,#fff);
+  border-right-color:rgba(255,255,255,.18)}
+.lager-table th.grp-h .expand-arrow{color:var(--g-fg,#fff)}
+.grp-c{background:var(--g-bg);color:var(--g-ink);font-weight:700}
+.grp-d{background:var(--g-bgD);color:var(--g-ink)}
+.prod-row.zebra td.grp-c{background:var(--g-bg2)}
+.prod-row.zebra td.grp-d{background:var(--g-bgD2)}
+
+.table-wrap-single{overflow:auto;-webkit-overflow-scrolling:touch;
+  position:sticky;top:var(--tbl-top);
+  max-height:calc(100dvh - var(--tbl-top) - .75rem);
+  border-radius:14px;border:1px solid var(--glass-border);
+  box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
+@media(min-width:641px){
+  .main-content{height:calc(100dvh - var(--header-h));min-height:0;overflow:hidden;
+    display:flex;flex-direction:column}
+  .table-wrap-single{position:static;flex:1 1 auto;min-height:0;max-height:none}
+}
+/* Kopfzeile klebt am oberen Rand des Rahmens, Artikelspalte am linken */
+.lager-table thead th{position:sticky;top:0;z-index:15}
+.lager-table th.col-artikel{top:0;z-index:25}
 
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
 .lager-table th{
-  font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;
-  font-weight:700;font-size:.78rem;letter-spacing:.04em;color:var(--neon-cyan);text-transform:uppercase;
-  padding:.7rem .9rem;border-bottom:2px solid var(--glass-border);border-right:1px solid var(--glass-border);
-  white-space:nowrap;position:sticky;top:0;z-index:10;text-align:center;
-  background:#eef2f6}
+  font-family:'Poppins','Century Gothic',sans-serif;
+  font-weight:800;font-size:.62rem;letter-spacing:.12em;color:#8FD8EE;text-transform:uppercase;
+  padding:.6rem .9rem;border-bottom:none;border-right:1px solid var(--ink3);
+  white-space:nowrap;z-index:10;text-align:center;line-height:1.25;
+  background:var(--ink2)}
+.lager-table th .th-text,.lager-table th .th-text-mob{font-size:.62rem;line-height:1.25}
 .lager-table th:last-child,.lager-table td:last-child{border-right:none}
-.lager-table td{padding:.38rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
+.lager-table td{padding:.42rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
 .lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
-.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(8,145,178,.06)}
+.lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(14,143,184,.05)}
+/* Zebra — hält die Artikelzeile über die ganze Breite zusammen */
+.prod-row.zebra td{background:var(--zebra)}
+.prod-row.zebra td.col-artikel{background:var(--zebra)}
+.lager-table td:not(.col-artikel){position:relative;z-index:1}
 
 /* Sticky Artikel column */
 .col-artikel{
-  position:sticky;left:0;z-index:5;
-  background:#f7f9fb;
+  position:sticky;left:0;z-index:12;
+  background:#fff;
   text-align:left!important;
   border-right:2px solid var(--glass-border)!important;
   min-width:200px;
 }
-.lager-table th.col-artikel{z-index:20;background:#eef2f6}
-.lager-table tr:hover td.col-artikel{background:#e3edf0}
+.lager-table th.col-artikel{position:sticky;left:0;z-index:25;background:var(--ink2);
+  color:#8FA6C9;text-align:left!important}
+.lager-table tr:hover td.col-artikel{background:#EAF4F8}
+td.col-artikel{background-color:#fff}
+/* farbige Kante links markiert die Artikelzeile */
+td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28rem;width:3px;
+  border-radius:0 3px 3px 0;background:var(--lg-accent,var(--neon-cyan))}
+.cat-row td.col-artikel::before{display:none}
+.cat-row td.col-artikel{background:#E7ECF4}
 
 /* Desktop: icons hidden */
 .th-icon{display:none}
@@ -161,28 +261,45 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
 
 @media(max-width:640px){
-  .col-artikel{min-width:calc(50vw - 8px);width:calc(50vw - 8px);max-width:calc(50vw - 8px)}
-  .lager-table th{font-size:.55rem;letter-spacing:.01em;padding:.4rem .2rem;line-height:1.2;white-space:normal}
-  .lager-table td{padding:.38rem .2rem}
-  .lager-table th:not(.col-artikel){min-width:62px;width:62px;text-align:center}
-  .lager-table td:not(.col-artikel){min-width:62px;width:62px;text-align:center}
-  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:none}
-  .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
-  .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
-  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.58rem}
-  .num-cell{font-size:.92rem!important;font-weight:700}
-  .prod-name{font-size:.88rem;white-space:normal;word-break:break-word}
-  .prod-unit{font-size:.66rem}
-  .prod-icon{width:26px;height:26px;font-size:.82rem}
+  :root{--tbl-top:calc(var(--header-h) + 2.6rem)}
+  .app-header{padding:0 .55rem;gap:.5rem}
+  .hdr-user{padding:.3rem .5rem;font-size:.8rem}
+  .burger{padding:8px}
+  .lager-controls{gap:.45rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+  .seg-group{flex:1 1 0;min-width:0}
+  .seg-cell{flex:1;min-width:0}
+  .seg-cell .ctrl-select{font-size:.82rem;padding:.05rem 1.1rem .05rem 0;background-position:right .1rem center}
+  .ctrl-actions{width:100%;margin-left:0;display:flex;gap:.45rem}
+  .ctrl-actions .btn-geraet,.ctrl-actions .btn-theke{flex:1;width:auto;font-size:.68rem;padding:.75rem .5rem}
+  .lager-table{table-layout:fixed;width:auto;min-width:100%}
+  .col-artikel{min-width:calc(43vw - 8px);width:calc(43vw - 8px);max-width:calc(43vw - 8px)}
+  .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.42rem .2rem;line-height:1.25;white-space:normal}
+  .lager-table td{padding:.42rem .2rem}
+  .lager-table th:not(.col-artikel){min-width:58px;width:58px;text-align:center}
+  .lager-table td:not(.col-artikel){min-width:58px;width:58px;text-align:center}
+  .lager-table thead th .th-text,.lager-table thead th .th-text-mob{font-size:.56rem}
+  .th-col-einkauf .th-text,.th-col-liefer .th-text,
+  .th-col-geraet .th-text,.th-col-theke .th-text,
+  .th-col-anfang .th-text,.th-col-bestand .th-text{display:none}
+  .th-text-mob{display:inline}
+  .th-icon{display:none}
+  td.num-cell,td.detail-td{font-size:.84rem!important;font-weight:600}
+  .col-artikel .prod-name{font-size:.82rem;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+  .col-artikel .prod-unit{font-size:.66rem}
+  .prod-icon{width:28px;height:28px;font-size:.86rem;border-radius:8px}
   .prod-info{gap:.28rem}
   .main-content{padding:1rem .35rem}
 }
+.th-text-mob{display:none}
 
 /* category row */
-.cat-row td{background:#e3e8f0;padding:.4rem .9rem;cursor:pointer;user-select:none;border-bottom:2px solid var(--glass-border)}
-.cat-row:hover td{background:#dae1eb}
-.cat-label{font-family:'Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.1em;
-  color:var(--neon-yellow);text-transform:uppercase;display:flex;align-items:center;gap:.5rem}
+.cat-row td{background:#E7ECF4;padding:.42rem .9rem;cursor:pointer;user-select:none;border-bottom:1px solid var(--glass-border)}
+.cat-row:hover td{background:#DFE5EF}
+.cat-label{font-family:'Poppins','Century Gothic',sans-serif;font-weight:800;font-size:.66rem;letter-spacing:.14em;
+  color:var(--ink);text-transform:uppercase;display:flex;align-items:center;gap:.5rem;width:100%}
+.cat-label::after{content:'';width:6px;height:6px;border-radius:2px;background:var(--lg-accent,var(--neon-cyan));order:-1}
+.cat-arrow{color:var(--text-dim)}
+.cat-count{margin-left:auto;font-size:.62rem;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
 .cat-arrow{font-size:.7rem;transition:transform .2s;display:inline-block}
 .cat-row.open .cat-arrow{transform:rotate(90deg)}
 .cat-items-count{font-size:.7rem;color:var(--text-dim);margin-left:.3rem}
@@ -190,15 +307,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 /* product row */
 .prod-row{transition:background .15s}
 .prod-row.hidden{display:none}
-.prod-icon{width:34px;height:34px;border-radius:50%;background:var(--icon-bg,rgba(8,145,178,.12));
+.prod-icon{width:34px;height:34px;border-radius:10px;background:var(--icon-bg,#E6F4F9);
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
-  border:1px solid rgba(8,145,178,.18);overflow:hidden}
+  border:1px solid rgba(14,143,184,.14);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
-.prod-name{font-size:.98rem;color:var(--text);line-height:1.2;font-weight:600}
-.prod-unit{font-size:.72rem;color:var(--text-dim);font-family:Arial,Helvetica,sans-serif;font-weight:400;letter-spacing:0}
+.prod-name{font-size:.93rem;color:var(--text);line-height:1.2;font-weight:600}
+.prod-unit{font-size:.7rem;color:var(--text-dim);font-weight:500;letter-spacing:.06em;margin-top:.05rem}
 
 /* number cells */
-.num-cell{text-align:center;font-family:'Century Gothic','CenturyGothic','AppleGothic','Trebuchet MS',sans-serif;font-size:1rem;font-weight:700;color:var(--text)}
+.num-cell{text-align:center}
+td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
+  font-variant-numeric:tabular-nums;color:var(--text)}
 .num-cell.editable{cursor:pointer;transition:color .2s}
 .num-cell.editable:hover{color:var(--neon-cyan)}
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
@@ -207,9 +326,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .col-einkauf-header{position:relative}
 .expand-arrow{display:inline-flex;align-items:center;justify-content:center;
   background:none;border:none;cursor:pointer;margin-left:.3rem;
-  font-size:.7rem;color:var(--neon-magenta);transition:color .2s;
+  font-size:.6rem;color:#fff;opacity:.85;transition:opacity .2s;
   vertical-align:middle;flex-shrink:0;padding:0;line-height:1}
-.expand-arrow:hover{color:var(--text)}
+.expand-arrow:hover{opacity:1}
 .expand-arrow.expanded{color:var(--neon-green)}
 .col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
 
@@ -226,6 +345,155 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .inline-input{background:#fff;border:1px solid var(--neon-cyan);border-radius:4px;
   color:var(--neon-cyan);font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;
   width:70px;text-align:center;padding:.2rem .3rem;outline:none}
+
+/* ══ WARENEINGANG-FENSTER — Farbe kommt vom gewählten Lager ══ */
+.we-modal{padding:0;overflow:hidden;display:flex;flex-direction:column;
+  max-height:92vh;max-height:92dvh}
+.we-head{background:var(--ink);color:#fff;padding:.95rem 1.1rem .85rem;position:relative;
+  flex:0 0 auto}
+.we-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--we-acc,var(--neon-cyan))}
+.we-head .modal-close{color:rgba(255,255,255,.6);top:.85rem;right:1rem}
+.we-head .modal-close:hover{color:#fff}
+.we-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.we-title-row{display:flex;align-items:center;gap:.55rem;margin-top:.15rem;flex-wrap:wrap}
+.we-title-row #we-title{font-size:1rem;font-weight:700;color:#fff}
+.we-lager-pill{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--we-soft,rgba(255,255,255,.15));color:var(--we-fg,#fff)}
+.we-steps{display:flex;align-items:center;gap:.45rem;margin-top:.75rem}
+.we-step{display:flex;align-items:center;gap:.35rem;font-size:.58rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:#7E90AE}
+.we-step i{width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.56rem}
+.we-step.on{color:#fff}
+.we-step.on i,.we-step.done i{background:var(--we-acc,var(--neon-cyan));color:#fff}
+.we-step-line{flex:1;height:1px;background:var(--ink3)}
+.we-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:.9rem 1.1rem 0;overscroll-behavior:contain}
+.we-foot{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--glass-border);
+  margin:.9rem -1.1rem 0;padding:.75rem 1.1rem 1rem;display:flex;gap:.5rem;z-index:3}
+.we-foot .btn-acc{flex:1;background:var(--we-grad,linear-gradient(100deg,var(--neon-cyan),#3FC5EC));
+  box-shadow:0 4px 14px var(--we-shadow,rgba(14,143,184,.28))}
+
+/* Artikelzeile in der Auswahl */
+.modal-prod-row.checked{background:var(--we-bg,#EAF6FB)}
+.prod-checkbox.checked{background:var(--we-acc,var(--neon-cyan));border-color:var(--we-acc,var(--neon-cyan))}
+.qty-input.show{border-color:var(--we-acc,var(--neon-cyan));background:#fff;color:var(--we-ink,var(--text));
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.modal-cat-count{margin-left:auto;font-size:.58rem;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
+.modal-cat-count.has{color:var(--we-ink,var(--neon-cyan))}
+
+/* Klebender Zähler */
+.we-summary{position:sticky;bottom:0;z-index:2;background:var(--ink);color:#fff;border-radius:12px;
+  padding:.55rem .8rem;display:flex;align-items:center;gap:.7rem;margin-top:.7rem}
+.we-summary s{text-decoration:none;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#8FA6C9;font-weight:800;display:block}
+.we-summary b{font-family:var(--mono);font-size:1rem;color:var(--we-fg,#fff);font-weight:700}
+.we-summary .r{margin-left:auto;text-align:right}
+
+/* Übersicht (Schritt 2) */
+.we-datechip{display:inline-flex;align-items:center;gap:.35rem;background:var(--we-bg,#EAF6FB);
+  color:var(--we-ink,var(--neon-cyan));border-radius:20px;padding:.22rem .65rem;
+  font-family:var(--mono);font-size:.78rem;font-weight:700;margin-bottom:.7rem}
+.confirm-list{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.confirm-cat{display:flex;align-items:center;gap:.5rem;background:#E7ECF4;padding:.4rem .7rem;
+  font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.confirm-cat i{width:6px;height:6px;border-radius:2px;background:var(--we-acc,var(--neon-cyan));display:block}
+.confirm-cat .n{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--text-dim);letter-spacing:0;font-weight:600}
+.confirm-list .confirm-item{padding:.42rem .7rem;border-top:1px solid var(--glass-border)}
+.confirm-list .confirm-cat + .confirm-item{border-top:none}
+.confirm-item.zeb{background:var(--zebra)}
+.confirm-item .ci-qty{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--we-ink,var(--text))}
+
+/* Shops */
+.shops-section{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem;margin-top:.85rem}
+.shops-title{display:flex;align-items:center;gap:.4rem}
+.shops-sum{margin-left:auto;font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--neon-green);letter-spacing:0}
+.betrag-input.filled{border-color:var(--neon-green);background:#fff;color:var(--neon-green);font-weight:700}
+
+/* Kategoriezeile in der Auswahl — wie in der Tabelle: Punkt in Lagerfarbe, Text in Tiefblau */
+.we-body .modal-cat-header{border-radius:9px;border-color:var(--glass-border)}
+.we-body .modal-cat-label{color:var(--ink);letter-spacing:.14em;font-weight:800;
+  display:flex;align-items:center;gap:.45rem}
+.we-body .modal-cat-label::before{content:'';width:6px;height:6px;border-radius:2px;
+  background:var(--we-acc,var(--neon-cyan));flex-shrink:0}
+/* Shops in der Übersicht — weiße Karte, Summe mintgrün */
+.confirm-shops{margin-top:.85rem;padding:.75rem .8rem;background:#fff;border-radius:12px;
+  border:1px solid var(--glass-border)}
+.confirm-shops-title{display:flex;align-items:center;gap:.4rem;color:var(--text-dim);
+  letter-spacing:.16em;font-size:.55rem;font-weight:800}
+.confirm-shops-title .cs-total{margin-left:auto;font-family:var(--mono);font-size:.78rem;
+  font-weight:700;color:var(--neon-green);letter-spacing:0}
+.confirm-shop-row{padding:.4rem 0}
+.confirm-shop-row .cs-name{color:var(--text);font-weight:600}
+.confirm-shop-row .cs-amt{font-family:var(--mono);color:var(--neon-green);font-size:.86rem}
+
+.we-body .field-label{font-size:.55rem;letter-spacing:.16em;font-weight:800;color:var(--text-dim);
+  margin-bottom:.35rem}
+/* Knöpfe im Fenster in normaler Schreibweise, nicht in Versalien */
+.we-foot .btn{text-transform:none;letter-spacing:.02em;font-size:.82rem}
+
+/* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
+   Das Datum steht über beiden, die Knopfleiste unter beiden. */
+@media(min-width:700px){
+  #modal-form .we-modal{max-width:min(94vw,900px)}
+  #form-step1{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);
+    column-gap:1rem;align-items:start}
+  #form-step1 > .field:first-child{grid-column:1 / -1}
+  #form-step1 > .field:nth-of-type(2){grid-column:1;grid-row:2 / span 2}
+  #form-selected-list{grid-column:2;grid-row:2;margin-top:0;border-top:none;padding-top:0;
+    background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem}
+  #form-shops-none{grid-column:2;grid-row:3;margin-top:.8rem}
+  #form-step1 > .we-foot{grid-column:1 / -1}
+  /* Schritt 2: Warenliste links, Shops rechts */
+  #form-step2{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);
+    column-gap:1rem;align-items:start}
+  #form-step2 > #confirm-date-label{grid-column:1 / -1}
+  #form-step2 > .confirm-list{grid-column:1}
+  #form-step2 > .confirm-shops{grid-column:2;margin-top:0}
+  #form-step2 > .we-foot{grid-column:1 / -1}
+}
+
+.we-hidden{display:none!important}
+
+#form-date{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;
+  text-align:left;border-radius:11px;padding:.62rem .8rem;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600}
+#form-date::-webkit-date-and-time-value{text-align:left}
+#form-date::-webkit-calendar-picker-indicator{opacity:.45}
+
+#modal-form{align-items:center;overflow:hidden}
+#modal-form .we-modal{margin:0}
+
+/* Pfeile werden gezeichnet, nicht gesetzt — Zeichen wie "▶" haben auf iOS eine
+   Emoji-Variante und erscheinen dort als blaues Kästchen. */
+.arw-i{display:inline-block;width:0;height:0;border-style:solid;
+  border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
+  transition:transform .2s;flex-shrink:0}
+.modal-cat.open .modal-cat-arrow .arw-i,
+.cat-row.open .cat-arrow .arw-i,
+.pcfg-cat.open .pcfg-cat-arrow .arw-i,
+.cl-date-group.open .cl-date-arrow .arw-i{transform:rotate(90deg)}
+.expand-arrow .arw-i{border-width:4px 0 4px 6px}
+.expand-arrow.expanded .arw-i{transform:rotate(180deg)}
+/* Kalender-Symbol im Datumsfeld selbst zeichnen */
+.we-body .field-label{font-size:.55rem;letter-spacing:.16em;font-weight:800;color:var(--text-dim);
+  margin-bottom:.35rem}
+/* Knöpfe im Fenster in normaler Schreibweise, nicht in Versalien */
+.we-foot .btn{text-transform:none;letter-spacing:.02em;font-size:.82rem}
+
+/* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
+   Das Datum steht über beiden, die Knopfleiste unter beiden. */
+
+
+#form-date{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2366748C' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.4rem}
+#form-date::-webkit-calendar-picker-indicator{opacity:0}
+.cal-i{display:inline-block;width:14px;height:14px;flex-shrink:0;
+  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E")}
+
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
@@ -430,11 +698,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </button>
   </div>
   <div class="hdr-center">
-    <div class="hdr-org">GAME GALAXY Betriebsportal</div>
-    <div class="hdr-page">LAGER – Getränke &amp; Snacks</div>
+    <div class="hdr-org">Lager</div>
+    <div class="hdr-page">Getränke &amp; <span style="color:#4FD2F5">Snacks</span></div>
   </div>
   <div class="hdr-right">
-    <div class="hdr-user" onclick="toggleUserDropdown()">
+    <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
     </div>
@@ -449,6 +717,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
+  <div class="side-brand">
+    <div class="side-mark"><span>G</span></div>
+    <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
+  </div>
   <ul class="nav-list">
     <li class="nav-item open">
       <button class="nav-link active" onclick="toggleSubMenu(this)">
@@ -456,7 +728,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </button>
       <ul class="nav-sub">
         <li><a href="lager.html">Bestände</a></li>
-        <li><a href="getraenke-snacks.html" style="color:var(--neon-cyan)">Getränke &amp; Snacks</a></li>
+        <li><a href="getraenke-snacks.html" style="color:#fff;background:rgba(78,199,235,.14);box-shadow:inset 3px 0 0 var(--neon-cyan)">Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html">Lieferplanung</a></li>
       </ul>
     </li>
@@ -490,12 +762,15 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- MAIN -->
 <div class="main-content">
   <div class="lager-controls">
+    <div class="seg-group">
+    <div class="seg-cell lg-cell" id="seg-lager"><label>Lager</label>
     <select class="ctrl-select" id="sel-lager" onchange="loadData()">
       <option value="nettetal">Nettetal</option>
       <option value="brüggen" selected>Brüggen</option>
       <option value="viersen">Viersen</option>
       <option value="köln">Köln</option>
-    </select>
+    </select></div>
+    <div class="seg-cell"><label>Monat</label>
     <select class="ctrl-select" id="sel-zeitraum" onchange="loadData()">
       <option value="2026-01">Januar 2026</option>
       <option value="2026-02">Februar 2026</option>
@@ -509,12 +784,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-10">Oktober 2026</option>
       <option value="2026-11">November 2026</option>
       <option value="2026-12">Dezember 2026</option>
-    </select>
-    <div style="margin-left:auto;display:flex;gap:.6rem;flex-shrink:0">
+    </select></div>
+    </div>
+    <div class="ctrl-actions">
       <button class="btn-geraet" onclick="openForm('geraet')">&#xFF0B; Gerät</button>
       <button class="btn-theke" onclick="openForm('theke')">&#xFF0B; Theke</button>
     </div>
   </div>
+  <div class="col-pager" id="col-pager"></div>
 
   <div class="table-wrap-single">
     <table class="lager-table" id="gs-table">
@@ -526,9 +803,21 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <!-- MODAL: GERÄT / THEKE -->
 <div class="modal-overlay" id="modal-form">
-  <div class="modal">
-    <button class="modal-close" onclick="closeForm()">&#x2715;</button>
-    <div class="modal-title" id="form-title">Gerät – Eintrag</div>
+  <div class="modal we-modal" id="form-modal">
+    <div class="we-head">
+      <button class="modal-close" onclick="closeForm()">&#x2715;</button>
+      <div class="we-eyebrow">Erfassen</div>
+      <div class="we-title-row">
+        <span id="form-title">Gerät</span>
+        <span class="we-lager-pill" id="form-lager-pill">Lager</span>
+      </div>
+      <div class="we-steps">
+        <div class="we-step on" id="form-step-1"><i>1</i><span>Waren</span></div>
+        <div class="we-step-line"></div>
+        <div class="we-step" id="form-step-2"><i>2</i><span>Prüfen</span></div>
+      </div>
+    </div>
+    <div class="we-body">
     <div id="form-step1">
       <div class="field">
         <label class="field-label">Datum</label>
@@ -537,23 +826,28 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="field">
         <label class="field-label">Waren auswählen</label>
         <div id="form-product-list"></div>
+        <div class="we-summary we-hidden" id="form-summary">
+          <div><s>Positionen</s><b id="form-sum-count">0</b></div>
+          <div class="r"><s>Stück gesamt</s><b id="form-sum-qty">0</b></div>
+        </div>
       </div>
-      <div id="form-selected-list" class="selected-list" style="display:none">
+      <div id="form-selected-list" class="selected-list we-hidden">
         <div class="selected-list-title">Ausgewählte Waren</div>
         <div id="form-selected-items"></div>
       </div>
-      <div class="modal-btn-row">
-        <button class="btn btn-primary" onclick="buildFormConfirm()">Weiter &#x2192;</button>
+      <div class="modal-btn-row we-foot">
         <button class="btn btn-ghost" onclick="closeForm()">Abbrechen</button>
+        <button class="btn btn-primary btn-acc" onclick="buildFormConfirm()">Liste prüfen &#x2192;</button>
       </div>
     </div>
-    <div id="form-step2" style="display:none">
+    <div id="form-step2" class="we-hidden">
       <div class="confirm-date" id="form-confirm-date"></div>
       <div class="confirm-list" id="form-confirm-list"></div>
-      <div class="modal-btn-row">
-        <button class="btn btn-save" id="form-save-btn" onclick="saveFormEntry()">&#x2713; Speichern</button>
+      <div class="modal-btn-row we-foot">
         <button class="btn btn-ghost" onclick="backToFormEdit()">&#x2190; Zurück</button>
+        <button class="btn btn-primary btn-acc" id="form-save-btn" onclick="saveFormEntry()">&#x2713; Speichern</button>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -619,11 +913,17 @@ const DEFAULT_GS_PRODUCTS = [
 ];
 let GS_PRODUCTS = DEFAULT_GS_PRODUCTS;
 
+// head = dunkler Spaltenkopf, fg = heller Text darauf, bg/bgD = Zellton
+// (bg2/bgD2 = Zebra-Variante), ink = Zahlenfarbe, accent = Kante an der Artikelzelle
 const NEON = {
-  nettetal:{neon:'#2563eb',bg:'rgba(37,99,235,.08)', bgD:'rgba(37,99,235,.14)', border:'rgba(37,99,235,.35)'},
-  brüggen: {neon:'#e11d48',bg:'rgba(225,29,72,.08)', bgD:'rgba(225,29,72,.14)', border:'rgba(225,29,72,.35)'},
-  viersen: {neon:'#ea580c',bg:'rgba(234,88,12,.08)', bgD:'rgba(234,88,12,.14)', border:'rgba(234,88,12,.35)'},
-  köln:    {neon:'#7c3aed',bg:'rgba(124,58,237,.08)',bgD:'rgba(124,58,237,.14)',border:'rgba(124,58,237,.35)'},
+  nettetal:{accent:'#2563EB',head:'#1D4FB8',fg:'#CADEFF',ink:'#1D4FB8',neon:'#1D4FB8',
+            bg:'#E9F0FE',bg2:'#DFE9FC',bgD:'#E2EAFB',bgD2:'#D8E3F8'},
+  'brüggen':{accent:'#E11D48',head:'#A31038',fg:'#FFD1DD',ink:'#C4123E',neon:'#C4123E',
+            bg:'#FDE8EE',bg2:'#F9DDE5',bgD:'#FADFE7',bgD2:'#F6D4DE'},
+  viersen: {accent:'#EA580C',head:'#A8480A',fg:'#FFE0C4',ink:'#B4520C',neon:'#B4520C',
+            bg:'#FDEEE1',bg2:'#F9E4D5',bgD:'#FAE6D5',bgD2:'#F6DCC9'},
+  'köln':  {accent:'#7C3AED',head:'#5227A0',fg:'#DFD2FF',ink:'#5A2FB0',neon:'#5A2FB0',
+            bg:'#F1EAFE',bg2:'#E9DFFC',bgD:'#EBE2FB',bgD2:'#E3D7F8'},
 };
 const LAGER_NAMES = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
 
@@ -690,7 +990,7 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 
     const endBestandGS = {};
     GS_PRODUCTS.forEach(catObj=>{
-      catObj.items.forEach(prod=>{
+      catObj.items.forEach((prod,pIdx)=>{
         endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0);
       });
     });
@@ -764,7 +1064,7 @@ async function loadData(){
   // End Bestand = dieselbe Formel wie auf lager.html für Getränke/Snacks:
   // Anfangsbestand + Lieferungen − Gerät − Theke
   GS_PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
+    catObj.items.forEach((prod,pIdx)=>{
       const abNum = Number(anfangsbestand[prod.id])||0;
       const liefNum = dedupedLiefSum(prod.id);
       const gerNum = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
@@ -777,26 +1077,28 @@ async function loadData(){
 }
 
 function renderTable(){
-  const cc=NEON[currentLager]||{neon:'var(--text)',bg:'transparent',bgD:'transparent',border:'rgba(255,255,255,.1)'};
+  const cc=NEON[currentLager]||NEON['brüggen'];
   const geraet_dates=[...new Set(geraetEntries.map(e=>e.datum))].sort();
   const theke_dates=[...new Set(thekeEntries.map(e=>e.datum))].sort();
 
   let thHTML='<tr>';
   thHTML+='<th class="col-artikel">Artikel</th>';
-  thHTML+='<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span></th>';
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span></div></th>`;
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet" style="background:${cc.bg};border-bottom:2px solid ${cc.border}"><div class="col-einkauf-wrap"><span style="color:${cc.neon};font-weight:700"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()" style="color:${cc.neon}">▶</button></div></th>`;
-  geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th" style="background:${cc.bgD};color:${cc.neon};font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
-  thHTML+=`<th class="num-cell col-einkauf-header" style="color:var(--text-dim)"><div class="col-einkauf-wrap"><span><span class="th-icon">🔴</span><span class="th-text">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()">▶</button></div></th>`;
-  theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th" style="color:var(--text-dim);font-size:.72rem;cursor:pointer" data-date="${d}">${l} ✏️</th>`;});
-  thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span></th></tr>';
+  const _zr=String(currentZeitraum||'');
+  const _mFirst=_zr.length>=7?'01.'+_zr.slice(5,7)+'.':'';
+  thHTML+='<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.'+(_mFirst?'<br>'+_mFirst:'')+'</span></th>';
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:#B9C6DB"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span></div></th>`;
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet grp-h"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span><span class="th-text-mob">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()"><i class="arw-i"></i></button></div></th>`;
+  geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">🔴</span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()"><i class="arw-i"></i></button></div></th>`;
+  theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
+  thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span><span class="th-text-mob">End<br>Best.</span></th></tr>';
   document.getElementById('gs-thead').innerHTML=thHTML;
 
   let tbHTML='';
   GS_PRODUCTS.forEach((catObj,ci)=>{
     const isFirst=ci===0;
-    tbHTML+=`<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}"><td class="col-artikel"><div class="cat-label"><span class="cat-arrow">▶</span>${catObj.cat} <span class="cat-items-count">(${catObj.items.length})</span></div></td><td colspan="99" style="background:#e3e8f0"></td></tr>`;
-    catObj.items.forEach(prod=>{
+    tbHTML+=`<tr class="cat-row ${isFirst?'open':''}" onclick="toggleCategory(this)" data-cat="${ci}"><td class="col-artikel"><div class="cat-label"><span class="cat-arrow"><i class="arw-i"></i></span>${catObj.cat}<span class="cat-count">${catObj.items.length}</span></div></td><td colspan="99" style="background:#E7ECF4"></td></tr>`;
+    catObj.items.forEach((prod,pIdx)=>{
       const ab=anfangsbestand[prod.id]??'';
       const abD=ab!==''?ab:'<span style="color:var(--text-dim);font-size:.7rem">+</span>';
       const tL=dedupedLiefSum(prod.id);
@@ -804,18 +1106,35 @@ function renderTable(){
       const tT=thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const eb=endbestandData[prod.id]!==undefined?endbestandData[prod.id]:'—';
       const ebS=eb!=='—'?'color:var(--neon-green)':'';
-      tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'}" data-cat="${ci}">`;
+      tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'} ${pIdx%2?'zebra':''}" data-cat="${ci}">`;
       tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${iconHTML(prod.icon,34)}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
       tbHTML+=`<td class="num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abD}</span></td>`;
-      tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tL||'—'}</td>`;
-      tbHTML+=`<td class="num-cell" style="background:${cc.bg};color:${cc.neon};font-weight:700">${tG||'—'}</td>`;
-      geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td" style="background:${cc.bgD};color:${cc.neon}">${q}</td>`;});
-      tbHTML+=`<td class="num-cell" style="color:var(--text-dim)">${tT||'—'}</td>`;
-      theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td" style="color:var(--text-dim)">${q}</td>`;});
+      tbHTML+=`<td class="num-cell" style="color:${tL?'var(--neon-green)':'#B7C2D2'}">${tL||'—'}</td>`;
+      tbHTML+=`<td class="num-cell grp-c">${tG||'—'}</td>`;
+      geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td grp-d">${q}</td>`;});
+      tbHTML+=`<td class="num-cell grp-c">${tT||'—'}</td>`;
+      theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td grp-d">${q}</td>`;});
       tbHTML+=`<td class="num-cell" style="${ebS}">${eb}</td></tr>`;
     });
   });
   document.getElementById('gs-tbody').innerHTML=tbHTML;
+
+  // Hausfarbe des Lagers an Kopf und Körper weiterreichen
+  const _applyVars=el=>{
+    if(!el) return;
+    el.style.setProperty('--g-head',cc.head); el.style.setProperty('--g-fg',cc.fg);
+    el.style.setProperty('--g-ink',cc.ink);   el.style.setProperty('--g-bg',cc.bg);
+    el.style.setProperty('--g-bg2',cc.bg2);   el.style.setProperty('--g-bgD',cc.bgD);
+    el.style.setProperty('--g-bgD2',cc.bgD2); el.style.setProperty('--lg-accent',cc.accent);
+  };
+  _applyVars(document.getElementById('gs-thead'));
+  _applyVars(document.getElementById('gs-tbody'));
+  const _selL=document.getElementById('sel-lager');
+  if(_selL&&_selL.parentElement){
+    _selL.parentElement.style.setProperty('--lg-ink',cc.head);
+    _selL.parentElement.style.setProperty('--lg-tint',cc.bg);
+  }
+  buildColPager();
 
   if(liefer_expanded)applyDetailCols('liefer',true);
   if(geraet_expanded)applyDetailCols('geraet',true);
@@ -826,8 +1145,48 @@ function renderTable(){
   document.querySelectorAll('.theke-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('theke',th.dataset.date)));
 }
 
+// Leiste über der Tabelle: listet die Spaltengruppen, springt hin, schaltet nichts.
+function buildColPager(){
+  const pager=document.getElementById('col-pager');
+  const wrap=document.querySelector('.table-wrap-single');
+  const thead=document.getElementById('gs-thead');
+  if(!pager||!wrap||!thead) return;
+  const ths=Array.from(thead.querySelectorAll('th')).filter(th=>!th.classList.contains('col-artikel'));
+  const chips=[];
+  ths.forEach(th=>{
+    const isGrp=th.classList.contains('grp-h');
+    const last=chips[chips.length-1];
+    if(isGrp&&last&&last.grp){ last.ths.push(th); return; }
+    const t=th.querySelector('.th-text-mob')||th.querySelector('.th-text');
+    let label=(t?t.innerText:th.innerText).replace(/\s+/g,' ').trim();
+    const short={'Anfangsbestand':'Anfang','Anf.':'Anfang','Endbestand':'Ende','End Best.':'Ende',
+                 'Lieferungen':'Liefer.','Gerät':'Gerät','Theke':'Theke'};
+    label=short[label]||label;
+    label=label.replace(/[\u25c0\u25b6\ufe0e✏️]/g,'').replace(/\s+/g,' ').trim();
+    if(!label) label='•';
+    chips.push({label,grp:isGrp,ths:[th]});
+  });
+  pager.innerHTML=chips.map((c,i)=>{
+    const on=c.grp&&c.ths.length>1?' on':'';
+    return `<button class="pg${on}" data-i="${i}">${c.label}</button>`;
+  }).join('');
+  const stick=wrap.querySelector('.col-artikel');
+  const stickW=stick?stick.getBoundingClientRect().width:0;
+  pager.querySelectorAll('.pg').forEach(btn=>{
+    btn.onclick=()=>{
+      const c=chips[Number(btn.dataset.i)];
+      wrap.scrollTo({left:Math.max(0,c.ths[0].offsetLeft-stickW),behavior:'smooth'});
+    };
+  });
+}
+
 window.toggleCategory=function(row){const ci=row.dataset.cat;const o=row.classList.toggle('open');document.querySelectorAll(`#gs-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!o))};
-function applyDetailCols(type,show){document.querySelectorAll(`.detail-${type}-th,.detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));const btn=document.getElementById(`expand-${type}-btn`);if(btn){btn.textContent=show?'◀':'▶';btn.classList.toggle('expanded',show)}}
+function applyDetailCols(type,show){
+  document.querySelectorAll(`.detail-${type}-th,.detail-${type}-td`).forEach(el=>el.classList.toggle('visible',show));
+  const btn=document.getElementById(`expand-${type}-btn`);
+  if(btn) btn.classList.toggle('expanded',show);
+  buildColPager();
+}
 window.toggleLieferCols=function(){liefer_expanded=!liefer_expanded;applyDetailCols('liefer',liefer_expanded)};
 window.toggleGeraetCols=function(){geraet_expanded=!geraet_expanded;applyDetailCols('geraet',geraet_expanded)};
 window.toggleThekeCols=function(){theke_expanded=!theke_expanded;applyDetailCols('theke',theke_expanded)};
@@ -841,38 +1200,100 @@ window.openAnfangsbestandModal=function(prodId,prodName){
 };
 window.saveAnfangsbestand=async function(){const val=parseFloat(document.getElementById('ab-value').value);if(isNaN(val)||val<0)return;showSpinner();anfangsbestand[currentAbProdId]=val;try{await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).set(anfangsbestand,{merge:true})}catch(e){}hideSpinner();document.getElementById('modal-ab').classList.remove('show');renderTable();showToast('Anfangsbestand gespeichert')};
 
+// Hausfarbe des Lagers als Variablen an das Fenster geben — Häkchen, Knopf,
+// Mengen und Kopfleiste lesen daraus.
+function formApplyAccent(){
+  const m=document.getElementById('form-modal');
+  const a=NEON[currentLager]||NEON['brüggen'];
+  if(!m) return;
+  m.style.setProperty('--we-acc',a.accent); m.style.setProperty('--we-ink',a.ink);
+  m.style.setProperty('--we-fg',a.fg);      m.style.setProperty('--we-bg',a.bg);
+  m.style.setProperty('--we-soft',a.head+'55');
+  m.style.setProperty('--we-grad','linear-gradient(100deg,'+a.head+','+a.accent+')');
+  m.style.setProperty('--we-shadow',a.accent+'4d');
+}
+function formSetStep(n){
+  const s1=document.getElementById('form-step-1'), s2=document.getElementById('form-step-2');
+  if(!s1||!s2) return;
+  s1.className='we-step '+(n===1?'on':'done');
+  s2.className='we-step '+(n===2?'on':'');
+  const i1=s1.querySelector('i'); if(i1) i1.textContent=(n===2?'✓':'1');
+}
+function formUpdateCounters(){
+  const ids=Object.keys(formItems);
+  let total=0; ids.forEach(id=>{ total+=Number(formItems[id])||0; });
+  const bar=document.getElementById('form-summary');
+  if(bar){
+    bar.classList.toggle('we-hidden', !ids.length);
+    const c=document.getElementById('form-sum-count'), q=document.getElementById('form-sum-qty');
+    if(c) c.textContent=ids.length;
+    if(q) q.textContent=total.toLocaleString('de-DE');
+  }
+  GS_PRODUCTS.forEach((catObj,ci)=>{
+    const el=document.getElementById('fcatcount-'+ci);
+    if(!el) return;
+    const n=catObj.items.filter(pr=>ids.includes(pr.id)).length;
+    el.textContent = n ? n+' gewählt' : '';
+    el.classList.toggle('has', !!n);
+  });
+}
+
 window.openForm=function(type,prefillItems,editId,prefillDate){
   formType=type;formItems=prefillItems?Object.assign({},prefillItems):{};formEditId=editId||null;
   const cc=NEON[currentLager]||{};
   const isG=type==='geraet';
-  document.getElementById('form-title').innerHTML=`${isG?'⚙️ Gerät':'🔴 Theke'} – Eintrag &nbsp;<span style="font-size:.65rem;padding:.15rem .55rem;border-radius:8px;background:${cc.bg||'#e9edf3'};border:1px solid ${cc.border||'#c9d1dc'};color:${cc.neon||'var(--text)'}">${LAGER_NAMES[currentLager]||currentLager}</span>`;
+  document.getElementById('form-title').textContent = isG?'Gerät':'Theke';
+  const _pill=document.getElementById('form-lager-pill');
+  if(_pill) _pill.textContent = LAGER_NAMES[currentLager]||currentLager;
+  formApplyAccent();
+  formSetStep(1);
   document.getElementById('form-date').value=prefillDate||new Date().toISOString().slice(0,10);
   let html='';
   GS_PRODUCTS.forEach((catObj,ci)=>{
     const isFirst=ci===0;
-    html+=`<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-arrow">▶</span></div><div class="modal-cat-items">`;
-    catObj.items.forEach(prod=>{
+    html+=`<div class="modal-cat${isFirst?' open':''}" id="fcat-${ci}"><div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')"><span class="modal-cat-label">${catObj.cat}</span><span class="modal-cat-count" id="fcatcount-${ci}"></span><span class="modal-cat-arrow"><i class="arw-i"></i></span></div><div class="modal-cat-items">`;
+    catObj.items.forEach((prod,pIdx)=>{
       const hasPre=formItems[prod.id]!==undefined;
-      html+=`<div class="modal-prod-row"><div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div><div class="modal-prod-name-block"><span class="modal-prod-name">${prod.name}</span>${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}</div><input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." value="${hasPre?formItems[prod.id]:''}" oninput="updateFormQty('${prod.id}',this.value)"></div>`;
+      html+=`<div class="modal-prod-row${hasPre?' checked':''}" id="frow-${prod.id}"><div class="prod-checkbox${hasPre?' checked':''}" id="fcb-${prod.id}" onclick="toggleFormProd('${prod.id}')"></div><div class="prod-icon" style="width:26px;height:26px;font-size:.85rem;flex-shrink:0">${iconHTML(prod.icon,26)}</div><div class="modal-prod-name-block"><span class="modal-prod-name">${prod.name}</span>${prod.unit?`<span class="modal-prod-unit">${prod.unit}</span>`:''}</div><input class="qty-input${hasPre?' show':''}" id="fqty-${prod.id}" type="number" min="0" step="0.1" placeholder="St." value="${hasPre?formItems[prod.id]:''}" oninput="updateFormQty('${prod.id}',this.value)"></div>`;
     });
     html+=`</div></div>`;
   });
   document.getElementById('form-product-list').innerHTML=html;
-  document.getElementById('form-step1').style.display='';
-  document.getElementById('form-step2').style.display='none';
-  document.getElementById('form-selected-list').style.display='none';
+  document.getElementById('form-step1').classList.remove('we-hidden');
+  document.getElementById('form-step2').classList.add('we-hidden');
+  document.getElementById('form-selected-list').classList.add('we-hidden');
   document.getElementById('form-save-btn').textContent=editId?'✓ Änderungen speichern':'✓ Speichern';
   updateFormPreview();
   document.getElementById('modal-form').classList.add('show');
 };
 window.closeForm=function(){document.getElementById('modal-form').classList.remove('show')};
 
-window.toggleFormProd=function(prodId){const cb=document.getElementById('fcb-'+prodId);const inp=document.getElementById('fqty-'+prodId);const ok=cb.classList.toggle('checked');inp.classList.toggle('show',ok);if(ok){inp.focus();if(formItems[prodId]===undefined)formItems[prodId]=0;}else{delete formItems[prodId];}updateFormPreview()};
+window.toggleFormProd=function(prodId){const cb=document.getElementById('fcb-'+prodId);const inp=document.getElementById('fqty-'+prodId);const ok=cb.classList.toggle('checked');const rw=document.getElementById('frow-'+prodId);if(rw)rw.classList.toggle('checked',ok);inp.classList.toggle('show',ok);if(ok){inp.focus();if(formItems[prodId]===undefined)formItems[prodId]=0;}else{delete formItems[prodId];}updateFormPreview()};
 window.updateFormQty=function(prodId,val){if(val!=='')formItems[prodId]=parseFloat(val)||0;updateFormPreview()};
-function updateFormPreview(){const ids=Object.keys(formItems);const sel=document.getElementById('form-selected-list');if(!ids.length){sel.style.display='none';return;}sel.style.display='block';let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div class="selected-cat-label">${c.cat}</div>`;lc=c.cat;}html+=`<div class="selected-item"><span class="selected-item-name">${iconHTML(p.icon,20)} ${p.name}<span class="selected-item-unit">${p.unit||''}</span></span><span class="selected-item-qty">${formItems[p.id]||0}</span></div>`;}});});document.getElementById('form-selected-items').innerHTML=html}
+function updateFormPreview(){formUpdateCounters();const ids=Object.keys(formItems);const sel=document.getElementById('form-selected-list');if(!ids.length){sel.classList.add('we-hidden');return;}sel.classList.remove('we-hidden');let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div class="selected-cat-label">${c.cat}</div>`;lc=c.cat;}html+=`<div class="selected-item"><span class="selected-item-name">${iconHTML(p.icon,20)} ${p.name}<span class="selected-item-unit">${p.unit||''}</span></span><span class="selected-item-qty">${formItems[p.id]||0}</span></div>`;}});});document.getElementById('form-selected-items').innerHTML=html}
 
-window.buildFormConfirm=function(){const ids=Object.keys(formItems);if(!ids.length){showToast('Bitte mindestens einen Artikel auswählen.');return;}const date=document.getElementById('form-date').value;if(!date){showToast('Bitte Datum auswählen.');return;}ids.forEach(id=>{const inp=document.getElementById('fqty-'+id);if(inp&&inp.value!=='')formItems[id]=parseFloat(inp.value)||0;});const d=new Date(date);document.getElementById('form-confirm-date').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});let html='',lc='';GS_PRODUCTS.forEach(c=>{c.items.forEach(p=>{if(ids.includes(p.id)){if(c.cat!==lc){html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${c.cat}</div>`;lc=c.cat;}html+=`<div class="confirm-item"><span class="ci-name">${iconHTML(p.icon,20)} ${p.name} <span class="ci-unit">${p.unit||''}</span></span><span class="ci-qty">${formItems[p.id]||0}</span></div>`;}}); });document.getElementById('form-confirm-list').innerHTML=html;document.getElementById('form-step1').style.display='none';document.getElementById('form-step2').style.display='';};
-window.backToFormEdit=function(){document.getElementById('form-step1').style.display='';document.getElementById('form-step2').style.display='none'};
+window.buildFormConfirm=function(){const ids=Object.keys(formItems);if(!ids.length){showToast('Bitte mindestens einen Artikel auswählen.');return;}const date=document.getElementById('form-date').value;if(!date){showToast('Bitte Datum auswählen.');return;}ids.forEach(id=>{const inp=document.getElementById('fqty-'+id);if(inp&&inp.value!=='')formItems[id]=parseFloat(inp.value)||0;});const d=new Date(date);
+  document.getElementById('form-confirm-date').innerHTML='<span class="we-datechip"><i class="cal-i"></i>'+d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
+  let html='';
+  GS_PRODUCTS.forEach(c=>{
+    const rows=c.items.filter(p=>ids.includes(p.id));
+    if(!rows.length) return;
+    const catQty=rows.reduce((a,p)=>a+(Number(formItems[p.id])||0),0);
+    html+=`<div class="confirm-cat"><i></i>${c.cat}<span class="n">${rows.length} · ${catQty.toLocaleString('de-DE')} St.</span></div>`;
+    rows.forEach((p,ri)=>{
+      html+=`<div class="confirm-item${ri%2?' zeb':''}"><span class="ci-name">${iconHTML(p.icon,20)} ${p.name} <span class="ci-unit">${p.unit||''}</span></span><span class="ci-qty">${formItems[p.id]||0}</span></div>`;
+    });
+  });
+  document.getElementById('form-confirm-list').innerHTML=html;
+  document.getElementById('form-step1').classList.add('we-hidden');
+  document.getElementById('form-step2').classList.remove('we-hidden');
+  formSetStep(2);
+};
+window.backToFormEdit=function(){
+  document.getElementById('form-step1').classList.remove('we-hidden');
+  document.getElementById('form-step2').classList.add('we-hidden');
+  formSetStep(1);
+};
 window.saveFormEntry=async function(){const date=document.getElementById('form-date').value;const monat=date.slice(0,7);const col=formType==='geraet'?'gs_geraet':'gs_theke';const entry={lager:currentLager,datum:date,monat,items:{...formItems},updatedAt:new Date().toISOString()};showSpinner();try{if(formEditId){await db.collection(col).doc(formEditId).update(entry);showToast('Eintrag aktualisiert ✓');}else{entry.createdAt=new Date().toISOString();await db.collection(col).add(entry);showToast('Eintrag gespeichert ✓');}closeForm();await loadData();}catch(e){hideSpinner();showToast('Fehler: '+e.message)}};
 
 window.openEditLieferung=function(date){const we=lieferungen.find(w=>w.datum===date);if(we)window.open('lager.html','_blank')};
