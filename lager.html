@@ -31,6 +31,7 @@
   /* Gerüst */
   --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --stick-top:var(--header-h);
   /* Hausfarbe je Lager */
   --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
@@ -224,6 +225,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 @media(max-width:640px){
+  :root{--stick-top:calc(var(--header-h) + 2.5rem)}
+  .cur{display:none}
   .app-header{padding:0 .55rem;gap:.5rem}
   .hdr-user{padding:.3rem .5rem;font-size:.8rem}
   .burger{padding:8px}
@@ -260,14 +263,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow:auto;-webkit-overflow-scrolling:touch;
-  max-height:calc(100dvh - var(--header-h) - 11rem);
+.table-wrap-single{overflow-x:auto;overflow-y:clip;-webkit-overflow-scrolling:touch;
   border-radius:14px;border:1px solid var(--glass-border);
   box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
-/* Kopfzeile bleibt oben stehen, die Artikelspalte links — beide zusammen in der Ecke */
-.lager-table thead th{position:sticky;top:0;z-index:15}
+/* Die Kopfzeile scrollt mit der Seite und bleibt unter der App-Kopfzeile stehen. */
+.lager-table thead th{position:sticky;top:var(--stick-top);z-index:15}
 .lager-table thead th.col-artikel{z-index:25}
-
+/* Die Spaltenleiste bleibt direkt darüber stehen */
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#fff}
 .lager-table th{
@@ -353,8 +355,9 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
 .cat-row td.col-artikel::before{display:none}
 
 /* Spalten-Leiste über der Tabelle — nur Hinweis und Sprungziel, schaltet nichts */
-.col-pager{display:none;gap:.3rem;overflow-x:auto;padding:0 .1rem .55rem;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.col-pager{display:none;gap:.3rem;overflow-x:auto;padding:.4rem .1rem .5rem;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  position:sticky;top:var(--header-h);z-index:16;background:var(--bg)}
 .col-pager::-webkit-scrollbar{display:none}
 .col-pager .pg{flex:0 0 auto;font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;padding:.3rem .6rem;border-radius:20px;
@@ -1314,7 +1317,7 @@ function renderTableActual(){
             const shopEntry = we.shops.find(s=>s.shop===shop);
             if(shopEntry&&shopEntry.betrag){
               const val = parseFloat(shopEntry.betrag)||0;
-              amt = val.toFixed(2)+' €';
+              amt = val.toFixed(2)+'<span class="cur"> €</span>';
               shopTotal += val;
               dateGrandTotals[d] += val;
               grandTotal += val;
@@ -1323,7 +1326,7 @@ function renderTableActual(){
           perDateAmt[d] = amt;
         });
         // Einkäufe gesamt — jetzt mit der tatsächlichen Summe befüllt
-        const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+' €' : '—';
+        const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+'<span class="cur"> €</span>' : '—';
         tbHTML += `<td class="num-cell" style="background:rgba(219,39,119,.10);color:var(--neon-magenta);font-weight:700">${shopTotalStr}</td>`;
         // Detail date cols (Einkauf dates)
         dates.forEach(d=>{
@@ -1331,8 +1334,8 @@ function renderTableActual(){
         });
         // Lieferungen placeholder
         tbHTML += `<td class="num-cell">—</td>`;
-        // Gerät/Theke/Bestand placeholders not applicable for shops
-        tbHTML += `<td class="num-cell" colspan="3">—</td>`;
+        // Beim Zentrallager folgt nach Lieferungen nur noch End Bestand
+        tbHTML += `<td class="num-cell">—</td>`;
         tbHTML += `</tr>`;
       });
 
@@ -1342,13 +1345,13 @@ function renderTableActual(){
       tbHTML += `<td class="col-artikel" style="${gs}"><div class="prod-name" style="font-family:'Century Gothic',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta);font-weight:700">GESAMT</div></td>`;
       tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
       // Einkäufe gesamt total
-      tbHTML += `<td class="num-cell" style="${gs};background:rgba(219,39,119,.10);color:var(--neon-magenta);font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+' €':'—'}</td>`;
+      tbHTML += `<td class="num-cell" style="${gs};background:rgba(219,39,119,.10);color:var(--neon-magenta);font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+'<span class="cur"> €</span>':'—'}</td>`;
       dates.forEach(d=>{
         const dtTotal = dateGrandTotals[d];
-        const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+' €' : '';
+        const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+'<span class="cur"> €</span>' : '';
         tbHTML += `<td class="num-cell detail-col detail-td" style="${gs};background:rgba(219,39,119,.05);color:var(--neon-magenta);font-weight:700;font-size:.82rem">${dtStr}</td>`;
       });
-      tbHTML += `<td class="num-cell" style="${gs}" colspan="3">—</td>`;
+      tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
       tbHTML += `</tr>`;
     }
   }
