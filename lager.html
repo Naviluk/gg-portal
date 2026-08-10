@@ -290,6 +290,11 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .lager-table td{padding:.42rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
 .lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
 .lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(14,143,184,.05)}
+/* Die klebende Artikelspalte darf nie durchsichtig sein, sonst scheinen die
+   darunter durchlaufenden Spalten hindurch und die Zeile wirkt verrutscht. */
+td.col-artikel{background-color:#fff}
+tr.shop-row-item td.col-artikel{background-color:#FBEAF1}
+
 /* Shop-Zeilen brauchen mehr Höhe als Artikelzeilen — sie tragen Beträge, keine Stückzahlen */
 tr.shop-row-item td{padding-top:.62rem;padding-bottom:.62rem}
 
@@ -1343,10 +1348,10 @@ function renderTableActual(){
         });
         // Einkäufe gesamt — jetzt mit der tatsächlichen Summe befüllt
         const shopTotalStr = shopTotal > 0 ? shopTotal.toFixed(2)+'<span class="cur"> €</span>' : '—';
-        tbHTML += `<td class="num-cell" style="background:rgba(219,39,119,.10);color:var(--neon-magenta);font-weight:700">${shopTotalStr}</td>`;
+        tbHTML += `<td class="num-cell" style="background:#F8DDE9;color:var(--neon-magenta);font-weight:700">${shopTotalStr}</td>`;
         // Detail date cols (Einkauf dates)
         dates.forEach(d=>{
-          tbHTML += `<td class="num-cell detail-col detail-td" style="background:rgba(219,39,119,.05);color:var(--neon-magenta);font-size:.78rem">${perDateAmt[d]}</td>`;
+          tbHTML += `<td class="num-cell detail-col detail-td" style="background:#FBE7EF;color:var(--neon-magenta);font-size:.78rem">${perDateAmt[d]}</td>`;
         });
         // Lieferungen placeholder
         tbHTML += `<td class="num-cell">—</td>`;
@@ -1356,16 +1361,16 @@ function renderTableActual(){
       });
 
       // Gesamt row
-      const gs = 'border-top:1px solid rgba(219,39,119,.3);background:rgba(219,39,119,.06)';
+      const gs = 'border-top:1px solid rgba(219,39,119,.3);background:#FBEAF1';
       tbHTML += `<tr class="shop-row-item">`;
       tbHTML += `<td class="col-artikel" style="${gs}"><div class="prod-name" style="font-family:'Century Gothic',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta);font-weight:700">GESAMT</div></td>`;
       tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
       // Einkäufe gesamt total
-      tbHTML += `<td class="num-cell" style="${gs};background:rgba(219,39,119,.10);color:var(--neon-magenta);font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+'<span class="cur"> €</span>':'—'}</td>`;
+      tbHTML += `<td class="num-cell" style="${gs};background:#F8DDE9;color:var(--neon-magenta);font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+'<span class="cur"> €</span>':'—'}</td>`;
       dates.forEach(d=>{
         const dtTotal = dateGrandTotals[d];
         const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+'<span class="cur"> €</span>' : '';
-        tbHTML += `<td class="num-cell detail-col detail-td" style="${gs};background:rgba(219,39,119,.05);color:var(--neon-magenta);font-weight:700;font-size:.82rem">${dtStr}</td>`;
+        tbHTML += `<td class="num-cell detail-col detail-td" style="${gs};background:#FBE7EF;color:var(--neon-magenta);font-weight:700;font-size:.82rem">${dtStr}</td>`;
       });
       tbHTML += `<td class="num-cell" style="${gs}">—</td>`;   // Lieferungen
       tbHTML += `<td class="num-cell" style="${gs}">—</td>`;   // End Bestand
