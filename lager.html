@@ -20,9 +20,9 @@
 <title>LAGER – GAME GALAXY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
   --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
   --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
@@ -105,8 +105,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
   background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
   display:flex;align-items:center;justify-content:center;
-  font-family:'Chakra Petch','Poppins',sans-serif;font-weight:700;font-size:1.35rem;color:#fff;
-  line-height:1;padding-bottom:2px;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  line-height:1;padding-bottom:3px;box-shadow:0 4px 14px rgba(216,27,126,.28)}
 .side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;
   color:#fff;line-height:1.2}
 .side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
@@ -361,7 +361,9 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
 .num-cell.editable .edit-val{border-bottom:1px dashed rgba(8,145,178,.5);padding-bottom:1px}
 
 /* Spaltengruppe (Einkäufe / Lieferungen) — Farbe kommt vom Lager */
-.lager-table th.grp-h{background:var(--g-head);color:#fff;border-right-color:rgba(255,255,255,.18)}
+.lager-table th.grp-h{background:var(--g-head);color:var(--g-fg,#fff);
+  border-right-color:rgba(255,255,255,.18)}
+.lager-table th.grp-h .expand-arrow{color:var(--g-fg,#fff)}
 .grp-c{background:var(--g-bg);color:var(--g-ink);font-weight:700}
 .grp-d{background:var(--g-bgD);color:var(--g-ink)}
 .prod-row.zebra td.grp-c{background:var(--g-bg2)}
@@ -906,12 +908,12 @@ function renderTableActual(){
   // Hausfarbe je Lager: head = dunkler Spaltenkopf, bg/bgD = Zellton (bg2/bgD2 = Zebra-Variante),
   // ink = Zahlenfarbe, accent = Kante links an der Artikelzelle.
   const neonMap = {
-    nettetal: {accent:'#2563EB', head:'#1D4FB8', ink:'#1D4FB8', bg:'#E9F0FE', bg2:'#DFE9FC', bgD:'#E2EAFB', bgD2:'#D8E3F8'},
-    brüggen:  {accent:'#E11D48', head:'#A31038', ink:'#C4123E', bg:'#FDE8EE', bg2:'#F9DDE5', bgD:'#FADFE7', bgD2:'#F6D4DE'},
-    viersen:  {accent:'#EA580C', head:'#A8480A', ink:'#B4520C', bg:'#FDEEE1', bg2:'#F9E4D5', bgD:'#FAE6D5', bgD2:'#F6DCC9'},
-    köln:     {accent:'#7C3AED', head:'#5227A0', ink:'#5A2FB0', bg:'#F1EAFE', bg2:'#E9DFFC', bgD:'#EBE2FB', bgD2:'#E3D7F8'},
+    nettetal: {accent:'#2563EB', head:'#1D4FB8', fg:'#CADEFF', ink:'#1D4FB8', bg:'#E9F0FE', bg2:'#DFE9FC', bgD:'#E2EAFB', bgD2:'#D8E3F8'},
+    brüggen:  {accent:'#E11D48', head:'#A31038', fg:'#FFD1DD', ink:'#C4123E', bg:'#FDE8EE', bg2:'#F9DDE5', bgD:'#FADFE7', bgD2:'#F6D4DE'},
+    viersen:  {accent:'#EA580C', head:'#A8480A', fg:'#FFE0C4', ink:'#B4520C', bg:'#FDEEE1', bg2:'#F9E4D5', bgD:'#FAE6D5', bgD2:'#F6DCC9'},
+    köln:     {accent:'#7C3AED', head:'#5227A0', fg:'#DFD2FF', ink:'#5A2FB0', bg:'#F1EAFE', bg2:'#E9DFFC', bgD:'#EBE2FB', bgD2:'#E3D7F8'},
   };
-  const zGreen = {accent:'#0FA574', head:'#0C6F53', ink:'#0A8A66', bg:'#E9F8F2', bg2:'#DEF2E9', bgD:'#E4F2EA', bgD2:'#D9EADF'};
+  const zGreen = {accent:'#0FA574', head:'#0C6F53', fg:'#B7F0DC', ink:'#0A8A66', bg:'#E9F8F2', bg2:'#DEF2E9', bgD:'#E4F2EA', bgD2:'#D9EADF'};
   const cc = neonMap[lager] || zGreen;
   const gv = isZentral ? zGreen : cc;
 
@@ -932,7 +934,7 @@ function renderTableActual(){
     // Einkäufe — neon green
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:#fff;font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span><span class="th-text-mob">Eink.</span></span>
+        <span style="font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span><span class="th-text-mob">Eink.</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
@@ -945,7 +947,7 @@ function renderTableActual(){
     // Lieferungen — lager neon color
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:#fff;font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span>
+        <span style="font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
@@ -972,6 +974,7 @@ function renderTableActual(){
   const applyVars = el=>{
     if(!el) return;
     el.style.setProperty('--g-head', gv.head);
+    el.style.setProperty('--g-fg',   gv.fg);
     el.style.setProperty('--g-ink',  gv.ink);
     el.style.setProperty('--g-bg',   gv.bg);
     el.style.setProperty('--g-bg2',  gv.bg2);
