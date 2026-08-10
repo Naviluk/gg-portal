@@ -196,6 +196,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .cat-row.open .cat-arrow .arw-i{transform:rotate(90deg)}
 .expand-arrow.expanded .arw-i{transform:rotate(180deg)}
 
+/* Theke ist eine Rolle, kein Lager — sie behält Magenta,
+   damit Gerät (Lagerfarbe) und Theke unterscheidbar bleiben. */
+.lager-table th.grp-theke{background:#9E1259;color:#FBD0E4}
+.lager-table th.grp-theke .expand-arrow{color:#FBD0E4}
+td.grp-c.grp-theke{background:#FCE7F1;color:#B01364}
+td.grp-d.grp-theke{background:#FDECF4;color:#B01364}
+.prod-row.zebra td.grp-c.grp-theke{background:#F8DDE9}
+.prod-row.zebra td.grp-d.grp-theke{background:#FAE3EE}
+
 /* ══ Spaltengruppe — Farbe kommt vom Lager ══ */
 .lager-table th.grp-h{background:var(--g-head);color:var(--g-fg,#fff);
   border-right-color:rgba(255,255,255,.18)}
@@ -347,7 +356,7 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
   width:70px;text-align:center;padding:.2rem .3rem;outline:none}
 
 /* ══ WARENEINGANG-FENSTER — Farbe kommt vom gewählten Lager ══ */
-.we-modal{padding:0;overflow:hidden;display:flex;flex-direction:column;
+.modal.we-modal{padding:0;overflow:hidden;display:flex;flex-direction:column;
   max-height:92vh;max-height:92dvh}
 .we-head{background:var(--ink);color:#fff;padding:.95rem 1.1rem .85rem;position:relative;
   flex:0 0 auto}
@@ -399,7 +408,10 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
   font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
 .confirm-cat i{width:6px;height:6px;border-radius:2px;background:var(--we-acc,var(--neon-cyan));display:block}
 .confirm-cat .n{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--text-dim);letter-spacing:0;font-weight:600}
-.confirm-list .confirm-item{padding:.42rem .7rem;border-top:1px solid var(--glass-border)}
+.confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  padding:.45rem .7rem;border-top:1px solid var(--glass-border)}
+.confirm-list .confirm-item .ci-name{flex:1;min-width:0}
+.confirm-list .confirm-item .ci-unit{color:var(--text-dim);font-size:.7rem;white-space:nowrap}
 .confirm-list .confirm-cat + .confirm-item{border-top:none}
 .confirm-item.zeb{background:var(--zebra)}
 .confirm-item .ci-qty{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--we-ink,var(--text))}
@@ -435,7 +447,7 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
 /* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
    Das Datum steht über beiden, die Knopfleiste unter beiden. */
 @media(min-width:700px){
-  #modal-form .we-modal{max-width:min(94vw,900px)}
+  #modal-form .modal.we-modal{max-width:min(94vw,900px)}
   #form-step1{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);
     column-gap:1rem;align-items:start}
   #form-step1 > .field:first-child{grid-column:1 / -1}
@@ -462,7 +474,7 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
 #form-date::-webkit-calendar-picker-indicator{opacity:.45}
 
 #modal-form{align-items:center;overflow:hidden}
-#modal-form .we-modal{margin:0}
+#modal-form .modal.we-modal{margin:0}
 
 /* Pfeile werden gezeichnet, nicht gesetzt — Zeichen wie "▶" haben auf iOS eine
    Emoji-Variante und erscheinen dort als blaues Kästchen. */
@@ -602,8 +614,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-danger{background:linear-gradient(135deg,#e11d48,#a3122f);color:#fff;font-weight:700}
 
 /* confirm view */
-.confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:baseline;
-  padding:.45rem 0;border-bottom:1px solid var(--glass-border);gap:.5rem}
+.confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:center;
+  padding:.45rem .7rem;border-bottom:none;border-top:1px solid var(--glass-border);gap:.6rem}
 .confirm-item .ci-name{color:var(--text);font-size:.88rem;flex:1}
 .confirm-item .ci-unit{font-size:.7rem;color:var(--text-dim);margin-left:.2rem}
 .confirm-item .ci-qty{font-family:'Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-green);font-weight:700;flex-shrink:0}
@@ -660,22 +672,16 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 50%{opacity:1}
 }
 .hdr-left{display:flex;align-items:center}
-.btn-geraet{
+.btn-geraet,.btn-theke{
   display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
-  font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
-  background:linear-gradient(135deg,rgba(8,145,178,.2),rgba(8,145,178,.08));
-  color:var(--neon-cyan);font-weight:700;
-  border:1px solid var(--neon-cyan);border-radius:6px;padding:.5rem .9rem;cursor:pointer;
-  box-shadow:0 0 12px rgba(8,145,178,.25);transition:all .2s;white-space:nowrap}
-.btn-geraet:hover{box-shadow:0 0 24px rgba(8,145,178,.6);transform:translateY(-1px)}
-.btn-theke{
-  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
-  font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
-  background:linear-gradient(135deg,var(--neon-magenta),#cc0099);
-  color:#fff;font-weight:700;
-  border:none;border-radius:6px;padding:.5rem .9rem;cursor:pointer;
-  box-shadow:0 0 16px rgba(219,39,119,.4);transition:all .2s;white-space:nowrap}
-.btn-theke:hover{box-shadow:0 0 28px rgba(219,39,119,.7);transform:translateY(-1px)}
+  font-family:'Poppins',sans-serif;font-size:.74rem;letter-spacing:.04em;
+  font-weight:700;border-radius:11px;padding:.62rem 1rem;cursor:pointer;
+  transition:transform .15s,box-shadow .2s;white-space:nowrap;border:none}
+.btn-geraet{background:#fff;border:1.5px solid var(--lg-accent,var(--neon-cyan));
+  color:var(--lg-ink,var(--neon-cyan))}
+.btn-theke{background:linear-gradient(100deg,#A81460,var(--neon-magenta));color:#fff;
+  box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.btn-geraet:hover,.btn-theke:hover{transform:translateY(-1px)}
 .edit-date-icon{font-size:.7rem;opacity:.55;margin-left:.15rem;cursor:pointer}
 .btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700;box-shadow:0 0 16px rgba(5,150,105,.3)}
 .btn-save:hover{box-shadow:0 0 28px rgba(5,150,105,.6);transform:translateY(-1px)}
@@ -1089,8 +1095,8 @@ function renderTable(){
   thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:#B9C6DB"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span></div></th>`;
   thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet grp-h"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span><span class="th-text-mob">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()"><i class="arw-i"></i></button></div></th>`;
   geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">🔴</span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()"><i class="arw-i"></i></button></div></th>`;
-  theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h grp-theke"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">🔴</span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()"><i class="arw-i"></i></button></div></th>`;
+  theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th grp-h grp-theke" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
   thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span><span class="th-text-mob">End<br>Best.</span></th></tr>';
   document.getElementById('gs-thead').innerHTML=thHTML;
 
@@ -1112,8 +1118,8 @@ function renderTable(){
       tbHTML+=`<td class="num-cell" style="color:${tL?'var(--neon-green)':'#B7C2D2'}">${tL||'—'}</td>`;
       tbHTML+=`<td class="num-cell grp-c">${tG||'—'}</td>`;
       geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td grp-d">${q}</td>`;});
-      tbHTML+=`<td class="num-cell grp-c">${tT||'—'}</td>`;
-      theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td grp-d">${q}</td>`;});
+      tbHTML+=`<td class="num-cell grp-c grp-theke">${tT||'—'}</td>`;
+      theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td grp-d grp-theke">${q}</td>`;});
       tbHTML+=`<td class="num-cell" style="${ebS}">${eb}</td></tr>`;
     });
   });
@@ -1129,6 +1135,8 @@ function renderTable(){
   };
   _applyVars(document.getElementById('gs-thead'));
   _applyVars(document.getElementById('gs-tbody'));
+  const _ctrls=document.querySelector('.lager-controls');
+  if(_ctrls){ _ctrls.style.setProperty('--lg-accent',cc.accent); _ctrls.style.setProperty('--lg-ink',cc.head); }
   const _selL=document.getElementById('sel-lager');
   if(_selL&&_selL.parentElement){
     _selL.parentElement.style.setProperty('--lg-ink',cc.head);
@@ -1155,8 +1163,11 @@ function buildColPager(){
   const chips=[];
   ths.forEach(th=>{
     const isGrp=th.classList.contains('grp-h');
+    const isHead=th.classList.contains('col-einkauf-header'); // Gruppenanfang
     const last=chips[chips.length-1];
-    if(isGrp&&last&&last.grp){ last.ths.push(th); return; }
+    // Datumsspalten hängen sich an die zuletzt geöffnete Gruppe, ein neuer
+    // Gruppenkopf beginnt dagegen einen eigenen Chip.
+    if(isGrp && !isHead && last && last.grp){ last.ths.push(th); return; }
     const t=th.querySelector('.th-text-mob')||th.querySelector('.th-text');
     let label=(t?t.innerText:th.innerText).replace(/\s+/g,' ').trim();
     const short={'Anfangsbestand':'Anfang','Anf.':'Anfang','Endbestand':'Ende','End Best.':'Ende',
@@ -1204,7 +1215,10 @@ window.saveAnfangsbestand=async function(){const val=parseFloat(document.getElem
 // Mengen und Kopfleiste lesen daraus.
 function formApplyAccent(){
   const m=document.getElementById('form-modal');
-  const a=NEON[currentLager]||NEON['brüggen'];
+  // Theke ist eine Rolle → Magenta; Gerät gehört zum Lager → Hausfarbe
+  const a = formType==='theke'
+    ? {accent:'#D81B7E',head:'#9E1259',fg:'#FBD0E4',ink:'#B01364',bg:'#FCE7F1'}
+    : (NEON[currentLager]||NEON['brüggen']);
   if(!m) return;
   m.style.setProperty('--we-acc',a.accent); m.style.setProperty('--we-ink',a.ink);
   m.style.setProperty('--we-fg',a.fg);      m.style.setProperty('--we-bg',a.bg);
