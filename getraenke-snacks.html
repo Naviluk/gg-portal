@@ -188,6 +188,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .col-pager .pg.on{background:#CFD7E2;color:#5D6B7E}
 @media(max-width:640px){.col-pager{display:flex}}
 
+/* Ganze Kopfzelle als Schaltfläche — der Pfeil nimmt keine Klicks an,
+   sonst würde ein Treffer auf ihn zweimal umschalten. */
+.lager-table th.is-toggle{cursor:pointer;-webkit-user-select:none;user-select:none}
+.lager-table th.is-toggle:hover{filter:brightness(1.12)}
+.lager-table th.is-toggle .expand-arrow{pointer-events:none}
+
 /* ══ Gezeichnete Pfeile statt Zeichen (auf iOS sonst Emoji) ══ */
 .arw-i{display:inline-block;width:0;height:0;border-style:solid;
   border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
@@ -1097,9 +1103,9 @@ function renderTable(){
   const _mFirst=_zr.length>=7?'01.'+_zr.slice(5,7)+'.':'';
   thHTML+='<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.'+(_mFirst?'<br>'+_mFirst:'')+'</span></th>';
   thHTML+=`<th class="num-cell col-einkauf-header th-col-liefer" style="color:#B9C6DB"><div class="col-einkauf-wrap"><span><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span></div></th>`;
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet grp-h"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span><span class="th-text-mob">Gerät</span></span><button class="expand-arrow" id="expand-geraet-btn" onclick="toggleGeraetCols()"><i class="arw-i"></i></button></div></th>`;
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-geraet grp-h is-toggle" onclick="toggleGeraetCols()" title="Details auf-/zuklappen"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">⚙️</span><span class="th-text">Gerät</span><span class="th-text-mob">Gerät</span></span><span class="expand-arrow" id="expand-geraet-btn"><i class="arw-i"></i></span></div></th>`;
   geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
-  thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h grp-theke"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">🔴</span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><button class="expand-arrow" id="expand-theke-btn" onclick="toggleThekeCols()"><i class="arw-i"></i></button></div></th>`;
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h grp-theke is-toggle" onclick="toggleThekeCols()" title="Details auf-/zuklappen"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon">🔴</span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><span class="expand-arrow" id="expand-theke-btn"><i class="arw-i"></i></span></div></th>`;
   theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th grp-h grp-theke" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen">✏️</span></th>`;});
   thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End-<br>bestand</span><span class="th-text-mob">End<br>Best.</span></th></tr>';
   document.getElementById('gs-thead').innerHTML=thHTML;

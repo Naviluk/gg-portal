@@ -413,6 +413,12 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
 .prod-row.zebra td.grp-c{background:var(--g-bg2)}
 .prod-row.zebra td.grp-d{background:var(--g-bgD2)}
 
+/* Ganze Kopfzelle als Schaltfläche — der Pfeil selbst nimmt keine Klicks an,
+   sonst würde ein Treffer auf ihn zweimal umschalten. */
+.lager-table th.is-toggle{cursor:pointer;-webkit-user-select:none;user-select:none}
+.lager-table th.is-toggle:hover{filter:brightness(1.12)}
+.lager-table th.is-toggle .expand-arrow{pointer-events:none}
+
 /* Expand arrow */
 .col-einkauf-header{position:relative}
 .expand-arrow{display:inline-flex;align-items:center;justify-content:center;
@@ -1161,10 +1167,10 @@ function renderTableActual(){
 
   if(isZentral){
     // Einkäufe — neon green
-    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf grp-h">
+    thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf grp-h is-toggle" onclick="toggleDetailCols()" title="Details auf-/zuklappen">
       <div class="col-einkauf-wrap">
         <span style="font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span><span class="th-text-mob">Eink.</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen"><i class="arw-i"></i></span>
+        <span class="expand-arrow" id="expand-arrow-btn"><i class="arw-i"></i></span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
@@ -1174,10 +1180,10 @@ function renderTableActual(){
     thHTML += '<th class="num-cell th-col-liefer" style="color:#B9C6DB"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></th>';
   } else {
     // Lieferungen — lager neon color
-    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h">
+    thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h is-toggle" onclick="toggleDetailCols()" title="Details auf-/zuklappen">
       <div class="col-einkauf-wrap">
         <span style="font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span>
-        <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen"><i class="arw-i"></i></span>
+        <span class="expand-arrow" id="expand-arrow-btn"><i class="arw-i"></i></span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
