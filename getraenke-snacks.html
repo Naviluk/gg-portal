@@ -198,12 +198,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* Theke ist eine Rolle, kein Lager — sie behält Magenta,
    damit Gerät (Lagerfarbe) und Theke unterscheidbar bleiben. */
-.lager-table th.grp-theke{background:#9E1259;color:#FBD0E4}
-.lager-table th.grp-theke .expand-arrow{color:#FBD0E4}
-td.grp-c.grp-theke{background:#FCE7F1;color:#B01364}
-td.grp-d.grp-theke{background:#FDECF4;color:#B01364}
-.prod-row.zebra td.grp-c.grp-theke{background:#F8DDE9}
-.prod-row.zebra td.grp-d.grp-theke{background:#FAE3EE}
+.lager-table th.grp-theke{background:#8C1176;color:#F7CCEC}
+.lager-table th.grp-theke .expand-arrow{color:#F7CCEC}
+td.grp-c.grp-theke{background:#FAE3F5;color:#A3128B}
+td.grp-d.grp-theke{background:#FCEBF8;color:#A3128B}
+.prod-row.zebra td.grp-c.grp-theke{background:#F5D8EF}
+.prod-row.zebra td.grp-d.grp-theke{background:#F8E1F3}
 
 /* ══ Spaltengruppe — Farbe kommt vom Lager ══ */
 .lager-table th.grp-h{background:var(--g-head);color:var(--g-fg,#fff);
@@ -280,9 +280,13 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
   .seg-cell .ctrl-select{font-size:.82rem;padding:.05rem 1.1rem .05rem 0;background-position:right .1rem center}
   .ctrl-actions{width:100%;margin-left:0;display:flex;gap:.45rem}
   .ctrl-actions .btn-geraet,.ctrl-actions .btn-theke{flex:1;width:auto;font-size:.68rem;padding:.75rem .5rem}
+  /* Größere Tippflächen auf dem Handy */
+  .nav-item>.nav-link{padding:1rem 1.5rem;font-size:.75rem}
+  .nav-sub li a{padding:.9rem 1.5rem .9rem 2.5rem;font-size:.9rem}
   .lager-table{table-layout:fixed;width:auto;min-width:100%}
   .col-artikel{min-width:calc(43vw - 8px);width:calc(43vw - 8px);max-width:calc(43vw - 8px)}
-  .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.42rem .2rem;line-height:1.25;white-space:normal}
+  .lager-table th{font-size:.54rem;letter-spacing:.04em;padding:.85rem .2rem;line-height:1.3;white-space:normal}
+  .lager-table th.col-artikel{padding-left:.6rem;padding-right:.4rem}
   .lager-table td{padding:.42rem .2rem}
   .lager-table th:not(.col-artikel){min-width:58px;width:58px;text-align:center}
   .lager-table td:not(.col-artikel){min-width:58px;width:58px;text-align:center}
@@ -679,8 +683,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   transition:transform .15s,box-shadow .2s;white-space:nowrap;border:none}
 .btn-geraet{background:#fff;border:1.5px solid var(--lg-accent,var(--neon-cyan));
   color:var(--lg-ink,var(--neon-cyan))}
-.btn-theke{background:linear-gradient(100deg,#A81460,var(--neon-magenta));color:#fff;
-  box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.btn-theke{background:linear-gradient(100deg,#8C1176,#C2189B);color:#fff;
+  box-shadow:0 4px 14px rgba(163,18,139,.3)}
 .btn-geraet:hover,.btn-theke:hover{transform:translateY(-1px)}
 .edit-date-icon{font-size:.7rem;opacity:.55;margin-left:.15rem;cursor:pointer}
 .btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700;box-shadow:0 0 16px rgba(5,150,105,.3)}
@@ -1217,7 +1221,7 @@ function formApplyAccent(){
   const m=document.getElementById('form-modal');
   // Theke ist eine Rolle → Magenta; Gerät gehört zum Lager → Hausfarbe
   const a = formType==='theke'
-    ? {accent:'#D81B7E',head:'#9E1259',fg:'#FBD0E4',ink:'#B01364',bg:'#FCE7F1'}
+    ? {accent:'#C2189B',head:'#8C1176',fg:'#F7CCEC',ink:'#A3128B',bg:'#FAE3F5'}
     : (NEON[currentLager]||NEON['brüggen']);
   if(!m) return;
   m.style.setProperty('--we-acc',a.accent); m.style.setProperty('--we-ink',a.ink);
