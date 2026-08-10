@@ -20,9 +20,9 @@
 <title>LAGER – GAME GALAXY</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
 :root{
   --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
   --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
@@ -100,8 +100,18 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* sidebar */
+.side-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.1rem;
+  min-height:var(--header-h);border-bottom:1px solid #22314F;margin-bottom:.6rem}
+.side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Chakra Petch','Poppins',sans-serif;font-weight:700;font-size:1.35rem;color:#fff;
+  line-height:1;padding-bottom:2px;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;
+  color:#fff;line-height:1.2}
+.side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
 .sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);
-  border-right:none;z-index:200;padding-top:var(--header-h);color:#AEBCD4;
+  border-right:none;z-index:200;padding-top:0;color:#AEBCD4;
   transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
 .sidebar.open{left:0}
 .sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
@@ -546,7 +556,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </button>
   </div>
   <div class="hdr-center">
-    <div class="hdr-org">Game Galaxy · Lager</div>
+    <div class="hdr-org">Lager</div>
     <div class="hdr-page">Be<span style="color:#4FD2F5">stände</span></div>
   </div>
   <div class="hdr-right">
@@ -591,6 +601,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <!-- SIDEBAR -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
+  <div class="side-brand">
+    <div class="side-mark">G</div>
+    <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
+  </div>
   <ul class="nav-list">
     <li class="nav-item open">
       <button class="nav-link active" onclick="toggleSubMenu(this)">
@@ -912,10 +926,6 @@ function renderTableActual(){
   // Anfangsbestand first — auf dem Handy als "Anf. / 01.08."
   const _zr = String(currentZeitraum||'');
   const _mFirst = _zr.length>=7 ? '01.'+_zr.slice(5,7)+'.' : '';
-  const _mLast  = _zr.length>=7
-      ? String(new Date(Number(_zr.slice(0,4)), Number(_zr.slice(5,7)), 0).getDate()).padStart(2,'0')
-        + '.' + _zr.slice(5,7) + '.'
-      : '';
   thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.'+(_mFirst?'<br>'+_mFirst:'')+'</span></th>';
 
   if(isZentral){
@@ -955,7 +965,7 @@ function renderTableActual(){
   }
 
   // Bestand last
-  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End<br>Bestand</span><span class="th-text-mob">Ende'+(_mLast?'<br>'+_mLast:'')+'</span></th>';
+  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End<br>Bestand</span><span class="th-text-mob">End<br>Best.</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
