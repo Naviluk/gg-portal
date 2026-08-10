@@ -106,7 +106,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
   display:flex;align-items:center;justify-content:center;
   font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
-  line-height:1;padding-bottom:3px;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+  line-height:1;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-mark span{display:block;transform:translateY(.045em)}
 .side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;
   color:#fff;line-height:1.2}
 .side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
@@ -604,7 +605,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <nav class="sidebar" id="sidebar">
   <div class="side-brand">
-    <div class="side-mark">G</div>
+    <div class="side-mark"><span>G</span></div>
     <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
   </div>
   <ul class="nav-list">
@@ -942,7 +943,7 @@ function renderTableActual(){
       thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} <span class="th-pen">✏️</span></th>`;
     });
     // Lieferungen neutral — nur bei Zentrallager, immer grau
-    thHTML += '<th class="num-cell th-col-liefer" style="color:var(--text-dim)"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></th>';
+    thHTML += '<th class="num-cell th-col-liefer" style="color:#B9C6DB"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></th>';
   } else {
     // Lieferungen — lager neon color
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h">
