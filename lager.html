@@ -286,10 +286,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .lager-table td{padding:.38rem .2rem}
   .lager-table th:not(.col-artikel){min-width:58px;width:58px;text-align:center}
   .lager-table td:not(.col-artikel){min-width:58px;width:58px;text-align:center}
-  .th-col-einkauf .th-text,.th-col-liefer .th-text{display:inline}
+  .th-col-einkauf .th-text,.th-col-liefer .th-text,
+  .th-col-anfang .th-text,.th-col-bestand .th-text{display:none}
+  .th-text-mob{display:inline}
   .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:none}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
-  .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline}
+
   td.num-cell,td.detail-td{font-size:.84rem!important;font-weight:600}
   .lager-table thead th .th-text,.lager-table thead th .th-text-mob{font-size:.56rem}
   .col-artikel .prod-name{font-size:.82rem;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
@@ -358,11 +360,11 @@ td.num-cell{font-family:var(--mono);font-size:.92rem;font-weight:600;
 /* Expand arrow */
 .col-einkauf-header{position:relative}
 .expand-arrow{display:inline-flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,.16);border:none;cursor:pointer;margin-left:.35rem;
-  width:18px;height:18px;border-radius:5px;
-  font-size:.62rem;color:#fff;transition:background .2s;
+  background:none;border:none;cursor:pointer;margin-left:.3rem;
+  font-size:.6rem;color:#fff;opacity:.85;transition:opacity .2s;
   vertical-align:middle;flex-shrink:0;padding:0;line-height:1}
-.expand-arrow:hover{background:rgba(255,255,255,.3)}
+.expand-arrow:hover{opacity:1}
+.th-pen{font-size:.62rem;opacity:.75;margin-left:.1rem}
 .col-einkauf-wrap{display:flex;align-items:center;justify-content:center;gap:.2rem;flex-wrap:nowrap}
 
 /* detail date columns */
@@ -518,7 +520,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .th-text-mob{display:none}
 @media(max-width:640px){
   .th-text-mob{display:inline}
-  .th-col-anfang .th-text{display:none}
 }
 /* Button text spans */
 .btn-line1{display:inline}
@@ -908,32 +909,38 @@ function renderTableActual(){
   let thHTML = '<tr>';
   thHTML += '<th class="col-artikel">Artikel</th>';
 
-  // Anfangsbestand first
-  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.<br>Bestand</span></th>';
+  // Anfangsbestand first — auf dem Handy als "Anf. / 01.08."
+  const _zr = String(currentZeitraum||'');
+  const _mFirst = _zr.length>=7 ? '01.'+_zr.slice(5,7)+'.' : '';
+  const _mLast  = _zr.length>=7
+      ? String(new Date(Number(_zr.slice(0,4)), Number(_zr.slice(5,7)), 0).getDate()).padStart(2,'0')
+        + '.' + _zr.slice(5,7) + '.'
+      : '';
+  thHTML += '<th class="num-cell th-col-anfang"><span class="th-icon">📦</span><span class="th-text">Anfangs-<br>bestand</span><span class="th-text-mob">Anf.'+(_mFirst?'<br>'+_mFirst:'')+'</span></th>';
 
   if(isZentral){
     // Einkäufe — neon green
     thHTML += `<th class="num-cell col-einkauf-header th-col-einkauf grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:#fff;font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span></span>
+        <span style="color:#fff;font-weight:800"><span class="th-icon">🛒</span><span class="th-text">Einkäufe</span><span class="th-text-mob">Eink.</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} ✏️</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} <span class="th-pen">✏️</span></th>`;
     });
     // Lieferungen neutral — nur bei Zentrallager, immer grau
-    thHTML += '<th class="num-cell th-col-liefer" style="color:var(--text-dim)"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></th>';
+    thHTML += '<th class="num-cell th-col-liefer" style="color:var(--text-dim)"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></th>';
   } else {
     // Lieferungen — lager neon color
     thHTML += `<th class="num-cell col-einkauf-header th-col-liefer grp-h">
       <div class="col-einkauf-wrap">
-        <span style="color:#fff;font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span></span>
+        <span style="color:#fff;font-weight:800"><span class="th-icon">🚚</span><span class="th-text">Lieferungen</span><span class="th-text-mob">Liefer.</span></span>
         <span class="expand-arrow" id="expand-arrow-btn" onclick="toggleDetailCols()" title="Details aufklappen">▶</span>
       </div></th>`;
     dates.forEach(d=>{
       const label = d.slice(8)+'.'+d.slice(5,7)+'.';
-      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} ✏️</th>`;
+      thHTML += `<th class="num-cell detail-col detail-th we-date-th grp-h" data-date="${d}">${label} <span class="th-pen">✏️</span></th>`;
     });
     // Gerät — nur Gesamtsumme, keine Aufklappung nach Datum
     thHTML += `<th class="num-cell col-einkauf-header" style="color:#B9A6F0">
@@ -948,7 +955,7 @@ function renderTableActual(){
   }
 
   // Bestand last
-  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End<br>Bestand</span></th>';
+  thHTML += '<th class="num-cell th-col-bestand"><span class="th-icon">🗂️</span><span class="th-text">End<br>Bestand</span><span class="th-text-mob">Ende'+(_mLast?'<br>'+_mLast:'')+'</span></th>';
   thHTML += '</tr>';
   thead.innerHTML = thHTML;
 
@@ -1693,14 +1700,15 @@ function buildColPager(){
     const short = {'Anfangsbestand':'Anfang','Anf. Bestand':'Anfang','End Bestand':'Ende',
                    'Lieferungen':'Liefer.','Einkäufe':'Einkäufe','Gerät':'Gerät','Theke':'Theke'};
     label = short[label] || label;
+    label = label.replace(/\s*[◀▶]\s*/g,'').trim();
     if(!label) label = '•';
     chips.push({label, grp:isGrp, ths:[th]});
   });
   const open = !!detailExpanded;
   pager.innerHTML = chips.map((c,i)=>{
-    const arrow = c.grp ? (open ? ' ◀' : ' ▶') : '';
-    const on    = c.grp && open ? ' on' : '';
-    return `<button class="pg${on}" data-i="${i}">${c.label}${arrow}</button>`;
+    // kein Pfeil in der Leiste — der Zustand zeigt sich allein durch den dunkleren Chip
+    const on = c.grp && open ? ' on' : '';
+    return `<button class="pg${on}" data-i="${i}">${c.label}</button>`;
   }).join('');
   const stick = wrap.querySelector('.col-artikel');
   const stickW = stick ? stick.getBoundingClientRect().width : 0;
