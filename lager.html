@@ -514,6 +514,68 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .confirm-shop-row .cs-amt{color:var(--neon-yellow);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.82rem;font-weight:700}
 .confirm-date{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.75rem;color:var(--neon-magenta);margin-bottom:.8rem}
 
+
+/* ══ WARENEINGANG-FENSTER — Farbe kommt vom gewählten Lager ══ */
+.we-modal{padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
+.we-head{background:var(--ink);color:#fff;padding:.95rem 1.1rem .85rem;position:relative;flex-shrink:0}
+.we-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--we-acc,var(--neon-cyan))}
+.we-head .modal-close{color:rgba(255,255,255,.6);top:.85rem;right:1rem}
+.we-head .modal-close:hover{color:#fff}
+.we-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.we-title-row{display:flex;align-items:center;gap:.55rem;margin-top:.15rem;flex-wrap:wrap}
+.we-title-row #we-title{font-size:1rem;font-weight:700;color:#fff}
+.we-lager-pill{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--we-soft,rgba(255,255,255,.15));color:var(--we-fg,#fff)}
+.we-steps{display:flex;align-items:center;gap:.45rem;margin-top:.75rem}
+.we-step{display:flex;align-items:center;gap:.35rem;font-size:.58rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:#7E90AE}
+.we-step i{width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.56rem}
+.we-step.on{color:#fff}
+.we-step.on i,.we-step.done i{background:var(--we-acc,var(--neon-cyan));color:#fff}
+.we-step-line{flex:1;height:1px;background:var(--ink3)}
+.we-body{flex:1;overflow-y:auto;padding:.9rem 1.1rem 0}
+.we-foot{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--glass-border);
+  margin:.9rem -1.1rem 0;padding:.75rem 1.1rem 1rem;display:flex;gap:.5rem}
+.we-foot .btn-acc{flex:1;background:var(--we-grad,linear-gradient(100deg,var(--neon-cyan),#3FC5EC));
+  box-shadow:0 4px 14px var(--we-shadow,rgba(14,143,184,.28))}
+
+/* Artikelzeile in der Auswahl */
+.modal-prod-row.checked{background:var(--we-bg,#EAF6FB)}
+.prod-checkbox.checked{background:var(--we-acc,var(--neon-cyan));border-color:var(--we-acc,var(--neon-cyan))}
+.qty-input.show{border-color:var(--we-acc,var(--neon-cyan));background:#fff;color:var(--we-ink,var(--text));
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.modal-cat-count{margin-left:auto;font-size:.58rem;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
+.modal-cat-count.has{color:var(--we-ink,var(--neon-cyan))}
+
+/* Klebender Zähler */
+.we-summary{position:sticky;bottom:0;z-index:2;background:var(--ink);color:#fff;border-radius:12px;
+  padding:.55rem .8rem;display:flex;align-items:center;gap:.7rem;margin-top:.7rem}
+.we-summary s{text-decoration:none;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#8FA6C9;font-weight:800;display:block}
+.we-summary b{font-family:var(--mono);font-size:1rem;color:var(--we-fg,#fff);font-weight:700}
+.we-summary .r{margin-left:auto;text-align:right}
+
+/* Übersicht (Schritt 2) */
+.we-datechip{display:inline-flex;align-items:center;gap:.35rem;background:var(--we-bg,#EAF6FB);
+  color:var(--we-ink,var(--neon-cyan));border-radius:20px;padding:.22rem .65rem;
+  font-family:var(--mono);font-size:.78rem;font-weight:700;margin-bottom:.7rem}
+.confirm-list{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.confirm-cat{display:flex;align-items:center;gap:.5rem;background:#E7ECF4;padding:.4rem .7rem;
+  font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.confirm-cat i{width:6px;height:6px;border-radius:2px;background:var(--we-acc,var(--neon-cyan));display:block}
+.confirm-cat .n{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--text-dim);letter-spacing:0;font-weight:600}
+.confirm-list .confirm-item{padding:.42rem .7rem;border-top:1px solid var(--glass-border)}
+.confirm-list .confirm-cat + .confirm-item{border-top:none}
+.confirm-item.zeb{background:var(--zebra)}
+.confirm-item .ci-qty{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--we-ink,var(--text))}
+
+/* Shops */
+.shops-section{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem;margin-top:.85rem}
+.shops-title{display:flex;align-items:center;gap:.4rem}
+.shops-sum{margin-left:auto;font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--neon-green);letter-spacing:0}
+.betrag-input.filled{border-color:var(--neon-green);background:#fff;color:var(--neon-green);font-weight:700}
+
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
   background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
@@ -697,9 +759,21 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <!-- ═══ MODAL: WARENEINGANG ═══ -->
 <div class="modal-overlay" id="modal-we">
-  <div class="modal">
-    <button class="modal-close" onclick="closeWareneingang()">✕</button>
-    <div class="modal-title" id="we-title">Wareneingang erstellen</div>
+  <div class="modal we-modal" id="we-modal">
+    <div class="we-head">
+      <button class="modal-close" onclick="closeWareneingang()">✕</button>
+      <div class="we-eyebrow">Erfassen</div>
+      <div class="we-title-row">
+        <span id="we-title">Wareneingang</span>
+        <span class="we-lager-pill" id="we-lager-pill">Lager</span>
+      </div>
+      <div class="we-steps">
+        <div class="we-step on" id="we-step-1"><i>1</i><span>Waren</span></div>
+        <div class="we-step-line"></div>
+        <div class="we-step" id="we-step-2"><i>2</i><span>Prüfen</span></div>
+      </div>
+    </div>
+    <div class="we-body">
 
     <!-- Step 1: Auswahl -->
     <div id="we-step1">
@@ -710,19 +784,24 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="field">
         <label class="field-label">Waren auswählen</label>
         <div id="we-product-list"></div>
+        <div class="we-summary" id="we-summary" style="display:none">
+          <div><s>Positionen</s><b id="we-sum-count">0</b></div>
+          <div class="r"><s>Stück gesamt</s><b id="we-sum-qty">0</b></div>
+        </div>
       </div>
       <div id="we-selected-list" class="selected-list" style="display:none">
         <div class="selected-list-title">Ausgewählte Waren</div>
         <div id="we-selected-items"></div>
       </div>
       <div id="we-shops-section" class="shops-section" style="display:none">
-        <div class="shops-title" id="we-shops-title">Shops / Einkaufsorte</div>
+        <div class="shops-title" id="we-shops-title">🏪 Shops / Einkaufsorte
+          <span class="shops-sum" id="we-shops-sum"></span></div>
         <div id="we-shop-rows"></div>
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
-      <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
+      <div class="modal-btn-row we-foot">
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
+        <button class="btn btn-primary btn-acc" id="btn-check-list" onclick="checkListAction()">Liste prüfen →</button>
       </div>
     </div>
 
@@ -731,10 +810,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-date" id="confirm-date-label"></div>
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
-      <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
-        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
+      <div class="modal-btn-row we-foot">
+        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück</button>
+        <button class="btn btn-primary btn-acc" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Speichern</button>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -1773,9 +1853,11 @@ window.openWareneingang = function(prefillDate){
     köln:         {name:'Köln',         color:'#cc00ff'},
   };
   const lc = lagerColors[currentLager] || {name: currentLager, color:'var(--text)'};
-  const titleText = isZentral ? 'Einkauf erfassen' : 'Wareneingang erfassen';
-  document.getElementById('we-title').innerHTML =
-    `${titleText} — <span style="color:${lc.color};text-shadow:0 0 10px ${lc.color}">${lc.name}</span>`;
+  document.getElementById('we-title').textContent = isZentral ? 'Einkauf' : 'Lieferung';
+  const pill = document.getElementById('we-lager-pill');
+  if(pill) pill.textContent = lc.name;
+  weApplyAccent();
+  weSetStep(1);
   document.getElementById('we-shops-section').style.display = isZentral?'':'none';
   document.getElementById('we-selected-list').style.display='none';
 
@@ -1789,6 +1871,7 @@ window.openWareneingang = function(prefillDate){
     html += `<div class="modal-cat" id="we-cat-${ci}">
       <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
         <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-count" id="we-catcount-${ci}"></span>
         <span class="modal-cat-arrow">▶</span>
       </div>
       <div class="modal-cat-items">`;
@@ -1808,12 +1891,44 @@ window.openWareneingang = function(prefillDate){
   });
   document.getElementById('we-product-list').innerHTML = html;
 }
+// Setzt die Hausfarbe des aktuellen Lagers als Variablen auf das Fenster.
+// Alles Farbige darin (Kopfleiste, Häkchen, Knopf, Mengen) liest daraus.
+const WE_ACCENTS = {
+  zentrallager:{acc:'#0FA574',ink:'#0A8A66',fg:'#B7F0DC',bg:'#E9F8F2',soft:'rgba(15,165,116,.22)',
+                grad:'linear-gradient(100deg,#0B7A5A,#12B487)',shadow:'rgba(15,165,116,.3)'},
+  nettetal:    {acc:'#2563EB',ink:'#1D4FB8',fg:'#CADEFF',bg:'#E9F0FE',soft:'rgba(37,99,235,.22)',
+                grad:'linear-gradient(100deg,#1B4CA8,#2E7BE0)',shadow:'rgba(37,99,235,.3)'},
+  'brüggen':   {acc:'#E11D48',ink:'#C4123E',fg:'#FFD1DD',bg:'#FDE8EE',soft:'rgba(225,29,72,.22)',
+                grad:'linear-gradient(100deg,#A5103A,#F0325C)',shadow:'rgba(225,29,72,.3)'},
+  viersen:     {acc:'#EA580C',ink:'#B4520C',fg:'#FFE0C4',bg:'#FDEEE1',soft:'rgba(234,88,12,.22)',
+                grad:'linear-gradient(100deg,#A64A0B,#EE8A2B)',shadow:'rgba(234,88,12,.3)'},
+  'köln':      {acc:'#7C3AED',ink:'#5A2FB0',fg:'#DFD2FF',bg:'#F1EAFE',soft:'rgba(124,58,237,.22)',
+                grad:'linear-gradient(100deg,#4E2AA8,#8258E8)',shadow:'rgba(124,58,237,.3)'},
+};
+function weApplyAccent(){
+  const m = document.getElementById('we-modal');
+  const a = WE_ACCENTS[currentLager] || WE_ACCENTS.zentrallager;
+  if(!m) return;
+  m.style.setProperty('--we-acc',a.acc);   m.style.setProperty('--we-ink',a.ink);
+  m.style.setProperty('--we-fg',a.fg);     m.style.setProperty('--we-bg',a.bg);
+  m.style.setProperty('--we-soft',a.soft); m.style.setProperty('--we-grad',a.grad);
+  m.style.setProperty('--we-shadow',a.shadow);
+}
+function weSetStep(n){
+  const s1=document.getElementById('we-step-1'), s2=document.getElementById('we-step-2');
+  if(!s1||!s2) return;
+  s1.className = 'we-step ' + (n===1?'on':'done');
+  s2.className = 'we-step ' + (n===2?'on':'');
+}
+
 window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
 
 window.toggleWeProd = function(prodId){
   const cb  = document.getElementById('we-cb-'+prodId);
   const qty = document.getElementById('we-qty-'+prodId);
+  const row = document.getElementById('we-row-'+prodId);
   const isChecked = cb.classList.toggle('checked');
+  if(row) row.classList.toggle('checked', isChecked);
   qty.classList.toggle('show', isChecked);
   if(isChecked){ qty.focus(); weSelectedItems[prodId]=0; }
   else { delete weSelectedItems[prodId]; }
@@ -1823,7 +1938,29 @@ window.updateWeQty = function(prodId, val){
   weSelectedItems[prodId] = parseFloat(val)||0;
   updateSelectedPreview();
 }
+// Zähler oben in den Kategorien und in der klebenden Leiste unten
+function weUpdateCounters(){
+  const ids = Object.keys(weSelectedItems);
+  let total = 0;
+  ids.forEach(id=>{ total += Number(weSelectedItems[id])||0; });
+  const bar = document.getElementById('we-summary');
+  if(bar){
+    bar.style.display = ids.length ? 'flex' : 'none';
+    const c=document.getElementById('we-sum-count'), q=document.getElementById('we-sum-qty');
+    if(c) c.textContent = ids.length;
+    if(q) q.textContent = total.toLocaleString('de-DE');
+  }
+  PRODUCTS.forEach((catObj,ci)=>{
+    const el = document.getElementById('we-catcount-'+ci);
+    if(!el) return;
+    const n = catObj.items.filter(pr=>ids.includes(pr.id)).length;
+    el.textContent = n ? n+' gewählt' : '';
+    el.classList.toggle('has', !!n);
+  });
+}
+
 function updateSelectedPreview(){
+  weUpdateCounters();
   const ids = Object.keys(weSelectedItems);
   const sel = document.getElementById('we-selected-list');
   const items = document.getElementById('we-selected-items');
@@ -1862,14 +1999,24 @@ window.addShopRow = function(){
     <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
     <optgroup label="Weitere">${secOpts}</optgroup>
   </select>
-  <input class="betrag-input" type="number" placeholder="€" step="0.01" onchange="weShopRows[${idx}].betrag=this.value">
+  <input class="betrag-input" type="number" placeholder="€" step="0.01" oninput="weShopSumUpdate(this)" onchange="weShopRows[${idx}].betrag=this.value;weShopSumUpdate(this)">
   <button class="shop-remove" onclick="removeShopRow(${idx})">✕</button>`;
   container.appendChild(div);
 }
+// Summiert alle eingetragenen Shop-Beträge in den Blockkopf.
+window.weShopSumUpdate = function(el){
+  if(el) el.classList.toggle('filled', !!(el.value && parseFloat(el.value)));
+  let sum=0;
+  document.querySelectorAll('#we-shop-rows .betrag-input').forEach(i=>{ sum += parseFloat(i.value)||0; });
+  const out=document.getElementById('we-shops-sum');
+  if(out) out.textContent = sum ? sum.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : '';
+}
+
 window.removeShopRow = function(idx){
   const el=document.getElementById('shop-row-'+idx);
   if(el) el.remove();
   weShopRows[idx]={removed:true};
+  weShopSumUpdate();
 }
 
 // Восстанавливает визуальные строки Shop в Schritt 1 из данных weShopRows (нужно при редактировании)
@@ -1877,6 +2024,7 @@ function weRebuildShopRowsDom(){
   const container = document.getElementById('we-shop-rows');
   if(!container) return;
   container.innerHTML='';
+  setTimeout(()=>{ document.querySelectorAll('#we-shop-rows .betrag-input').forEach(i=>weShopSumUpdate(i)); },0);
   const rows = weShopRows.slice();
   weShopRows = [];
   rows.forEach(row=>{
@@ -1892,7 +2040,7 @@ function weRebuildShopRowsDom(){
       <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
       <optgroup label="Weitere">${secOpts}</optgroup>
     </select>
-    <input class="betrag-input" type="number" placeholder="€" step="0.01" value="${row.betrag||''}" onchange="weShopRows[${idx}].betrag=this.value">
+    <input class="betrag-input" type="number" placeholder="€" step="0.01" value="${row.betrag||''}" oninput="weShopSumUpdate(this)" onchange="weShopRows[${idx}].betrag=this.value;weShopSumUpdate(this)">
     <button class="shop-remove" onclick="removeShopRow(${idx})">✕</button>`;
     container.appendChild(div);
   });
@@ -1914,21 +2062,25 @@ window.buildConfirm = function(){
   document.getElementById('we-step1').style.display='none';
   document.getElementById('we-step2').style.display='block';
 
+  weSetStep(2);
   const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('confirm-date-label').innerHTML =
+    '<span class="we-datechip">🗓 '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})+'</span>';
 
-  let html=''; let lastCat='';
+  let html='';
   PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        const unitTxt = prod.unit||'';
-        const qty = weSelectedItems[prod.id]||0;
-        html+=`<div class="confirm-item">
-          <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
-          <span class="ci-qty">${qty}</span>
-        </div>`;
-      }
+    const rows = catObj.items.filter(pr=>ids.includes(pr.id));
+    if(!rows.length) return;
+    const catQty = rows.reduce((a,pr)=>a+(Number(weSelectedItems[pr.id])||0),0);
+    html+=`<div class="confirm-cat"><i></i>${catObj.cat}
+      <span class="n">${rows.length} · ${catQty.toLocaleString('de-DE')} St.</span></div>`;
+    rows.forEach((prod,ri)=>{
+      const unitTxt = prod.unit||'';
+      const qty = weSelectedItems[prod.id]||0;
+      html+=`<div class="confirm-item${ri%2?' zeb':''}">
+        <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+        <span class="ci-qty">${qty}</span>
+      </div>`;
     });
   });
   document.getElementById('confirm-list').innerHTML=html;
@@ -1947,15 +2099,18 @@ window.buildConfirm = function(){
 }
 
 window.backToEdit = function(){
+  weSetStep(1);
   document.getElementById('we-step1').style.display='block';
   document.getElementById('we-step2').style.display='none';
   setTimeout(()=>{
     document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
+    document.querySelectorAll('[id^="we-row-"]').forEach(rw=>rw.classList.remove('checked'));
     document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{qi.classList.remove('show');qi.value='';});
     Object.entries(weSelectedItems).forEach(([prodId,qty])=>{
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb) cb.classList.add('checked');
+      const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
       if(qi){qi.classList.add('show');qi.value=qty;}
     });
     updateSelectedPreview();
@@ -2051,11 +2206,14 @@ window.openEditLieferung = function(date){
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb) cb.classList.add('checked');
+      const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     weRebuildShopRowsDom();
     updateSelectedPreview();
-    document.getElementById('we-title').innerHTML='Lieferung bearbeiten – <span style="color:'+col+'">'+lagerName.toUpperCase()+'</span>';
+    document.getElementById('we-title').textContent='Lieferung bearbeiten';
+    const _pl=document.getElementById('we-lager-pill'); if(_pl) _pl.textContent=lagerName;
+    weApplyAccent();
     // Меняем кнопку подтверждения
     const saveBtn=document.getElementById('btn-confirm-save');
     if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
@@ -2078,6 +2236,7 @@ window.openEditWareneingang = function(date){
       const cb=document.getElementById('we-cb-'+prodId);
       const qi=document.getElementById('we-qty-'+prodId);
       if(cb) cb.classList.add('checked');
+      const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
       if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
     });
     weRebuildShopRowsDom();
