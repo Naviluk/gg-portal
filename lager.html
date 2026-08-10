@@ -232,6 +232,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   .burger{padding:8px}
   /* Beträge der Shop-Zeilen kleiner, damit das €-Zeichen in die Zelle passt */
   tr.shop-row-item td.num-cell{font-size:.72rem!important;padding-left:.3rem;padding-right:.3rem}
+  tr.shop-row-item td{padding-top:.6rem;padding-bottom:.6rem}
   tr.shop-total-row td.num-cell{font-size:.72rem!important;padding-left:.3rem;padding-right:.3rem}
   .lager-controls{gap:.45rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
   .seg-group{flex:1 1 0;min-width:0}
@@ -289,6 +290,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .lager-table td{padding:.42rem .9rem;border-bottom:1px solid var(--glass-border);border-right:1px solid var(--glass-border);vertical-align:middle}
 .lager-table tr:last-child td{border-bottom:1px solid var(--glass-border)}
 .lager-table tr:hover td{box-shadow:inset 0 0 0 999px rgba(14,143,184,.05)}
+/* Shop-Zeilen brauchen mehr Höhe als Artikelzeilen — sie tragen Beträge, keine Stückzahlen */
+tr.shop-row-item td{padding-top:.62rem;padding-bottom:.62rem}
+
 /* Zebra — jede zweite Artikelzeile, damit die Zeile über die ganze Breite zusammenhält */
 .prod-row.zebra td{background:var(--zebra)}
 .prod-row.zebra td.col-artikel{background:var(--zebra)}
@@ -645,6 +649,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   #we-step2 > .we-foot{grid-column:1 / -1}
 }
 
+.we-hidden{display:none!important}
+
 #we-date{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;
   text-align:left;border-radius:11px;padding:.62rem .8rem;
   font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600}
@@ -691,6 +697,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   #we-step2 > .confirm-shops{grid-column:2;margin-top:0}
   #we-step2 > .we-foot{grid-column:1 / -1}
 }
+
 
 #we-date{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2366748C' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.4rem}
@@ -931,7 +938,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     </div>
 
     <!-- Step 2: Confirm -->
-    <div id="we-step2" style="display:none">
+    <div id="we-step2" class="we-hidden">
       <div class="confirm-date" id="confirm-date-label"></div>
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
@@ -1360,7 +1367,8 @@ function renderTableActual(){
         const dtStr = dtTotal > 0 ? dtTotal.toFixed(2)+'<span class="cur"> €</span>' : '';
         tbHTML += `<td class="num-cell detail-col detail-td" style="${gs};background:rgba(219,39,119,.05);color:var(--neon-magenta);font-weight:700;font-size:.82rem">${dtStr}</td>`;
       });
-      tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
+      tbHTML += `<td class="num-cell" style="${gs}">—</td>`;   // Lieferungen
+      tbHTML += `<td class="num-cell" style="${gs}">—</td>`;   // End Bestand
       tbHTML += `</tr>`;
     }
   }
@@ -1961,8 +1969,8 @@ window.openWareneingang = function(prefillDate){
   weSelectedItems = {};
   weShopRows = [];
   currentEditWeId = null; // режим создания
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
+  document.getElementById('we-step1').classList.remove('we-hidden');
+  document.getElementById('we-step2').classList.add('we-hidden');
   document.getElementById('modal-we').classList.add('show');
   // Восстанавливаем текст кнопки для новой записи
   const _sb=document.getElementById('btn-confirm-save');
@@ -2091,8 +2099,8 @@ function updateSelectedPreview(){
   const items = document.getElementById('we-selected-items');
   const shops = document.getElementById('we-shops-section');
   if(!ids.length){ sel.style.display='none'; shops.style.display='none'; return; }
-  sel.style.display='block';
-  if(currentLager==='zentrallager') shops.style.display='block';
+  sel.style.display='';
+  if(currentLager==='zentrallager') shops.style.display='';
   // Group by category
   let html=''; let lastCat='';
   PRODUCTS.forEach(catObj=>{
@@ -2184,8 +2192,8 @@ window.buildConfirm = function(){
     if(sel&&inp) weShopRows[i] = {shop:sel.value, betrag:inp.value};
   });
 
-  document.getElementById('we-step1').style.display='none';
-  document.getElementById('we-step2').style.display='block';
+  document.getElementById('we-step1').classList.add('we-hidden');
+  document.getElementById('we-step2').classList.remove('we-hidden');
 
   weSetStep(2);
   const d=new Date(date);
@@ -2214,7 +2222,7 @@ window.buildConfirm = function(){
   const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
   const cs=document.getElementById('confirm-shops');
   if(activeShops.length){
-    cs.style.display='block';
+    cs.style.display='';
     const _csTotal = activeShops.reduce((a,x)=>a+(parseFloat(x.betrag)||0),0);
     cs.innerHTML='<div class="confirm-shops-title">🏪 Shops<span class="cs-total">'+
       _csTotal.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €</span></div>'+
@@ -2227,8 +2235,8 @@ window.buildConfirm = function(){
 
 window.backToEdit = function(){
   weSetStep(1);
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
+  document.getElementById('we-step1').classList.remove('we-hidden');
+  document.getElementById('we-step2').classList.add('we-hidden');
   setTimeout(()=>{
     document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
     document.querySelectorAll('[id^="we-row-"]').forEach(rw=>rw.classList.remove('checked'));
@@ -2296,8 +2304,8 @@ window.buildConfirmLieferung = function(){
   if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
   const date=document.getElementById('we-date').value;
   if(!date){ showToast('Bitte Datum auswählen.'); return; }
-  document.getElementById('we-step1').style.display='none';
-  document.getElementById('we-step2').style.display='block';
+  document.getElementById('we-step1').classList.add('we-hidden');
+  document.getElementById('we-step2').classList.remove('we-hidden');
   weSetStep(2);
   const d=new Date(date);
   document.getElementById('confirm-date-label').innerHTML=
