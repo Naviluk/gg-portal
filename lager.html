@@ -31,7 +31,6 @@
   /* Gerüst */
   --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-  --stick-top:var(--header-h);
   /* Hausfarbe je Lager */
   --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
 }
@@ -225,7 +224,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   font-size:.82rem;padding:.5rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .btn-add-artikel:hover{border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(8,145,178,.05)}
 @media(max-width:640px){
-  :root{--stick-top:calc(var(--header-h) + 2.5rem)}
   .cur{display:none}
   .app-header{padding:0 .55rem;gap:.5rem}
   .hdr-user{padding:.3rem .5rem;font-size:.8rem}
@@ -263,13 +261,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 }
 
 /* ── TABLE WRAPPER ── */
-.table-wrap-single{overflow-x:auto;overflow-y:clip;-webkit-overflow-scrolling:touch;
+.table-wrap-single{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;
   border-radius:14px;border:1px solid var(--glass-border);
   box-shadow:0 2px 12px rgba(16,26,46,.06);background:#fff}
-/* Die Kopfzeile scrollt mit der Seite und bleibt unter der App-Kopfzeile stehen. */
-.lager-table thead th{position:sticky;top:var(--stick-top);z-index:15}
-.lager-table thead th.col-artikel{z-index:25}
-/* Die Spaltenleiste bleibt direkt darüber stehen */
 /* ── SINGLE TABLE with sticky first column ── */
 .lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#fff}
 .lager-table th{
@@ -285,17 +279,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 /* Zebra — jede zweite Artikelzeile, damit die Zeile über die ganze Breite zusammenhält */
 .prod-row.zebra td{background:var(--zebra)}
 .prod-row.zebra td.col-artikel{background:var(--zebra)}
+.cat-row td.col-artikel{background:#E7ECF4}
+.lager-table td:not(.col-artikel){position:relative;z-index:1}
 
 /* Sticky Artikel column */
 .col-artikel{
-  position:sticky;left:0;z-index:5;
+  position:sticky;left:0;z-index:12;
   background:#fff;
   text-align:left!important;
   border-right:2px solid var(--glass-border)!important;
   min-width:200px;
 }
-.lager-table th.col-artikel{position:sticky;left:0;top:0;z-index:25;background:var(--ink2);
-  color:#8FA6C9;text-align:left!important}
+.lager-table th.col-artikel{position:sticky;left:0;z-index:25;
+  background:var(--ink2);color:#8FA6C9;text-align:left!important}
 .lager-table tr:hover td.col-artikel{background:#EAF4F8}
 
 /* Desktop: icons hidden */
