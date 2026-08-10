@@ -576,6 +576,23 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .shops-sum{margin-left:auto;font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--neon-green);letter-spacing:0}
 .betrag-input.filled{border-color:var(--neon-green);background:#fff;color:var(--neon-green);font-weight:700}
 
+/* Kategoriezeile in der Auswahl — wie in der Tabelle: Punkt in Lagerfarbe, Text in Tiefblau */
+.we-body .modal-cat-header{border-radius:9px;border-color:var(--glass-border)}
+.we-body .modal-cat-label{color:var(--ink);letter-spacing:.14em;font-weight:800;
+  display:flex;align-items:center;gap:.45rem}
+.we-body .modal-cat-label::before{content:'';width:6px;height:6px;border-radius:2px;
+  background:var(--we-acc,var(--neon-cyan));flex-shrink:0}
+/* Shops in der Übersicht — weiße Karte, Summe mintgrün */
+.confirm-shops{margin-top:.85rem;padding:.75rem .8rem;background:#fff;border-radius:12px;
+  border:1px solid var(--glass-border)}
+.confirm-shops-title{display:flex;align-items:center;gap:.4rem;color:var(--text-dim);
+  letter-spacing:.16em;font-size:.55rem;font-weight:800}
+.confirm-shops-title .cs-total{margin-left:auto;font-family:var(--mono);font-size:.78rem;
+  font-weight:700;color:var(--neon-green);letter-spacing:0}
+.confirm-shop-row{padding:.4rem 0}
+.confirm-shop-row .cs-name{color:var(--text);font-weight:600}
+.confirm-shop-row .cs-amt{font-family:var(--mono);color:var(--neon-green);font-size:.86rem}
+
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
   background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
@@ -2090,7 +2107,9 @@ window.buildConfirm = function(){
   const cs=document.getElementById('confirm-shops');
   if(activeShops.length){
     cs.style.display='block';
-    cs.innerHTML='<div class="confirm-shops-title">Shops / Einkaufsorte</div>'+
+    const _csTotal = activeShops.reduce((a,x)=>a+(parseFloat(x.betrag)||0),0);
+    cs.innerHTML='<div class="confirm-shops-title">🏪 Shops / Einkaufsorte<span class="cs-total">'+
+      _csTotal.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €</span></div>'+
       activeShops.map(s=>{
         const amt = parseFloat(s.betrag||0).toFixed(2);
         return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
