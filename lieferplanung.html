@@ -306,10 +306,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .modal{background:#ffffff;border:1px solid var(--glass-border);border-radius:16px;
   padding:1.5rem;width:100%;max-width:600px;position:relative;box-shadow:0 20px 60px rgba(30,37,50,.2);
   margin:auto}
-.modal-title{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.1em;
+.modal-title{position:sticky;top:0;z-index:3;background:#fff;
+  margin:-1.5rem -1.5rem .9rem;padding:1.1rem 3rem .9rem 1.5rem;
+  border-bottom:1px solid var(--glass-border);border-radius:16px 16px 0 0;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.1em;
   color:var(--neon-cyan);text-transform:uppercase;margin-bottom:1.2rem}
-.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;
-  color:var(--text-dim);font-size:1.2rem;cursor:pointer;line-height:1}
+.modal-close{position:sticky;float:right;top:.9rem;right:0;z-index:4;background:none;border:none;
+  color:var(--text-dim);font-size:1.2rem;cursor:pointer;line-height:1;
+  width:2rem;height:2rem;margin:-.3rem -.6rem 0 0}
 .modal-close:hover{color:var(--neon-magenta)}
 
 /* form elements in modal */
@@ -399,7 +403,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-add-shop:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
 
 /* modal buttons */
-.modal-btn-row{display:flex;gap:.7rem;margin-top:1.2rem;flex-wrap:wrap}
+.modal-btn-row{position:sticky;bottom:0;z-index:3;background:#fff;
+  display:flex;gap:.7rem;flex-wrap:wrap;
+  margin:1.2rem -1.5rem -1.5rem;padding:.9rem 1.5rem 1.2rem;
+  border-top:1px solid var(--glass-border);border-radius:0 0 16px 16px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
   font-family:'Poppins',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.02em;
   border:none;border-radius:11px;cursor:pointer;padding:.72rem 1.2rem;transition:all .2s}
@@ -441,6 +448,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .modal-cat.open .modal-cat-arrow .arw-i{transform:rotate(90deg)}
 /* Größere Tippflächen auf dem Handy */
 @media(max-width:640px){
+  .modal-overlay{padding:.5rem}
+  .modal{max-width:100%;border-radius:14px;padding:1.1rem}
+  .modal-title{margin:-1.1rem -1.1rem .8rem;padding:1rem 2.6rem .8rem 1.1rem;
+    font-size:.92rem;border-radius:14px 14px 0 0}
+  .modal-btn-row{margin:1rem -1.1rem -1.1rem;padding:.8rem 1.1rem 1rem;border-radius:0 0 14px 14px}
+  .modal-btn-row .btn{flex:1 1 auto}
   .app-header{padding:0 .55rem;gap:.5rem}
   .hdr-user{padding:.3rem .5rem;font-size:.8rem}
   .burger{padding:8px}
@@ -494,13 +507,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
 
 /* --- Datei-spezifische Regeln (übernommen, Farben angepasst) --- */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
-:root{
-  --bg:var(--bg);--bg2:var(--bg3);--bg3:var(--bg3);
-  --neon-cyan:var(--neon-cyan);--neon-magenta:var(--neon-magenta);--neon-yellow:var(--neon-yellow);--neon-green:var(--neon-green);
-  --glass:var(--glass);--glass-border:var(--glass-border);
-  --text:var(--text);--text-dim:var(--text-dim);--header-h:64px;
-}
 @keyframes scan{0%,100%{opacity:.3}
 50%{opacity:1}
 }
