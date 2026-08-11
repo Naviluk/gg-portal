@@ -142,6 +142,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .lp-hub-label b{display:block;font-weight:700}
 .lp-hub-label s{display:block;text-decoration:none;font-size:.62rem;letter-spacing:.13em;
   text-transform:uppercase;opacity:.75;margin-top:.15rem;font-weight:600}
+/* Einkaufssumme auf der Zentrallager-Kachel */
+.lp-hub-money{display:block;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:1.15rem;font-weight:700;color:#fff;margin-top:.3rem;letter-spacing:0}
+.lp-hub-money:empty{display:none}
 /* Zähler oben rechts: wie viele Artikel sind geplant */
 .lp-hub-badge{position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.22);
   border-radius:20px;padding:.14rem .5rem;font-family:var(--mono);font-size:.66rem;
@@ -437,14 +441,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 /* ══ Hausfarbe des aktuellen Lagers — überall dieselbe Quelle ══ */
 .lg-tint{background:var(--lg-bg,#fff)}
 /* Zahlen im Monoschnitt mit fester Ziffernbreite */
-.num-cell,.plan-form-akt,.plan-form-verbr,.plan-form-empf,.lief-gepl-span,
+.num-cell,.plan-form-akt,.plan-form-verbr,.plan-form-empf,.qty,
 .pack-badge,.ek-total,.ek-tag,.we-summary b{
   font-family:var(--mono);font-variant-numeric:tabular-nums}
 /* Gezeichnete Pfeile statt Zeichen — auf iOS sonst blaue Emoji-Kästchen */
 .arw-i{display:inline-block;width:0;height:0;border-style:solid;
   border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
   transition:transform .2s;flex-shrink:0}
-.lief-cat-wrap:not(.collapsed) .lief-cat-title .arw-i,
 .modal-cat.open .modal-cat-arrow .arw-i{transform:rotate(90deg)}
 /* Größere Tippflächen auf dem Handy */
 @media(max-width:640px){
@@ -461,17 +464,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .nav-sub li a{padding:.9rem 1.5rem .9rem 2.5rem;font-size:.9rem}
 }
 
-/* Artikelzeilen im Panel: Kante in der Hausfarbe, geplante Menge im Monoschnitt */
-.lief-row{position:relative}
-.lief-row::before{content:'';position:absolute;left:0;top:.3rem;bottom:.3rem;width:3px;
-  border-radius:0 3px 3px 0;background:var(--lg-accent,var(--neon-cyan))}
-.lief-row .lief-gepl-span{color:var(--lg-accent,var(--neon-magenta));font-weight:700}
-.lief-cat-title i{width:6px;height:6px;border-radius:2px;background:var(--lg-accent,var(--neon-cyan));display:block}
-/* Knöpfe im Panel in der Hausfarbe */
-.panel-body .btn-outline-cyan{border-color:var(--lg-accent,var(--neon-cyan));
-  color:var(--lg-accent,var(--neon-cyan))}
-.panel-body .btn-save{background:linear-gradient(100deg,
-  color-mix(in srgb,var(--lg-accent,#0E8FB8) 70%,#000),var(--lg-accent,#0E8FB8))}
+.gesamt-panel .btn-outline-cyan{border-color:var(--btn-acc,var(--lg-accent,var(--neon-cyan)));
+  color:var(--btn-acc,var(--lg-accent,var(--neon-cyan)))}
+.gesamt-panel .btn-save{color:#fff;background:linear-gradient(100deg,
+  color-mix(in srgb,var(--btn-acc,var(--lg-accent,#0E8FB8)) 70%,#000),
+  var(--btn-acc,var(--lg-accent,#0E8FB8)))}
 
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
@@ -537,71 +534,94 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-save{background:linear-gradient(135deg,var(--neon-green),#00aa55);color:#000;font-weight:700}
 .btn-save:hover{box-shadow:0 0 22px rgba(5,150,105,.5);transform:translateY(-1px)}
 .plan-value{color:var(--neon-magenta);font-weight:700}
-.lief-tab{
-  font-family:'Poppins',sans-serif;font-size:.68rem;letter-spacing:.07em;
-  padding:.4rem .8rem;border-radius:6px;cursor:pointer;
-  border:1px solid var(--glass-border);background:transparent;
-  color:var(--text-dim);transition:all .2s}
-.lief-tab.active{font-weight:700}
-.lief-tab[data-lg="brüggen"].active{border-color:#e11d48;color:#e11d48;background:rgba(225,29,72,.08)}
-.lief-tab[data-lg="viersen"].active{border-color:#ea580c;color:#ea580c;background:rgba(234,88,12,.08)}
-.lief-tab[data-lg="köln"].active{border-color:#7c3aed;color:#7c3aed;background:rgba(124,58,237,.08)}
-.lief-cat-title{font-family:'Poppins',sans-serif;font-size:.66rem;letter-spacing:.14em;font-weight:800;
-  color:var(--ink);background:#E7ECF4;border-radius:9px;padding:.45rem .7rem;text-transform:uppercase;
-  cursor:pointer;display:flex;align-items:center;gap:.5rem;user-select:none;margin-bottom:.35rem}
-.lief-cat-title::before{content:'';width:0;height:0;border-style:solid;
-  border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
-  transform:rotate(90deg);transition:transform .2s;flex-shrink:0}
-.lief-cat-wrap.collapsed .lief-cat-title::before{transform:rotate(0deg)}
-.lief-cat-wrap.collapsed .lief-cat-items{display:none}
-.lief-row{display:flex;align-items:center;gap:.4rem;padding:.45rem .2rem;
-  border-bottom:1px solid var(--glass)}
-.lief-row-name{flex:1;font-size:.95rem;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lief-row-gepl{width:52px;min-width:52px;text-align:center;font-size:.88rem;color:var(--neon-magenta);font-weight:700;flex-shrink:0;padding:0 .3rem}
-.lief-col-header{display:flex;align-items:center;gap:.5rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem}
-.lch-name{flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.lch-gepl{width:52px;min-width:52px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700}
-.lch-pack{width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-cyan);text-transform:uppercase;font-weight:700;margin:0 .15rem}
-.lch-deliv{width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-green);text-transform:uppercase;font-weight:700;margin:0 .15rem}
-.lief-check{width:36px;height:36px;border:2px solid var(--glass-border);border-radius:8px;
-  cursor:pointer;flex-shrink:0;min-width:36px;display:flex;align-items:center;justify-content:center;
-  transition:all .15s;background:rgba(0,0,0,.2);margin:0 .15rem}
-.lief-gepl-span{
-  width:52px;min-width:52px;text-align:center;font-size:1rem;color:var(--neon-magenta);
-  font-weight:700;cursor:pointer;padding:.2rem .3rem;border-radius:4px;
-  transition:background .15s}
-.lief-gepl-span:hover{background:rgba(219,39,119,.12)}
-.lief-check.packed{border-color:var(--neon-cyan);background:var(--glass-border)}
-.lief-check.packed::after{content:'✓';color:var(--neon-cyan);font-size:.75rem;font-weight:700}
-.lief-check.delivered{border-color:var(--neon-green);background:rgba(5,150,105,.15)}
-.lief-check.delivered::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
-.ek-check{width:36px;height:36px;border:2px solid var(--glass-border);border-radius:8px;
-  cursor:pointer;flex-shrink:0;min-width:36px;display:flex;align-items:center;justify-content:center;
-  transition:all .15s;background:rgba(0,0,0,.2);margin:0 .15rem}
-.ek-check.bought{border-color:var(--neon-green);background:rgba(5,150,105,.15)}
-.ek-check.bought::after{content:'✓';color:var(--neon-green);font-size:.75rem;font-weight:700}
 .missing-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .missing-row-name{flex:1;font-size:.85rem}
 .missing-intentional{display:flex;align-items:center;gap:.3rem;font-size:.75rem;color:var(--text-dim);cursor:pointer}
+/* ══ Schublade: fester Kopf, Rollbereich, fester Fuß ══════════════════════ */
+.panel-scrim{position:fixed;inset:0;background:rgba(11,18,32,.42);backdrop-filter:blur(1.5px);
+  z-index:390;opacity:0;pointer-events:none;transition:opacity .3s}
+.panel-scrim.show{opacity:1;pointer-events:auto}
 .gesamt-panel{
   position:fixed;top:0;right:-101vw;bottom:0;width:min(440px,100vw);
-  background:var(--bg);border-left:none;
-  z-index:400;transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;
-  padding:0 0 2rem;box-sizing:border-box;
+  background:var(--bg);border-left:none;z-index:400;
+  transition:right .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow:hidden;padding:0;box-sizing:border-box;
   box-shadow:-18px 0 50px rgba(16,26,46,.28)}
-/* Kopfleiste des Panels: dunkel, darunter ein Streifen in der Hausfarbe */
-.panel-head{background:var(--ink);color:#fff;padding:.9rem 1rem .85rem;position:relative}
-.panel-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
-  background:var(--lg-accent,var(--neon-cyan))}
-.panel-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
-.panel-body{padding:1rem}
-.lager-pill{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
-  border-radius:20px;padding:.18rem .6rem;background:var(--lg-soft,rgba(255,255,255,.15));
-  color:var(--lg-fg,#fff)}
 .gesamt-panel.open{right:0!important}
-.gesamt-panel-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.01em;
-  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;color:#fff;margin-top:.15rem;
-  text-transform:uppercase;margin-bottom:1.2rem}
+/* Kopf: dunkel, Titel, Gesamtsumme, darunter ein Streifen in der Hausfarbe */
+.panel-head{background:var(--ink);color:#fff;padding:1rem 1.1rem .9rem;position:relative;flex-shrink:0}
+.panel-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:linear-gradient(90deg,var(--lg-accent,var(--neon-cyan)),var(--neon-cyan))}
+.gesamt-panel-title{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.01em;color:#fff;display:block;padding-right:2rem;line-height:1.25}
+.gesamt-panel-title em{font-style:normal;color:var(--lg-fg,#3EDCA9)}
+.panel-sum{display:flex;align-items:baseline;gap:.5rem;margin-top:.35rem}
+.panel-sum b{font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:1.35rem;font-weight:700;color:#fff}
+.panel-sum s{text-decoration:none;font-size:.62rem;letter-spacing:.13em;
+  text-transform:uppercase;color:#8FA6C9;font-weight:700}
+.gesamt-close{position:absolute;top:.85rem;right:.95rem;background:none;border:none;
+  color:rgba(255,255,255,.6);font-size:1.15rem;cursor:pointer;padding:.2rem;line-height:1}
+.gesamt-close:hover{color:#fff}
+.panel-sub{flex-shrink:0;padding:.75rem .8rem 0}
+.panel-body{flex:1;overflow-y:auto;padding:0 .8rem .2rem;-webkit-overflow-scrolling:touch}
+.panel-foot{flex-shrink:0;display:flex;flex-direction:column;gap:.45rem;
+  padding:.7rem .8rem calc(.9rem + env(safe-area-inset-bottom));
+  background:var(--bg);border-top:1px solid var(--glass-border)}
+.panel-foot .btn{width:100%}
+/* Reiter (Nach Artikeln / Nach Shops) */
+.tabs{display:flex;gap:.35rem;padding:0 0 .65rem}
+.tab{flex:1;text-align:center;font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;
+  padding:.5rem;border:none;border-radius:10px;background:#E1E7F0;color:var(--text-dim);
+  cursor:pointer;transition:background .2s,color .2s}
+.tab.on{background:var(--ink);color:#fff}
+/* Karte einer Gruppe (Shop bzw. Kategorie) */
+.ek{background:#fff;border:1px solid var(--glass-border);border-radius:14px;
+  overflow:hidden;margin-bottom:.6rem}
+.ek-grp{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;background:#E7ECF4;
+  cursor:pointer;user-select:none}
+.ek-grp b{font-size:.7rem;font-weight:800;letter-spacing:.07em;color:var(--ink);
+  text-transform:uppercase;display:flex;align-items:center;gap:.45rem;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ek-grp .sum{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:.76rem;font-weight:700;color:#fff;background:var(--neon-green);
+  border-radius:20px;padding:.13rem .55rem;white-space:nowrap;letter-spacing:0}
+.ek-grp .sum.cnt{background:var(--lg-accent,var(--neon-cyan))}
+.ek-grp .arw-i{transform:rotate(90deg)}
+.ek.collapsed .ek-grp .arw-i{transform:rotate(0deg)}
+.ek.collapsed .ek-row{display:none}
+.ek-row{display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;
+  border-top:1px solid var(--glass-border)}
+.tok{width:32px;height:32px;min-width:32px;border-radius:10px;background:#E6F4F9;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  overflow:hidden;flex-shrink:0}
+.tok img{width:32px!important;height:32px!important;border-radius:10px!important;object-fit:cover;display:block}
+.ek-mid{flex:1;min-width:0;cursor:pointer}
+.ek-mid b{display:block;font-size:.84rem;font-weight:600;line-height:1.2;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ek-mid b s{text-decoration:none;color:var(--text-dim);font-weight:500;font-size:.68rem}
+.chips{display:flex;gap:.25rem;margin-top:.25rem;flex-wrap:wrap}
+.chip{font-size:.62rem;font-weight:600;border-radius:20px;padding:.1rem .45rem;
+  background:#EDF1F7;color:#5A6980;font-family:var(--mono);white-space:nowrap}
+.chip.eur{background:var(--neon-green);color:#fff}
+.chip.warn{background:#FDEEDD;color:#b45309}
+.qty{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.88rem;font-weight:700;
+  color:var(--neon-magenta);text-align:right;white-space:nowrap;flex-shrink:0;
+  min-width:56px;cursor:pointer}
+.qty s{display:block;text-decoration:none;font-size:.58rem;color:var(--text-dim);
+  letter-spacing:.06em;font-weight:600}
+.tick{width:28px;height:28px;min-width:28px;border-radius:9px;border:1.8px solid var(--glass-border);
+  background:#fff;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.74rem;font-weight:700;color:transparent;transition:background .15s,border-color .15s,color .15s}
+.tick.on{background:var(--neon-green);border-color:var(--neon-green);color:#fff}
+.tick.pack.on{background:var(--neon-cyan);border-color:var(--neon-cyan)}
+/* Spaltenköpfe über den Karten */
+.ek-legend{display:flex;align-items:center;justify-content:flex-end;gap:.55rem;
+  padding:0 calc(.7rem + 1px) .5rem;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.ek-legend .l-q{min-width:56px;text-align:right;color:var(--neon-magenta)}
+.ek-legend .l-t{width:28px;text-align:center;font-size:.7rem}
+.panel-empty{color:var(--text-dim);font-size:.85rem;padding:.6rem .2rem}
 .gesamt-cat{margin-bottom:1rem}
 .gesamt-cat-title{font-family:'Poppins',sans-serif;font-size:.6rem;letter-spacing:.1em;
   color:var(--neon-yellow);margin-bottom:.4rem;text-transform:uppercase}
@@ -609,8 +629,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   padding:.3rem 0;border-bottom:1px solid var(--glass)}
 .gesamt-name{font-size:.85rem;color:var(--text)}
 .gesamt-qty{font-family:var(--mono);font-size:.9rem;color:var(--neon-cyan);font-weight:700}
-.gesamt-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;
-  color:var(--text-dim);font-size:1.2rem;cursor:pointer;padding:.3rem}
 .plan-modal{max-width:600px}
 #modal-plan{display:none}
 #modal-plan.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
@@ -668,15 +686,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   .modal-cat-header{padding-left:.55rem;padding-right:.55rem}
   .modal-cat-items{padding:0 0 .5rem 0}
 }
-/* ── Einkauf-Panel: Zeile mit Preis-Infos ── */
-.ek-open{cursor:pointer}
-.ek-main{flex:1;min-width:0}
-.ek-main .lief-row-name:hover{color:var(--neon-cyan)}
-.ek-price-line{display:flex;align-items:center;gap:.3rem;margin-top:.22rem;flex-wrap:wrap}
-.ek-tag{font-size:.66rem;font-weight:700;color:#5b6472;background:var(--glass);border-radius:10px;padding:.08rem .45rem;white-space:nowrap}
-.ek-total{font-size:.68rem;font-weight:700;color:#fff;background:var(--neon-green);border-radius:10px;padding:.08rem .5rem;white-space:nowrap}
-.ek-shop-sum{margin-left:auto;font-family:var(--mono);font-size:.78rem;font-weight:700;
-  color:#fff;background:var(--neon-green);border-radius:10px;padding:.1rem .55rem;letter-spacing:0;text-transform:none}
 /* ── Artikel-Detail-Modal ── */
 .ekd-input{background:#fff;border:1.5px solid var(--glass-border);border-radius:10px;color:var(--text);
   font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600;
@@ -758,9 +767,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     justify-content:center!important;gap:.25rem!important}
   #ctrl-buttons .btn-soll{flex:0 0 auto!important}
   #ctrl-buttons .btn-gesamt{flex:1!important}
-  .gesamt-panel{width:100vw;padding:calc(var(--header-h) + .1rem) .8rem 2rem}
-  .gesamt-panel-title{font-size:.95rem}
-  .lief-tab{font-size:.68rem;padding:.35rem .6rem}
+  .gesamt-panel{width:100vw}
+  .gesamt-panel-title{font-size:.92rem}
+  .panel-sum b{font-size:1.2rem}
+  .ek-mid b{font-size:.8rem}
+  .tab{font-size:.66rem}
   .th-col-empf,.th-col-plan{
     vertical-align:middle;text-align:center;padding:.25rem .15rem}
   .th-col-empf .th-text{
@@ -854,7 +865,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="lp-hub-container">
       <button class="lp-hub-card lp-hub-main" style="--card-color:#0FA574;--card-dark:#0A7A5A" onclick="openHubAction('zentrallager','einkauf')">
         <div class="lp-hub-icon">🛒</div>
-        <div class="lp-hub-label"><b>Zentrallager</b><s>Einkauf</s></div>
+        <div class="lp-hub-label"><b>Zentrallager</b><s>Einkauf</s>
+          <span class="lp-hub-money" id="hub-money-zentrallager"></span></div>
           <span class="lp-hub-badge" id="hub-badge-zentrallager"></span>
       </button>
       <div class="lp-hub-branches">
@@ -915,23 +927,30 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+<!-- Abdunklung hinter den Schubladen -->
+<div class="panel-scrim" id="panel-scrim" onclick="closeAllPanels()"></div>
+
 <!-- LIEFERUNGEN PANEL -->
 <div class="gesamt-panel" id="gesamt-panel" onclick="event.stopPropagation()">
   <div class="panel-head">
-    <button class="gesamt-close" onclick="closeLieferungen()" style="z-index:10">✕</button>
-    <div class="panel-eyebrow">Planung</div>
-    <div class="gesamt-panel-title" id="lief-panel-title">🚚 Lieferung</div>
+    <button class="gesamt-close" onclick="closeLieferungen()">✕</button>
+    <div class="gesamt-panel-title" id="lief-panel-title">🚚 <em>Lieferung</em></div>
+    <div class="panel-sum"><b id="lief-panel-count">0</b><s>Artikel geplant</s></div>
+  </div>
+  <div class="panel-sub">
+    <div class="ek-legend" id="lief-legend">
+      <span class="l-q">Gepl.</span><span class="l-t">📦</span><span class="l-t">✅</span>
+    </div>
   </div>
   <div class="panel-body">
-  <div id="lief-content"></div>
-  <div style="margin-top:1rem">
-    <button class="btn btn-outline-cyan" style="width:100%" onclick="openPlanFormFromPanel('lieferung')">➕ Artikel hinzufügen</button>
+    <div id="lief-content"></div>
   </div>
-  <!-- Кнопка завершить доставку -->
-  <div style="margin-top:.6rem" id="lief-complete-wrap">
-    <button class="btn btn-save" id="btn-lief-complete" onclick="openCompleteDelivery()" 
-      disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Lieferung abschliessen</button>
-  </div>
+  <div class="panel-foot">
+    <button class="btn btn-outline-cyan" onclick="openPlanFormFromPanel('lieferung')">＋ Artikel hinzufügen</button>
+    <div id="lief-complete-wrap">
+      <button class="btn btn-save" id="btn-lief-complete" onclick="openCompleteDelivery()"
+        disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Lieferung abschliessen</button>
+    </div>
   </div>
 </div>
 
@@ -1077,33 +1096,28 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <!-- EINKÄUFE PANEL -->
 <div class="gesamt-panel" id="einkaeufe-panel" onclick="event.stopPropagation()"
-     style="right:-101vw;--lg-accent:#0FA574;--lg-soft:rgba(15,165,116,.25);--lg-fg:#B7F0DC">
+     style="right:-101vw;--lg-accent:#0FA574;--lg-soft:rgba(15,165,116,.25);--lg-fg:#3EDCA9;--btn-acc:#0E8FB8">
   <div class="panel-head">
     <button class="gesamt-close" onclick="closeEinkaeufe()">✕</button>
-    <div class="panel-eyebrow">Planung</div>
-    <div class="gesamt-panel-title">🛒 Einkauf <span class="lager-pill">Zentrallager</span></div>
+    <div class="gesamt-panel-title">🛒 <em>Zentrallager</em> – Einkauf</div>
+    <div class="panel-sum"><b id="ek-panel-total">0,00 €</b><s id="ek-panel-sub">0 Artikel</s></div>
+  </div>
+  <div class="panel-sub">
+    <div class="tabs">
+      <button class="tab on" id="ek-sort-artikel" onclick="switchEkSort('artikel')">Nach Artikeln</button>
+      <button class="tab" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
+    </div>
+    <div class="ek-legend" id="ek-legend">
+      <span class="l-q">Gepl.</span><span class="l-t">✅</span>
+    </div>
   </div>
   <div class="panel-body">
-  <!-- Сортировка -->
-  <div style="display:flex;gap:.4rem;margin-bottom:1rem">
-    <button class="lief-tab active" id="ek-sort-artikel" onclick="switchEkSort('artikel')"
-      style="border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.1)">Nach Artikeln</button>
-    <button class="lief-tab" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
+    <div id="einkaeufe-content"></div>
   </div>
-  <!-- Шапка колонок -->
-  <div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .2rem .5rem;border-bottom:2px solid var(--glass-border);margin-bottom:.4rem">
-    <span style="flex:1;font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:700">Artikel</span>
-    <span style="width:64px;min-width:64px;text-align:center;font-size:.72rem;color:var(--neon-magenta);text-transform:uppercase;font-weight:700">Gepl.</span>
-    <span style="width:36px;min-width:36px;text-align:center;font-size:.72rem;color:var(--neon-green);font-weight:700">✓</span>
-  </div>
-  <div id="einkaeufe-content"></div>
-  <div style="margin-top:1rem">
-    <button class="btn btn-outline-cyan" style="width:100%" onclick="openPlanFormFromPanel('einkauf')">➕ Artikel hinzufügen</button>
-  </div>
-  <div style="margin-top:.6rem" id="ek-complete-wrap">
+  <div class="panel-foot">
+    <button class="btn btn-outline-cyan" onclick="openPlanFormFromPanel('einkauf')">＋ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
-      disabled style="width:100%;opacity:.4;cursor:not-allowed">✓ Einkauf abschliessen</button>
-  </div>
+      disabled style="opacity:.4;cursor:not-allowed">✓ Einkauf abschließen</button>
   </div>
 </div>
 
@@ -1536,6 +1550,18 @@ function updateHubBadges(){
     el.textContent = n ? n : '';
     el.style.display = n ? '' : 'none';
   });
+  // Zentrallager zeigt zusätzlich, was der geplante Einkauf kostet
+  const money = document.getElementById('hub-money-zentrallager');
+  if(money){
+    const items = planData['zentrallager'] || {};
+    let sum = 0;
+    Object.keys(items).forEach(id=>{
+      const q = Number(items[id])||0; if(q<=0) return;
+      const pr = getEinkaufspreis(id);
+      if(pr!==null) sum += pr*q;
+    });
+    money.textContent = sum>0 ? fmtEUR(sum) : '';
+  }
 }
 
 function updateButtons(){
@@ -1707,18 +1733,33 @@ window.openEinkaeufe = async function(){
     }
   }catch(e){}
   document.getElementById('einkaeufe-panel').classList.add('open');
+  togglePanelScrim(true);
   renderEkContent();
 };
 window.closeEinkaeufe = function(){
   document.getElementById('einkaeufe-panel').classList.remove('open');
+  togglePanelScrim(false);
+};
+// Abdunklung liegt hinter beiden Schubladen — sie verschwindet erst, wenn keine offen ist.
+function togglePanelScrim(){
+  const anyOpen = ['einkaeufe-panel','gesamt-panel'].some(id=>{
+    const el=document.getElementById(id); return el && el.classList.contains('open');
+  });
+  const sc = document.getElementById('panel-scrim');
+  if(sc) sc.classList.toggle('show', anyOpen);
+}
+window.closeAllPanels = function(){
+  ['einkaeufe-panel','gesamt-panel'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.classList.remove('open');
+  });
+  togglePanelScrim();
 };
 window.switchEkSort = function(sort){
   ekSort = sort;
   ['artikel','shops'].forEach(s=>{
     const btn=document.getElementById('ek-sort-'+s);
     if(!btn) return;
-    btn.classList.toggle('active', s===sort);
-    btn.style.cssText = s===sort ? 'border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,245,255,.1)' : '';
+    btn.classList.toggle('on', s===sort);
   });
   renderEkContent();
 };
@@ -1726,44 +1767,68 @@ window.switchEkSort = function(sort){
 // Die Spalte "Shop" gibt es nicht mehr — der Shop wird beim Hinzufügen/Bearbeiten des
 // Artikels im Detail-Fenster gesetzt und hier nur noch als kleines Tag angezeigt.
 // Klick auf Icon / Name / Menge öffnet dasselbe Detail-Fenster.
+// Gruppenkarte: Kopf (Shop bzw. Kategorie) + Zeilen, per Klick auf den Kopf zuklappbar
+function ekCard(id, label, sumHtml, rows){
+  return `<div class="ek" id="${id}">
+    <div class="ek-grp" onclick="document.getElementById('${id}').classList.toggle('collapsed')">
+      <b><i class="arw-i"></i>${label}</b>${sumHtml}</div>
+    ${rows}</div>`;
+}
+
 function buildEkRow(prod, gepl){
   if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
   const st = ekState[prod.id];
   const price = getEinkaufspreis(prod.id);
   const label = ekGeplLabel(prod.id, gepl);
-  const shopTag = ekSort==='shops' ? ''
-    : `<span class="ek-tag">🏪 ${st.shop||'— Shop —'}</span>`;
-  const priceTags = price!==null
-    ? `<span class="ek-tag">${fmtEUR(price)} / St.</span><span class="ek-total">🛒 ${fmtEUR(price*gepl)}</span>`
-    : `<span class="ek-tag" style="color:#b45309">Preis fehlt</span>`;
-  return `<div class="lief-row" id="ek-row-${prod.id}">
-    <div class="prod-icon ek-open" onclick="openEkDetail('${prod.id}','panel')" style="width:26px;height:26px;font-size:.82rem;flex-shrink:0;min-width:26px">${iconHTML(prod.icon,26)}</div>
-    <div class="ek-main">
-      <div class="lief-row-name ek-open" onclick="openEkDetail('${prod.id}','panel')" style="font-size:.84rem">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.2rem">${prod.unit||''}</span></div>
-      <div class="ek-price-line">${shopTag}${priceTags}</div>
+  const pack  = getEkPack(prod.id, gepl);
+  // Unter der Menge steht immer die reine Stückzahl — bei Packungen also 3× 24 / 72 St.
+  const sub   = pack ? gepl+' St.' : 'St.';
+  let chips = '';
+  if(ekSort!=='shops') chips += `<span class="chip">🏪 ${st.shop||'— Shop —'}</span>`;
+  chips += price!==null
+    ? `<span class="chip">${fmtEUR(price)} / St.</span><span class="chip eur">${fmtEUR(price*gepl)}</span>`
+    : `<span class="chip warn">Preis fehlt</span>`;
+  const open = `onclick="openEkDetail('${prod.id}','panel')"`;
+  return `<div class="ek-row" id="ek-row-${prod.id}">
+    <div class="tok" ${open}>${iconHTML(prod.icon,32)}</div>
+    <div class="ek-mid" ${open}>
+      <b>${prod.name}${prod.unit?` <s>${prod.unit}</s>`:''}</b>
+      <div class="chips">${chips}</div>
     </div>
-    <span class="lief-gepl-span" onclick="openEkDetail('${prod.id}','panel')" style="width:64px;min-width:64px;text-align:center;font-size:.88rem">${label}</span>
-    <div class="ek-check${st.bought?' bought':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')"></div>
+    <div class="qty" ${open}>${label}<s>${sub}</s></div>
+    <div class="tick${st.bought?' on':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')">✓</div>
   </div>`;
 }
 
 function renderEkContent(){
   const lgPlan = planData['zentrallager']||{};
   let html = '';
+  // Kopfzahlen: Gesamtsumme, Anzahl Artikel, Anzahl beteiligter Shops
+  let total=0, count=0; const shopSet=new Set();
+  PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
+    const gepl=lgPlan[prod.id]||0; if(!gepl) return;
+    if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+    const p=getEinkaufspreis(prod.id);
+    if(p!==null) total+=p*gepl;
+    count++;
+    if(ekState[prod.id].shop) shopSet.add(ekState[prod.id].shop);
+  }));
+  const totEl=document.getElementById('ek-panel-total');
+  const subEl=document.getElementById('ek-panel-sub');
+  if(totEl) totEl.textContent=fmtEUR(total);
+  if(subEl) subEl.textContent=count+' Artikel'+(shopSet.size?' · '+shopSet.size+' Shops':'');
+
   if(ekSort==='artikel'){
     PRODUCTS.forEach((cat,ci)=>{
-      let catHtml='';
+      let rows='', sum=0;
       cat.items.forEach(prod=>{
         const gepl=lgPlan[prod.id]||0; if(!gepl)return;
-        catHtml+=buildEkRow(prod,gepl);
+        rows+=buildEkRow(prod,gepl);
+        const p=getEinkaufspreis(prod.id);
+        if(p!==null) sum+=p*gepl;
       });
-      if(catHtml){
-        const wid='ek-cat-wrap-'+ci;
-        html+=`<div class="lief-cat-wrap" id="${wid}">
-          <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${cat.cat}</div>
-          <div class="lief-cat-items">${catHtml}</div>
-        </div>`;
-      }
+      if(rows) html+=ekCard('ek-cat-wrap-'+ci, cat.cat,
+        `<span class="sum">${fmtEUR(sum)}</span>`, rows);
     });
   } else {
     const byShop = {};
@@ -1775,21 +1840,19 @@ function renderEkContent(){
       byShop[shop].push({prod,gepl});
     }));
     Object.entries(byShop).sort(([a],[b])=>a.localeCompare(b)).forEach(([shop,items],si)=>{
-      const wid='ek-shop-wrap-'+si;
-      const catHtml=items.map(x=>buildEkRow(x.prod,x.gepl)).join('');
+      const rows=items.map(x=>buildEkRow(x.prod,x.gepl)).join('');
       // Gesamtsumme aller für diesen Shop geplanten Artikel (Menge × Einkaufspreis)
       const sum = items.reduce((acc,x)=>{
         const p = getEinkaufspreis(x.prod.id);
         return acc + (p!==null ? p*x.gepl : 0);
       },0);
-      html+=`<div class="lief-cat-wrap" id="${wid}">
-        <div class="lief-cat-title" onclick="document.getElementById('${wid}').classList.toggle('collapsed')">${shop}
-          <span class="ek-shop-sum">${items.length} Artikel · ${fmtEUR(sum)}</span></div>
-        <div class="lief-cat-items">${catHtml}</div>
-      </div>`;
+      html+=ekCard('ek-shop-wrap-'+si, '🏪 '+shop,
+        `<span class="sum">${fmtEUR(sum)}</span>`, rows);
     });
   }
-  if(!html) html='<p style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">Keine geplanten Einkäufe.</p>';
+  const legend=document.getElementById('ek-legend');
+  if(legend) legend.style.display = html ? '' : 'none';
+  if(!html) html='<p class="panel-empty">Keine geplanten Einkäufe.</p>';
   document.getElementById('einkaeufe-content').innerHTML=html;
   updateEkCompleteBtn();
 }
@@ -1817,7 +1880,7 @@ window.toggleEkCheck = function(prodId){
   if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
   ekState[prodId].bought=!ekState[prodId].bought;
   const el=document.getElementById('ek-chk-'+prodId);
-  if(el) el.className='ek-check'+(ekState[prodId].bought?' bought':'');
+  if(el) el.className='tick'+(ekState[prodId].bought?' on':'');
   updateEkCompleteBtn();
   const toSave={};
   Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSave[id]=true; });
@@ -1968,11 +2031,13 @@ let liefState = {};
 window.openLieferungen = async function(){
   updateLiefPanelTitle(currentLiefLager);
   document.getElementById('gesamt-panel').classList.add('open');
+  togglePanelScrim();
   await loadLiefState(currentLiefLager);
   renderLiefContent(currentLiefLager);
 };
 window.closeLieferungen = function(){
   document.getElementById('gesamt-panel').classList.remove('open');
+  togglePanelScrim();
 };
 
 // Hausfarbe je Filiale — dieselben Werte wie auf den übrigen Seiten
@@ -1985,7 +2050,7 @@ const LIEF_PANEL_FARBEN = {
 function updateLiefPanelTitle(lg){
   const name = LAGER_NAMES[lg]||lg;
   const titleEl = document.getElementById('lief-panel-title');
-  if(titleEl) titleEl.innerHTML = '🚚 Lieferung <span class="lager-pill">'+name+'</span>';
+  if(titleEl) titleEl.innerHTML = '🚚 <em>'+name+'</em> – Lieferung';
   // Das ganze Panel bekommt die Hausfarbe: Streifen unter dem Kopf, Pille,
   // Kante an den Artikelzeilen und die Farbe der geplanten Mengen.
   const panel = document.getElementById('gesamt-panel');
@@ -2022,47 +2087,43 @@ function renderLiefContent(lg){
   const lgPlan = planData[lg]||{};
   // Только артикли где Gepl.Lieferung > 0
   const hasData = PRODUCTS.some(cat=>cat.items.some(p=>lgPlan[p.id]>0));
+  const legend  = document.getElementById('lief-legend');
+  const cntEl   = document.getElementById('lief-panel-count');
   if(!hasData){
     document.getElementById('lief-content').innerHTML=
-      '<p style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">Keine geplanten Lieferungen.</p>';
+      '<p class="panel-empty">Keine geplanten Lieferungen.</p>';
     document.getElementById('lief-complete-wrap').style.display='none';
+    if(legend) legend.style.display='none';
+    if(cntEl) cntEl.textContent='0';
     return;
   }
   document.getElementById('lief-complete-wrap').style.display='';
+  if(legend) legend.style.display='';
 
-  let html = '<div class="lief-col-header">';
-  html += '<span class="lch-name">Artikel</span>';
-  html += '<span class="lch-gepl">Gepl.</span>';
-  html += '<span class="lch-pack" title="Gepackt">📦</span>';
-  html += '<span class="lch-deliv" title="Geliefert">✅</span>';
-  html += '</div>';
-
+  let html='', total=0;
   PRODUCTS.forEach((cat,ci)=>{
-    let catHtml='';
+    let rows='', n=0;
     cat.items.forEach(prod=>{
       const gepl = lgPlan[prod.id]||0;
       if(!gepl) return;
       if(!liefState[lg][prod.id]) liefState[lg][prod.id]={packed:false,delivered:false};
       const st = liefState[lg][prod.id];
-      catHtml += `<div class="lief-row" id="lief-row-${lg}-${prod.id}">
-        <div class="prod-icon" style="width:28px;height:28px;font-size:.88rem;flex-shrink:0;min-width:28px">${iconHTML(prod.icon,28)}</div>
-        <div class="lief-row-name">${prod.name}<span style="font-size:.68rem;color:var(--text-dim);margin-left:.25rem">${prod.unit||''}</span></div>
-        <span class="lief-gepl-span" onclick="openLiefGeplModal('${lg}','${prod.id}',${gepl})">${gepl}</span>
-        <div class="lief-check${st.packed?' packed':''}" id="lchk-pack-${lg}-${prod.id}"
-          onclick="toggleLiefCheck('${lg}','${prod.id}','packed')"></div>
-        <div class="lief-check${st.delivered?' delivered':''}" id="lchk-deliv-${lg}-${prod.id}"
-          onclick="toggleLiefCheck('${lg}','${prod.id}','delivered')"></div>
+      n++; total++;
+      rows += `<div class="ek-row" id="lief-row-${lg}-${prod.id}">
+        <div class="tok">${iconHTML(prod.icon,32)}</div>
+        <div class="ek-mid"><b>${prod.name}${prod.unit?` <s>${prod.unit}</s>`:''}</b></div>
+        <div class="qty" onclick="openLiefGeplModal('${lg}','${prod.id}',${gepl})">${gepl}<s>St.</s></div>
+        <div class="tick pack${st.packed?' on':''}" id="lchk-pack-${lg}-${prod.id}"
+          onclick="toggleLiefCheck('${lg}','${prod.id}','packed')">✓</div>
+        <div class="tick${st.delivered?' on':''}" id="lchk-deliv-${lg}-${prod.id}"
+          onclick="toggleLiefCheck('${lg}','${prod.id}','delivered')">✓</div>
       </div>`;
     });
-    if(catHtml){
-      const wrapId=`lief-cat-wrap-${lg}-${ci}`;
-      html+=`<div class="lief-cat-wrap" id="${wrapId}">
-        <div class="lief-cat-title" onclick="document.getElementById('${wrapId}').classList.toggle('collapsed')">${cat.cat}</div>
-        <div class="lief-cat-items">${catHtml}</div>
-      </div>`;
-    }
+    if(rows) html += ekCard(`lief-cat-wrap-${lg}-${ci}`, cat.cat,
+      `<span class="sum cnt">${n} Artikel</span>`, rows);
   });
 
+  if(cntEl) cntEl.textContent = total;
   document.getElementById('lief-content').innerHTML = html;
   updateCompleteBtn(lg);
 }
@@ -2110,8 +2171,8 @@ window.toggleLiefCheck = function(lg, prodId, type){
   // Обновляем UI чекбоксов
   const packEl = document.getElementById(`lchk-pack-${lg}-${prodId}`);
   const delivEl = document.getElementById(`lchk-deliv-${lg}-${prodId}`);
-  if(packEl){ packEl.className='lief-check'+(liefState[lg][prodId].packed?' packed':''); }
-  if(delivEl){ delivEl.className='lief-check'+(liefState[lg][prodId].delivered?' delivered':''); }
+  if(packEl){ packEl.className='tick pack'+(liefState[lg][prodId].packed?' on':''); }
+  if(delivEl){ delivEl.className='tick'+(liefState[lg][prodId].delivered?' on':''); }
   updateCompleteBtn(lg);
   // Speichern, damit die Galken beim Verlassen/Wiederöffnen der Form erhalten bleiben
   const toSave={};
