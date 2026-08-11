@@ -1890,11 +1890,14 @@ window.openRechnung = async function(branch){
   if(currentZeitraum.length!==7){ showToast('Bitte einen einzelnen Monat wählen'); return; }
   if(!Object.keys(rgTexte).length) await loadRgConfig();
   const t = currentZeitraum.split('-');
-  const heute = new Date().toISOString().slice(0,10);
+  // Rechnungsdatum: der 15. des FOLGEmonats — die Leistung des gewählten Monats
+  // wird im Monat danach abgerechnet. Nummer und Betreff bleiben beim Leistungsmonat.
+  const rgD = new Date(Number(t[0]), Number(t[1]), 15);   // Monat ohne -1 = Folgemonat
+  const rgDatum = rgD.getFullYear()+'-'+String(rgD.getMonth()+1).padStart(2,'0')+'-15';
   const e = rgConfig.empfaenger[branch] || {};
   document.getElementById('rg-branch').value = branch;
   document.getElementById('rg-empf').textContent = e.firma || branch;
-  document.getElementById('rg-datum').value = heute;
+  document.getElementById('rg-datum').value = rgDatum;
   document.getElementById('rg-nummer').value = rgNummer(branch);
   document.getElementById('rg-betreff').value = 'Rechnung für '+MONATE[Number(t[1])-1]+' '+t[0];
   const data = buildRechnungData(branch);
