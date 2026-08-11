@@ -210,6 +210,54 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   background:#E7EBF2;color:#93A0B2;white-space:nowrap;border:none;cursor:pointer}
 @media(max-width:640px){.col-pager{display:flex}}
 
+
+/* ══ Rechnungsstellung ══ */
+.rg-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.rg-btn{flex:1 1 auto;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;
+  letter-spacing:.03em;padding:.6rem .9rem;border-radius:11px;cursor:pointer;
+  background:#fff;border:1.5px solid var(--c);color:var(--c);transition:transform .15s}
+.rg-btn:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--c) 8%,#fff)}
+.rg-cfg{width:2.6rem;flex:0 0 2.6rem;border:1px solid var(--glass-border);background:#fff;
+  border-radius:11px;font-size:1rem;cursor:pointer}
+.rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.rg-input{width:100%;background:#fff;border:1.5px solid var(--glass-border);border-radius:10px;
+  padding:.55rem .7rem;font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:600;
+  color:var(--text);outline:none}
+.rg-input.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rg-input:focus{border-color:var(--neon-cyan)}
+.rg-prev{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.rg-prev-row{display:flex;justify-content:space-between;gap:.6rem;padding:.5rem .75rem;
+  border-top:1px solid var(--glass-border);font-size:.84rem}
+.rg-prev-row:first-child{border-top:none}
+.rg-prev-row b{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rg-prev-row.total{background:var(--ink);color:#fff;font-weight:700}
+.rg-prev-row.total b{color:#3EDCA9}
+.rg-prev-empty{padding:.8rem;color:var(--text-dim);font-size:.84rem;text-align:center}
+
+/* Konfiguration */
+.rgcfg-tabs{display:flex;gap:.35rem;margin-top:.75rem}
+.rgcfg-tab{flex:1;font-family:'Poppins',sans-serif;font-size:.68rem;font-weight:700;padding:.45rem;
+  border:none;border-radius:10px;background:rgba(255,255,255,.12);color:#AEBCD4;cursor:pointer}
+.rgcfg-tab.on{background:#fff;color:var(--ink)}
+.rgcfg-hint{font-size:.74rem;color:var(--text-dim);line-height:1.5;margin-bottom:.6rem}
+.rgcfg-cat{font-family:'Poppins',sans-serif;font-size:.6rem;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink);background:#E7ECF4;border-radius:8px;
+  padding:.4rem .7rem;margin:.8rem 0 .4rem}
+.rgcfg-row{display:flex;align-items:center;gap:.6rem;padding:.25rem 0}
+.rgcfg-name{width:170px;flex-shrink:0;font-size:.8rem;font-weight:600;color:var(--text);line-height:1.25}
+.rgcfg-name i{display:block;font-style:normal;font-size:.66rem;color:var(--text-dim)}
+.rgcfg-input{flex:1;min-width:0;background:#fff;border:1.5px solid var(--glass-border);
+  border-radius:9px;padding:.42rem .6rem;font-family:'Poppins',sans-serif;font-size:.82rem;
+  color:var(--text);outline:none;resize:vertical}
+.rgcfg-input.mono{font-family:var(--mono)}
+.rgcfg-input:focus{border-color:var(--neon-cyan)}
+@media(max-width:640px){
+  .rg-btn{flex:1 1 calc(50% - .5rem);font-size:.68rem}
+  .rg-grid{grid-template-columns:1fr}
+  .rgcfg-row{flex-direction:column;align-items:stretch;gap:.2rem}
+  .rgcfg-name{width:auto}
+}
+
 /* ══ Dienstleistungen: von Hand gepflegte Beträge ══ */
 .dl-cell{padding:.3rem .35rem!important}
 .dl-input{width:100%;min-width:0;box-sizing:border-box;text-align:center;
@@ -606,6 +654,59 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+
+<!-- ═══ MODAL: RECHNUNG ERSTELLEN ═══ -->
+<div class="modal-overlay" id="modal-rechnung" onclick="if(event.target===this)closeRechnung()">
+  <div class="modal we-modal">
+    <div class="we-head">
+      <button class="modal-close" onclick="closeRechnung()">&#x2715;</button>
+      <div class="we-eyebrow">Rechnung</div>
+      <div class="we-title-row"><span>Erstellen</span>
+        <span class="we-lager-pill" id="rg-empf">Filiale</span></div>
+    </div>
+    <div class="we-body">
+      <input type="hidden" id="rg-branch">
+      <div class="rg-grid">
+        <div class="field"><label class="field-label">Datum</label>
+          <input type="date" id="rg-datum" class="rg-input"></div>
+        <div class="field"><label class="field-label">Rechnungs-Nr</label>
+          <input type="text" id="rg-nummer" class="rg-input mono"></div>
+      </div>
+      <div class="field"><label class="field-label">Betreff</label>
+        <input type="text" id="rg-betreff" class="rg-input"></div>
+      <div class="field"><label class="field-label">Übersicht</label>
+        <div class="rg-prev" id="rg-vorschau"></div></div>
+      <div class="modal-btn-row we-foot">
+        <button class="btn btn-ghost" onclick="closeRechnung()">Abbrechen</button>
+        <button class="btn btn-primary btn-acc" id="rg-print-btn" onclick="printRechnung()">Rechnung öffnen &#x2192;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: RECHNUNGSTEXTE & STAMMDATEN ═══ -->
+<div class="modal-overlay" id="modal-rgcfg" onclick="if(event.target===this)closeRgConfig()">
+  <div class="modal we-modal">
+    <div class="we-head">
+      <button class="modal-close" onclick="closeRgConfig()">&#x2715;</button>
+      <div class="we-eyebrow">Konfiguration</div>
+      <div class="we-title-row"><span>Rechnung</span></div>
+      <div class="rgcfg-tabs">
+        <button class="rgcfg-tab on" data-tab="texte" onclick="rgCfgTab('texte')">Artikeltexte</button>
+        <button class="rgcfg-tab" data-tab="stamm" onclick="rgCfgTab('stamm')">Stammdaten</button>
+      </div>
+    </div>
+    <div class="we-body">
+      <div id="rgcfg-texte"></div>
+      <div id="rgcfg-stamm" class="we-hidden"></div>
+      <div class="modal-btn-row we-foot">
+        <button class="btn btn-ghost" onclick="closeRgConfig()">Schließen</button>
+        <button class="btn btn-primary btn-acc" onclick="saveRgConfig()">&#x2713; Speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="user-dropdown" id="user-dropdown">
   <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
   <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
@@ -678,6 +779,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <option value="2026-12">Dezember 2026</option>
     </select></div>
     </div>
+  </div>
+  <div class="rg-actions">
+    <button class="rg-btn" style="--c:#2563EB" onclick="openRechnung('nettetal')">🧾 Nettetal</button>
+    <button class="rg-btn" style="--c:#E11D48" onclick="openRechnung('brüggen')">🧾 Brüggen</button>
+    <button class="rg-btn" style="--c:#EA580C" onclick="openRechnung('viersen')">🧾 Viersen</button>
+    <button class="rg-btn" style="--c:#7C3AED" onclick="openRechnung('köln')">🧾 Köln</button>
+    <button class="rg-cfg" onclick="openRgConfig()" title="Rechnungstexte &amp; Stammdaten">⚙️</button>
   </div>
   <div class="kpi-row" id="kpi-row"></div>
   <div class="col-pager" id="col-pager"></div>
@@ -1211,6 +1319,111 @@ function buildColPager(){
 // Auf-/zugeklappt wird gemerkt, damit ein Neuaufbau der Tabelle (z. B. nach dem
 // Eintragen eines Betrags) den Zustand nicht zurücksetzt. Start: alles zu.
 const catOpenState = {};
+
+// ══════════ RECHNUNGSSTELLUNG ══════════════════════════════════════════════
+// Vorbelegte Rechnungstexte, übernommen aus der Excel-Datei 05/2026.
+// Über die Konfiguration (⚙️) sind sie frei änderbar; Änderungen liegen in
+// Firestore unter rechnung_config/texte und gelten dann für alle Monate.
+const DEFAULT_RG_TEXTE = {"rb_blue": "0,25 DPG DS Red Bull","rb_zero": "0,25 DPG DS Red Bull Zero","rb_white": "0,25 DPG DS Red Bull White","action_e": "0,25 DS DPG Action Energy","cola_red": "0,33 DS Coca Cola","cola_zero": "0,33 DS Coca Cola Zero","fanta": "0,33 DS Fanta Orange","sprite": "0,33 DS Sprite","vio_stil": "0,50 DPG FL VIO Wasser Stil","vio_med": "0,50 DPG FL VIO Wasser Medium","gero_sp": "0,33 DPG FL Gerolsteiner Wasser Sprudel","gero_med": "0,33 DPG FL Gerolsteiner Wasser Medium","durstl": "0,50 PG Durstlöscher Verschiedene Sorte","erdnuesse": "Ueltje Erdnuesse, 20 x 50g.","stuf": "Ueltje Studentenfutter, 20 x 50g.","snickers": "Snikers, 24 x 80g.","mars": "Mars, 24 x 70 g.","twix": "Twix, 30 x 70g.","mnm": "M&M, 16 x 82g","pringles": "Chips Pringles, 12 x 40g.","bifi_orig": "BIFI Original, 40 x 20g.","croissant": "Croissants, 5 x 48g.","madeleine": "Madeleines","biscoff": "Lotus Caramellgebäck Biscoff, 300St. Packung","nimm2": "Nimm 2 Soft, Bonbons, 400g.","risen": "Schoko Riesen, Bonbons, 900g.","milchb": "Milch Boller, Bonbons, 325g.","melange": "Melange Toffee, Bonbons, 325g.","haribo": "Haribo Party Spaß, 1000g.","ice_bon": "ICE, Bonbons, 400g.","minibox": "Mars MINI MIX Box - 3 KG.","tee_100": "TEE Verschiedene Sorten, 20St.","tee_20": "TEE Verschiedene Sorten, 100St.","zucker": "ZUCKER Raffinade, 2 KG.","cappuc": "PURE Cappucino Topping Tchibo, 1 KG.","glasrein": "Glasreiniger, 1L","spulmit": "Spülmittel, 750 ml","wc_rein": "WC Reiniger, 0,95L","urin_kalk": "WC Urinstein- und Kalklöser, 750 ml","wc_tab": "WC-Duftstein, 2 St.","duft_wc": "Duftspray, 300 ml","duft_hall": "Duftspray Automat., 250 ml","luftpar": "Lufterfrischer, 150 ml","geraet_d": "Einzelgerät für automatisches Duftspray","seife_nf": "Flüssigseife - Nachfüllpack, 2L","seife_fl": "Flüssigseife, 500 ml","bad_rein": "Bad reiniger Waschb.&Flisen","boden_aj": "Boden Reinigungsmittel AJAX","allzweck": "Allzweckreiniger","hygienr": "Hygienreiniger, 1,5L","antilim": "Anti Limescale, 750 ml","scheurm": "Scheuermilch, 750 ml","rohrrein": "Rohreiniger, 1L","essig_r": "Essigreiniger, 1L","toilp": "Tualettenpapier, 3lg., 20 St.","kuchenr": "Küchenrollen, 3lg., 8 St.","handtpap": "Handtuchpapier Papiertr., 5 x 250 St.","handsch_e": "Haushaltshandschuhe, 1 Paar","handsch_m": "Einmal Latexhandschuhe, 100 St.","feuchtt": "Feuchte Allzwecktücher, 80 St.","handgesc": "Handtücher / Geschirrtücher, 2 St.","putztuch": "Allzwecktücher Mikrofaser, 5 St.","swamme": "Topfschwämme, 6 St.","wischbez": "Wischbezug, 2 St.","staubf": "Staubfangtücher","staubsb": "Staubsaugerbeutel","buromат": "Büromaterial (Schreibwaren-Set)","mull120": "Müllbeutel - 120 L","mull60": "Müllbeutel - 60 L","mull50": "Müllbeutel - 50 L","mull35": "Müllbeutel - 35/30 L","mull25": "Müllbeutel - 25 L","mull10": "Müllbeutel - 10 L","hygient": "Hygienetücher","togo_d": "To-Go Deckel, 100 St.","togo_b": "To-Go Becher, 50 St.","urinam": "Urinamatte","kaffetab": "Kaffemaschinen Reinigungs-Tabs","desinfek": "Desinfektionsspray universal, 250 ml","batterie": "Batterien, AA","streichh": "Streichhölzer, Pack, je 38 St.","feuerzg": "Reibradfeuerzeug, 50St.","susstoff": "Süßstoff","kaffee": "PURE Fine Selection Finesse Tchibo, 1 KG.","kakao": "","kitkat": "","bifi_roll": "","rollino": "","werthers": "","brotchen": "","bref": "Bref Kalkreiniger Power, 750 ml","lappen": "Bodentuch","duftvase_g": "Duftstäbchen Raumduft, 200 ml","duftvase_t": "Duftstäbchen Raumduft, 90 ml"};
+
+// Absender, Empfänger und Nummernkreise — ebenfalls in der Konfiguration änderbar.
+const DEFAULT_RG_CONFIG = {
+  absender:{
+    firma:'Viktor Lukanowski Handelsvertretung',
+    strasse:'Langenbroicher Str. 47A',
+    ort:'D-52372 Kreuzau',
+    tel:'Tel: +49(0)172 7204394',
+    gf:'Viktor Lukanowski',
+    ustid:'USt-ID: DE163373632',
+    mail:'E-Mail: vlukanowski@gmail.com',
+    bank:'Kreissparkasse Köln',
+    iban:'IBAN: DE27 3705 0299 1142 1286 58',
+    swift:'SWIFT: COKSDE33XXX',
+    hinweis:'Bitte begleichen Sie die Rechnung innerhalb von 3 Wochen. Als Verwendungszweck geben Sie bitte Ihre Rechnungsnummer an.'
+  },
+  empfaenger:{
+    nettetal:{firma:'Game Galaxy Nettetal UG', strasse:'Josefstraße 16',  ort:'41334, Nettetal', code:'101'},
+    'brüggen':{firma:'Game Galaxy Brüggen UG', strasse:'Weiersfeld 33',   ort:'41379, Brüggen',  code:'102'},
+    viersen:{ firma:'Game Galaxy Viersen UG',  strasse:'',                ort:'', code:'103'},
+    'köln':{  firma:'Game Galaxy Köln UG',     strasse:'',                ort:'', code:'104'}
+  },
+  dl:{
+    inventur:'Inventur und Warenkontrolle\nPauschale gemäß Leistungsumfang',
+    beschaffung:'Beschaffungsmanagement (Einkäufe / Lieferungen / Nachfüllungen des Getränkeautomaten)\nPauschale gemäß Leistungsumfang'
+  }
+};
+let rgTexte = {}, rgConfig = {};
+
+// Mehrwertsteuer je Rechnungsgruppe
+const RG_MWST = {'Getränke':0.19,'Suesswaren/Snack':0.07,'Heißgetränke':0.07,
+                 'Haushaltsartikel und Verbrauchsmaterialien':0.19,'Dienstleistungen':0.19};
+// Zuordnung Portal-Kategorie → Rechnungsgruppe
+const RG_GRUPPE = {'Getränke':'Getränke','Snacks':'Suesswaren/Snack',
+                   'Süssigkeiten':'Suesswaren/Snack','Heißgetränke':'Heißgetränke',
+                   'Haushaltsartikel':'Haushaltsartikel und Verbrauchsmaterialien'};
+const RG_UEBERSCHRIFT = {'Getränke':'GETRÄNKE','Suesswaren/Snack':'SUESSWAREN / SNACK',
+  'Heißgetränke':'HEISSGETRÄNKE','Haushaltsartikel und Verbrauchsmaterialien':'HAUSHALTSARTIKEL / VERBRAUCHSMATERIALIEN',
+  'Dienstleistungen':'DIENSTLEISTUNGEN'};
+
+async function loadRgConfig(){
+  rgTexte  = Object.assign({}, DEFAULT_RG_TEXTE);
+  rgConfig = JSON.parse(JSON.stringify(DEFAULT_RG_CONFIG));
+  try{
+    const t = await db.collection('rechnung_config').doc('texte').get();
+    if(t.exists) Object.assign(rgTexte, t.data());
+  }catch(e){}
+  try{
+    const c = await db.collection('rechnung_config').doc('stammdaten').get();
+    if(c.exists){
+      const d=c.data();
+      if(d.absender)   Object.assign(rgConfig.absender, d.absender);
+      if(d.empfaenger) Object.keys(d.empfaenger).forEach(k=>Object.assign(rgConfig.empfaenger[k]||{}, d.empfaenger[k]));
+      if(d.dl)         Object.assign(rgConfig.dl, d.dl);
+    }
+  }catch(e){}
+}
+
+// Baut die Rechnungsdaten einer Filiale für den gewählten Monat.
+// Aufgenommen werden nur Artikel, die im Monat tatsächlich geliefert wurden.
+function buildRechnungData(branch){
+  const zeit = currentZeitraum;
+  const gruppen = {};   // Gruppe → {mwst, netto, brutto, zeilen:[]}
+  const add = (grp, zeile) => {
+    if(!gruppen[grp]) gruppen[grp] = {mwst:RG_MWST[grp], brutto:0, zeilen:[]};
+    gruppen[grp].zeilen.push(zeile);
+    gruppen[grp].brutto += zeile.gesamt;
+  };
+
+  buildRechnungenCategories().forEach(catObj=>{
+    const grp = RG_GRUPPE[catObj.cat] || catObj.cat;
+    catObj.items.forEach(prod=>{
+      const stueck = Number((lieferungenPerBranch[branch]||{})[prod.id]) || 0;
+      if(!stueck) return;                       // nichts geliefert → nicht auf die Rechnung
+      const vk    = getEffectivePrice(prod.id,'verkauf',zeit) || 0;
+      const kolli = prod.kolli || 1;
+      const anzahl = stueck / kolli;
+      add(grp, {text: rgTexte[prod.id] || prod.name, anzahl, einzel:vk, gesamt:anzahl*vk});
+    });
+  });
+
+  DL_ROWS.forEach(row=>{
+    const v = getDlValue(row.id, branch, zeit);
+    if(!v) return;
+    add('Dienstleistungen', {text:(rgConfig.dl[row.id]||row.name), anzahl:1, einzel:v, gesamt:v});
+  });
+
+  const gruppenListe = Object.keys(RG_MWST).filter(g=>gruppen[g]).map(g=>{
+    const o = gruppen[g];
+    o.name = g; o.netto = o.brutto/(1+o.mwst);
+    return o;
+  });
+  const nettoSumme = gruppenListe.reduce((a,g)=>a+g.netto,0);
+  const bruttoSumme = gruppenListe.reduce((a,g)=>a+g.brutto,0);
+  const nettoJeSatz = {};
+  gruppenListe.forEach(g=>{ nettoJeSatz[g.mwst]=(nettoJeSatz[g.mwst]||0)+g.netto; });
+  return {branch, gruppen:gruppenListe, nettoSumme, bruttoSumme, nettoJeSatz};
+}
+
 window.toggleCategory = function(row){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
@@ -1389,6 +1602,7 @@ async function loadData(){
     }catch(e){}
   }
 
+  await loadRgConfig();
   hideSpinner();
   renderTableActual();
 }
@@ -1658,6 +1872,237 @@ window.openEditWareneingang = function(date){
     buildConfirm();
   },100);
 }
+
+
+const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
+                'September','Oktober','November','Dezember'];
+const eur = v => v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const num = v => (Math.round(v*100)/100).toLocaleString('de-DE',{maximumFractionDigits:2});
+
+// Nummernkreis wie bisher von Hand geführt: Jahr - Filialcode - Monat
+function rgNummer(branch){
+  const t = currentZeitraum.split('-');
+  const code = (rgConfig.empfaenger[branch]||{}).code || '100';
+  return t[0]+'-'+code+'-'+t[1];
+}
+
+window.openRechnung = async function(branch){
+  if(currentZeitraum.length!==7){ showToast('Bitte einen einzelnen Monat wählen'); return; }
+  if(!Object.keys(rgTexte).length) await loadRgConfig();
+  const t = currentZeitraum.split('-');
+  const heute = new Date().toISOString().slice(0,10);
+  const e = rgConfig.empfaenger[branch] || {};
+  document.getElementById('rg-branch').value = branch;
+  document.getElementById('rg-empf').textContent = e.firma || branch;
+  document.getElementById('rg-datum').value = heute;
+  document.getElementById('rg-nummer').value = rgNummer(branch);
+  document.getElementById('rg-betreff').value = 'Rechnung für '+MONATE[Number(t[1])-1]+' '+t[0];
+  const data = buildRechnungData(branch);
+  document.getElementById('rg-vorschau').innerHTML = data.gruppen.length
+    ? data.gruppen.map(g=>'<div class="rg-prev-row"><span>'+g.name+'</span><b>'+eur(g.brutto)+'</b></div>').join('')
+      + '<div class="rg-prev-row total"><span>Gesamtbetrag (brutto)</span><b>'+eur(data.bruttoSumme)+'</b></div>'
+    : '<div class="rg-prev-empty">Für diesen Monat gibt es keine Positionen.</div>';
+  document.getElementById('rg-print-btn').disabled = !data.gruppen.length;
+  document.getElementById('modal-rechnung').classList.add('show');
+};
+window.closeRechnung = function(){ document.getElementById('modal-rechnung').classList.remove('show'); };
+
+// Erzeugt die druckfertige Rechnung in einem neuen Fenster. Bewusst als HTML mit
+// eigenem Druck-Stylesheet: gleiches Layout wie die bisherige Vorlage, und
+// "Als PDF sichern" übernimmt das Betriebssystem.
+window.printRechnung = function(){
+  const branch  = document.getElementById('rg-branch').value;
+  const datum   = document.getElementById('rg-datum').value;
+  const nummer  = document.getElementById('rg-nummer').value;
+  const betreff = document.getElementById('rg-betreff').value;
+  const d = buildRechnungData(branch);
+  const a = rgConfig.absender, e = rgConfig.empfaenger[branch] || {};
+  const dstr = datum ? datum.split('-').reverse().join('.') : '';
+  const br = function(t){ return String(t||'').replace(/\n/g,'<br>'); };
+
+  const uebersicht = d.gruppen.map(function(g){
+    return '<tr><td class="li">'+br(g.name)+'</td>'
+         + '<td class="ri">'+eur(g.netto)+'</td>'
+         + '<td class="ct">'+Math.round(g.mwst*100)+'%</td>'
+         + '<td class="ri bold">'+eur(g.brutto)+'</td></tr>';
+  }).join('');
+
+  let pos = 0;
+  const detail = d.gruppen.map(function(g){
+    const kopf = '<tr class="grp"><td colspan="6">'+(RG_UEBERSCHRIFT[g.name]||g.name.toUpperCase())+'</td></tr>';
+    const zeilen = g.zeilen.map(function(z){
+      pos++;
+      return '<tr><td class="ct">'+pos+'</td>'
+           + '<td class="li">'+br(z.text)+'</td>'
+           + '<td class="ct">'+num(z.anzahl)+'</td>'
+           + '<td class="ct">'+Math.round(g.mwst*100)+'%</td>'
+           + '<td class="ri">'+eur(z.einzel)+'</td>'
+           + '<td class="ri">'+eur(z.gesamt)+'</td></tr>';
+    }).join('');
+    return kopf+zeilen;
+  }).join('');
+
+  const steuer = Object.keys(d.nettoJeSatz).sort(function(x,y){return y-x;}).map(function(sz){
+    return '<tr><td class="ri lbl">MwSt. '+Math.round(sz*100)+'% auf</td>'
+         + '<td class="ri">'+eur(d.nettoJeSatz[sz])+'</td>'
+         + '<td class="ri">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
+  }).join('');
+
+  const fuss = '<div class="fuss">'
+    + '<div><b>'+a.firma+'</b><br>'+a.strasse+'<br>'+a.ort+'<br>'+a.tel+'</div>'
+    + '<div>Geschäftsführer:<br>'+a.gf+'<br>'+a.ustid+'<br>'+a.mail+'</div>'
+    + '<div>Bankverbindung:<br>'+a.bank+'<br>'+a.iban+'<br>'+a.swift+'</div></div>';
+
+  const html = '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">'
++'<title>'+nummer+' – '+(e.firma||branch)+'</title><style>'
++'@page{size:A4;margin:16mm 14mm}'
++'*{box-sizing:border-box}'
++'body{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#111;margin:0}'
++'.seite{page-break-after:always;position:relative;min-height:245mm;padding-bottom:26mm}'
++'.seite:last-child{page-break-after:auto}'
++'.marke{width:60px;height:60px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6mm}'
++'.marke i{display:block;border-radius:2px}'
++'.kopf{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14mm}'
++'.kopf .re{text-align:right}'
++'h1{font-size:12pt;margin:0 0 6mm}'
++'table{width:100%;border-collapse:collapse}'
++'th{background:#F0742A;color:#fff;font-weight:700;font-size:9pt;padding:2.6mm 2mm;text-align:left}'
++'th.ri{text-align:right}th.ct{text-align:center}'
++'td{padding:2.4mm 2mm;border-bottom:.4pt solid #d8d8d8;vertical-align:top}'
++'.ri{text-align:right;white-space:nowrap}.ct{text-align:center;white-space:nowrap}'
++'.bold{font-weight:700}'
++'.summe{margin-top:8mm;margin-left:auto;width:96mm}'
++'.summe td{border:none;padding:1.4mm 2mm}'
++'.summe .lbl{color:#C1531A}'
++'.summe .end td{border-top:1.6pt solid #F0742A;font-weight:700;font-size:10.5pt;padding-top:2.4mm}'
++'.hinweis{margin-top:10mm;font-size:9pt;line-height:1.5}'
++'.fuss{position:absolute;bottom:0;left:0;right:0;display:flex;gap:8mm;font-size:7.5pt;color:#444;'
++'line-height:1.45;border-top:.4pt solid #ddd;padding-top:2.5mm}'
++'.fuss>div{flex:1}'
++'.dl-kopf{font-weight:700;font-size:10pt;margin-bottom:5mm}'
++'tr.grp td{background:#fff;font-weight:700;padding-top:4mm;border-bottom:.8pt solid #999}'
++'@media print{.drucken{display:none}}'
++'.drucken{position:fixed;top:10px;right:10px;padding:.6rem 1.1rem;border:none;border-radius:8px;'
++'background:#0E8FB8;color:#fff;font:600 14px Arial;cursor:pointer}'
++'</style></head><body>'
++'<button class="drucken" onclick="window.print()">Drucken / als PDF sichern</button>'
++'<div class="seite"><div class="kopf"><div>'
++'<div class="marke"><i style="background:#F5D400"></i><i style="background:#F0742A"></i>'
++'<i style="background:#E8502A"></i><i style="background:#F0A020"></i></div>'
++'<div><b>'+(e.firma||'')+'</b><br>'+(e.strasse||'')+'<br>'+(e.ort||'')+'</div></div>'
++'<div class="re">Datum: <b>'+dstr+'</b><br>Rechnungs-Nr: <b>'+nummer+'</b></div></div>'
++'<h1>'+betreff+'</h1><table>'
++'<tr><th>Rechnungsübersicht (Details siehe Folgeseiten)</th><th class="ri">Nettobetrag</th>'
++'<th class="ct">MwSt.</th><th class="ri">Bruttobetrag</th></tr>'+uebersicht+'</table>'
++'<table class="summe">'
++'<tr><td class="ri lbl">Gesamtbetrag (netto)</td><td></td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
++steuer
++'<tr class="end"><td class="ri">Gesamtbetrag (brutto):</td><td></td><td class="ri">'+eur(d.bruttoSumme)+'</td></tr>'
++'</table><div class="hinweis">'+(a.hinweis||'')+'</div>'+fuss+'</div>'
++'<div class="seite"><div class="dl-kopf">Detailauflistung</div><table>'
++'<tr><th class="ct">Pos.</th><th>Artikelbezeichnung</th><th class="ct">Anzahl</th>'
++'<th class="ct">MwSt.</th><th class="ri">Einzelpreis (brutto)</th><th class="ri">Gesamtpreis (brutto)</th></tr>'
++detail+'</table>'+fuss+'</div></body></html>';
+
+  const w = window.open('','_blank');
+  if(!w){ showToast('Bitte Pop-ups für diese Seite erlauben'); return; }
+  w.document.write(html); w.document.close();
+};
+
+
+// ── Konfiguration: Artikeltexte und Stammdaten ──────────────────────────────
+window.rgCfgTab = function(tab){
+  document.querySelectorAll('.rgcfg-tab').forEach(function(b){
+    b.classList.toggle('on', b.dataset.tab===tab);
+  });
+  document.getElementById('rgcfg-texte').classList.toggle('we-hidden', tab!=='texte');
+  document.getElementById('rgcfg-stamm').classList.toggle('we-hidden', tab!=='stamm');
+};
+
+window.openRgConfig = async function(){
+  if(!Object.keys(rgTexte).length) await loadRgConfig();
+
+  // Artikeltexte: links der kurze Portalname, rechts die Zeile für die Rechnung
+  let html = '<div class="rgcfg-hint">Links steht der Name aus dem Portal, rechts die Zeile, '
+           + 'die auf der Rechnung erscheint.</div>';
+  buildRechnungenCategories().forEach(function(catObj){
+    html += '<div class="rgcfg-cat">'+catObj.cat+'</div>';
+    catObj.items.forEach(function(prod){
+      html += '<div class="rgcfg-row">'
+            + '<div class="rgcfg-name">'+prod.name
+            + (prod.unit?'<i>'+prod.unit+'</i>':'')+'</div>'
+            + '<input class="rgcfg-input" data-prod="'+prod.id+'" '
+            + 'value="'+String(rgTexte[prod.id]||'').replace(/"/g,'&quot;')+'" '
+            + 'placeholder="'+String(prod.name).replace(/"/g,'&quot;')+'"></div>';
+    });
+  });
+  html += '<div class="rgcfg-cat">Dienstleistungen</div>';
+  DL_ROWS.forEach(function(row){
+    html += '<div class="rgcfg-row">'
+          + '<div class="rgcfg-name">'+row.name+'</div>'
+          + '<textarea class="rgcfg-input" rows="2" data-dl="'+row.id+'">'
+          + String(rgConfig.dl[row.id]||'')+'</textarea></div>';
+  });
+  document.getElementById('rgcfg-texte').innerHTML = html;
+
+  // Stammdaten: Absender einmal, Empfänger je Filiale
+  const a = rgConfig.absender;
+  const f = function(label, key, val, cls){
+    return '<div class="rgcfg-row"><div class="rgcfg-name">'+label+'</div>'
+         + '<input class="rgcfg-input" data-'+cls+'="'+key+'" value="'
+         + String(val||'').replace(/"/g,'&quot;')+'"></div>';
+  };
+  let sh = '<div class="rgcfg-cat">Absender</div>'
+    + f('Firma','firma',a.firma,'abs') + f('Straße','strasse',a.strasse,'abs')
+    + f('Ort','ort',a.ort,'abs') + f('Telefon','tel',a.tel,'abs')
+    + f('Geschäftsführer','gf',a.gf,'abs') + f('USt-ID','ustid',a.ustid,'abs')
+    + f('E-Mail','mail',a.mail,'abs') + f('Bank','bank',a.bank,'abs')
+    + f('IBAN','iban',a.iban,'abs') + f('SWIFT','swift',a.swift,'abs')
+    + '<div class="rgcfg-row"><div class="rgcfg-name">Zahlungshinweis</div>'
+    + '<textarea class="rgcfg-input" rows="2" data-abs="hinweis">'+String(a.hinweis||'')+'</textarea></div>';
+  BRANCHES.forEach(function(br){
+    const e = rgConfig.empfaenger[br] || {};
+    sh += '<div class="rgcfg-cat">Empfänger — '+BRANCH_LABELS[br]+'</div>'
+        + '<div class="rgcfg-row"><div class="rgcfg-name">Firma</div><input class="rgcfg-input" data-emp="'+br+'|firma" value="'+String(e.firma||'').replace(/"/g,'&quot;')+'"></div>'
+        + '<div class="rgcfg-row"><div class="rgcfg-name">Straße</div><input class="rgcfg-input" data-emp="'+br+'|strasse" value="'+String(e.strasse||'').replace(/"/g,'&quot;')+'"></div>'
+        + '<div class="rgcfg-row"><div class="rgcfg-name">PLZ, Ort</div><input class="rgcfg-input" data-emp="'+br+'|ort" value="'+String(e.ort||'').replace(/"/g,'&quot;')+'"></div>'
+        + '<div class="rgcfg-row"><div class="rgcfg-name">Nummernkreis<i>Jahr-Code-Monat</i></div><input class="rgcfg-input mono" data-emp="'+br+'|code" value="'+String(e.code||'').replace(/"/g,'&quot;')+'"></div>';
+  });
+  document.getElementById('rgcfg-stamm').innerHTML = sh;
+
+  rgCfgTab('texte');
+  document.getElementById('modal-rgcfg').classList.add('show');
+};
+window.closeRgConfig = function(){ document.getElementById('modal-rgcfg').classList.remove('show'); };
+
+window.saveRgConfig = async function(){
+  showSpinner();
+  try{
+    const texte = {};
+    document.querySelectorAll('#rgcfg-texte [data-prod]').forEach(function(el){
+      const v = el.value.trim();
+      if(v) texte[el.dataset.prod] = v;
+    });
+    document.querySelectorAll('#rgcfg-texte [data-dl]').forEach(function(el){
+      rgConfig.dl[el.dataset.dl] = el.value;
+    });
+    document.querySelectorAll('#rgcfg-stamm [data-abs]').forEach(function(el){
+      rgConfig.absender[el.dataset.abs] = el.value;
+    });
+    document.querySelectorAll('#rgcfg-stamm [data-emp]').forEach(function(el){
+      const p = el.dataset.emp.split('|');
+      if(!rgConfig.empfaenger[p[0]]) rgConfig.empfaenger[p[0]] = {};
+      rgConfig.empfaenger[p[0]][p[1]] = el.value;
+    });
+    await db.collection('rechnung_config').doc('texte').set(texte);
+    await db.collection('rechnung_config').doc('stammdaten')
+      .set({absender:rgConfig.absender, empfaenger:rgConfig.empfaenger, dl:rgConfig.dl});
+    rgTexte = Object.assign({}, DEFAULT_RG_TEXTE, texte);
+    showToast('Gespeichert ✓');
+    closeRgConfig();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',async()=>{
