@@ -123,49 +123,55 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── TOP CONTROLS ── */
 .lp-hub{margin-bottom:1.5rem}
-.lp-hub-container{width:75%;margin:0 auto;display:flex;flex-direction:column;gap:1rem}
-.lp-hub-branches{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-.lp-hub-card{--card-color:var(--neon-cyan);--card-dark:var(--neon-cyan);aspect-ratio:1/1;justify-self:stretch;
+/* Monatsleiste über den Kacheln — gleiche Breite wie das Kachelraster */
+.lp-bar{max-width:660px;margin:0 auto 1rem}
+.lp-seg{display:block;position:relative;background:#fff;border:1px solid var(--glass-border);
+  border-radius:11px;padding:.45rem .75rem .5rem}
+.lp-seg-l{display:block;font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.lp-seg select{width:100%;border:none;background:none;outline:none;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:700;color:var(--text);
+  padding:0;appearance:none;-webkit-appearance:none}
+.lp-seg::after{content:'▾';position:absolute;right:.85rem;bottom:.55rem;
+  color:var(--neon-cyan);font-size:.72rem;pointer-events:none}
+
+.lp-hub-container{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:.6rem}
+.lp-hub-branches{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+.lp-hub-card{--card-color:var(--neon-cyan);--card-dark:var(--neon-cyan);
+  min-height:116px;justify-self:stretch;
   display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:.5rem;
   background:linear-gradient(135deg,var(--card-dark),var(--card-color));
   border:none;border-radius:14px;cursor:pointer;position:relative;overflow:hidden;
   transition:transform .18s,box-shadow .2s;
-  box-shadow:0 4px 14px color-mix(in srgb,var(--card-color) 30%,transparent);padding:1rem}
-.lp-hub-card.lp-hub-main{width:100%;aspect-ratio:auto;height:150px;flex-direction:column;
-  align-items:flex-start;justify-content:space-between}
-.lp-hub-card.lp-hub-main .lp-hub-icon{font-size:2.2rem}
+  box-shadow:0 4px 14px color-mix(in srgb,var(--card-color) 30%,transparent);padding:.9rem .85rem}
+.lp-hub-card.lp-hub-main{width:100%;min-height:112px}
+.lp-hub-card.lp-hub-main .lp-hub-icon{font-size:1.7rem}
 .lp-hub-card:hover{transform:translateY(-3px);
   box-shadow:0 10px 26px color-mix(in srgb,var(--card-color) 45%,transparent)}
-.lp-hub-icon{font-size:1.9rem;line-height:1}
-.lp-hub-label{font-family:'Poppins',sans-serif;font-weight:700;font-size:.95rem;
-  color:#fff;text-align:left;line-height:1.25}
+.lp-hub-icon{font-size:1.45rem;line-height:1}
+.lp-hub-label{font-family:'Poppins',sans-serif;font-weight:700;font-size:.9rem;
+  color:#fff;text-align:left;line-height:1.2}
 .lp-hub-label b{display:block;font-weight:700}
-.lp-hub-label s{display:block;text-decoration:none;font-size:.62rem;letter-spacing:.13em;
-  text-transform:uppercase;opacity:.75;margin-top:.15rem;font-weight:600}
+.lp-hub-label s{display:block;text-decoration:none;font-size:.62rem;letter-spacing:.11em;
+  text-transform:uppercase;opacity:.72;margin-top:.15rem;font-weight:600}
 /* Einkaufssumme auf der Zentrallager-Kachel */
 .lp-hub-money{display:block;font-family:var(--mono);font-variant-numeric:tabular-nums;
-  font-size:1.15rem;font-weight:700;color:#fff;margin-top:.3rem;letter-spacing:0}
+  font-size:1.05rem;font-weight:700;color:#fff;margin-top:.35rem;letter-spacing:0}
 .lp-hub-money:empty{display:none}
 /* Zähler oben rechts: wie viele Artikel sind geplant */
-.lp-hub-badge{position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.22);
-  border-radius:20px;padding:.14rem .5rem;font-family:var(--mono);font-size:.66rem;
+.lp-hub-badge{position:absolute;top:.7rem;right:.7rem;background:rgba(255,255,255,.2);
+  border-radius:20px;padding:.14rem .5rem;font-family:var(--mono);font-size:.62rem;
   font-weight:700;color:#fff;letter-spacing:0}
-.lp-hub-soll-link{display:block;margin:1.2rem auto 0;background:#fff;border:1.5px solid var(--glass-border);
-  border-radius:11px;color:var(--text-dim);font-family:'Poppins',sans-serif;font-size:.76rem;
-  font-weight:700;letter-spacing:.04em;padding:.7rem 1.2rem;cursor:pointer;transition:all .2s}
+.lp-hub-soll-link{display:block;width:100%;max-width:660px;margin:.75rem auto 0;
+  background:#fff;border:1.5px solid var(--glass-border);
+  border-radius:11px;color:var(--text-dim);font-family:'Poppins',sans-serif;font-size:.78rem;
+  font-weight:700;letter-spacing:.04em;padding:.8rem 1.2rem;cursor:pointer;transition:all .2s}
 .lp-hub-soll-link:hover{border-color:var(--neon-cyan);color:var(--neon-cyan)}
-@media(min-width:641px){
-  .lp-hub-container{width:60%;min-width:560px}
-  .lp-hub-branches{grid-template-columns:repeat(4,1fr)}
-}
 @media(max-width:640px){
-  .lp-hub-container{width:75%;gap:.7rem}
-  .lp-hub-branches{gap:.7rem}
-  .lp-hub-card{padding:.7rem}
-  .lp-hub-card.lp-hub-main{height:130px}
-  .lp-hub-icon{font-size:1.7rem}
-  .lp-hub-card.lp-hub-main .lp-hub-icon{font-size:2rem}
-  .lp-hub-label{font-size:.76rem}
+  .lp-hub-card{min-height:104px;padding:.8rem .75rem}
+  .lp-hub-card.lp-hub-main{min-height:100px}
+  .lp-hub-label{font-size:.85rem}
+  .lp-hub-money{font-size:.98rem}
 }
 .lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
 .ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
@@ -302,6 +308,55 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .inline-input{background:#fff;border:1px solid var(--neon-cyan);border-radius:4px;
   color:var(--neon-cyan);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.8rem;
   width:70px;text-align:center;padding:.2rem .3rem;outline:none}
+
+/* ══ Planungsfenster (Neuer Einkauf / Neue Lieferung) ═══════════════════════
+   Gleicher Aufbau wie beim Wareneingang: dunkler Kopf in der Hausfarbe,
+   rollender Mittelteil, feste Fußleiste. */
+.pmodal{background:var(--bg);border-radius:16px;width:100%;max-width:640px;max-height:92vh;
+  margin:auto;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 30px 70px rgba(16,26,46,.35);--acc:var(--neon-cyan);
+  --acc-soft:rgba(14,143,184,.22);--acc-fg:#9BE0F5;
+  --acc-grad:linear-gradient(100deg,#0A6D8D,#0E8FB8)}
+.pm-head{background:var(--ink);color:#fff;padding:.9rem 1rem .85rem;position:relative;flex-shrink:0}
+.pm-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--acc)}
+.pm-close{position:absolute;top:.8rem;right:.95rem;background:none;border:none;line-height:1;
+  color:rgba(255,255,255,.6);font-size:1.15rem;cursor:pointer;padding:.2rem}
+.pm-close:hover{color:#fff}
+.pm-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.pm-title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:700;margin-top:.15rem;
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding-right:2rem}
+.pm-lgr{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--acc-soft);color:var(--acc-fg)}
+.pm-body{flex:1;overflow-y:auto;padding:.85rem .9rem 1rem;-webkit-overflow-scrolling:touch}
+.pm-fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800;margin-bottom:.35rem}
+.pmodal .pm-date{width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  padding:.6rem .75rem;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:.95rem;font-weight:600;color:var(--text);outline:none;margin-bottom:.9rem}
+.pmodal .pm-date:focus{border-color:var(--acc)}
+.pm-foot{flex-shrink:0;display:flex;gap:.5rem;background:var(--bg);
+  border-top:1px solid var(--glass-border);
+  padding:.75rem .9rem calc(1rem + env(safe-area-inset-bottom))}
+.pm-foot .btn{flex:1}
+.btn-acc{background:var(--acc-grad);color:#fff;border:none;
+  box-shadow:0 4px 14px rgba(16,26,46,.18)}
+.btn-acc:hover{transform:translateY(-1px)}
+/* Artikelliste im Planungsfenster: Kategoriebalken + weiße Kartenliste */
+#modal-plan .modal-cat{margin-bottom:.6rem}
+#modal-plan .modal-cat-header{background:#E7ECF4;border:none;border-radius:9px;
+  padding:.45rem .7rem;margin-bottom:0}
+#modal-plan .modal-cat-header:hover{background:#DFE6F0}
+#modal-plan .modal-cat-label{color:var(--ink);font-size:.62rem;letter-spacing:.14em;font-weight:800}
+#modal-plan .modal-cat-items{padding:0;margin-top:.4rem;background:#fff;
+  border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+#modal-plan .plan-form-row{padding:.45rem .6rem;border-bottom:none;
+  border-top:1px solid var(--glass-border);border-radius:0}
+#modal-plan .plan-form-row:first-child{border-top:none}
+#modal-plan .plan-form-row:nth-child(even){background:var(--zebra)}
+#modal-plan .plan-form-row:hover{background:#EDF3F8}
+#modal-plan .prod-icon{border-radius:9px;background:#E6F4F9;border:none}
+#modal-plan .prod-icon img{border-radius:9px!important}
+#modal-plan .plan-form-header{padding:.45rem .6rem;border-bottom:none;margin-bottom:.2rem}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
@@ -631,7 +686,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .gesamt-qty{font-family:var(--mono);font-size:.9rem;color:var(--neon-cyan);font-weight:700}
 .plan-modal{max-width:600px}
 #modal-plan{display:none}
-#modal-plan.show{display:flex;align-items:flex-start;justify-content:center;padding-top:2rem}
+#modal-plan.show{display:flex;align-items:center;justify-content:center;padding:1rem;overflow:hidden}
 .plan-form-row{display:flex;align-items:center;gap:.5rem;padding:.45rem .5rem;border-bottom:1px solid var(--glass-border);border-radius:4px;min-width:0}
 .plan-form-row:hover{background:rgba(8,145,178,.03)}
 .plan-form-name{flex:1;font-size:.86rem;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
@@ -669,8 +724,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
    spalten werden schmaler und der Name darf über zwei Zeilen umbrechen, statt
    abgeschnitten zu werden. */
 @media(max-width:640px){
-  #modal-plan .modal{padding:1.1rem .75rem 1.2rem}
-  #modal-plan.show{padding-top:1rem}
+  #modal-plan.show{padding:.5rem}
+  .pmodal{max-height:96vh;border-radius:14px}
+  .pm-body{padding:.75rem .6rem .9rem}
   .plan-form-header{gap:.3rem;padding:.4rem .15rem}
   .plan-form-row{gap:.3rem;padding:.42rem .15rem}
   .pfh-st,.pfn-st{display:none}
@@ -861,6 +917,12 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <div class="main-content">
   <!-- ── HUB: große Aktions-Kacheln ── -->
+  <div class="lp-bar">
+    <label class="lp-seg">
+      <span class="lp-seg-l">Monat</span>
+      <select id="hub-monat" onchange="changeMonat(this.value)"></select>
+    </label>
+  </div>
   <div class="lp-hub">
     <div class="lp-hub-container">
       <button class="lp-hub-card lp-hub-main" style="--card-color:#0FA574;--card-dark:#0A7A5A" onclick="openHubAction('zentrallager','einkauf')">
@@ -1014,20 +1076,23 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <!-- MODAL: PLANUNG — одно окно -->
 <div class="modal-overlay" id="modal-plan" onclick="if(event.target===this)closePlan()">
-  <div class="modal" id="plan-modal-right" style="max-width:620px;width:100%;max-height:90vh;overflow-y:auto">
-    <button class="modal-close" onclick="closePlan()">✕</button>
-    <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem">
-      <div class="modal-title" id="plan-title-right" style="margin-bottom:0">Neue Bestellung</div>
-      <div id="plan-lager-badge-right"></div>
+  <div class="pmodal" id="plan-modal-right">
+    <div class="pm-head">
+      <button class="pm-close" onclick="closePlan()">✕</button>
+      <div class="pm-eyebrow">Planung</div>
+      <div class="pm-title">
+        <span id="plan-title-right">Neuer Einkauf</span>
+        <span id="plan-lager-badge-right"></span>
+      </div>
     </div>
-    <div class="field" style="margin-bottom:.8rem">
-      <label class="field-label">Datum</label>
-      <input type="date" id="plan-date" style="width:100%;background:#fff;border:1.5px solid var(--glass-border);color:var(--text);font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;padding:.6rem .8rem;border-radius:10px;outline:none">
+    <div class="pm-body">
+      <label class="pm-fl">Datum</label>
+      <input type="date" id="plan-date" class="pm-date">
+      <div id="plan-content"></div>
     </div>
-    <div id="plan-content"></div>
-    <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-outline-cyan" id="btn-prüfen-plan" onclick="addArtikelDirekt()">➕ Artikel hinzufügen</button>
+    <div class="pm-foot">
       <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
+      <button class="btn btn-acc" id="btn-prüfen-plan" onclick="addArtikelDirekt()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -1547,7 +1612,8 @@ function updateHubBadges(){
     if(!el) return;
     const items = planData[lg] || {};
     const n = Object.keys(items).filter(k=>Number(items[k])>0).length;
-    el.textContent = n ? n : '';
+    // Zentrallager sagt es ausgeschrieben, die Filialen kommen mit der bloßen Zahl aus
+    el.textContent = n ? (lg==='zentrallager' ? n+' offen' : String(n)) : '';
     el.style.display = n ? '' : 'none';
   });
   // Zentrallager zeigt zusätzlich, was der geplante Einkauf kostet
@@ -2794,6 +2860,15 @@ window.openPlanFormFromPanel = async function(type){
   await openPlanForm();
 };
 
+// Hausfarben für den Kopf des Planungsfensters (dieselben Werte wie auf den Kacheln)
+const PLAN_FARBEN = {
+  zentrallager:{acc:'#0FA574',soft:'rgba(15,165,116,.22)',fg:'#B7F0DC',grad:'linear-gradient(100deg,#0B7A5A,#12B487)'},
+  nettetal:    {acc:'#2563EB',soft:'rgba(37,99,235,.24)', fg:'#CADEFF',grad:'linear-gradient(100deg,#1B4CA8,#2E7BE0)'},
+  'brüggen':   {acc:'#E11D48',soft:'rgba(225,29,72,.24)', fg:'#FFD1DD',grad:'linear-gradient(100deg,#A5103A,#F0325C)'},
+  viersen:     {acc:'#EA580C',soft:'rgba(234,88,12,.24)', fg:'#FFE0C4',grad:'linear-gradient(100deg,#A64A0B,#EE8A2B)'},
+  'köln':      {acc:'#7C3AED',soft:'rgba(124,58,237,.24)',fg:'#DFD2FF',grad:'linear-gradient(100deg,#4E2AA8,#8258E8)'},
+};
+
 window.openPlanForm=async function(){
   document.getElementById('plan-modal-right').style.display='';
   planType=currentLager==='zentrallager'?'einkauf':'lieferung';
@@ -2805,11 +2880,16 @@ window.openPlanForm=async function(){
   // Заголовок и бейдж
   document.getElementById('plan-title-right').textContent=isE?'Neuer Einkauf':'Neue Lieferung';
   const _pb=document.getElementById('btn-prüfen-plan');
-  if(_pb) _pb.textContent='➕ Artikel hinzufügen';
-  const badge=`<span style="font-family:'Poppins',sans-serif;font-weight:800;font-size:.62rem;padding:.2rem .7rem;
-    border-radius:10px;background:${nc.bg||'#e9edf3'};border:1px solid ${nc.border||'#c9d1dc'};
-    color:${nc.neon||'var(--text)'}">${lagerName.toUpperCase()}</span>`;
-  document.getElementById('plan-lager-badge-right').innerHTML=badge;
+  if(_pb) _pb.textContent='✓ Speichern';
+  document.getElementById('plan-lager-badge-right').outerHTML =
+    `<span class="pm-lgr" id="plan-lager-badge-right">${lagerName}</span>`;
+  // Das Fenster trägt die Hausfarbe des Lagers — wie beim Wareneingang
+  const f = PLAN_FARBEN[currentLager] || PLAN_FARBEN.zentrallager;
+  const shell = document.getElementById('plan-modal-right');
+  shell.style.setProperty('--acc', f.acc);
+  shell.style.setProperty('--acc-soft', f.soft);
+  shell.style.setProperty('--acc-fg', f.fg);
+  shell.style.setProperty('--acc-grad', f.grad);
 
   // Дата
   const _pd=document.getElementById('plan-date');
@@ -2831,39 +2911,25 @@ window.openPlanForm=async function(){
   }
 
   // Собираем данные: akt и empf для каждого артикля
-  const aktValues={}, empfValues={};
+  const aktValues={};
   PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
-      let soll=0,akt=0;
-      toLoad.forEach(lg=>{ soll+=Number((sollData[lg]||{})[prod.id])||0; });
-      akt = currentLager==='zentrallager'
+      aktValues[prod.id] = currentLager==='zentrallager'
         ? Number((bestandData['zentrallager']||{})[prod.id])||0
         : Number((bestandData[currentLager]||{})[prod.id])||0;
-      aktValues[prod.id]=akt;
-      const diff=Math.max(0,soll-akt);
-      if(diff>0) empfValues[prod.id]=diff;
     });
   });
 
   // Строим форму с заголовком колонок и категориями
-  // Zentrallager-Einkauf: KEINE Spalte "Empf." — dafür rechts neben "Neu" die
-  // Einheit "St." (Standard-Eingabe sind also immer Stück).
-  const headerHtml = isE
-    ? `<div class="plan-form-header">
+  // Die Spalte „Empf." ist entfallen — sie stand nur im Weg, entschieden wird
+  // ohnehin anhand von Bestand und Verbrauch.
+  const headerHtml = `<div class="plan-form-header">
         <span class="pfh-spacer"></span>
         <span class="pfh-name">Artikel</span>
         <span class="pfh-akt">Aktuell</span>
         <span class="pfh-verbr">Verbr.</span>
         <span class="pfh-neu-wide">Neu</span>
         <span class="pfh-st">St.</span>
-      </div>`
-    : `<div class="plan-form-header">
-        <span class="pfh-spacer"></span>
-        <span class="pfh-name">Artikel</span>
-        <span class="pfh-akt">Aktuell</span>
-        <span class="pfh-verbr">Verbr.</span>
-        <span class="pfh-empf">Empf.</span>
-        <span class="pfh-neu">Neu</span>
       </div>`;
 
   let html=headerHtml;
@@ -2877,7 +2943,6 @@ window.openPlanForm=async function(){
       <div class="modal-cat-items">`;
     catObj.items.forEach(prod=>{
       const akt   = aktValues[prod.id]||0;
-      const empf  = empfValues[prod.id]||0;
       const verbr = verbrValues[prod.id];
       const gespeichert = Number((planData[currentLager]||{})[prod.id])||0;
       // Bereits gespeicherter Plan-Wert hat Vorrang vor der Empfehlung — sonst sieht es
@@ -2910,9 +2975,11 @@ window.openPlanForm=async function(){
           <div class="plan-form-name">${nameHtml}</div>
           <span class="plan-form-akt">${akt||'—'}</span>
           <span class="plan-form-verbr">${verbr!==undefined?verbr:'—'}</span>
-          <span class="plan-form-empf">${empf||'—'}</span>
-          <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
-            value="${neuVal}" style="${neuStyle}">
+          <div class="pfn-wrap">
+            <input class="plan-form-neu" id="plan-${prod.id}" type="number" min="0" step="0.1" placeholder="—"
+              value="${neuVal}" style="${neuStyle}">
+            <span class="pfn-st">St.</span>
+          </div>
         </div>`;
       }
     });
@@ -3062,9 +3129,29 @@ document.addEventListener('DOMContentLoaded', async function(){
   currentZeitraum = _knownMonths.includes(_curMonat) ? _curMonat : '2026-06';
   const _selZeitraumEl = document.getElementById('sel-zeitraum');
   if(_selZeitraumEl && _knownMonths.includes(currentZeitraum)) _selZeitraumEl.value = currentZeitraum;
+  buildMonatSelect(_knownMonths);
 
   await Promise.all([loadProducts(), loadShops(), loadEkPreise(), loadEkPacks()]);
+  // Kacheln sollen schon beim Öffnen zeigen, was geplant ist — nicht erst nach dem ersten Klick.
+  await loadData();
 });
+
+const MONAT_NAMEN = ['Januar','Februar','März','April','Mai','Juni',
+  'Juli','August','September','Oktober','November','Dezember'];
+function buildMonatSelect(months){
+  const sel = document.getElementById('hub-monat');
+  if(!sel) return;
+  sel.innerHTML = months.map(m=>{
+    const [y,mm] = m.split('-');
+    return `<option value="${m}"${m===currentZeitraum?' selected':''}>${MONAT_NAMEN[Number(mm)-1]} ${y}</option>`;
+  }).join('');
+}
+window.changeMonat = async function(m){
+  currentZeitraum = m;
+  const alt = document.getElementById('sel-zeitraum');
+  if(alt) alt.value = m;
+  await loadData();
+};
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
 document.addEventListener('DOMContentLoaded', function(){
