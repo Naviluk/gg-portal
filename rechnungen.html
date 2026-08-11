@@ -1946,11 +1946,9 @@ window.printRechnung = function(){
       + '<td class="ri b">'+eur(r.brutto)+'</td></tr>';
   }).join('');
 
-  // Spalte 1 trägt den ganzen Text, Spalte 2 nur den Doppelpunkt —
-  // dadurch stehen alle Doppelpunkte exakt untereinander.
   const steuer = Object.keys(d.nettoJeSatz).sort(function(x,y){return y-x;}).map(function(sz){
-    return '<tr><td class="ri">MwSt. '+Math.round(sz*100)+'% auf '+eur(d.nettoJeSatz[sz])+'</td>'
-      + '<td class="dp">:</td>'
+    return '<tr><td class="ri">MwSt. '+Math.round(sz*100)+'% auf</td>'
+      + '<td class="ri">'+eur(d.nettoJeSatz[sz])+' :</td>'
       + '<td class="ri">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
   }).join('');
 
@@ -1971,7 +1969,7 @@ window.printRechnung = function(){
         w: mehrzeilig ? 2.4 : 1});
     });
   });
-  const MAX_GEWICHT = 32;           // lässt gut zwei Zeilen Luft über der Fußzeile
+  const MAX_GEWICHT = 42;           // füllt die Seite, lässt rund zwei Zeilen zur Fußzeile
   const SCHLUSS_GEWICHT = 5;        // Steuer- und Summenblock am Ende
   const bloecke = []; let cur = [], last = 0;
   flat.forEach(function(z){
@@ -2026,7 +2024,7 @@ window.printRechnung = function(){
 +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}'
 +'body{margin:0;background:#5A5F66;font-family:Arial,Helvetica,sans-serif;color:#000;'
 +'font-size:9.5pt;padding:78px 0 60px}'
-+'.seite{width:210mm;height:297mm;background:#fff;margin:0 auto 22px;padding:16mm 14mm 42mm;'
++'.seite{width:210mm;height:297mm;background:#fff;margin:0 auto 22px;padding:16mm 14mm 28mm;'
 +'position:relative;box-shadow:0 6px 24px rgba(0,0,0,.35);overflow:hidden}'
 /* Logo: Schriftblock genau auf Höhe der Quadrate */
 +'.logo{display:flex;align-items:stretch;gap:8px;height:48px;margin-bottom:16mm}'
@@ -2051,10 +2049,10 @@ window.printRechnung = function(){
 +'.b{font-weight:700}.li{line-height:1.35;white-space:normal}'
 +'.w-pos{width:12mm}.w-anz{width:16mm}.w-mwst{width:14mm}.w-preis{width:25mm}'
 /* Summenblock: rechtsbündig an der vorletzten Spalte */
-+'.summe{width:auto;margin-top:9mm}'
++'.summe{width:104mm;margin:9mm 0 0 auto;table-layout:auto}'
 +'.summe td{border:none;padding:1.4mm 2mm;font-size:9pt;color:#000}'
-+'.summe .dp{width:4mm;text-align:center;padding-left:0;padding-right:0}'
-+'.summe .end td{border-top:1.6pt solid #F0742A;font-weight:700;font-size:10.5pt;padding-top:2.6mm}'
++'.summe .end td{border-bottom:2pt solid #F0742A;font-weight:700;font-size:10.5pt;'
++'padding-top:4mm;padding-bottom:2mm}'
 +'.hinweis{margin-top:12mm;font-size:9pt;line-height:1.55}'
 /* Detailseiten */
 +'.snr{position:absolute;top:16mm;right:14mm;font-size:8pt;color:#000}'
@@ -2094,9 +2092,9 @@ window.printRechnung = function(){
 +'<th class="ri w-preis">Nettobetrag</th><th class="ct w-mwst">MwSt.</th>'
 +'<th class="ri w-preis">Bruttobetrag</th></tr>'+uebersicht+'</table>'
 +'<table class="summe">'
-+'<tr><td class="ri">Gesamtbetrag (netto)</td><td class="dp">:</td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
++'<tr><td class="ri" colspan="2">Gesamtbetrag (netto) :</td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
 +steuer
-+'<tr class="end"><td class="ri">Gesamtbetrag (brutto)</td><td class="dp">:</td><td class="ri">'+eur(d.bruttoSumme)+'</td></tr>'
++'<tr class="end"><td class="ri b" colspan="2">Gesamtbetrag (brutto):</td><td class="ri b">'+eur(d.bruttoSumme)+'</td></tr>'
 +'</table>'
 +'<div class="hinweis">'+esc(a.hinweis||'')+'</div>'+fuss+'</div>'
 +seitenHtml
