@@ -375,7 +375,7 @@ tr.shop-row-item td{padding-top:.62rem;padding-bottom:.62rem}
   display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
   border:1px solid rgba(14,143,184,.14);overflow:hidden}
 .prod-info{display:flex;align-items:center;gap:.6rem}
-.prod-name{font-size:.93rem;color:var(--text);line-height:1.2;font-weight:600}
+.prod-name{font-size:.95rem;color:var(--text);line-height:1.2;font-weight:600}
 .prod-unit{font-size:.7rem;color:var(--text-dim);font-weight:500;letter-spacing:.06em;margin-top:.05rem}
 /* farbige Kante links: markiert die Artikelzeile
    (kein position:relative hier — das würde das sticky der Spalte aushebeln) */
@@ -1380,7 +1380,7 @@ function renderTableActual(){
       // Gesamt row
       const gs = 'border-top:1px solid rgba(219,39,119,.3);background:#FBEAF1';
       tbHTML += `<tr class="shop-row-item">`;
-      tbHTML += `<td class="col-artikel" style="${gs}"><div class="prod-name" style="font-family:'Century Gothic',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta);font-weight:700">GESAMT</div></td>`;
+      tbHTML += `<td class="col-artikel" style="${gs}"><div class="prod-name" style="font-family:'Poppins','Century Gothic',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--neon-magenta);font-weight:700">GESAMT</div></td>`;
       tbHTML += `<td class="num-cell" style="${gs}">—</td>`;
       // Einkäufe gesamt total
       tbHTML += `<td class="num-cell" style="${gs};background:#F8DDE9;color:var(--neon-magenta);font-weight:700">${grandTotal>0?grandTotal.toFixed(2)+'<span class="cur"> €</span>':'—'}</td>`;
