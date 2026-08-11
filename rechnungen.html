@@ -1953,8 +1953,8 @@ window.printRechnung = function(){
   // Doppelpunkte automatisch auf einer Linie — dasselbe Prinzip wie unter
   // der Detailauflistung.
   const steuer = Object.keys(d.nettoJeSatz).sort(function(x,y){return y-x;}).map(function(sz){
-    return '<tr><td class="ri">MwSt. '+Math.round(sz*100)+'% auf '+eur(d.nettoJeSatz[sz])+' :</td>'
-      + '<td class="ri wert">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
+    return '<tr><td class="ri" colspan="3">MwSt. '+Math.round(sz*100)+'% auf '+eur(d.nettoJeSatz[sz])+' :</td>'
+      + '<td class="ri">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
   }).join('');
 
   // ── Detailzeilen als Daten an das Fenster übergeben ──
@@ -1971,10 +1971,17 @@ window.printRechnung = function(){
         einzel:eur(z.einzel), gesamt:eur(z.gesamt)});
     });
   });
-  const schlussHtml = '<table class="schluss">'
-    + '<tr class="gesamt"><td class="ri">Gesamtbetrag (brutto):</td><td class="ri wert">'+eur(d.bruttoSumme)+'</td></tr>'
-    + '<tr><td class="ri">erhaltene Mehrwertsteuer 7% auf '+eur(d.nettoJeSatz[0.07]||0)+' netto</td><td class="ri wert">'+eur((d.nettoJeSatz[0.07]||0)*0.07)+'</td></tr>'
-    + '<tr><td class="ri">erhaltene Mehrwertsteuer 19% auf '+eur(d.nettoJeSatz[0.19]||0)+' netto</td><td class="ri wert">'+eur((d.nettoJeSatz[0.19]||0)*0.19)+'</td></tr>'
+  // Spaltenraster: einmal festgelegt, von Übersicht und Summenblock gemeinsam
+  // benutzt — nur so liegen die Kanten wirklich übereinander.
+  const SPALTEN4 = '<colgroup><col><col style="width:25mm"><col style="width:14mm">'
+                 + '<col style="width:25mm"></colgroup>';
+  const SPALTEN6 = '<colgroup><col style="width:12mm"><col><col style="width:16mm">'
+                 + '<col style="width:14mm"><col style="width:25mm"><col style="width:25mm"></colgroup>';
+
+  const schlussHtml = '<table class="schluss">' + SPALTEN6
+    + '<tr class="gesamt"><td class="ri" colspan="5">Gesamtbetrag (brutto):</td><td class="ri">'+eur(d.bruttoSumme)+'</td></tr>'
+    + '<tr><td class="ri" colspan="5">erhaltene Mehrwertsteuer 7% auf '+eur(d.nettoJeSatz[0.07]||0)+' netto</td><td class="ri">'+eur((d.nettoJeSatz[0.07]||0)*0.07)+'</td></tr>'
+    + '<tr><td class="ri" colspan="5">erhaltene Mehrwertsteuer 19% auf '+eur(d.nettoJeSatz[0.19]||0)+' netto</td><td class="ri">'+eur((d.nettoJeSatz[0.19]||0)*0.19)+'</td></tr>'
     + '</table>';
 
   const logo = '<div class="logo">'
@@ -2011,11 +2018,9 @@ window.printRechnung = function(){
 +'td{padding:2.6mm 2mm;border-bottom:.5pt solid #d9d9d9;vertical-align:top;font-size:9pt}'
 +'.ri{text-align:right;white-space:nowrap}.ct{text-align:center;white-space:nowrap}'
 +'.b{font-weight:700}.li{line-height:1.35;white-space:normal}'
-+'.w-pos{width:12mm}.w-anz{width:16mm}.w-mwst{width:14mm}.w-preis{width:25mm}'
 /* Summen: Textspalte + Betragsspalte, beide rechtsbündig */
-+'.summe{width:104mm;margin:9mm 0 0 auto}'
-+'.summe td{border:none;padding:1.4mm 0;font-size:9pt;color:#000}'
-+'.summe .wert{width:30mm;padding-left:4mm}'
++'.summe{width:100%;margin:9mm 0 0 0}'
++'.summe td{border:none;padding:1.4mm 2mm;font-size:9pt;color:#000}'
 +'.summe .end td{border-bottom:2pt solid #F0742A;font-weight:700;font-size:10.5pt;'
 +'padding-top:4mm;padding-bottom:2mm}'
 +'.hinweis{margin-top:12mm;font-size:9pt;line-height:1.55}'
@@ -2027,9 +2032,8 @@ window.printRechnung = function(){
 +'.detail td{padding:1.25mm 2mm;font-size:8.5pt;border-bottom:.4pt solid #e2e2e2}'
 +'.detail tr.grp td{background:#E4E4E4;font-weight:700;font-size:8.5pt;padding:1.5mm 2mm;'
 +'border-bottom:.4pt solid #c4c4c4}'
-+'.schluss{width:104mm;margin:6mm 0 0 auto}'
-+'.schluss td{border:none;padding:1.4mm 0;font-size:8.5pt;color:#000}'
-+'.schluss .wert{width:30mm;padding-left:4mm}'
++'.schluss{width:100%;margin:6mm 0 0 0}'
++'.schluss td{border:none;padding:1.4mm 2mm;font-size:8.5pt;color:#000}'
 +'.schluss .gesamt td{background:#DCDCDC;font-weight:700;font-size:10pt;padding:2.2mm 2mm}'
 /* Fußzeile: feste Höhe, immer am selben Platz */
 +'.fuss{position:absolute;left:14mm;right:14mm;bottom:12mm;height:20mm;display:flex;gap:7mm;'
@@ -2052,13 +2056,13 @@ window.printRechnung = function(){
 +'<div class="kopf"><div class="adr"><b>'+esc(e.firma||'')+'</b><br>'+esc(e.strasse||'')+'<br>'+esc(e.ort||'')+'</div>'
 +'<div class="meta">Datum: <b>'+dstr+'</b><br>Rechnungs-Nr: <b>'+esc(nummer)+'</b></div></div>'
 +'<h1>'+esc(betreff)+'</h1>'
-+'<table><tr><th>Rechnungsübersicht (Details siehe Folgeseiten)</th>'
-+'<th class="ri w-preis">Nettobetrag</th><th class="ct w-mwst">MwSt.</th>'
-+'<th class="ri w-preis">Bruttobetrag</th></tr>'+uebersicht+'</table>'
-+'<table class="summe">'
-+'<tr><td class="ri">Gesamtbetrag (netto) :</td><td class="ri wert">'+eur(d.nettoSumme)+'</td></tr>'
++'<table>'+SPALTEN4+'<tr><th>Rechnungsübersicht (Details siehe Folgeseiten)</th>'
++'<th class="ri">Nettobetrag</th><th class="ct">MwSt.</th>'
++'<th class="ri">Bruttobetrag</th></tr>'+uebersicht+'</table>'
++'<table class="summe">'+SPALTEN4
++'<tr><td class="ri" colspan="3">Gesamtbetrag (netto) :</td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
 +steuer
-+'<tr class="end"><td class="ri">Gesamtbetrag (brutto):</td><td class="ri wert">'+eur(d.bruttoSumme)+'</td></tr>'
++'<tr class="end"><td class="ri" colspan="3">Gesamtbetrag (brutto):</td><td class="ri">'+eur(d.bruttoSumme)+'</td></tr>'
 +'</table>'
 +'<div class="hinweis">'+esc(a.hinweis||'')+'</div>'+fuss+'</div>'
 +'<div id="detail-root"></div>'
@@ -2066,15 +2070,16 @@ window.printRechnung = function(){
 +'var ROWS='+JSON.stringify(rowsData)+';'
 +'var FUSS='+JSON.stringify(fuss)+';'
 +'var SCHLUSS='+JSON.stringify(schlussHtml)+';'
-+'var KOPF=\'<tr><th class="ct w-pos">Pos.</th><th>Artikelbezeichnung</th>\''
-+'+\'<th class="ct w-anz">Anzahl</th><th class="ct w-mwst">MwSt.</th>\''
-+'+\'<th class="ri w-preis">Einzelpreis<br>(brutto)</th>\''
-+'+\'<th class="ri w-preis">Gesamtpreis<br>(brutto)</th></tr>\';'
++'var SPALTEN='+JSON.stringify(SPALTEN6)+';'
++'var KOPF=\'<tr><th class="ct">Pos.</th><th>Artikelbezeichnung</th>\''
++'+\'<th class="ct">Anzahl</th><th class="ct">MwSt.</th>\''
++'+\'<th class="ri">Einzelpreis<br>(brutto)</th>\''
++'+\'<th class="ri">Gesamtpreis<br>(brutto)</th></tr>\';'
 +'var root=document.getElementById("detail-root"),seiten=[],akt=null;'
 +'function neueSeite(){'
 +' var s=document.createElement("div");s.className="seite";'
 +' s.innerHTML=\'<div class="snr"></div><div class="detail-titel">Detailauflistung</div>\''
-+'  +\'<table class="detail"><tbody>\'+KOPF+\'</tbody></table>\'+FUSS;'
++'  +\'<table class="detail">\'+SPALTEN+\'<tbody>\'+KOPF+\'</tbody></table>\'+FUSS;'
 +' root.appendChild(s);seiten.push(s);'
 +' akt={seite:s,tbody:s.querySelector("tbody"),fuss:s.querySelector(".fuss")};'
 +' return akt;}'
