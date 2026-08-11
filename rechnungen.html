@@ -1910,10 +1910,12 @@ window.closeRechnung = function(){ document.getElementById('modal-rechnung').cla
 
 
 
-// Erzeugt die Rechnung als A4-Vorschau. Wichtig: Bildschirm und Druck benutzen
-// dieselben Blöcke — jede ".seite" ist genau eine gedruckte Seite. Deshalb ist
-// die Fußzeile immer absolut im Blatt verankert (nicht fixed), sonst wiederholt
-// der Druck sie auf jeder Seite und die Umbrüche verrutschen.
+
+// Erzeugt die Rechnung als A4-Vorschau.
+// Die Detailseiten werden NICHT vorab geschätzt, sondern im geöffneten Fenster
+// gemessen: Zeilen wandern so lange auf die Seite, bis der Abstand zur Fußzeile
+// unter zwei Zeilenhöhen fällt. Damit können lange, umbrechende Artikelnamen
+// den Fuß nicht mehr überlaufen.
 window.printRechnung = function(){
   const branch  = document.getElementById('rg-branch').value;
   const datum   = document.getElementById('rg-datum').value;
@@ -1925,60 +1927,55 @@ window.printRechnung = function(){
   const esc = t => String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
   // ── Übersicht: die beiden Dienstleistungen stehen einzeln, je zweizeilig ──
-  const uebRows = [];
-  d.gruppen.forEach(function(g){
-    if(g.name!=='Dienstleistungen'){
-      uebRows.push({titel:esc(g.name), sub:'', netto:g.netto, mwst:g.mwst, brutto:g.brutto});
-    }else{
-      g.zeilen.forEach(function(z){
-        const teile = String(z.text).split('\n');
-        uebRows.push({titel:esc(teile[0]), sub:esc(teile.slice(1).join(' ')),
-                      netto:z.gesamt/(1+g.mwst), mwst:g.mwst, brutto:z.gesamt});
-      });
-    }
-  });
-  const uebersicht = uebRows.map(function(r){
-    return '<tr><td class="li">'+(r.sub
-        ? '<b>'+r.titel+'</b><br>'+r.sub
-        : r.titel)+'</td>'
-      + '<td class="ri">'+eur(r.netto)+'</td>'
-      + '<td class="ct">'+Math.round(r.mwst*100)+'%</td>'
-      + '<td class="ri b">'+eur(r.brutto)+'</td></tr>';
-  }).join('');
+  const uebersicht = (function(){
+    const rows = [];
+    d.gruppen.forEach(function(g){
+      if(g.name!=='Dienstleistungen'){
+        rows.push({titel:esc(g.name), sub:'', netto:g.netto, mwst:g.mwst, brutto:g.brutto});
+      }else{
+        g.zeilen.forEach(function(z){
+          const t = String(z.text).split('\n');
+          rows.push({titel:esc(t[0]), sub:esc(t.slice(1).join(' ')),
+                     netto:z.gesamt/(1+g.mwst), mwst:g.mwst, brutto:z.gesamt});
+        });
+      }
+    });
+    return rows.map(function(r){
+      return '<tr><td class="li">'+(r.sub ? '<b>'+r.titel+'</b><br>'+r.sub : r.titel)+'</td>'
+        + '<td class="ri">'+eur(r.netto)+'</td>'
+        + '<td class="ct">'+Math.round(r.mwst*100)+'%</td>'
+        + '<td class="ri b">'+eur(r.brutto)+'</td></tr>';
+    }).join('');
+  })();
 
+  // Summenblock: eine Textspalte, eine Betragsspalte, beide rechtsbündig.
+  // Weil jede Textzeile auf " :" endet und rechtsbündig steht, liegen alle
+  // Doppelpunkte automatisch auf einer Linie — dasselbe Prinzip wie unter
+  // der Detailauflistung.
   const steuer = Object.keys(d.nettoJeSatz).sort(function(x,y){return y-x;}).map(function(sz){
-    return '<tr><td class="ri">MwSt. '+Math.round(sz*100)+'% auf</td>'
-      + '<td class="ri">'+eur(d.nettoJeSatz[sz])+' :</td>'
-      + '<td class="ri">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
+    return '<tr><td class="ri">MwSt. '+Math.round(sz*100)+'% auf '+eur(d.nettoJeSatz[sz])+' :</td>'
+      + '<td class="ri wert">'+eur(d.nettoJeSatz[sz]*Number(sz))+'</td></tr>';
   }).join('');
 
-  // ── Detailzeilen sammeln und in Seiten schneiden ──
-  // Gewichtung: eine normale Zeile zählt 1, eine Kategorieüberschrift 1.6,
-  // eine zweizeilige Dienstleistung 2.4 — so bleibt unten immer Luft für den Fuß.
-  const flat = [];
+  // ── Detailzeilen als Daten an das Fenster übergeben ──
+  const rowsData = [];
   let pos = 0;
   d.gruppen.forEach(function(g){
-    flat.push({grp:true, text:RG_UEBERSCHRIFT[g.name]||g.name.toUpperCase(), w:1.6});
+    rowsData.push({grp:1, text:RG_UEBERSCHRIFT[g.name]||g.name.toUpperCase()});
     g.zeilen.forEach(function(z){
       pos++;
-      const teile = String(z.text).split('\n');
-      const mehrzeilig = teile.length>1;
-      flat.push({pos:pos,
-        text: mehrzeilig ? esc(teile[0])+'<br>'+esc(teile.slice(1).join(' ')) : esc(teile[0]),
-        anzahl:z.anzahl, mwst:g.mwst, einzel:z.einzel, gesamt:z.gesamt,
-        w: mehrzeilig ? 2.4 : 1});
+      const t = String(z.text).split('\n');
+      rowsData.push({pos:pos,
+        text: t.length>1 ? esc(t[0])+'<br>'+esc(t.slice(1).join(' ')) : esc(t[0]),
+        anzahl:num(z.anzahl), mwst:Math.round(g.mwst*100)+'%',
+        einzel:eur(z.einzel), gesamt:eur(z.gesamt)});
     });
   });
-  const MAX_GEWICHT = 42;           // füllt die Seite, lässt rund zwei Zeilen zur Fußzeile
-  const SCHLUSS_GEWICHT = 5;        // Steuer- und Summenblock am Ende
-  const bloecke = []; let cur = [], last = 0;
-  flat.forEach(function(z){
-    if(last + z.w > MAX_GEWICHT){ bloecke.push(cur); cur = []; last = 0; }
-    cur.push(z); last += z.w;
-  });
-  if(cur.length) bloecke.push(cur);
-  if(bloecke.length && last + SCHLUSS_GEWICHT > MAX_GEWICHT) bloecke.push([]);
-  const detailSeiten = bloecke.length;
+  const schlussHtml = '<table class="schluss">'
+    + '<tr class="gesamt"><td class="ri">Gesamtbetrag (brutto):</td><td class="ri wert">'+eur(d.bruttoSumme)+'</td></tr>'
+    + '<tr><td class="ri">erhaltene Mehrwertsteuer 7% auf '+eur(d.nettoJeSatz[0.07]||0)+' netto</td><td class="ri wert">'+eur((d.nettoJeSatz[0.07]||0)*0.07)+'</td></tr>'
+    + '<tr><td class="ri">erhaltene Mehrwertsteuer 19% auf '+eur(d.nettoJeSatz[0.19]||0)+' netto</td><td class="ri wert">'+eur((d.nettoJeSatz[0.19]||0)*0.19)+'</td></tr>'
+    + '</table>';
 
   const logo = '<div class="logo">'
     + '<div class="quad"><i style="background:#F5E03A"></i><i style="background:#F7941E"></i>'
@@ -1991,85 +1988,53 @@ window.printRechnung = function(){
     + '<div>Geschäftsführer:<br>'+esc(a.gf)+'<br>'+esc(a.ustid)+'<br>'+esc(a.mail)+'</div>'
     + '<div>Bankverbindung:<br>'+esc(a.bank)+'<br>'+esc(a.iban)+'<br>'+esc(a.swift)+'</div></div>';
 
-  const detailKopf = '<tr class="dkopf"><th class="ct w-pos">Pos.</th><th>Artikelbezeichnung</th>'
-    + '<th class="ct w-anz">Anzahl</th><th class="ct w-mwst">MwSt.</th>'
-    + '<th class="ri w-preis">Einzelpreis<br>(brutto)</th>'
-    + '<th class="ri w-preis">Gesamtpreis<br>(brutto)</th></tr>';
-
-  const seitenHtml = bloecke.map(function(blk, idx){
-    const zeilen = blk.map(function(z){
-      if(z.grp) return '<tr class="grp"><td colspan="6">'+z.text+'</td></tr>';
-      return '<tr><td class="ct">'+z.pos+'</td><td class="li">'+z.text+'</td>'
-        + '<td class="ct">'+num(z.anzahl)+'</td>'
-        + '<td class="ct">'+Math.round(z.mwst*100)+'%</td>'
-        + '<td class="ri">'+eur(z.einzel)+'</td>'
-        + '<td class="ri">'+eur(z.gesamt)+'</td></tr>';
-    }).join('');
-    const letzte = idx===bloecke.length-1;
-    const schluss = letzte
-      ? '<table class="schluss">'
-        + '<tr class="gesamt"><td class="ri">Gesamtbetrag (brutto):</td><td class="ri">'+eur(d.bruttoSumme)+'</td></tr>'
-        + '<tr><td class="ri">erhaltene Mehrwertsteuer 7% auf '+eur(d.nettoJeSatz[0.07]||0)+' netto</td><td class="ri">'+eur((d.nettoJeSatz[0.07]||0)*0.07)+'</td></tr>'
-        + '<tr><td class="ri">erhaltene Mehrwertsteuer 19% auf '+eur(d.nettoJeSatz[0.19]||0)+' netto</td><td class="ri">'+eur((d.nettoJeSatz[0.19]||0)*0.19)+'</td></tr>'
-        + '</table>' : '';
-    return '<div class="seite">'
-      + '<div class="snr">Seite '+(idx+1)+' von '+detailSeiten+'</div>'
-      + '<div class="detail-titel">Detailauflistung</div>'
-      + '<table class="detail">'+detailKopf+zeilen+'</table>'+schluss+fuss+'</div>';
-  }).join('');
-
   const html = '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">'
 +'<title>'+esc(nummer)+' – '+esc(e.firma||branch)+'</title><style>'
 +'@page{size:A4;margin:0}'
 +'*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}'
 +'body{margin:0;background:#5A5F66;font-family:Arial,Helvetica,sans-serif;color:#000;'
 +'font-size:9.5pt;padding:78px 0 60px}'
-+'.seite{width:210mm;height:297mm;background:#fff;margin:0 auto 22px;padding:16mm 14mm 28mm;'
++'.seite{width:210mm;height:297mm;background:#fff;margin:0 auto 22px;padding:16mm 14mm;'
 +'position:relative;box-shadow:0 6px 24px rgba(0,0,0,.35);overflow:hidden}'
-/* Logo: Schriftblock genau auf Höhe der Quadrate */
 +'.logo{display:flex;align-items:stretch;gap:8px;height:48px;margin-bottom:16mm}'
 +'.quad{width:48px;height:48px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;flex-shrink:0}'
 +'.quad i{display:block}'
-+'.wort{height:48px;display:flex;flex-direction:column;justify-content:space-between;'
-+'color:#2E2A27;font-weight:700}'
++'.wort{height:48px;display:flex;flex-direction:column;justify-content:space-between;color:#2E2A27;font-weight:700}'
 +'.wort span{font-size:15.5pt;line-height:1;letter-spacing:-.2pt}'
-+'.wort em{font-style:normal;font-weight:400;font-size:5.4pt;letter-spacing:.01em;line-height:1}'
-/* Kopf */
++'.wort em{font-style:normal;font-weight:400;font-size:5.4pt;line-height:1}'
 +'.kopf{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16mm}'
-+'.adr{line-height:1.5}'
-+'.meta{text-align:right;line-height:1.8;white-space:nowrap}'
++'.adr{line-height:1.5}.meta{text-align:right;line-height:1.8;white-space:nowrap}'
 +'h1{font-size:12pt;margin:0 0 7mm}'
-/* Übersicht */
 +'table{width:100%;border-collapse:collapse}'
-+'th{background:#F0742A;color:#fff;font-weight:700;font-size:8.5pt;padding:2.4mm 2mm;'
-+'text-align:left;vertical-align:bottom}'
++'th{background:#F0742A;color:#fff;font-weight:700;font-size:8.5pt;padding:2.4mm 2mm;text-align:left;vertical-align:bottom}'
 +'th.ri{text-align:right}th.ct{text-align:center}'
 +'td{padding:2.6mm 2mm;border-bottom:.5pt solid #d9d9d9;vertical-align:top;font-size:9pt}'
 +'.ri{text-align:right;white-space:nowrap}.ct{text-align:center;white-space:nowrap}'
 +'.b{font-weight:700}.li{line-height:1.35;white-space:normal}'
 +'.w-pos{width:12mm}.w-anz{width:16mm}.w-mwst{width:14mm}.w-preis{width:25mm}'
-/* Summenblock: rechtsbündig an der vorletzten Spalte */
-+'.summe{width:104mm;margin:9mm 0 0 auto;table-layout:auto}'
-+'.summe td{border:none;padding:1.4mm 2mm;font-size:9pt;color:#000}'
+/* Summen: Textspalte + Betragsspalte, beide rechtsbündig */
++'.summe{width:104mm;margin:9mm 0 0 auto}'
++'.summe td{border:none;padding:1.4mm 0;font-size:9pt;color:#000}'
++'.summe .wert{width:30mm;padding-left:4mm}'
 +'.summe .end td{border-bottom:2pt solid #F0742A;font-weight:700;font-size:10.5pt;'
 +'padding-top:4mm;padding-bottom:2mm}'
 +'.hinweis{margin-top:12mm;font-size:9pt;line-height:1.55}'
 /* Detailseiten */
 +'.snr{position:absolute;top:16mm;right:14mm;font-size:8pt;color:#000}'
 +'.detail-titel{font-weight:700;font-size:10pt;margin-bottom:4mm}'
-+'.detail th{background:none;color:#000;border-top:1.6pt solid #000;'
-+'border-bottom:.6pt solid #999;padding:1.6mm 2mm;font-size:8.5pt}'
++'.detail th{background:none;color:#000;border-top:1.6pt solid #000;border-bottom:.6pt solid #999;'
++'padding:1.6mm 2mm;font-size:8.5pt}'
 +'.detail td{padding:1.25mm 2mm;font-size:8.5pt;border-bottom:.4pt solid #e2e2e2}'
 +'.detail tr.grp td{background:#E4E4E4;font-weight:700;font-size:8.5pt;padding:1.5mm 2mm;'
 +'border-bottom:.4pt solid #c4c4c4}'
-+'.schluss{width:auto;margin-top:6mm;margin-left:auto}'
-+'.schluss td{border:none;padding:1.4mm 2mm;font-size:8.5pt;color:#000}'
++'.schluss{width:104mm;margin:6mm 0 0 auto}'
++'.schluss td{border:none;padding:1.4mm 0;font-size:8.5pt;color:#000}'
++'.schluss .wert{width:30mm;padding-left:4mm}'
 +'.schluss .gesamt td{background:#DCDCDC;font-weight:700;font-size:10pt;padding:2.2mm 2mm}'
-/* Fußzeile: immer im Blatt verankert, damit Druck = Ansicht */
-+'.fuss{position:absolute;left:14mm;right:14mm;bottom:12mm;display:flex;gap:7mm;'
+/* Fußzeile: feste Höhe, immer am selben Platz */
++'.fuss{position:absolute;left:14mm;right:14mm;bottom:12mm;height:20mm;display:flex;gap:7mm;'
 +'font-size:6.8pt;color:#3a3a3a;line-height:1.5;border-top:.5pt solid #ddd;padding-top:2.5mm}'
 +'.fuss>div{flex:1}'
-/* Werkzeugleiste */
 +'.leiste{position:fixed;top:0;left:0;right:0;height:52px;background:#101A2E;color:#fff;'
 +'display:flex;align-items:center;justify-content:center;gap:12px;z-index:9}'
 +'.leiste button{padding:.55rem 1.1rem;border:none;border-radius:9px;background:#0E8FB8;'
@@ -2083,7 +2048,6 @@ window.printRechnung = function(){
 +'</style></head><body>'
 +'<div class="leiste"><button id="btn-print">Drucken / als PDF sichern</button>'
 +'<button class="sec" id="btn-close">Schließen</button></div>'
-/* Seite 1 — Übersicht, ohne Seitenzahl */
 +'<div class="seite">'+logo
 +'<div class="kopf"><div class="adr"><b>'+esc(e.firma||'')+'</b><br>'+esc(e.strasse||'')+'<br>'+esc(e.ort||'')+'</div>'
 +'<div class="meta">Datum: <b>'+dstr+'</b><br>Rechnungs-Nr: <b>'+esc(nummer)+'</b></div></div>'
@@ -2092,13 +2056,48 @@ window.printRechnung = function(){
 +'<th class="ri w-preis">Nettobetrag</th><th class="ct w-mwst">MwSt.</th>'
 +'<th class="ri w-preis">Bruttobetrag</th></tr>'+uebersicht+'</table>'
 +'<table class="summe">'
-+'<tr><td class="ri" colspan="2">Gesamtbetrag (netto) :</td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
++'<tr><td class="ri">Gesamtbetrag (netto) :</td><td class="ri wert">'+eur(d.nettoSumme)+'</td></tr>'
 +steuer
-+'<tr class="end"><td class="ri b" colspan="2">Gesamtbetrag (brutto):</td><td class="ri b">'+eur(d.bruttoSumme)+'</td></tr>'
++'<tr class="end"><td class="ri">Gesamtbetrag (brutto):</td><td class="ri wert">'+eur(d.bruttoSumme)+'</td></tr>'
 +'</table>'
 +'<div class="hinweis">'+esc(a.hinweis||'')+'</div>'+fuss+'</div>'
-+seitenHtml
++'<div id="detail-root"></div>'
 +'<scr'+'ipt>'
++'var ROWS='+JSON.stringify(rowsData)+';'
++'var FUSS='+JSON.stringify(fuss)+';'
++'var SCHLUSS='+JSON.stringify(schlussHtml)+';'
++'var KOPF=\'<tr><th class="ct w-pos">Pos.</th><th>Artikelbezeichnung</th>\''
++'+\'<th class="ct w-anz">Anzahl</th><th class="ct w-mwst">MwSt.</th>\''
++'+\'<th class="ri w-preis">Einzelpreis<br>(brutto)</th>\''
++'+\'<th class="ri w-preis">Gesamtpreis<br>(brutto)</th></tr>\';'
++'var root=document.getElementById("detail-root"),seiten=[],akt=null;'
++'function neueSeite(){'
++' var s=document.createElement("div");s.className="seite";'
++' s.innerHTML=\'<div class="snr"></div><div class="detail-titel">Detailauflistung</div>\''
++'  +\'<table class="detail"><tbody>\'+KOPF+\'</tbody></table>\'+FUSS;'
++' root.appendChild(s);seiten.push(s);'
++' akt={seite:s,tbody:s.querySelector("tbody"),fuss:s.querySelector(".fuss")};'
++' return akt;}'
+/* Grenze: Oberkante der Fußzeile minus zwei Zeilenhöhen */
++'function grenze(p){var z=p.tbody.rows.length>1?p.tbody.rows[p.tbody.rows.length-1].getBoundingClientRect().height:18;'
++' return p.fuss.getBoundingClientRect().top-2*z;}'
++'function passt(p){return p.tbody.getBoundingClientRect().bottom<=grenze(p);}'
++'neueSeite();'
++'ROWS.forEach(function(r){'
++' var tr=document.createElement("tr");'
++' if(r.grp){tr.className="grp";tr.innerHTML=\'<td colspan="6">\'+r.text+\'</td>\';}'
++' else{tr.innerHTML=\'<td class="ct">\'+r.pos+\'</td><td class="li">\'+r.text+\'</td>\''
++'  +\'<td class="ct">\'+r.anzahl+\'</td><td class="ct">\'+r.mwst+\'</td>\''
++'  +\'<td class="ri">\'+r.einzel+\'</td><td class="ri">\'+r.gesamt+\'</td>\';}'
++' akt.tbody.appendChild(tr);'
++' if(!passt(akt)){akt.tbody.removeChild(tr);neueSeite();akt.tbody.appendChild(tr);}'
++'});'
+/* Abschlussblock: passt er nicht mehr, bekommt er eine eigene Seite */
++'var box=document.createElement("div");box.innerHTML=SCHLUSS;'
++'akt.seite.insertBefore(box,akt.fuss);'
++'if(box.getBoundingClientRect().bottom>akt.fuss.getBoundingClientRect().top-6){'
++' akt.seite.removeChild(box);neueSeite();akt.seite.insertBefore(box,akt.fuss);}'
++'seiten.forEach(function(s,i){s.querySelector(".snr").textContent="Seite "+(i+1)+" von "+seiten.length;});'
 +'document.getElementById("btn-print").addEventListener("click",function(){window.focus();window.print();});'
 +'document.getElementById("btn-close").addEventListener("click",function(){window.close();});'
 +'</scr'+'ipt></body></html>';
