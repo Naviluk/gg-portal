@@ -357,6 +357,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 #modal-plan .prod-icon{border-radius:9px;background:#E6F4F9;border:none}
 #modal-plan .prod-icon img{border-radius:9px!important}
 #modal-plan .plan-form-header{padding:.45rem .6rem;border-bottom:none;margin-bottom:.2rem}
+/* Artikelname: fett und ruhig, Einheit als eigene kleine Zeile darunter */
+#modal-plan .plan-form-name{white-space:normal;font-size:inherit;line-height:1.2}
+#modal-plan .plan-form-name b{display:block;font-family:'Poppins',sans-serif;font-size:.82rem;
+  font-weight:600;color:var(--text);line-height:1.2;overflow:hidden;text-overflow:ellipsis}
+#modal-plan .plan-form-name i{display:block;font-style:normal;font-size:.64rem;
+  color:var(--text-dim);letter-spacing:.06em;margin-top:.05rem}
+#modal-plan .pfh-akt,#modal-plan .pfh-verbr,#modal-plan .pfh-empf{
+  font-size:.58rem;letter-spacing:.04em}
 
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
@@ -423,8 +431,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .betrag-input::-webkit-outer-spin-button,.betrag-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .betrag-input[type=number]{-moz-appearance:textfield}
 .modal-prod-name-block{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem;overflow:hidden}
-.modal-prod-name{font-size:.85rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.modal-prod-unit{font-size:.7rem;color:var(--text-dim)}
+.modal-prod-name{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-prod-unit{font-size:.64rem;color:var(--text-dim);letter-spacing:.06em}
 
 /* selected list */
 .selected-list{margin-top:1rem;border-top:1px solid var(--glass-border);padding-top:1rem}
@@ -480,8 +488,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 /* confirm view */
 .confirm-list .confirm-item{display:flex;justify-content:space-between;align-items:baseline;
   padding:.45rem 0;border-bottom:1px solid var(--glass-border);gap:.5rem}
-.confirm-item .ci-name{color:var(--text);font-size:.88rem;flex:1}
-.confirm-item .ci-unit{font-size:.7rem;color:var(--text-dim);margin-left:.2rem}
+.confirm-item .ci-name{color:var(--text);font-size:.82rem;font-weight:600;flex:1}
+.confirm-item .ci-unit{font-size:.64rem;color:var(--text-dim);letter-spacing:.06em;margin-left:.25rem;font-weight:400}
 .confirm-item .ci-qty{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--neon-green);font-weight:700;flex-shrink:0}
 .confirm-item .ci-cat{font-size:.65rem;color:var(--text-dim);display:block}
 .confirm-shops{margin-top:.8rem;padding:.7rem;background:var(--bg3);border-radius:6px;border:1px solid var(--glass-border)}
@@ -725,6 +733,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
    abgeschnitten zu werden. */
 @media(max-width:640px){
   #modal-plan.show{padding:.5rem}
+  #modal-plan .plan-form-name b{font-size:.78rem}
   .pmodal{max-height:96vh;border-radius:14px}
   .pm-body{padding:.75rem .6rem .9rem}
   .plan-form-header{gap:.3rem;padding:.4rem .15rem}
@@ -2949,8 +2958,7 @@ window.openPlanForm=async function(){
       // beim erneuten Öffnen so aus, als wäre der gespeicherte Wert verschwunden.
       const neuVal = gespeichert>0 ? gespeichert : '';
       const neuStyle = neuVal ? 'border-color:var(--neon-cyan);background:rgba(0,245,255,.06)' : '';
-      const nameHtml = `<span style="font-size:.86rem">${prod.name}</span>
-          ${prod.unit?`<span style="font-size:.7rem;color:var(--text-dim);margin-left:.25rem">${prod.unit}</span>`:''}`;
+      const nameHtml = `<b>${prod.name}</b>${prod.unit?`<i>${prod.unit}</i>`:''}`;
 
       if(isE){
         // Klick auf Icon oder Name öffnet das Detail-Fenster (Shop / Anzahl / Preis)
