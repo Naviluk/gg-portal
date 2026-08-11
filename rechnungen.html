@@ -1943,7 +1943,7 @@ window.printRechnung = function(){
     return rows.map(function(r){
       return '<tr><td class="li">'+(r.sub ? '<b>'+r.titel+'</b><br>'+r.sub : r.titel)+'</td>'
         + '<td class="ri">'+eur(r.netto)+'</td>'
-        + '<td class="ct">'+Math.round(r.mwst*100)+'%</td>'
+        + '<td class="ri">'+Math.round(r.mwst*100)+'%</td>'
         + '<td class="ri b">'+eur(r.brutto)+'</td></tr>';
     }).join('');
   })();
@@ -2012,7 +2012,7 @@ window.printRechnung = function(){
 +'.kopf{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16mm}'
 +'.adr{line-height:1.5}.meta{text-align:right;line-height:1.8;white-space:nowrap}'
 +'h1{font-size:12pt;margin:0 0 7mm}'
-+'table{width:100%;border-collapse:collapse}'
++'table{width:100%;border-collapse:collapse;table-layout:fixed}'
 +'th{background:#F0742A;color:#fff;font-weight:700;font-size:8.5pt;padding:2.4mm 2mm;text-align:left;vertical-align:bottom}'
 +'th.ri{text-align:right}th.ct{text-align:center}'
 +'td{padding:2.6mm 2mm;border-bottom:.5pt solid #d9d9d9;vertical-align:top;font-size:9pt}'
@@ -2057,7 +2057,7 @@ window.printRechnung = function(){
 +'<div class="meta">Datum: <b>'+dstr+'</b><br>Rechnungs-Nr: <b>'+esc(nummer)+'</b></div></div>'
 +'<h1>'+esc(betreff)+'</h1>'
 +'<table>'+SPALTEN4+'<tr><th>Rechnungsübersicht (Details siehe Folgeseiten)</th>'
-+'<th class="ri">Nettobetrag</th><th class="ct">MwSt.</th>'
++'<th class="ri">Nettobetrag</th><th class="ri">MwSt.</th>'
 +'<th class="ri">Bruttobetrag</th></tr>'+uebersicht+'</table>'
 +'<table class="summe">'+SPALTEN4
 +'<tr><td class="ri" colspan="3">Gesamtbetrag (netto) :</td><td class="ri">'+eur(d.nettoSumme)+'</td></tr>'
@@ -2072,7 +2072,7 @@ window.printRechnung = function(){
 +'var SCHLUSS='+JSON.stringify(schlussHtml)+';'
 +'var SPALTEN='+JSON.stringify(SPALTEN6)+';'
 +'var KOPF=\'<tr><th class="ct">Pos.</th><th>Artikelbezeichnung</th>\''
-+'+\'<th class="ct">Anzahl</th><th class="ct">MwSt.</th>\''
++'+\'<th class="ri">Anzahl</th><th class="ri">MwSt.</th>\''
 +'+\'<th class="ri">Einzelpreis<br>(brutto)</th>\''
 +'+\'<th class="ri">Gesamtpreis<br>(brutto)</th></tr>\';'
 +'var root=document.getElementById("detail-root"),seiten=[],akt=null;'
@@ -2092,7 +2092,7 @@ window.printRechnung = function(){
 +' var tr=document.createElement("tr");'
 +' if(r.grp){tr.className="grp";tr.innerHTML=\'<td colspan="6">\'+r.text+\'</td>\';}'
 +' else{tr.innerHTML=\'<td class="ct">\'+r.pos+\'</td><td class="li">\'+r.text+\'</td>\''
-+'  +\'<td class="ct">\'+r.anzahl+\'</td><td class="ct">\'+r.mwst+\'</td>\''
++'  +\'<td class="ri">\'+r.anzahl+\'</td><td class="ri">\'+r.mwst+\'</td>\''
 +'  +\'<td class="ri">\'+r.einzel+\'</td><td class="ri">\'+r.gesamt+\'</td>\';}'
 +' akt.tbody.appendChild(tr);'
 +' if(!passt(akt)){akt.tbody.removeChild(tr);neueSeite();akt.tbody.appendChild(tr);}'
