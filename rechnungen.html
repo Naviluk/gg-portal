@@ -210,6 +210,18 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   background:#E7EBF2;color:#93A0B2;white-space:nowrap;border:none;cursor:pointer}
 @media(max-width:640px){.col-pager{display:flex}}
 
+/* ══ Dienstleistungen: von Hand gepflegte Beträge ══ */
+.dl-cell{padding:.3rem .35rem!important}
+.dl-input{width:100%;min-width:0;box-sizing:border-box;text-align:center;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.86rem;font-weight:700;
+  background:#F6F9FC;border:1.5px solid var(--glass-border);border-radius:8px;
+  padding:.35rem .2rem;outline:none;transition:border-color .15s,background .15s}
+.dl-input::placeholder{color:#B7C2D2;font-weight:600}
+.dl-input:hover{border-color:#BFCBDA}
+.dl-input:focus{border-color:var(--neon-cyan);background:#fff}
+.dl-row .prod-icon{background:#EAF3EF}
+.dl-row .prod-unit{color:var(--neon-green);font-weight:600}
+
 /* ══ Gezeichnete Pfeile ══ */
 .arw-i{display:inline-block;width:0;height:0;border-style:solid;
   border-width:4px 0 4px 6px;border-color:transparent transparent transparent currentColor;
@@ -958,6 +970,42 @@ function renderTableActual(){
     tbHTML += rowsHTML;
   });
 
+  // ── DIENSTLEISTUNGEN: eigene Kategorie mit von Hand gepflegten Beträgen ──
+  {
+    const dlCi = categories.length;                 // eigener Index fürs Auf-/Zuklappen
+    const dlTotals = {gesamt:0};
+    BRANCHES.forEach(br=>dlTotals[br]=0);
+    const dlRowsHTML = DL_ROWS.map((row,ri)=>{
+      let rowGesamt = 0;
+      const cells = BRANCHES.map(br=>{
+        const v = getDlValue(row.id, br, zeit);
+        rowGesamt += v; dlTotals[br] += v; grandTotals[br] += v;
+        return `<td class="num-cell dl-cell">
+          <input class="dl-input" type="text" inputmode="decimal"
+            value="${v ? v.toFixed(2).replace('.',',') : ''}" placeholder="—"
+            style="color:${BRANCH_COLORS[br]}"
+            onchange="saveDlValue('${row.id}','${br}',this.value)"
+            onclick="event.stopPropagation()">
+        </td>`;
+      }).join('');
+      dlTotals.gesamt += rowGesamt; grandTotals.gesamt += rowGesamt;
+      return `<tr class="prod-row dl-row ${ri%2?'zebra':''}" data-cat="${dlCi}">
+        <td class="col-artikel"><div class="prod-info">
+          <div class="prod-icon">${row.icon}</div>
+          <div><div class="prod-name">${row.name}</div><div class="prod-unit">Dienstleistung</div></div>
+        </div></td>
+        ${cells}
+        <td class="num-cell" style="color:var(--neon-green);font-weight:700;background:#F2FAF7">${fmt(rowGesamt)}</td>
+      </tr>`;
+    }).join('');
+
+    tbHTML += `<tr class="cat-row open" onclick="toggleCategory(this)" data-cat="${dlCi}">
+      <td class="col-artikel"><div class="cat-label"><span class="cat-arrow"><i class="arw-i"></i></span>Dienstleistungen<span class="cat-count">${DL_ROWS.length}</span></div></td>
+      ${BRANCHES.map(br=>`<td class="num-cell" style="background:var(--ink2);color:#fff;font-weight:700;border-right-color:var(--ink3)">${fmt(dlTotals[br])}</td>`).join('')}
+      <td class="num-cell" style="background:var(--ink2);color:#3EDCA9;font-weight:700">${fmt(dlTotals.gesamt)}</td>
+    </tr>` + dlRowsHTML;
+  }
+
   // ── GESAMT-ZEILE (immer sichtbar, unabhängig vom Kategorie-Zustand) ──
   tbHTML += `<tr class="total-row">
     <td class="col-artikel" style="background:#E4F6EE"><div class="prod-name" style="font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.1em;color:#0A8A66">Gesamt</div></td>
@@ -980,6 +1028,44 @@ function renderTableActual(){
 // Ermittelt den zum gewählten Monat gültigen Preis: der zuletzt EXPLIZIT gesetzte Wert
 // in diesem Monat oder einem früheren Monat gilt so lange weiter, bis er in einem
 // späteren Monat erneut geändert wird.
+// ── DIENSTLEISTUNGEN (nur auf dieser Seite) ──────────────────────────────────
+// Zwei feste Positionen, deren Beträge je Filiale von Hand eingetragen werden.
+const DL_ROWS = [
+  {id:'inventur',   name:'Inventur',    icon:'📋'},
+  {id:'beschaffung',name:'Beschaffung', icon:'🛒'},
+];
+let dlDocs = [];
+
+// Gültiger Betrag: jüngster Eintrag dieser Position und Filiale, dessen Monat
+// nicht nach dem gewählten liegt. Jede Filiale wird einzeln aufgelöst, damit
+// eine spätere Änderung an einer Filiale die anderen nicht zurücksetzt.
+function getDlValue(rowId, branch, zeit){
+  const c = dlDocs.filter(d=>d.rowId===rowId && d.monat<=zeit
+                          && d.werte && d.werte[branch]!==undefined && d.werte[branch]!==null);
+  if(!c.length) return 0;
+  c.sort((a,b)=>b.monat.localeCompare(a.monat));
+  return Number(c[0].werte[branch]) || 0;
+}
+
+// Speichert einen Betrag im GEWÄHLTEN Monat. Frühere Monate bleiben unberührt,
+// spätere übernehmen den Wert automatisch, solange sie nichts Eigenes haben.
+window.saveDlValue = async function(rowId, branch, raw){
+  const zeit = currentZeitraum;
+  if(zeit.length!==7) return;
+  const val = parseFloat(String(raw).replace(',','.'));
+  if(isNaN(val)) return;
+  const docId = rowId+'_'+zeit;
+  try{
+    await db.collection('dienstleistungen').doc(docId)
+      .set({rowId, monat:zeit, werte:{[branch]:val}}, {merge:true});
+    const ex = dlDocs.find(d=>d.rowId===rowId && d.monat===zeit);
+    if(ex){ ex.werte = ex.werte||{}; ex.werte[branch]=val; }
+    else dlDocs.push({rowId, monat:zeit, werte:{[branch]:val}});
+    renderTableActual();
+    showToast('Gespeichert ✓');
+  }catch(e){ showToast('Fehler: '+e.message); }
+};
+
 const BRANCHES = ['nettetal','brüggen','viersen','köln'];
 const BRANCH_LABELS = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
 const BRANCH_COLORS = {nettetal:'#1D4FB8',brüggen:'#C4123E',viersen:'#B4520C',köln:'#5A2FB0'};
@@ -1262,6 +1348,15 @@ async function loadData(){
   try{
     const snap = await db.collection('preise').get();
     snap.forEach(d=>priceDocs.push(d.data()));
+  }catch(e){}
+
+  // Dienstleistungen: alle je erfassten Beträge laden. Es gilt dieselbe Regel wie
+  // bei den Preisen — der zuletzt EXPLIZIT gesetzte Betrag in diesem oder einem
+  // früheren Monat gilt weiter, bis er erneut geändert wird.
+  dlDocs = [];
+  try{
+    const snap = await db.collection('dienstleistungen').get();
+    snap.forEach(d=>dlDocs.push(d.data()));
   }catch(e){}
 
   // Lieferungen aller 4 Filialen für den gewählten Monat (dedupliziert, wie auf lager.html)
