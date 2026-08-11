@@ -1397,7 +1397,12 @@ function buildRechnungData(branch){
     catObj.items.forEach(prod=>{
       const stueck = Number((lieferungenPerBranch[branch]||{})[prod.id]) || 0;
       if(!stueck) return;                       // nichts geliefert → nicht auf die Rechnung
-      const vk    = getEffectivePrice(prod.id,'verkauf',zeit) || 0;
+      // Ohne gepflegten Verkaufspreis gehört der Artikel nicht auf die Rechnung,
+      // auch wenn er geliefert wurde. "null" heißt: auf der Seite Preise nie
+      // eingetragen — eine ausdrückliche 0 dagegen bleibt eine gültige Angabe.
+      const vkRaw = getEffectivePrice(prod.id,'verkauf',zeit);
+      if(vkRaw===null || vkRaw===undefined || vkRaw==='') return;
+      const vk    = Number(vkRaw) || 0;
       const kolli = prod.kolli || 1;
       const anzahl = stueck / kolli;
       add(grp, {text: rgTexte[prod.id] || prod.name, anzahl, einzel:vk, gesamt:anzahl*vk});
