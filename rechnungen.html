@@ -926,7 +926,7 @@ function renderTableActual(){
   BRANCHES.forEach(br=>grandTotals[br]=0);
 
   categories.forEach((catObj, ci)=>{
-    const isFirst = ci === 0;
+    const isFirst = !!catOpenState[ci];
     const catOpen = isFirst ? 'open' : '';
 
     const catTotals = {gesamt:0};
@@ -982,14 +982,17 @@ function renderTableActual(){
         rowGesamt += v; dlTotals[br] += v; grandTotals[br] += v;
         return `<td class="num-cell dl-cell">
           <input class="dl-input" type="text" inputmode="decimal"
-            value="${v ? v.toFixed(2).replace('.',',') : ''}" placeholder="—"
+            value="${v ? v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €' : ''}" placeholder="— €"
             style="color:${BRANCH_COLORS[br]}"
+            data-row="${row.id}" data-br="${br}"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+            onfocus="dlStrip(this)"
             onchange="saveDlValue('${row.id}','${br}',this.value)"
             onclick="event.stopPropagation()">
         </td>`;
       }).join('');
       dlTotals.gesamt += rowGesamt; grandTotals.gesamt += rowGesamt;
-      return `<tr class="prod-row dl-row ${ri%2?'zebra':''}" data-cat="${dlCi}">
+      return `<tr class="prod-row dl-row ${catOpenState[dlCi]?'':'hidden'} ${ri%2?'zebra':''}" data-cat="${dlCi}">
         <td class="col-artikel"><div class="prod-info">
           <div class="prod-icon">${row.icon}</div>
           <div><div class="prod-name">${row.name}</div><div class="prod-unit">Dienstleistung</div></div>
@@ -999,7 +1002,7 @@ function renderTableActual(){
       </tr>`;
     }).join('');
 
-    tbHTML += `<tr class="cat-row open" onclick="toggleCategory(this)" data-cat="${dlCi}">
+    tbHTML += `<tr class="cat-row ${catOpenState[dlCi]?'open':''}" onclick="toggleCategory(this)" data-cat="${dlCi}">
       <td class="col-artikel"><div class="cat-label"><span class="cat-arrow"><i class="arw-i"></i></span>Dienstleistungen<span class="cat-count">${DL_ROWS.length}</span></div></td>
       ${BRANCHES.map(br=>`<td class="num-cell" style="background:var(--ink2);color:#fff;font-weight:700;border-right-color:var(--ink3)">${fmt(dlTotals[br])}</td>`).join('')}
       <td class="num-cell" style="background:var(--ink2);color:#3EDCA9;font-weight:700">${fmt(dlTotals.gesamt)}</td>
@@ -1049,10 +1052,19 @@ function getDlValue(rowId, branch, zeit){
 
 // Speichert einen Betrag im GEWÄHLTEN Monat. Frühere Monate bleiben unberührt,
 // spätere übernehmen den Wert automatisch, solange sie nichts Eigenes haben.
+// Beim Hineinklicken das €-Zeichen entfernen, damit man direkt tippen kann.
+window.dlStrip = function(el){
+  el.value = el.value.replace(/[^\d,.-]/g,'').trim();
+  requestAnimationFrame(()=>el.select());
+};
+
 window.saveDlValue = async function(rowId, branch, raw){
   const zeit = currentZeitraum;
   if(zeit.length!==7) return;
-  const val = parseFloat(String(raw).replace(',','.'));
+  // "1.234,56 €" → 1234.56 ; leeres Feld = keine Änderung
+  const txt = String(raw).replace(/[^\d,.-]/g,'').trim();
+  if(!txt) return;
+  const val = parseFloat(txt.replace(/\.(?=\d{3}\b)/g,'').replace(',','.'));
   if(isNaN(val)) return;
   const docId = rowId+'_'+zeit;
   try{
@@ -1062,6 +1074,9 @@ window.saveDlValue = async function(rowId, branch, raw){
     if(ex){ ex.werte = ex.werte||{}; ex.werte[branch]=val; }
     else dlDocs.push({rowId, monat:zeit, werte:{[branch]:val}});
     renderTableActual();
+    // Fokus zurück auf dieselbe Zelle — sonst springt die Ansicht nach oben
+    const back = document.querySelector(`.dl-input[data-row="${rowId}"][data-br="${branch}"]`);
+    if(back) back.focus({preventScroll:true});
     showToast('Gespeichert ✓');
   }catch(e){ showToast('Fehler: '+e.message); }
 };
@@ -1193,9 +1208,13 @@ function buildColPager(){
   });
 }
 
+// Auf-/zugeklappt wird gemerkt, damit ein Neuaufbau der Tabelle (z. B. nach dem
+// Eintragen eines Betrags) den Zustand nicht zurücksetzt. Start: alles zu.
+const catOpenState = {};
 window.toggleCategory = function(row){
   const ci = row.dataset.cat;
   const isOpen = row.classList.toggle('open');
+  catOpenState[ci] = isOpen;
   document.querySelectorAll(`#lager-tbody .prod-row[data-cat="${ci}"]`).forEach(r=>r.classList.toggle('hidden',!isOpen));
 }
 // Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
