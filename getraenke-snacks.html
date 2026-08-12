@@ -124,7 +124,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── TOP CONTROLS ── */
 .lager-controls{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.5rem}
-.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:6px;
+.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:11px;
   color:var(--text);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
   outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
   background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
@@ -236,7 +236,7 @@ td.grp-d.grp-theke{background:#FCEBF8;color:#A3128B}
 .lager-table th.col-artikel{top:0;z-index:25}
 
 /* ── SINGLE TABLE with sticky first column ── */
-.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#f7f9fb}
+.lager-table{border-collapse:separate;border-spacing:0;min-width:500px;width:100%;background:#fff}
 .lager-table th{
   font-family:'Poppins','Century Gothic',sans-serif;
   font-weight:800;font-size:.62rem;letter-spacing:.12em;color:#8FD8EE;text-transform:uppercase;
@@ -1034,7 +1034,10 @@ function iconHTML(icon, sizePx){
   sizePx = sizePx || 34;
   if(isImageIcon(icon)){
     const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
-    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;display:block">`;
+    // Foto-Symbole tragen dieselbe abgerundete Kachelform wie die Emoji-Plättchen —
+    // der Radius wächst mit der Größe (rund 30 %), damit 20px und 34px gleich wirken.
+    const rad = Math.max(6, Math.round(sizePx*0.3));
+    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
   }
   return icon || '📦';
 }
