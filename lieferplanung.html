@@ -581,6 +581,17 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .we-datechip{display:inline-flex;align-items:center;gap:.35rem;background:var(--we-bg,#EAF6FB);
   color:var(--we-ink,var(--neon-cyan));border-radius:20px;padding:.22rem .65rem;
   font-family:var(--mono);font-size:.78rem;font-weight:700;margin-bottom:.7rem}
+/* Im Bestätigungsschritt lässt sich das Datum direkt ändern — es sieht aus wie die
+   Pille daneben, ist aber ein echtes Datumsfeld. */
+.confirm-date .we-datechip-input{display:inline-flex;align-items:center;width:auto;min-width:0;
+  background:var(--we-bg,#EAF6FB);color:var(--we-ink,var(--neon-cyan));
+  border:1px solid transparent;border-radius:20px;padding:.3rem .7rem;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.8rem;font-weight:700;
+  margin-bottom:.7rem;outline:none;cursor:pointer;transition:border-color .15s,background .15s}
+.confirm-date .we-datechip-input:hover{border-color:var(--we-acc,var(--neon-cyan))}
+.confirm-date .we-datechip-input:focus{border-color:var(--we-acc,var(--neon-cyan));background:#fff}
+.confirm-date .we-datechip-input::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
+.confirm-date .we-datechip-input::-webkit-date-and-time-value{text-align:left}
 .confirm-list{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
 .confirm-cat{display:flex;align-items:center;gap:.5rem;background:#E7ECF4;padding:.4rem .7rem;
   font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
@@ -2684,9 +2695,9 @@ window.buildConfirm = function(){
 
   weSetStep(2);
 
-  const d=new Date(date);
   document.getElementById('confirm-date-label').innerHTML=
-    `<span class="we-datechip"><i class="cal-i"></i>${d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}</span>`;
+    `<input type="date" class="we-datechip-input" id="we-date-confirm" value="${date}"
+       onchange="weSetDate(this.value)" title="Datum ändern">`;
 
   let html='';
   PRODUCTS.forEach(catObj=>{
@@ -2714,6 +2725,12 @@ window.buildConfirm = function(){
   } else {
     document.getElementById('confirm-shops').style.display='none';
   }
+};
+
+window.weSetDate = function(val){
+  if(!val) return;
+  const src = document.getElementById('we-date');
+  if(src) src.value = val;
 };
 
 window.backToEdit = function(){
@@ -2784,7 +2801,10 @@ window.confirmWareneingang = async function(){
   const ids=Object.keys(weSelectedItems);
   if(!ids.length){ showToast('Bitte mindestens einen Artikel auswählen.'); return; }
   showSpinner();
-  const date=document.getElementById('we-date').value || new Date().toISOString().slice(0,10);
+  // Falls im Bestätigungsschritt ein anderes Datum gewählt wurde, gilt dieses.
+  const dc = document.getElementById('we-date-confirm');
+  const date = (dc && dc.value) || document.getElementById('we-date').value
+               || new Date().toISOString().slice(0,10);
   const monat=date.slice(0,7);
   const activeShops=weShopRows
     .filter(s=>s&&!s.removed&&s.shop)
