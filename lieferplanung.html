@@ -533,6 +533,145 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   color-mix(in srgb,var(--btn-acc,var(--lg-accent,#0E8FB8)) 70%,#000),
   var(--btn-acc,var(--lg-accent,#0E8FB8)))}
 
+/* ══ WARENEINGANG-FENSTER — Farbe kommt vom gewählten Lager ══ */
+.we-modal{padding:0;overflow:hidden;display:flex;flex-direction:column;
+  max-height:92vh;max-height:92dvh}
+.we-head{background:var(--ink);color:#fff;padding:.95rem 1.1rem .85rem;position:relative;
+  flex:0 0 auto}
+.we-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--we-acc,var(--neon-cyan))}
+.we-head .modal-close{color:rgba(255,255,255,.6);top:.85rem;right:1rem}
+.we-head .modal-close:hover{color:#fff}
+.we-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.we-title-row{display:flex;align-items:center;gap:.55rem;margin-top:.15rem;flex-wrap:wrap}
+.we-title-row #we-title{font-size:1rem;font-weight:700;color:#fff}
+.we-lager-pill{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--we-soft,rgba(255,255,255,.15));color:var(--we-fg,#fff)}
+.we-steps{display:flex;align-items:center;gap:.45rem;margin-top:.75rem}
+.we-step{display:flex;align-items:center;gap:.35rem;font-size:.58rem;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:#7E90AE}
+.we-step i{width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.56rem}
+.we-step.on{color:#fff}
+.we-step.on i,.we-step.done i{background:var(--we-acc,var(--neon-cyan));color:#fff}
+.we-step-line{flex:1;height:1px;background:var(--ink3)}
+.we-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:.9rem 1.1rem 0;overscroll-behavior:contain}
+.we-foot{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--glass-border);
+  margin:.9rem -1.1rem 0;padding:.75rem 1.1rem 1rem;display:flex;gap:.5rem;z-index:3}
+.we-foot .btn-acc{flex:1;background:var(--we-grad,linear-gradient(100deg,var(--neon-cyan),#3FC5EC));
+  box-shadow:0 4px 14px var(--we-shadow,rgba(14,143,184,.28))}
+
+/* Artikelzeile in der Auswahl */
+.modal-prod-row.checked{background:var(--we-bg,#EAF6FB)}
+.prod-checkbox.checked{background:var(--we-acc,var(--neon-cyan));border-color:var(--we-acc,var(--neon-cyan))}
+.qty-input.show{border-color:var(--we-acc,var(--neon-cyan));background:#fff;color:var(--we-ink,var(--text));
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600}
+.modal-cat-count{margin-left:auto;font-size:.58rem;font-weight:700;color:var(--text-dim);letter-spacing:.04em}
+.modal-cat-count.has{color:var(--we-ink,var(--neon-cyan))}
+
+/* Klebender Zähler */
+.we-summary{position:sticky;bottom:0;z-index:2;background:var(--ink);color:#fff;border-radius:12px;
+  padding:.55rem .8rem;display:flex;align-items:center;gap:.7rem;margin-top:.7rem}
+.we-summary s{text-decoration:none;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#8FA6C9;font-weight:800;display:block}
+.we-summary b{font-family:var(--mono);font-size:1rem;color:var(--we-fg,#fff);font-weight:700}
+.we-summary .r{margin-left:auto;text-align:right}
+
+/* Übersicht (Schritt 2) */
+.we-datechip{display:inline-flex;align-items:center;gap:.35rem;background:var(--we-bg,#EAF6FB);
+  color:var(--we-ink,var(--neon-cyan));border-radius:20px;padding:.22rem .65rem;
+  font-family:var(--mono);font-size:.78rem;font-weight:700;margin-bottom:.7rem}
+.confirm-list{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.confirm-cat{display:flex;align-items:center;gap:.5rem;background:#E7ECF4;padding:.4rem .7rem;
+  font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.confirm-cat i{width:6px;height:6px;border-radius:2px;background:var(--we-acc,var(--neon-cyan));display:block}
+.confirm-cat .n{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--text-dim);letter-spacing:0;font-weight:600}
+.confirm-list .confirm-item{padding:.42rem .7rem;border-top:1px solid var(--glass-border)}
+.confirm-list .confirm-cat + .confirm-item{border-top:none}
+.confirm-item.zeb{background:var(--zebra)}
+.confirm-item .ci-qty{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--we-ink,var(--text))}
+
+/* Shops */
+.shops-section{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem;margin-top:.85rem}
+.shops-title{display:flex;align-items:center;gap:.4rem}
+.shops-sum{margin-left:auto;font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--neon-green);letter-spacing:0}
+.betrag-input.filled{border-color:var(--neon-green);background:#fff;color:var(--neon-green);font-weight:700}
+
+/* Kategoriezeile in der Auswahl — wie in der Tabelle: Punkt in Lagerfarbe, Text in Tiefblau */
+.we-body .modal-cat-header{border-radius:9px;border-color:var(--glass-border)}
+.we-body .modal-cat-label{color:var(--ink);letter-spacing:.14em;font-weight:800;
+  display:flex;align-items:center;gap:.45rem}
+.we-body .modal-cat-label::before{content:'';width:6px;height:6px;border-radius:2px;
+  background:var(--we-acc,var(--neon-cyan));flex-shrink:0}
+/* Shops in der Übersicht — weiße Karte, Summe mintgrün */
+.confirm-shops{margin-top:.85rem;padding:.75rem .8rem;background:#fff;border-radius:12px;
+  border:1px solid var(--glass-border)}
+.confirm-shops-title{display:flex;align-items:center;gap:.4rem;color:var(--text-dim);
+  letter-spacing:.16em;font-size:.55rem;font-weight:800}
+.confirm-shops-title .cs-total{margin-left:auto;font-family:var(--mono);font-size:.78rem;
+  font-weight:700;color:var(--neon-green);letter-spacing:0}
+.confirm-shop-row{padding:.4rem 0}
+.confirm-shop-row .cs-name{color:var(--text);font-weight:600}
+.confirm-shop-row .cs-amt{font-family:var(--mono);color:var(--neon-green);font-size:.86rem}
+
+
+.we-hidden{display:none!important}
+
+#we-date{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;
+  text-align:left;border-radius:11px;padding:.62rem .8rem;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600}
+#we-date::-webkit-date-and-time-value{text-align:left}
+#we-date::-webkit-calendar-picker-indicator{opacity:.45}
+
+#modal-we{align-items:center;overflow:hidden}
+#modal-we .we-modal{margin:0}
+
+/* Kalender-Symbol im Datumsfeld selbst zeichnen */
+.we-body .field-label{font-size:.55rem;letter-spacing:.16em;font-weight:800;color:var(--text-dim);
+  margin-bottom:.35rem}
+/* Knöpfe im Fenster in normaler Schreibweise, nicht in Versalien */
+.we-foot .btn{text-transform:none;letter-spacing:.02em;font-size:.82rem}
+
+/* Auf breiten Schirmen zwei Spalten: links wählen, rechts sehen, was drin ist.
+   Das Datum steht über beiden, die Knopfleiste unter beiden. */
+@media(min-width:700px){
+  #modal-we .we-modal{max-width:min(94vw,900px)}
+  #we-step1{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);
+    column-gap:1rem;align-items:start}
+  #we-step1 > .field:first-child{grid-column:1 / -1}
+  #we-step1 > .field:nth-of-type(2){grid-column:1;grid-row:2 / span 2}
+  #we-selected-list{grid-column:2;grid-row:2;margin-top:0;border-top:none;padding-top:0;
+    background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.75rem .8rem}
+  #we-shops-section{grid-column:2;grid-row:3;margin-top:.8rem}
+  #we-step1 > .we-foot{grid-column:1 / -1}
+  /* Schritt 2: Warenliste links, Shops rechts */
+  #we-step2{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);
+    column-gap:1rem;align-items:start}
+  #we-step2 > #confirm-date-label{grid-column:1 / -1}
+  #we-step2 > .confirm-list{grid-column:1}
+  #we-step2 > .confirm-shops{grid-column:2;margin-top:0}
+  #we-step2 > .we-foot{grid-column:1 / -1}
+}
+
+
+#we-date{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2366748C' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .75rem center;padding-right:2.4rem}
+#we-date::-webkit-calendar-picker-indicator{opacity:0}
+.cal-i{display:inline-block;width:14px;height:14px;flex-shrink:0;
+  background:currentColor;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:contain;mask-size:contain;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Crect x='2' y='3.2' width='12' height='11' rx='2'/%3E%3Cpath d='M5 1.6v3M11 1.6v3M2 6.6h12'/%3E%3C/svg%3E")}
+
+
+/* Shops im Bestätigungsschritt: gleiche Karte wie in Schritt 1, aber änderbar */
+#confirm-shops .shop-row{margin-bottom:.45rem}
+#confirm-shops .shop-row:last-of-type{margin-bottom:.55rem}
+#confirm-shops .shop-select{font-size:.85rem;border-radius:9px}
+#confirm-shops .betrag-input{border-radius:9px;font-family:var(--mono);
+  font-variant-numeric:tabular-nums;font-weight:700}
+.cs-hint{font-size:.62rem;color:var(--text-dim);letter-spacing:.02em;margin-top:.1rem}
+
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
   background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
@@ -1027,9 +1166,21 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
 <!-- ═══ MODAL: WARENEINGANG (gemeinsame Form wie auf lager.html) ═══ -->
 <div class="modal-overlay" id="modal-we">
-  <div class="modal">
-    <button class="modal-close" onclick="closeWareneingang()">✕</button>
-    <div class="modal-title" id="we-title">Wareneingang erfassen</div>
+  <div class="modal we-modal" id="we-modal">
+    <div class="we-head">
+      <button class="modal-close" onclick="closeWareneingang()">✕</button>
+      <div class="we-eyebrow">Erfassen</div>
+      <div class="we-title-row">
+        <span id="we-title">Einkauf</span>
+        <span class="we-lager-pill" id="we-lager-pill">Zentrallager</span>
+      </div>
+      <div class="we-steps">
+        <div class="we-step on" id="we-step-1"><i>1</i><span>Waren</span></div>
+        <div class="we-step-line"></div>
+        <div class="we-step" id="we-step-2"><i>2</i><span>Prüfen</span></div>
+      </div>
+    </div>
+    <div class="we-body">
 
     <!-- Schritt 1: Auswahl -->
     <div id="we-step1">
@@ -1040,68 +1191,37 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="field">
         <label class="field-label">Waren auswählen</label>
         <div id="we-product-list"></div>
+        <div class="we-summary" id="we-summary" style="display:none">
+          <div><s>Positionen</s><b id="we-sum-count">0</b></div>
+          <div class="r"><s>Stück gesamt</s><b id="we-sum-qty">0</b></div>
+        </div>
       </div>
       <div id="we-selected-list" class="selected-list" style="display:none">
         <div class="selected-list-title">Ausgewählte Waren</div>
         <div id="we-selected-items"></div>
       </div>
       <div id="we-shops-section" class="shops-section" style="display:none">
-        <div class="shops-title" id="we-shops-title">Shops / Einkaufsorte</div>
+        <div class="shops-title" id="we-shops-title">🏪 Shops / Einkaufsorte
+          <span class="shops-sum" id="we-shops-sum"></span></div>
         <div id="we-shop-rows"></div>
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
-      <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-check-list" onclick="checkListAction()">Einkaufsliste prüfen →</button>
+      <div class="modal-btn-row we-foot">
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
+        <button class="btn btn-primary btn-acc" id="btn-check-list" onclick="checkListAction()">Liste prüfen →</button>
       </div>
     </div>
 
     <!-- Schritt 2: Bestätigung -->
-    <div id="we-step2" style="display:none">
+    <div id="we-step2" class="we-hidden">
       <div class="confirm-date" id="confirm-date-label"></div>
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
-      <div class="modal-btn-row">
-        <button class="btn btn-primary" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
-        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück zur Bearbeitung</button>
+      <div class="modal-btn-row we-foot">
+        <button class="btn btn-ghost" onclick="backToEdit()">← Zurück</button>
+        <button class="btn btn-primary btn-acc" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Bestätigen</button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- MODAL: SOLL-BESTAND -->
-<div class="modal-overlay" id="modal-soll" onclick="if(event.target===this)closeSoll()">
-  <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
-    <button class="modal-close" onclick="closeSoll()">✕</button>
-    <div class="modal-title">⚙️ Soll-Bestand konfigurieren</div>
-    <div class="soll-lager-tabs" id="soll-tabs"></div>
-    <div id="soll-content"></div>
-    <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveSoll()">💾 Speichern</button>
-      <button class="btn btn-ghost" onclick="closeSoll()">Abbrechen</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: PLANUNG — одно окно -->
-<div class="modal-overlay" id="modal-plan" onclick="if(event.target===this)closePlan()">
-  <div class="pmodal" id="plan-modal-right">
-    <div class="pm-head">
-      <button class="pm-close" onclick="closePlan()">✕</button>
-      <div class="pm-eyebrow">Planung</div>
-      <div class="pm-title">
-        <span id="plan-title-right">Neuer Einkauf</span>
-        <span id="plan-lager-badge-right"></span>
-      </div>
-    </div>
-    <div class="pm-body">
-      <label class="pm-fl">Datum</label>
-      <input type="date" id="plan-date" class="pm-date">
-      <div id="plan-content"></div>
-    </div>
-    <div class="pm-foot">
-      <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
-      <button class="btn btn-acc" id="btn-prüfen-plan" onclick="addArtikelDirekt()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -2297,6 +2417,7 @@ function weBuildProductList(){
     html += `<div class="modal-cat" id="we-cat-${ci}">
       <div class="modal-cat-header" onclick="this.closest('.modal-cat').classList.toggle('open')">
         <span class="modal-cat-label">${catObj.cat}</span>
+        <span class="modal-cat-count" id="we-catcount-${ci}"></span>
         <span class="modal-cat-arrow"><i class="arw-i"></i></span>
       </div>
       <div class="modal-cat-items">`;
@@ -2317,24 +2438,76 @@ function weBuildProductList(){
   document.getElementById('we-product-list').innerHTML = html;
 }
 
+// Hausfarben je Lager — dieselben Werte wie im Planungsfenster und auf lager.html
+const WE_ACCENTS = {
+  zentrallager:{acc:'#0FA574',ink:'#0A8A66',fg:'#B7F0DC',bg:'#E9F8F2',soft:'rgba(15,165,116,.22)',
+                grad:'linear-gradient(100deg,#0B7A5A,#12B487)',shadow:'rgba(15,165,116,.3)'},
+  nettetal:    {acc:'#2563EB',ink:'#1D4FB8',fg:'#CADEFF',bg:'#E9F0FE',soft:'rgba(37,99,235,.22)',
+                grad:'linear-gradient(100deg,#1B4CA8,#2E7BE0)',shadow:'rgba(37,99,235,.3)'},
+  'brüggen':   {acc:'#E11D48',ink:'#C4123E',fg:'#FFD1DD',bg:'#FDE8EE',soft:'rgba(225,29,72,.22)',
+                grad:'linear-gradient(100deg,#A5103A,#F0325C)',shadow:'rgba(225,29,72,.3)'},
+  viersen:     {acc:'#EA580C',ink:'#B4520C',fg:'#FFE0C4',bg:'#FDEEE1',soft:'rgba(234,88,12,.22)',
+                grad:'linear-gradient(100deg,#A64A0B,#EE8A2B)',shadow:'rgba(234,88,12,.3)'},
+  'köln':      {acc:'#7C3AED',ink:'#5A2FB0',fg:'#DFD2FF',bg:'#F1EAFE',soft:'rgba(124,58,237,.22)',
+                grad:'linear-gradient(100deg,#4E2AA8,#8258E8)',shadow:'rgba(124,58,237,.3)'},
+};
+function weApplyAccent(){
+  const m = document.getElementById('we-modal');
+  const a = WE_ACCENTS[weLpLager] || WE_ACCENTS.zentrallager;
+  if(!m) return;
+  m.style.setProperty('--we-acc',a.acc);   m.style.setProperty('--we-ink',a.ink);
+  m.style.setProperty('--we-fg',a.fg);     m.style.setProperty('--we-bg',a.bg);
+  m.style.setProperty('--we-soft',a.soft); m.style.setProperty('--we-grad',a.grad);
+  m.style.setProperty('--we-shadow',a.shadow);
+}
+// Schrittanzeige: die 1 wird zum Haken, sobald Schritt 2 dran ist.
+function weSetStep(n){
+  const s1=document.getElementById('we-step-1'), s2=document.getElementById('we-step-2');
+  const b1=document.getElementById('we-step1'), b2=document.getElementById('we-step2');
+  if(b1) b1.classList.toggle('we-hidden', n!==1);
+  if(b2) b2.classList.toggle('we-hidden', n!==2);
+  if(!s1||!s2) return;
+  s1.className = 'we-step ' + (n===1?'on':'done');
+  s2.className = 'we-step ' + (n===2?'on':'');
+  const i1=s1.querySelector('i'); if(i1) i1.textContent = (n===2?'✓':'1');
+}
 function weSetTitle(){
   const isEinkauf = weLpMode==='einkauf';
-  const titleText = isEinkauf ? 'Einkauf erfassen' : 'Lieferung erfassen';
-  const lc = isEinkauf
-    ? {name:'Zentrallager', color:'var(--neon-green)'}
-    : {name:LAGER_NAMES[weLpLager]||weLpLager, color:(NEON[weLpLager]||{}).neon||'var(--neon-cyan)'};
-  document.getElementById('we-title').innerHTML =
-    `${titleText} — <span style="color:${lc.color};text-shadow:0 0 10px ${lc.color}">${lc.name}</span>`;
-  document.getElementById('we-shops-section').style.display = isEinkauf?'':'none';
+  document.getElementById('we-title').textContent = isEinkauf ? 'Einkauf' : 'Lieferung';
+  const pill = document.getElementById('we-lager-pill');
+  if(pill) pill.textContent = isEinkauf ? 'Zentrallager' : (LAGER_NAMES[weLpLager]||weLpLager);
+  weApplyAccent();
+  // Shops werden im Bestätigungsschritt gepflegt (dort stehen die Beträge),
+  // deshalb bleibt der Block in der Auswahl ausgeblendet.
+  document.getElementById('we-shops-section').style.display = 'none';
+}
+
+function weUpdateSummary(){
+  const ids=Object.keys(weSelectedItems);
+  const box=document.getElementById('we-summary');
+  if(box) box.style.display = ids.length ? '' : 'none';
+  const c=document.getElementById('we-sum-count'), q=document.getElementById('we-sum-qty');
+  if(c) c.textContent = ids.length;
+  if(q) q.textContent = ids.reduce((a,id)=>a+(Number(weSelectedItems[id])||0),0);
+  PRODUCTS.forEach((catObj,ci)=>{
+    const el=document.getElementById('we-catcount-'+ci);
+    if(!el) return;
+    const n=catObj.items.filter(pr=>ids.includes(pr.id)).length;
+    el.textContent = n ? n+' gewählt' : '';
+    el.classList.toggle('has', !!n);
+  });
 }
 
 function weApplySelectionToDom(){
   document.querySelectorAll('[id^="we-cb-"]').forEach(cb=>cb.classList.remove('checked'));
+  document.querySelectorAll('#we-product-list .modal-prod-row').forEach(r=>r.classList.remove('checked'));
   document.querySelectorAll('[id^="we-qty-"]').forEach(qi=>{qi.classList.remove('show');qi.value='';});
   Object.entries(weSelectedItems).forEach(([prodId,qty])=>{
     const cb=document.getElementById('we-cb-'+prodId);
     const qi=document.getElementById('we-qty-'+prodId);
+    const row=document.getElementById('we-row-'+prodId);
     if(cb) cb.classList.add('checked');
+    if(row) row.classList.add('checked');
     if(qi){ qi.classList.add('show'); qi.value=qty; }
   });
 }
@@ -2342,14 +2515,18 @@ function weApplySelectionToDom(){
 window.toggleWeProd = function(prodId){
   const cb  = document.getElementById('we-cb-'+prodId);
   const qty = document.getElementById('we-qty-'+prodId);
+  const row = document.getElementById('we-row-'+prodId);
   const isChecked = cb.classList.toggle('checked');
+  if(row) row.classList.toggle('checked', isChecked);
   qty.classList.toggle('show', isChecked);
   if(isChecked){ qty.focus(); weSelectedItems[prodId]=weSelectedItems[prodId]||0; }
   else { delete weSelectedItems[prodId]; }
+  weShopsStale = true;
   weUpdateSelectedPreview();
 }
 window.updateWeQty = function(prodId, val){
   weSelectedItems[prodId] = parseFloat(val)||0;
+  weShopsStale = true;
   weUpdateSelectedPreview();
 }
 function weUpdateSelectedPreview(){
@@ -2357,9 +2534,9 @@ function weUpdateSelectedPreview(){
   const sel = document.getElementById('we-selected-list');
   const items = document.getElementById('we-selected-items');
   const shops = document.getElementById('we-shops-section');
+  weUpdateSummary();
   if(!ids.length){ sel.style.display='none'; if(shops) shops.style.display='none'; return; }
   sel.style.display='block';
-  if(weLpMode==='einkauf' && shops) shops.style.display='block';
   let html=''; let lastCat='';
   PRODUCTS.forEach(catObj=>{
     catObj.items.forEach(prod=>{
@@ -2376,6 +2553,88 @@ function weUpdateSelectedPreview(){
   });
   items.innerHTML=html;
 }
+
+// Woher kommen die Shops im Bestätigungsschritt: jeder gekaufte Artikel trägt
+// seinen Shop (aus der Einkaufsliste), der Betrag ist Menge × Einkaufspreis.
+// Artikel ohne hinterlegten Preis zählen nicht mit — die Summe bleibt änderbar.
+let weShopsStale = false;   // Auswahl hat sich geändert
+let weShopsTouched = false; // Beträge/Shops wurden von Hand bearbeitet
+function weShopsFromSelection(){
+  const byShop = {};
+  Object.keys(weSelectedItems).forEach(id=>{
+    const shop = (ekState[id] && ekState[id].shop) || ekDefaultShops[id] || '';
+    const key  = shop || '\u0000';
+    if(!byShop[key]) byShop[key] = {shop, betrag:0, offen:0};
+    const pr  = getEinkaufspreis(id);
+    const qty = Number(weSelectedItems[id])||0;
+    if(pr!==null) byShop[key].betrag += pr*qty;
+    else byShop[key].offen++;
+  });
+  return Object.values(byShop).map(r=>({
+    shop: r.shop,
+    betrag: r.betrag ? r.betrag.toFixed(2) : '',
+    offen: r.offen
+  }));
+}
+
+// Zeichnet die Shop-Zeilen des Bestätigungsschritts (Shop wählbar, Betrag änderbar)
+function weRenderConfirmShops(){
+  const cs = document.getElementById('confirm-shops');
+  if(!cs) return;
+  if(weLpMode!=='einkauf'){ cs.style.display='none'; return; }
+  const rows = weShopRows.filter(r=>r && !r.removed);
+  cs.style.display='block';
+  const priOpts = SHOPS_PRIMARY.map(x=>`<option value="${x}">${x}</option>`).join('');
+  const secOpts = SHOPS_SECONDARY.map(x=>`<option value="${x}">${x}</option>`).join('');
+  const total = rows.reduce((a,r)=>a+(parseFloat(r.betrag)||0),0);
+  let html = `<div class="shops-title">🏪 Shops / Einkaufsorte
+    <span class="shops-sum" id="cs-sum">${fmtEUR(total)}</span></div>`;
+  weShopRows.forEach((r,i)=>{
+    if(!r || r.removed) return;
+    html += `<div class="shop-row" id="cs-row-${i}">
+      <select class="shop-select" onchange="weShopEdit(${i},'shop',this.value)">
+        <option value="">— Shop wählen —</option>
+        <optgroup label="Hauptlieferanten">${priOpts}</optgroup>
+        <optgroup label="Weitere">${secOpts}</optgroup>
+      </select>
+      <input class="betrag-input${r.betrag?' filled':''}" type="number" step="0.01" placeholder="€"
+        value="${r.betrag||''}" onchange="weShopEdit(${i},'betrag',this.value)">
+      <button class="shop-remove" onclick="weShopRemove(${i})">✕</button>
+    </div>`;
+    if(r.offen) html += `<div class="cs-hint">${r.offen} Artikel ohne hinterlegten Einkaufspreis — Betrag bitte prüfen.</div>`;
+  });
+  html += `<button class="btn-add-shop" onclick="weShopAdd()">＋ Shop hinzufügen</button>`;
+  cs.innerHTML = html;
+  // Auswahl nachtragen (im Markup gesetzte selected-Attribute gehen bei optgroup leicht verloren)
+  weShopRows.forEach((r,i)=>{
+    if(!r || r.removed) return;
+    const sel = document.querySelector(`#cs-row-${i} .shop-select`);
+    if(sel) sel.value = r.shop||'';
+  });
+}
+window.weShopEdit = function(i, field, val){
+  if(!weShopRows[i]) return;
+  weShopsTouched = true;
+  weShopRows[i][field] = val;
+  if(field==='betrag'){
+    const inp = document.querySelector(`#cs-row-${i} .betrag-input`);
+    if(inp) inp.classList.toggle('filled', !!val);
+    const sum = weShopRows.filter(r=>r&&!r.removed)
+      .reduce((a,r)=>a+(parseFloat(r.betrag)||0),0);
+    const el = document.getElementById('cs-sum');
+    if(el) el.textContent = fmtEUR(sum);
+  }
+};
+window.weShopRemove = function(i){
+  weShopsTouched = true;
+  if(weShopRows[i]) weShopRows[i]={removed:true};
+  weRenderConfirmShops();
+};
+window.weShopAdd = function(){
+  weShopsTouched = true;
+  weShopRows.push({shop:'',betrag:''});
+  weRenderConfirmShops();
+};
 
 window.addShopRow = function(){
   const idx = weShopRows.length;
@@ -2416,43 +2675,42 @@ window.buildConfirm = function(){
     if(sel&&inp) weShopRows[i] = {shop:sel.value, betrag:inp.value};
   });
 
-  document.getElementById('we-step1').style.display='none';
-  document.getElementById('we-step2').style.display='block';
+  weSetStep(2);
 
   const d=new Date(date);
-  document.getElementById('confirm-date-label').textContent='Datum: '+d.toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('confirm-date-label').innerHTML=
+    `<span class="we-datechip"><i class="cal-i"></i>${d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})}</span>`;
 
-  let html=''; let lastCat='';
+  let html='';
   PRODUCTS.forEach(catObj=>{
-    catObj.items.forEach(prod=>{
-      if(ids.includes(prod.id)){
-        if(catObj.cat!==lastCat){ html+=`<div style="font-size:.62rem;color:var(--text-dim);margin:.5rem 0 .2rem;letter-spacing:.08em;text-transform:uppercase">${catObj.cat}</div>`; lastCat=catObj.cat; }
-        const unitTxt = prod.unit||'';
-        const qty = weSelectedItems[prod.id]||0;
-        html+=`<div class="confirm-item">
-          <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
-          <span class="ci-qty">${qty}</span>
-        </div>`;
-      }
+    const items = catObj.items.filter(prod=>ids.includes(prod.id));
+    if(!items.length) return;
+    const stk = items.reduce((a,prod)=>a+(Number(weSelectedItems[prod.id])||0),0);
+    html+=`<div class="confirm-cat"><i></i>${catObj.cat}<span class="n">${items.length} · ${stk} St.</span></div>`;
+    items.forEach((prod,ix)=>{
+      const unitTxt = prod.unit||'';
+      const qty = weSelectedItems[prod.id]||0;
+      html+=`<div class="confirm-item${ix%2?' zeb':''}">
+        <span class="ci-name">${iconHTML(prod.icon,20)} ${prod.name} <span class="ci-unit">${unitTxt}</span></span>
+        <span class="ci-qty">${qty}</span>
+      </div>`;
     });
   });
   document.getElementById('confirm-list').innerHTML=html;
 
-  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
-  const cs=document.getElementById('confirm-shops');
-  if(weLpMode==='einkauf' && activeShops.length){
-    cs.style.display='block';
-    cs.innerHTML='<div class="confirm-shops-title">Shops / Einkaufsorte</div>'+
-      activeShops.map(s=>{
-        const amt = parseFloat(s.betrag||0).toFixed(2);
-        return `<div class="confirm-shop-row"><span class="cs-name">${s.shop}</span><span class="cs-amt">${amt} €</span></div>`;
-      }).join('');
-  } else { cs.style.display='none'; }
+  // Shops: beim ersten Aufruf aus dem Einkauf ableiten, danach die Eingaben behalten
+  if(weLpMode==='einkauf'){
+    const leer = !weShopRows.filter(r=>r&&!r.removed).length;
+    if(leer || (weShopsStale && !weShopsTouched)) weShopRows = weShopsFromSelection();
+    weShopsStale = false;
+    weRenderConfirmShops();
+  } else {
+    document.getElementById('confirm-shops').style.display='none';
+  }
 };
 
 window.backToEdit = function(){
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
+  weSetStep(1);
   setTimeout(()=>{
     weApplySelectionToDom();
     weUpdateSelectedPreview();
@@ -2495,6 +2753,7 @@ function weOpenFromAbschluss(lager, mode){
   weLpMode  = mode;
   weSelectedItems = {...items};
   weShopRows = [];
+  weShopsStale = false; weShopsTouched = false;
 
   weBuildProductList();
   weSetTitle();
@@ -2505,8 +2764,7 @@ function weOpenFromAbschluss(lager, mode){
   if(saveBtn) saveBtn.textContent='✓ Bestätigen';
 
   document.getElementById('modal-we').classList.add('show');
-  document.getElementById('we-step1').style.display='block';
-  document.getElementById('we-step2').style.display='none';
+  weSetStep(1);
 
   setTimeout(()=>{
     weApplySelectionToDom();
@@ -2521,7 +2779,9 @@ window.confirmWareneingang = async function(){
   showSpinner();
   const date=document.getElementById('we-date').value || new Date().toISOString().slice(0,10);
   const monat=date.slice(0,7);
-  const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
+  const activeShops=weShopRows
+    .filter(s=>s&&!s.removed&&s.shop)
+    .map(s=>({shop:s.shop, betrag: s.betrag===''||s.betrag==null ? '' : String(s.betrag)}));
   const lager=weLpLager;
   const entry={
     lager, datum:date, monat,
