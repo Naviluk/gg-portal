@@ -457,7 +457,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   background-repeat:no-repeat;background-position:right .5rem center;transition:border-color .2s}
 .shop-select:focus{border-color:var(--neon-cyan)}
 .shop-select option{background:#fff}
-.betrag-input{width:80px;min-width:80px;max-width:80px;flex-shrink:0;
+.betrag-input{width:104px;min-width:104px;max-width:104px;flex-shrink:0;
   background:#fff;border:1px solid var(--glass-border);border-radius:6px;
   color:var(--neon-yellow);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
   font-size:.85rem;padding:.5rem .4rem;text-align:right;outline:none}
@@ -669,7 +669,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 #confirm-shops .shop-row:last-of-type{margin-bottom:.55rem}
 #confirm-shops .shop-select{font-size:.85rem;border-radius:9px}
 #confirm-shops .betrag-input{border-radius:9px;font-family:var(--mono);
-  font-variant-numeric:tabular-nums;font-weight:700}
+  font-variant-numeric:tabular-nums;font-weight:700;font-size:.82rem;
+  padding:.5rem .55rem;letter-spacing:-.02em}
+/* Auf schmalen Schirmen darf die Zeile umbrechen, statt den Betrag zu quetschen */
+@media(max-width:640px){
+  #confirm-shops .shop-row{flex-wrap:wrap}
+  #confirm-shops .shop-select{flex:1 1 100%}
+  #confirm-shops .betrag-input{flex:1 1 auto;max-width:none;width:auto}
+}
 .cs-hint{font-size:.62rem;color:var(--text-dim);letter-spacing:.02em;margin-top:.1rem}
 
 /* success toast */
@@ -1201,7 +1208,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <div id="we-selected-items"></div>
       </div>
       <div id="we-shops-section" class="shops-section" style="display:none">
-        <div class="shops-title" id="we-shops-title">🏪 Shops / Einkaufsorte
+        <div class="shops-title" id="we-shops-title">🏪 Shops
           <span class="shops-sum" id="we-shops-sum"></span></div>
         <div id="we-shop-rows"></div>
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
@@ -1298,8 +1305,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
   <div class="panel-sub">
     <div class="tabs">
-      <button class="tab on" id="ek-sort-artikel" onclick="switchEkSort('artikel')">Nach Artikeln</button>
-      <button class="tab" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
+      <button class="tab on" id="ek-sort-shops" onclick="switchEkSort('shops')">Nach Shops</button>
+      <button class="tab" id="ek-sort-artikel" onclick="switchEkSort('artikel')">Nach Artikeln</button>
     </div>
     <div class="ek-legend" id="ek-legend">
       <span class="l-q">Gepl.</span><span class="l-t">✅</span>
@@ -1847,7 +1854,7 @@ window.toggleCategory=function(row){
 
 // ── EINKÄUFE STATE ──
 const SHOPS_ALL = ['Metro','Coffeefair','DM','Amazon','Aldi','REWE','Penny','Trinkgut','Kaufland','Action','Centershop'];
-let ekSort = 'artikel';
+let ekSort = 'shops';   // Voreinstellung: nach Shops — so wird meistens eingekauft
 let ekState = {};
 let ekDefaultShops = {};
 
@@ -2587,7 +2594,7 @@ function weRenderConfirmShops(){
   const priOpts = SHOPS_PRIMARY.map(x=>`<option value="${x}">${x}</option>`).join('');
   const secOpts = SHOPS_SECONDARY.map(x=>`<option value="${x}">${x}</option>`).join('');
   const total = rows.reduce((a,r)=>a+(parseFloat(r.betrag)||0),0);
-  let html = `<div class="shops-title">🏪 Shops / Einkaufsorte
+  let html = `<div class="shops-title">🏪 Shops
     <span class="shops-sum" id="cs-sum">${fmtEUR(total)}</span></div>`;
   weShopRows.forEach((r,i)=>{
     if(!r || r.removed) return;
