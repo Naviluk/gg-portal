@@ -1244,6 +1244,43 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   </div>
 </div>
 
+<!-- MODAL: SOLL-BESTAND -->
+<div class="modal-overlay" id="modal-soll" onclick="if(event.target===this)closeSoll()">
+  <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeSoll()">✕</button>
+    <div class="modal-title">⚙️ Soll-Bestand konfigurieren</div>
+    <div class="soll-lager-tabs" id="soll-tabs"></div>
+    <div id="soll-content"></div>
+    <div class="modal-btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveSoll()">💾 Speichern</button>
+      <button class="btn btn-ghost" onclick="closeSoll()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PLANUNG — одно окно -->
+<div class="modal-overlay" id="modal-plan" onclick="if(event.target===this)closePlan()">
+  <div class="pmodal" id="plan-modal-right">
+    <div class="pm-head">
+      <button class="pm-close" onclick="closePlan()">✕</button>
+      <div class="pm-eyebrow">Planung</div>
+      <div class="pm-title">
+        <span id="plan-title-right">Neuer Einkauf</span>
+        <span id="plan-lager-badge-right"></span>
+      </div>
+    </div>
+    <div class="pm-body">
+      <label class="pm-fl">Datum</label>
+      <input type="date" id="plan-date" class="pm-date">
+      <div id="plan-content"></div>
+    </div>
+    <div class="pm-foot">
+      <button class="btn btn-ghost" onclick="closePlan()">Schließen</button>
+      <button class="btn btn-acc" id="btn-prüfen-plan" onclick="addArtikelDirekt()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: PLAN BESTÄTIGUNG -->
 <div class="modal-overlay" id="modal-plan-confirm" onclick="if(event.target===this)closePlanConfirm()">
   <div class="modal" style="max-width:580px;width:100%;max-height:88vh;overflow-y:auto">
