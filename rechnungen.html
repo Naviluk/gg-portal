@@ -7,7 +7,7 @@
   try{
     var r=JSON.parse(u).role;
     var ok={'lager.html':1,'getraenke-snacks.html':1,'lieferplanung.html':1,
-            'uebersicht.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1,'rechnungen.html':1};
+            'inventur.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1,'rechnungen.html':1};
     var p=location.pathname.split('/').pop();
     if(ok[p]&&r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
     window.GG_USER=JSON.parse(u);
@@ -766,6 +766,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <li><a href="lager.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17"/></svg>Bestände</a></li>
         <li><a href="getraenke-snacks.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M7 8h10l-1 12.5H8L7 8Z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/><path d="M8.6 13h6.8"/></svg>Getränke &amp; Snacks</a></li>
         <li><a href="lieferplanung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg>Lieferplanung</a></li>
+        <li><a href="inventur.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 11.5l2 2 4-4"/></svg>Inventur</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
@@ -776,16 +777,6 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <ul class="nav-sub">
         <li><a href="preise.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M12.5 3.5 20.5 11a1.5 1.5 0 0 1 0 2.1l-7.4 7.4a1.5 1.5 0 0 1-2.1 0L3.5 13V5a1.5 1.5 0 0 1 1.5-1.5h7.5Z"/><circle cx="8" cy="8" r="1.4"/></svg>Preise</a></li>
         <li><a href="rechnungen.html" class="on"><svg class="nav-i" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4v-17Z"/><path d="M9 8h6M9 12h6"/></svg>Rechnungen</a></li>
-      </ul>
-    </li>
-    <li class="nav-divider"></li>
-    <li class="nav-item">
-      <button class="nav-link" onclick="toggleSubMenu(this)">
-        Inventur<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
-      </button>
-      <ul class="nav-sub">
-        <li><a href="uebersicht.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 11.5l2 2 4-4"/></svg>Übersicht</a></li>
-        <li><a href="erfassungen.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="4" y="4.5" width="16" height="15" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M8 4.5V3h8v1.5"/></svg>Erfassungen</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>

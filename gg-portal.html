@@ -682,7 +682,7 @@
         <svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
       </button>
       <ul class="nav-sub">
-        <li><a href="uebersicht.html">Übersicht</a></li>
+        <li><a href="inventur.html">Inventur</a></li>
         <li><a href="erfassungen.html">Erfassungen</a></li>
       </ul>
     </li>
@@ -1051,9 +1051,9 @@ async function handleAdminPassword(){
     applyAdminRoleMenu(found.role);
     hideSpinner();
     closeAdminModal();
-    setAdminPageTitle('Statistik');
-    showPage('admin');
-    applyMobileHeader('admin');
+    // Admins landen auf der Startseite, nicht mehr auf der leeren Statistik-Seite
+    window.location.href = 'startseite.html';
+    return;
   } catch(e){ hideSpinner(); showErr('err-admin-pw','Verbindungsfehler.'); }
 }
 
@@ -1245,8 +1245,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
         if(elD) elD.textContent = user.name;
         if(elM) elM.textContent = user.name;
         applyAdminRoleMenu(user.role);
-        showPage('admin');
-        applyMobileHeader('admin');
+        window.location.href = 'startseite.html';
         return;
       }
     }
