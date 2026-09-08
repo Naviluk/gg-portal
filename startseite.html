@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Startseite — GAME GALAXY</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
@@ -31,13 +34,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   padding:.9rem 0;z-index:50}
 .rail-head{display:flex;align-items:center;gap:.7rem;width:100%;justify-content:center}
 .rail-brand{display:none;min-width:0}
-.rail-brand b{display:block;font-size:.92rem;font-weight:800;letter-spacing:.02em;color:#fff;line-height:1.1}
-.rail-brand s{display:block;text-decoration:none;font-size:.74rem;font-weight:600;
-  color:#7E90AE;letter-spacing:.02em;margin-top:.1rem}
-.rail-mark{width:44px;height:44px;border-radius:14px;flex-shrink:0;text-decoration:none;
-  background:linear-gradient(135deg,#4F46E5,#D81B7E);display:flex;align-items:center;
-  justify-content:center;color:#fff;font-weight:800;font-size:1.15rem;
-  box-shadow:0 6px 20px rgba(124,58,237,.5);cursor:pointer}
+.rail-brand b{display:block;font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:800;
+  letter-spacing:.08em;color:#fff;line-height:1.2}
+.rail-brand s{display:block;text-decoration:none;font-size:.62rem;font-weight:600;
+  letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
+.rail-mark{width:42px;height:42px;border-radius:12px;flex-shrink:0;text-decoration:none;
+  background:linear-gradient(135deg,#0E8FB8,#D81B7E);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-family:'Poppins',sans-serif;font-weight:800;
+  font-size:1.7rem;line-height:1;box-shadow:0 4px 14px rgba(216,27,126,.32);cursor:pointer}
+.rail-mark span{display:block;transform:translateY(.045em)}
 .rail-items{display:flex;flex-direction:column;align-items:center;gap:.3rem;margin-top:1.3rem;width:100%}
 .rail-sep{width:34px;height:1px;background:var(--line);margin:.65rem 0}
 .rail-btn{position:relative;width:46px;height:46px;border-radius:14px;border:none;background:none;
@@ -56,7 +61,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   box-shadow:0 8px 22px rgba(0,0,0,.45)}
 .rail-btn:hover span{opacity:1;transform:translateX(0)}
 .rail-ava{margin-top:auto;width:40px;height:40px;border-radius:50%;cursor:pointer;
-  background:linear-gradient(135deg,#4F46E5,#D81B7E);color:#fff;display:flex;
+  background:linear-gradient(135deg,#0E8FB8,#D81B7E);color:#fff;display:flex;
   align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
 
 /* ══ Inhalt ═════════════════════════════════════════════════════════════ */
@@ -106,6 +111,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .rail-btn.soon{opacity:.55}
 /* Menü unter dem Kürzel */
 .user-menu{position:fixed;left:.7rem;bottom:4.2rem;z-index:95;min-width:170px;display:none;
+  /* auf dem Telefon hängt es an der Kopfleiste rechts */
   background:var(--ink3);border:1px solid var(--line);border-radius:12px;overflow:hidden;
   box-shadow:0 14px 40px rgba(0,0,0,.5)}
 .user-menu.show{display:block}
@@ -156,7 +162,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem;min-height:40px;
   cursor:pointer;white-space:nowrap;touch-action:manipulation}
 .hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--cyan),var(--magenta));display:flex;align-items:center;
+  background:linear-gradient(135deg,#0E8FB8,#D81B7E);display:flex;align-items:center;
   justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
 .side-scrim{display:none;position:fixed;inset:0;background:rgba(5,9,18,.6);z-index:49;
   opacity:0;transition:opacity .25s}
@@ -186,6 +192,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   .wrap{margin-left:0;padding:calc(64px + 1rem) .9rem 2.5rem}
   /* Der Seitentitel steht schon in der Kopfleiste — hier wäre er doppelt.
      Übrig bleibt das Datum, linksbündig. */
+  .user-menu{left:auto;right:.7rem;top:calc(64px + .4rem);bottom:auto}
   .head-title{display:none}
   .head{margin-bottom:.9rem}
   .datum{margin-left:0;font-size:.72rem;padding:.34rem .7rem}
@@ -215,7 +222,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <div class="hdr-org">Betriebsportal</div>
     <div class="hdr-page">Start<b>seite</b></div>
   </div>
-  <div class="hdr-user"><span class="hdr-ava">A</span>Admin
+  <div class="hdr-user" onclick="toggleUser()"><span class="hdr-ava">A</span><span id="hdr-name">Admin</span>
     <svg viewBox="0 0 16 16" style="width:13px;height:13px;fill:none;stroke:#8FA6C9;stroke-width:2"><polyline points="4,6 8,10 12,6"/></svg>
   </div>
 </header>
@@ -224,7 +231,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 <!-- ══ Schiene (Tablet/Desktop) bzw. Menütafel (Telefon) ══ -->
 <nav class="rail">
   <div class="rail-head">
-    <a class="rail-mark" href="startseite.html">G</a>
+    <a class="rail-mark" href="startseite.html"><span>G</span></a>
     <div class="rail-brand"><b>GAME GALAXY</b><s>Betriebsportal</s></div>
   </div>
   <div class="rail-items">
@@ -309,7 +316,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 </main>
 
 <div class="user-menu" id="user-menu">
-  <a href="gg-portal.html">Abmelden</a>
+  <a href="#" onclick="abmelden(event)">Abmelden</a>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -331,6 +338,17 @@ const LAGER_NAMEN = {zentrallager:'Zentrallager',nettetal:'Nettetal','brüggen':
   viersen:'Viersen','köln':'Köln'};
 const LAGER_PUNKT = {zentrallager:'#3EDCA9',nettetal:'#5A9CF8','brüggen':'#F0325C',
   viersen:'#F59E4B','köln':'#A78BFA'};
+
+// Wer ist angemeldet? Ohne Sitzung geht es zurück zur Anmeldung.
+(function(){
+  let user=null;
+  try{ user = JSON.parse(localStorage.getItem('gg_user')||'null'); }catch(e){}
+  if(!user || !user.name){ window.location.replace('gg-portal.html'); return; }
+  const kurz = user.name.trim().charAt(0).toUpperCase();
+  document.querySelectorAll('.rail-ava,.hdr-ava').forEach(el=>el.textContent=kurz);
+  const nameEl=document.getElementById('hdr-name');
+  if(nameEl) nameEl.textContent = user.name;
+})();
 
 // Datum in der Kopfzeile
 (function(){
@@ -371,6 +389,11 @@ async function ladeStatus(){
 ladeStatus();
 
 function toggleUser(){ document.getElementById('user-menu').classList.toggle('show'); }
+window.abmelden = function(e){
+  e.preventDefault();
+  localStorage.removeItem('gg_user');
+  window.location.href = 'gg-portal.html';
+};
 let toastT;
 function bald(e,name){
   e.preventDefault();

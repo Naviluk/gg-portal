@@ -92,21 +92,44 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .sidebar.open{left:0}
 .sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
 .sidebar-overlay.show{display:block}
-.nav-list{list-style:none;padding:1rem 0}
-.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;
-  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.1em;color:var(--text-dim);
-  text-transform:uppercase;cursor:pointer;transition:color .2s,background .2s;border:none;background:none;width:100%;text-align:left}
-.nav-item>.nav-link{color:#5D6E8C}
-.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#fff;background:rgba(78,199,235,.10)}
+/* ══ Menü — gleiche Handschrift wie die Schiene auf der Startseite ══════ */
+.nav-list{list-style:none;padding:.7rem 0 1rem}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1.35rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-weight:800;font-size:.6rem;letter-spacing:.2em;color:#5D6E8C;text-transform:uppercase;
+  cursor:pointer;transition:color .2s;border:none;background:none;width:100%;text-align:left}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#9FB2CE;background:none}
 .nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
 .nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
-.nav-sub{display:none;list-style:none;background:rgba(0,0,0,.18)}
+.nav-sub{display:none;list-style:none;background:none;padding:.1rem .8rem .4rem}
 .nav-item.open>.nav-sub{display:block}
-.nav-sub li a{display:block;padding:.55rem 1.5rem .55rem 2.5rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
-  font-size:.85rem;color:var(--text-dim);text-decoration:none;letter-spacing:.02em;transition:color .2s}
-.nav-sub li a{color:#AEBCD4}
-.nav-sub li a:hover{color:#fff;background:rgba(78,199,235,.10)}
-.nav-divider{height:1px;background:#22314F;margin:.5rem 1.5rem}
+.nav-sub li a{position:relative;display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:500;
+  color:#7E90AE;text-decoration:none;letter-spacing:.01em;transition:color .18s,background .18s}
+.nav-sub li a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.nav-sub li a.on{color:#5FD3F0;background:rgba(95,211,240,.13);font-weight:600}
+.nav-sub li a.on::before{content:'';position:absolute;left:-.8rem;top:9px;bottom:9px;width:3px;
+  border-radius:0 3px 3px 0;background:#5FD3F0;box-shadow:0 0 10px rgba(95,211,240,.85)}
+/* Gezeichnete Symbole in Knöpfen, Kopfzellen und Titeln — sie übernehmen die
+   Textfarbe und bleiben auf jedem Gerät gleich (Emoji sehen überall anders aus). */
+.ui-i{width:1.05em;height:1.05em;vertical-align:-.16em;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.th-icon .ui-i{width:15px;height:15px;vertical-align:-.2em}
+.th-pen .ui-i{width:12px;height:12px;opacity:.75}
+.modal-title .ui-i,.gesamt-panel-title .ui-i{width:1.05em;height:1.05em;vertical-align:-.15em}
+.lp-hub-icon .ui-i{width:1.45rem;height:1.45rem;stroke-width:1.6;vertical-align:0}
+.nav-i{width:19px;height:19px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.nav-sub li a.on .nav-i{opacity:1}
+.nav-divider{height:1px;background:rgba(255,255,255,.07);margin:.35rem 1.35rem}
+.nav-home a{position:relative;display:flex;align-items:center;gap:.7rem;margin:0 .8rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:600;
+  color:#7E90AE;text-decoration:none;transition:color .18s,background .18s}
+.nav-home a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.side-brand{text-decoration:none;transition:background .2s}
+.side-brand:hover{background:rgba(95,211,240,.07)}
 /* Symbole im Menü — gezeichnet, damit sie die Textfarbe übernehmen */
 .nav-i{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round;opacity:.85}
@@ -836,6 +859,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ek-mid b s{text-decoration:none;color:var(--text-dim);font-weight:500;font-size:.68rem}
 .chips{display:flex;gap:.25rem;margin-top:.25rem;flex-wrap:wrap}
+.chip .ui-i{width:11px;height:11px;vertical-align:-.14em;stroke-width:1.9}
+.ek-grp b .ui-i{width:13px;height:13px}
 .chip{font-size:.62rem;font-weight:600;border-radius:20px;padding:.1rem .45rem;
   background:#EDF1F7;color:#5A6980;font-family:var(--mono);white-space:nowrap}
 .chip.eur{background:var(--neon-green);color:#fff}
@@ -1047,8 +1072,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 </header>
 
 <div class="user-dropdown" id="user-dropdown">
-  <button onclick="window.location.href='gg-portal.html'">← Zurück zum Portal</button>
-  <button class="danger" onclick="window.location.href='gg-portal.html'">Abmelden</button>
+  <button class="danger" onclick="abmelden()">Abmelden</button>
 </div>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -1067,7 +1091,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <ul class="nav-sub">
         <li><a href="lager.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17"/></svg>Bestände</a></li>
         <li><a href="getraenke-snacks.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M7 8h10l-1 12.5H8L7 8Z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/><path d="M8.6 13h6.8"/></svg>Getränke &amp; Snacks</a></li>
-        <li><a href="lieferplanung.html" style="color:#fff;background:rgba(78,199,235,.14);box-shadow:inset 3px 0 0 var(--neon-cyan)"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg>Lieferplanung</a></li>
+        <li><a href="lieferplanung.html" class="on"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg>Lieferplanung</a></li>
       </ul>
     </li>
     <li class="nav-divider"></li>
@@ -1091,12 +1115,18 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       </ul>
     </li>
     <li class="nav-divider"></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='statistik.html'"><span class="nav-lbl"><svg class="nav-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg>Statistik</span></button></li>
-    <li class="nav-divider"></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='thekenverkauf.html'"><span class="nav-lbl"><svg class="nav-i" viewBox="0 0 24 24"><path d="M3 9.5h18l-1.2 4H4.2L3 9.5Z"/><path d="M5 13.5V20h14v-6.5"/><path d="M9 6.5 12 3l3 3.5"/></svg>Thekenverkauf</span></button></li>
-    <li class="nav-item"><button class="nav-link" onclick="window.location.href='getraenke.html'"><span class="nav-lbl"><svg class="nav-i" viewBox="0 0 24 24"><path d="M6 4h12l-1.2 4.5L13 12v7h-2v-7L7.2 8.5 6 4Z"/></svg>Getränke</span></button></li>
-    </ul>
-  </nav>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Daten<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="statistik.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg>Statistik</a></li>
+        <li><a href="leerung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg>Leerung</a></li>
+        <li><a href="konten.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg>Konten</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
 <div class="main-content">
   <!-- ── HUB: große Aktions-Kacheln ── -->
@@ -1109,35 +1139,35 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
   <div class="lp-hub">
     <div class="lp-hub-container">
       <button class="lp-hub-card lp-hub-main" style="--card-color:#0FA574;--card-dark:#0A7A5A" onclick="openHubAction('zentrallager','einkauf')">
-        <div class="lp-hub-icon">🛒</div>
+        <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 10.5h9.6L19.5 7H6"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg></div>
         <div class="lp-hub-label"><b>Zentrallager</b><s>Einkauf</s>
           <span class="lp-hub-money" id="hub-money-zentrallager"></span></div>
           <span class="lp-hub-badge" id="hub-badge-zentrallager"></span>
       </button>
       <div class="lp-hub-branches">
         <button class="lp-hub-card" style="--card-color:#2563EB;--card-dark:#1B4CA8" onclick="openHubAction('nettetal','lieferung')">
-          <div class="lp-hub-icon">🚚</div>
+          <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg></div>
           <div class="lp-hub-label"><b>Nettetal</b><s>Lieferung</s></div>
           <span class="lp-hub-badge" id="hub-badge-nettetal"></span>
         </button>
         <button class="lp-hub-card" style="--card-color:#E11D48;--card-dark:#A5103A" onclick="openHubAction('brüggen','lieferung')">
-          <div class="lp-hub-icon">🚚</div>
+          <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg></div>
           <div class="lp-hub-label"><b>Brüggen</b><s>Lieferung</s></div>
           <span class="lp-hub-badge" id="hub-badge-brüggen"></span>
         </button>
         <button class="lp-hub-card" style="--card-color:#EA580C;--card-dark:#A64A0B" onclick="openHubAction('viersen','lieferung')">
-          <div class="lp-hub-icon">🚚</div>
+          <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg></div>
           <div class="lp-hub-label"><b>Viersen</b><s>Lieferung</s></div>
           <span class="lp-hub-badge" id="hub-badge-viersen"></span>
         </button>
         <button class="lp-hub-card" style="--card-color:#7C3AED;--card-dark:#4E2AA8" onclick="openHubAction('köln','lieferung')">
-          <div class="lp-hub-icon">🚚</div>
+          <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg></div>
           <div class="lp-hub-label"><b>Köln</b><s>Lieferung</s></div>
           <span class="lp-hub-badge" id="hub-badge-köln"></span>
         </button>
       </div>
     </div>
-    <button class="lp-hub-soll-link" onclick="openHubAction('zentrallager','soll')">⚙️ Soll-Bestand konfigurieren</button>
+    <button class="lp-hub-soll-link" onclick="openHubAction('zentrallager','soll')"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg> Soll-Bestand konfigurieren</button>
   </div>
 
   <div class="lager-controls" style="display:none">
@@ -1179,7 +1209,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="gesamt-panel" id="gesamt-panel" onclick="event.stopPropagation()">
   <div class="panel-head">
     <button class="gesamt-close" onclick="closeLieferungen()">✕</button>
-    <div class="gesamt-panel-title" id="lief-panel-title">🚚 <em>Lieferung</em></div>
+    <div class="gesamt-panel-title" id="lief-panel-title"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg> <em>Lieferung</em></div>
     <div class="panel-sum"><b id="lief-panel-count">0</b><s>Artikel geplant</s></div>
   </div>
   <div class="panel-sub">
@@ -1236,7 +1266,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <div id="we-selected-items"></div>
       </div>
       <div id="we-shops-section" class="shops-section" style="display:none">
-        <div class="shops-title" id="we-shops-title">🏪 Shops
+        <div class="shops-title" id="we-shops-title"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 4.5h16l1 4.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0L4 4.5Z"/><path d="M5.5 12V20h13v-8"/><path d="M10 20v-4.5h4V20"/></svg> Shops
           <span class="shops-sum" id="we-shops-sum"></span></div>
         <div id="we-shop-rows"></div>
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
@@ -1265,11 +1295,11 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 <div class="modal-overlay" id="modal-soll" onclick="if(event.target===this)closeSoll()">
   <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
     <button class="modal-close" onclick="closeSoll()">✕</button>
-    <div class="modal-title">⚙️ Soll-Bestand konfigurieren</div>
+    <div class="modal-title"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg> Soll-Bestand konfigurieren</div>
     <div class="soll-lager-tabs" id="soll-tabs"></div>
     <div id="soll-content"></div>
     <div class="modal-btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveSoll()">💾 Speichern</button>
+      <button class="btn btn-primary" onclick="saveSoll()"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4.5 4.5h11l4 4v11h-15v-15Z"/><path d="M8 4.5V10h6.5V4.5"/><rect x="8" y="13.5" width="8" height="6"/></svg> Speichern</button>
       <button class="btn btn-ghost" onclick="closeSoll()">Abbrechen</button>
     </div>
   </div>
@@ -1365,7 +1395,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
      style="right:-101vw;--lg-accent:#0FA574;--lg-soft:rgba(15,165,116,.25);--lg-fg:#3EDCA9;--btn-acc:#0E8FB8">
   <div class="panel-head">
     <button class="gesamt-close" onclick="closeEinkaeufe()">✕</button>
-    <div class="gesamt-panel-title">🛒 <em>Zentrallager</em> – Einkauf</div>
+    <div class="gesamt-panel-title"><svg class="ui-i" viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 10.5h9.6L19.5 7H6"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg> <em>Zentrallager</em> – Einkauf</div>
     <div class="panel-sum"><b id="ek-panel-total">0,00 €</b><s id="ek-panel-sub">0 Artikel</s></div>
   </div>
   <div class="panel-sub">
@@ -1545,6 +1575,8 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show');document.getElementById('burger-btn').classList.toggle('open')}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('show');document.getElementById('burger-btn').classList.remove('open')}
 function toggleSubMenu(btn){btn.closest('.nav-item').classList.toggle('open')}
+// Abmelden räumt die Sitzung weg — sonst schickt das Portal sofort wieder zurück.
+function abmelden(){ localStorage.removeItem('gg_user'); window.location.href='gg-portal.html'; }
 function toggleUserDropdown(){document.getElementById('user-dropdown').classList.toggle('show');document.addEventListener('click',function h(e){if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){document.getElementById('user-dropdown').classList.remove('show');document.removeEventListener('click',h)}})}
 
 // Berechnet den Anfangsbestand für Getränke/Snacks eines bestimmten Monats,
@@ -1836,10 +1868,10 @@ function updateHubBadges(){
 
 function updateButtons(){
   const div=document.getElementById('ctrl-buttons');
-  const ekBtn='<button class="btn-gesamt btn-einkaeufe-style" onclick="openEinkaeufe()">🛒 Einkäufe</button>';
-  const liefBtn='<button class="btn-gesamt" onclick="openLieferungen()">🚚 Lieferungen</button>';
+  const ekBtn='<button class="btn-gesamt btn-einkaeufe-style" onclick="openEinkaeufe()"><svg class="ui-i" viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 10.5h9.6L19.5 7H6"/><circle cx="9.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg> Einkäufe</button>';
+  const liefBtn='<button class="btn-gesamt" onclick="openLieferungen()"><svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg> Lieferungen</button>';
   if(currentLager==='zentrallager'){
-    div.innerHTML='<button class="btn-soll" onclick="openSoll()">⚙️ Soll-Bestand</button>'+ekBtn+liefBtn;
+    div.innerHTML='<button class="btn-soll" onclick="openSoll()"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg> Soll-Bestand</button>'+ekBtn+liefBtn;
   }else{
     div.innerHTML=ekBtn+liefBtn;
   }
@@ -1862,8 +1894,8 @@ function renderTable(){
 
   document.getElementById('lp-thead').innerHTML=`<tr>
     <th class="col-artikel">Artikel</th>
-    <th class="num-cell th-col-anfang"><span class="th-icon">📊</span><span class="th-text">Aktuel.<br>Bestand</span></th>
-    <th class="num-cell th-col-monatl"><span class="th-icon">📋</span><span class="th-text">Soll<br>Bestand</span></th>
+    <th class="num-cell th-col-anfang"><span class="th-icon"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg></span><span class="th-text">Aktuel.<br>Bestand</span></th>
+    <th class="num-cell th-col-monatl"><span class="th-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 11.5l2 2 4-4"/></svg></span><span class="th-text">Soll<br>Bestand</span></th>
     <th class="num-cell th-col-empf" style="${isPastMonth?'background:var(--bg3);border-bottom:2px solid var(--glass-border)':'background:rgba(0,255,136,.06);border-bottom:2px solid rgba(0,255,136,.3)'}">
       <span class="th-text" style="color:${isPastMonth?'var(--text-dim)':'var(--neon-green)'};display:block;line-height:1.3;white-space:normal">
         <span class="th-text-desktop">${empfLabel}</span><span class="th-text-mob">${empfLabelBr}</span>
@@ -2054,7 +2086,7 @@ function buildEkRow(prod, gepl){
   // Unter der Menge steht immer die reine Stückzahl — bei Packungen also 3× 24 / 72 St.
   const sub   = pack ? gepl+' St.' : 'St.';
   let chips = '';
-  if(ekSort!=='shops') chips += `<span class="chip">🏪 ${st.shop||'— Shop —'}</span>`;
+  if(ekSort!=='shops') chips += `<span class="chip"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 4.5h16l1 4.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0L4 4.5Z"/><path d="M5.5 12V20h13v-8"/><path d="M10 20v-4.5h4V20"/></svg> ${st.shop||'— Shop —'}</span>`;
   chips += price!==null
     ? `<span class="chip">${fmtEUR(price)} / St.</span><span class="chip eur">${fmtEUR(price*gepl)}</span>`
     : `<span class="chip warn">Preis fehlt</span>`;
@@ -2116,7 +2148,7 @@ function renderEkContent(){
         const p = getEinkaufspreis(x.prod.id);
         return acc + (p!==null ? p*x.gepl : 0);
       },0);
-      html+=ekCard('ek-shop-wrap-'+si, '🏪 '+shop,
+      html+=ekCard('ek-shop-wrap-'+si, '<svg class="ui-i" viewBox="0 0 24 24"><path d="M4 4.5h16l1 4.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0L4 4.5Z"/><path d="M5.5 12V20h13v-8"/><path d="M10 20v-4.5h4V20"/></svg> '+shop,
         `<span class="sum">${fmtEUR(sum)}</span>`, rows);
     });
   }
@@ -2320,7 +2352,7 @@ const LIEF_PANEL_FARBEN = {
 function updateLiefPanelTitle(lg){
   const name = LAGER_NAMES[lg]||lg;
   const titleEl = document.getElementById('lief-panel-title');
-  if(titleEl) titleEl.innerHTML = '🚚 <em>'+name+'</em> – Lieferung';
+  if(titleEl) titleEl.innerHTML = '<svg class="ui-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg> <em>'+name+'</em> – Lieferung';
   // Das ganze Panel bekommt die Hausfarbe: Streifen unter dem Kopf, Pille,
   // Kante an den Artikelzeilen und die Farbe der geplanten Mengen.
   const panel = document.getElementById('gesamt-panel');
@@ -2659,7 +2691,7 @@ function weRenderConfirmShops(){
   const priOpts = SHOPS_PRIMARY.map(x=>`<option value="${x}">${x}</option>`).join('');
   const secOpts = SHOPS_SECONDARY.map(x=>`<option value="${x}">${x}</option>`).join('');
   const total = rows.reduce((a,r)=>a+(parseFloat(r.betrag)||0),0);
-  let html = `<div class="shops-title">🏪 Shops
+  let html = `<div class="shops-title"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 4.5h16l1 4.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0L4 4.5Z"/><path d="M5.5 12V20h13v-8"/><path d="M10 20v-4.5h4V20"/></svg> Shops
     <span class="shops-sum" id="cs-sum">${fmtEUR(total)}</span></div>`;
   weShopRows.forEach((r,i)=>{
     if(!r || r.removed) return;
@@ -3484,9 +3516,24 @@ document.addEventListener('DOMContentLoaded', async function(){
   buildMonatSelect(_knownMonths);
 
   await Promise.all([loadProducts(), loadShops(), loadEkPreise(), loadEkPacks()]);
-  // Kacheln sollen schon beim Öffnen zeigen, was geplant ist — nicht erst nach dem ersten Klick.
-  await loadData();
+  // Kacheln sollen schon beim Öffnen zeigen, was geplant ist — dafür reicht die
+  // Planungs-Sammlung. Die schwere Bestandsrechnung läuft erst beim Öffnen einer Kachel.
+  await ladePlanung();
 });
+
+// Nur lp_planung lesen: eine Abfrage, keine Monatsketten, kein Wartekreis.
+async function ladePlanung(){
+  try{
+    const snap = await db.collection('lp_planung').get();
+    planData = {};
+    snap.forEach(d=>{
+      const plan = d.data();
+      if(!planData[plan.lager]) planData[plan.lager] = {};
+      Object.assign(planData[plan.lager], plan.items || {});
+    });
+  }catch(e){ console.warn('Planung laden fehlgeschlagen:', e.message); }
+  updateHubBadges();
+}
 
 const MONAT_NAMEN = ['Januar','Februar','März','April','Mai','Juni',
   'Juli','August','September','Oktober','November','Dezember'];
@@ -3502,7 +3549,7 @@ window.changeMonat = async function(m){
   currentZeitraum = m;
   const alt = document.getElementById('sel-zeitraum');
   if(alt) alt.value = m;
-  await loadData();
+  await ladePlanung();
 };
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
