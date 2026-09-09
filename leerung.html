@@ -241,8 +241,6 @@ body[data-lg="brüggen"]{--acc:#E11D48;--acc-ink:#C4123E;--acc-bg:#FDE8EE;--acc-
   --acc-d1:#F0325C;--acc-d2:#A5103A;--acc-sh:rgba(225,29,72,.3)}
 body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-fg:#FFE0C4;
   --acc-d1:#EE8A2B;--acc-d2:#A64A0B;--acc-sh:rgba(234,88,12,.3)}
-body[data-lg="köln"]{--acc:#7C3AED;--acc-ink:#5A2FB0;--acc-bg:#F1EAFE;--acc-fg:#DFD2FF;
-  --acc-d1:#8258E8;--acc-d2:#4E2AA8;--acc-sh:rgba(124,58,237,.3)}
 
 .main-content{max-width:860px;margin:var(--header-h) auto 0;padding:1.3rem 1.2rem 3rem}
 .view{display:none}
@@ -604,8 +602,6 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   <!-- ══ Filiale ══ -->
   <div class="view" id="v-main">
     <button class="back" onclick="show('v-hub')">← Alle Filialen</button>
-    <div class="sub-title" id="lg-name">—</div>
-    <div class="sub-sub" id="lg-sub">Leerung</div>
 
     <div class="vm-wrap">
       <div class="vormonat">
@@ -668,8 +664,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   <!-- ══ Geräte ══ -->
   <div class="view" id="v-geraete">
     <button class="back" onclick="show('v-main')">← Zurück</button>
-    <div class="sub-title">Geräte</div>
-    <div class="sub-sub" id="sub-ger">—</div>
+    <div class="sub-title" style="margin-bottom:.9rem">Geräte</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
       <div class="date-sel"><select id="sel-datum-g" onchange="renderGeraete()"></select></div>
     </div>
@@ -681,8 +676,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   <!-- ══ Wechsler ══ -->
   <div class="view" id="v-wechsler">
     <button class="back" onclick="show('v-main')">← Zurück</button>
-    <div class="sub-title">Wechsler</div>
-    <div class="sub-sub" id="sub-wex">—</div>
+    <div class="sub-title" style="margin-bottom:.9rem">Wechsler</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
       <div class="date-sel"><select id="sel-datum-w" onchange="renderWechsler()"></select></div>
     </div>
@@ -692,8 +686,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   <!-- ══ Getränke ══ -->
   <div class="view" id="v-getraenke">
     <button class="back" onclick="show('v-main')">← Zurück</button>
-    <div class="sub-title">Getränke</div>
-    <div class="sub-sub" id="sub-get">—</div>
+    <div class="sub-title" style="margin-bottom:.9rem">Getränke</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
       <div class="date-sel"><select id="sel-datum-t" onchange="renderGetraenke()"></select></div>
     </div>
@@ -867,13 +860,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 /* ══ Stammdaten ══════════════════════════════════════════════════════ */
-const FILIALEN = ['nettetal','brüggen','viersen','köln'];
-const NAMEN = {nettetal:'Nettetal','brüggen':'Brüggen',viersen:'Viersen','köln':'Köln'};
+// Köln hat keine Leerung — weder als eigene Seite noch als Geldgeber
+const FILIALEN = ['nettetal','brüggen','viersen'];
+const NAMEN = {nettetal:'Nettetal','brüggen':'Brüggen',viersen:'Viersen'};
 const FARBEN = {
   nettetal:{t1:'#2E7BE0',t2:'#16307A',sh:'rgba(37,99,235,.35)',dot:'#2E7BE0'},
   'brüggen':{t1:'#F0325C',t2:'#8A0D30',sh:'rgba(225,29,72,.35)',dot:'#F0325C'},
   viersen:{t1:'#EE8A2B',t2:'#A64A0B',sh:'rgba(234,88,12,.35)',dot:'#EE8A2B'},
-  'köln':{t1:'#8258E8',t2:'#4E2AA8',sh:'rgba(124,58,237,.35)',dot:'#8258E8'},
 };
 const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
 const GERAETE_ZAHL = 12;
@@ -881,8 +874,12 @@ const NOMINALE = [50,20,10,2,1];
 const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
                 'September','Oktober','November','Dezember'];
 
+const monatKey = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const tagKey   = d => monatKey(d)+'-'+String(d.getDate()).padStart(2,'0');
+const heute    = () => tagKey(new Date());
+
 let lg = 'nettetal';
-let monat = new Date().toISOString().slice(0,7);
+let monat = monatKey(new Date());
 let leerungen = [];      // Leerungen der Filiale im Monat
 let monatDoc = {};       // Zusatzangaben des Monats
 let kredite = [];        // alle Kredite, die diese Filiale betreffen
@@ -939,10 +936,10 @@ function abmelden(){ localStorage.removeItem('gg_user'); window.location.href='g
 /* ══ Monatsliste ═════════════════════════════════════════════════════ */
 function buildMonate(){
   const sel=document.getElementById('sel-monat');
-  const heute=new Date(); const opts=[];
+  const jetzt=new Date(); const opts=[];
   for(let i=0;i<14;i++){
-    const d=new Date(heute.getFullYear(),heute.getMonth()-i,1);
-    const key=d.toISOString().slice(0,7);
+    const d=new Date(jetzt.getFullYear(),jetzt.getMonth()-i,1);
+    const key=monatKey(d);
     opts.push(`<option value="${key}">${MONATE[d.getMonth()]} ${d.getFullYear()}</option>`);
   }
   sel.innerHTML=opts.join('');
@@ -955,8 +952,7 @@ function monatText(m){
 }
 function vorMonat(m){
   const [y,mm]=m.split('-').map(Number);
-  const d=new Date(y,mm-2,1);
-  return d.toISOString().slice(0,7);
+  return monatKey(new Date(y,mm-2,1));
 }
 
 /* ══ Rechnen ═════════════════════════════════════════════════════════ */
@@ -1139,12 +1135,6 @@ function auswahl(id){
 
 /* ══ Filialansicht ═══════════════════════════════════════════════════ */
 async function renderMain(){
-  document.getElementById('lg-name').textContent=NAMEN[lg];
-  document.getElementById('lg-sub').textContent='Leerung · '+monatText(monat);
-  ['sub-ger','sub-wex','sub-get'].forEach(id=>{
-    document.getElementById(id).textContent=NAMEN[lg]+' · '+monatText(monat);
-  });
-
   const su=summen(auswahl('sel-datum'));
   const suMonat=summen(leerungen);
   document.getElementById('v-ger').textContent=eur(su.ger);
@@ -1349,7 +1339,7 @@ let geberZiel=null; // wohin die Auswahl des Kreditgebers zurückfließt
 
 function openLeerung(){
   document.getElementById('dlg-lg').textContent=NAMEN[lg];
-  document.getElementById('le-datum').value=new Date().toISOString().slice(0,10);
+  document.getElementById('le-datum').value=heute();
   document.getElementById('le-aus').value='';
   let g='<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>';
   for(let i=1;i<=GERAETE_ZAHL;i++){
@@ -1551,7 +1541,7 @@ async function savePlan(){
       for(const z of nachher){
         await db.collection('leerung_kredit').add({
           geber:z.geber, nehmer:lg, betrag:z.betrag,
-          datum:new Date().toISOString().slice(0,10), monat, zweck:'bank',
+          datum:heute(), monat, zweck:'bank',
           art: planArtWert, getilgtAm:null, getilgtArt:null
         });
       }
@@ -1584,7 +1574,7 @@ function openBank(i){
   const p=(monatDoc.bankPlan||[])[i];
   if(!p) return;
   document.getElementById('bank-betrag').value=zahl(p.gesamt);
-  document.getElementById('bank-datum').value=new Date().toISOString().slice(0,10);
+  document.getElementById('bank-datum').value=heute();
   openM('modal-bank');
 }
 async function confirmBank(){
@@ -1641,7 +1631,7 @@ async function tilgen(){
   showSpinner();
   try{
     await db.collection('leerung_kredit').doc(kreditId)
-      .set({getilgtAm:new Date().toISOString().slice(0,10),
+      .set({getilgtAm:heute(),
             getilgtArt:kreditArt},{merge:true});
     closeM('modal-kredit');
     showToast('Kredit erledigt ✓');
