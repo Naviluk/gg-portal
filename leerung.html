@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leerung — GAME GALAXY</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+(function(){
+  var u=localStorage.getItem('gg_user');
+  if(!u){location.replace('gg-portal.html');return;}
+  try{
+    var r=JSON.parse(u).role;
+    if(r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
+    window.GG_USER=JSON.parse(u);
+  }catch(e){localStorage.removeItem('gg_user');location.replace('gg-portal.html');}
+})();
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
+:root{
+  --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
+  --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
+  --glass:#E7ECF4;--glass-border:#DCE3ED;
+  --text:#141B29;--text-dim:#66748C;--header-h:64px;
+  /* Gerüst */
+  --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --tbl-top:calc(var(--header-h) + .5rem);
+  /* Hausfarbe je Lager */
+  --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Poppins','Century Gothic','CenturyGothic','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(8,145,178,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(8,145,178,0.035) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:var(--ink);border-bottom:none;
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 2px 10px rgba(16,26,46,.18)}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
+.hdr-left{display:flex;align-items:center}
+.hdr-center{flex:1;text-align:left;min-width:0}
+.hdr-right{display:flex;align-items:center;gap:.5rem}
+.hdr-org{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:800;
+  font-size:.58rem;letter-spacing:.2em;color:#7E90AE;text-transform:uppercase;line-height:1.1}
+.hdr-page{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:1rem;letter-spacing:.02em;
+  color:#fff;font-weight:700;margin-top:.1rem;line-height:1.15}
+.hdr-page .hdr-page-pre{font-size:.62rem;letter-spacing:.18em;color:#7E90AE;text-transform:uppercase;font-weight:800}
+.hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
+.hdr-user{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
+  -webkit-tap-highlight-color:rgba(255,255,255,.12);touch-action:manipulation;min-height:40px;
+  display:flex;align-items:center;gap:.4rem;white-space:nowrap;font-weight:600;
+  background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem}
+
+.hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
+.burger{background:rgba(255,255,255,.09);border:none;border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;padding:9px;align-items:center;justify-content:center}
+.burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* sidebar */
+.side-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.1rem;
+  min-height:var(--header-h);border-bottom:1px solid #22314F;margin-bottom:.6rem}
+.side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  line-height:1;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-mark span{display:block;transform:translateY(.045em)}
+.side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;
+  color:#fff;line-height:1.2}
+.side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);
+  border-right:none;z-index:200;padding-top:0;color:#AEBCD4;
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
+.sidebar-overlay.show{display:block}
+/* ══ Menü — gleiche Handschrift wie die Schiene auf der Startseite ══════ */
+.nav-list{list-style:none;padding:.7rem 0 1rem}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1.35rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-weight:800;font-size:.6rem;letter-spacing:.2em;color:#5D6E8C;text-transform:uppercase;
+  cursor:pointer;transition:color .2s;border:none;background:none;width:100%;text-align:left}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#9FB2CE;background:none}
+.nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
+.nav-sub{display:none;list-style:none;background:none;padding:.1rem .8rem .4rem}
+.nav-item.open>.nav-sub{display:block}
+.nav-sub li a{position:relative;display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:500;
+  color:#7E90AE;text-decoration:none;letter-spacing:.01em;transition:color .18s,background .18s}
+.nav-sub li a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.nav-sub li a.on{color:#5FD3F0;background:rgba(95,211,240,.13);font-weight:600}
+.nav-sub li a.on::before{content:'';position:absolute;left:-.8rem;top:9px;bottom:9px;width:3px;
+  border-radius:0 3px 3px 0;background:#5FD3F0;box-shadow:0 0 10px rgba(95,211,240,.85)}
+/* Gezeichnete Symbole in Knöpfen, Kopfzellen und Titeln — sie übernehmen die
+   Textfarbe und bleiben auf jedem Gerät gleich (Emoji sehen überall anders aus). */
+.ui-i{width:1.05em;height:1.05em;vertical-align:-.16em;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.th-icon .ui-i{width:15px;height:15px;vertical-align:-.2em}
+.th-pen .ui-i{width:12px;height:12px;opacity:.75}
+.modal-title .ui-i,.gesamt-panel-title .ui-i{width:1.05em;height:1.05em;vertical-align:-.15em}
+.lp-hub-icon .ui-i{width:1.45rem;height:1.45rem;stroke-width:1.6;vertical-align:0}
+.nav-i{width:19px;height:19px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.nav-sub li a.on .nav-i{opacity:1}
+.nav-divider{height:1px;background:rgba(255,255,255,.07);margin:.35rem 1.35rem}
+.nav-home a{position:relative;display:flex;align-items:center;gap:.7rem;margin:0 .8rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:600;
+  color:#7E90AE;text-decoration:none;transition:color .18s,background .18s}
+.nav-home a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.side-brand{text-decoration:none;transition:background .2s}
+.side-brand:hover{background:rgba(95,211,240,.07)}
+/* Symbole im Menü — gezeichnet, damit sie die Textfarbe übernehmen */
+.nav-i{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.nav-sub li a{display:flex;align-items:center;gap:.6rem;padding-left:1.55rem}
+.nav-sub li a:hover .nav-i{opacity:1}
+.nav-item>.nav-link .nav-lbl{display:flex;align-items:center;gap:.6rem}
+/* Startseite steht über allem und führt aus dem Portal heraus zurück zur Übersicht */
+.nav-home a{display:flex;align-items:center;gap:.6rem;padding:.75rem 1.5rem;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:.1em;text-transform:uppercase;color:#5D6E8C;text-decoration:none;
+  transition:color .2s,background .2s}
+.nav-home a:hover{color:#fff;background:rgba(78,199,235,.10)}
+.side-brand{text-decoration:none;transition:background .2s}
+.side-brand:hover{background:rgba(78,199,235,.08)}
+
+
+/* user dropdown */
+.user-dropdown{position:fixed;top:calc(var(--header-h) + 4px);right:1.2rem;
+  background:#ffffff;border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
+  display:none;z-index:300;min-width:180px;box-shadow:0 8px 24px rgba(30,37,50,.12)}
+.user-dropdown.show{display:block}
+.user-dropdown button{display:block;width:100%;padding:.7rem 1.2rem;text-align:left;background:none;border:none;
+  cursor:pointer;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--text-dim);letter-spacing:.02em;transition:background .15s,color .15s}
+.user-dropdown button:hover{background:rgba(8,145,178,.08);color:var(--neon-cyan)}
+.user-dropdown button.danger:hover{background:rgba(219,39,60,.08);color:#dc2626}
+
+/* ── MAIN ── */
+.main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
+
+/* ── TOP CONTROLS ── */
+.lager-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ctrl-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+/* Segment-Steuerung: zwei Felder in einem Rahmen, mit Rubrik über dem Wert */
+.seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.seg-cell{padding:.3rem .7rem .38rem;min-width:0;position:relative}
+.seg-cell+.seg-cell{border-left:1px solid var(--glass-border)}
+.seg-cell>label{display:block;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);font-weight:800;
+  pointer-events:none}
+.seg-cell .ctrl-select{border:none!important;border-radius:0;background-color:transparent!important;
+  box-shadow:none;padding:.05rem 1.5rem .05rem 0;font-size:.92rem;font-weight:700;width:100%;
+  background-position:right .2rem center}
+.seg-cell.lg-cell{background:var(--lg-tint,#fff)}
+.seg-cell.lg-cell>label{color:var(--lg-ink,var(--text-dim))}
+.seg-cell.lg-cell .ctrl-select{color:var(--lg-ink,var(--text))}
+.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:11px;
+  color:var(--text);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
+  outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
+  background-repeat:no-repeat;background-position:right .7rem center;
+  transition:border-color .2s;min-width:0;box-shadow:0 1px 2px rgba(30,37,50,.04)}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+/* Lager-Auswahl trägt die Hausfarbe des gewählten Lagers */
+
+.ctrl-select option{background:#fff;color:var(--text)}
+.btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  background:linear-gradient(100deg,var(--neon-magenta),#F0568F);color:#fff;
+  border:none;border-radius:11px;padding:.62rem 1rem;cursor:pointer;
+  box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
+.btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
+.btn-icon-settings{width:2.6rem;height:2.6rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid var(--glass-border);border-radius:11px;font-size:1.1rem;cursor:pointer;
+  transition:all .2s;box-shadow:0 1px 3px rgba(30,37,50,.06)}
+.btn-icon-settings:hover{border-color:var(--neon-cyan);box-shadow:0 3px 8px rgba(8,145,178,.15);transform:translateY(-1px)}
+
+/* success toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
+  padding:.8rem 1.4rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.06em;
+  color:var(--neon-green);z-index:999;display:none;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(5,150,105,.18)}
+.toast.show{display:block;animation:fadeInUp .3s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* spinner */
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:999;align-items:center;justify-content:center}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(8,145,178,.15);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile: Anfangsbestand header split */
+.th-text-mob{display:none}
+@media(max-width:640px){
+  .th-text-mob{display:inline}
+}
+/* Button text spans */
+.btn-line1{display:inline}
+.btn-line2{display:inline}
+.btn-wareneingang{white-space:nowrap}
+@media(max-width:640px){
+  .btn-line1{display:block}
+  .btn-line2{display:block}
+  .btn-wareneingang{white-space:normal}
+}
+.text-dim-small{color:var(--text-dim);font-size:.72rem}
+
+
+/* ── Fenster: Grundgerüst wie auf den übrigen Seiten ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
+  align-items:center;justify-content:center;padding:1rem;overflow:hidden}
+.modal-overlay.show{display:flex}
+.modal{background:#ffffff;border:1px solid var(--glass-border);border-radius:16px;
+  width:100%;max-width:600px;position:relative;box-shadow:0 20px 60px rgba(30,37,50,.25);margin:auto}
+
+/* ══════════ Leerung ══════════════════════════════════════════════════ */
+:root{--acc:#7C3AED;--acc-ink:#5A2FB0;--acc-bg:#F1EAFE;--acc-fg:#DFD2FF;
+  --acc-d1:#8258E8;--acc-d2:#4E2AA8;--acc-sh:rgba(124,58,237,.3);--rot:#E11D48}
+body[data-lg="nettetal"]{--acc:#2563EB;--acc-ink:#1D4FB8;--acc-bg:#E9F0FE;--acc-fg:#CADEFF;
+  --acc-d1:#2E7BE0;--acc-d2:#1B4CA8;--acc-sh:rgba(37,99,235,.3)}
+body[data-lg="brüggen"]{--acc:#E11D48;--acc-ink:#C4123E;--acc-bg:#FDE8EE;--acc-fg:#FFD1DD;
+  --acc-d1:#F0325C;--acc-d2:#A5103A;--acc-sh:rgba(225,29,72,.3)}
+body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-fg:#FFE0C4;
+  --acc-d1:#EE8A2B;--acc-d2:#A64A0B;--acc-sh:rgba(234,88,12,.3)}
+body[data-lg="köln"]{--acc:#7C3AED;--acc-ink:#5A2FB0;--acc-bg:#F1EAFE;--acc-fg:#DFD2FF;
+  --acc-d1:#8258E8;--acc-d2:#4E2AA8;--acc-sh:rgba(124,58,237,.3)}
+
+.main-content{max-width:860px;margin:var(--header-h) auto 0;padding:1.3rem 1.2rem 3rem}
+.view{display:none}
+.view.on{display:block}
+
+/* Startansicht */
+.bank-all{background:var(--ink);border-radius:18px;overflow:hidden;color:#fff;
+  box-shadow:0 10px 30px rgba(16,26,46,.28)}
+.bank-all-head{display:flex;align-items:center;gap:.5rem;padding:.85rem 1rem .7rem;
+  border-bottom:1px solid rgba(255,255,255,.1)}
+.bank-all-head s{text-decoration:none;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  font-weight:800;color:#9FB2CE}
+.bank-all-head em{font-style:normal;margin-left:auto;font-size:.68rem;color:#7E90AE;font-weight:600}
+.brow{display:flex;align-items:center;gap:.6rem;padding:.7rem 1rem;border-top:1px solid rgba(255,255,255,.07)}
+.brow:first-of-type{border-top:none}
+.bdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.brow .nm{font-size:.9rem;font-weight:600}
+.brow .nm s{text-decoration:none;display:block;font-size:.68rem;color:#7E90AE;margin-top:.05rem}
+.brow .val{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:1rem;font-weight:700;white-space:nowrap}
+.brow.sum{background:rgba(255,255,255,.06);border-top:2px solid rgba(255,255,255,.18)}
+.brow.sum .nm{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#9FB2CE}
+.brow.sum .val{font-size:1.5rem;color:#7EE7C0}
+
+.tiles{display:flex;flex-direction:column;gap:.75rem;margin-top:1.1rem}
+.tile{position:relative;overflow:hidden;display:flex;align-items:center;gap:1rem;border:none;
+  border-radius:18px;cursor:pointer;padding:1.1rem 1.15rem;color:#fff;text-align:left;
+  background:linear-gradient(120deg,var(--t2),var(--t1));box-shadow:0 8px 24px var(--tsh);
+  transition:transform .18s,box-shadow .2s;font-family:'Poppins',sans-serif}
+.tile:hover{transform:translateY(-3px);box-shadow:0 14px 34px var(--tsh)}
+.tile::after{content:'';position:absolute;width:200px;height:200px;right:-70px;top:-90px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 70%);pointer-events:none}
+.tile .t-nm{font-size:1.15rem;font-weight:700;line-height:1.15}
+.tile .t-nm s{text-decoration:none;display:block;font-size:.66rem;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.75;margin-top:.2rem;font-weight:600}
+.tile .t-right{margin-left:auto;text-align:right;position:relative;z-index:1}
+.tile .t-sum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.35rem;font-weight:700;display:block}
+.tile .t-date{font-size:.66rem;opacity:.8;margin-top:.15rem;font-weight:500}
+.tile .t-arw{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:.4rem}
+.tile .t-arw svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* gemeinsame Bausteine */
+.i-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--glass-border);
+  background:var(--bg2);color:var(--text-dim);font-size:.62rem;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.i-btn:hover,.i-btn.on{border-color:var(--acc);color:var(--acc);background:var(--acc-bg)}
+.i-btn.light{border-color:rgba(255,255,255,.3);background:none;color:#9FB2CE}
+.i-btn.light:hover,.i-btn.light.on{border-color:#7EE7C0;color:#7EE7C0;background:rgba(126,231,192,.12)}
+.split{display:none;padding:.1rem .9rem .7rem 2.6rem;background:var(--zebra);border-top:1px dashed var(--glass-border)}
+.split.show{display:block}
+.split div{display:flex;justify-content:space-between;font-size:.8rem;padding:.32rem 0;color:var(--text-dim)}
+.split div b{font-family:var(--mono);font-weight:700;color:var(--text)}
+.split.dark{background:var(--ink2);border-top-color:rgba(255,255,255,.15)}
+.split.dark div{color:#9FB2CE}
+.split.dark div b{color:#fff}
+.edit-link{background:none;border:none;color:var(--acc);font-family:'Poppins',sans-serif;
+  font-size:.7rem;font-weight:700;cursor:pointer;text-decoration:underline;padding:0}
+
+.back{display:inline-flex;align-items:center;gap:.4rem;background:none;border:none;cursor:pointer;
+  color:var(--acc);font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:700;padding:.3rem 0;margin-bottom:.6rem}
+.sub-title{font-size:1.25rem;font-weight:700;margin-bottom:.1rem}
+.sub-sub{font-size:.72rem;color:var(--text-dim);margin-bottom:1rem}
+
+.vm-wrap{background:var(--bg2);border:1px solid var(--glass-border);border-radius:12px;
+  overflow:hidden;margin-bottom:.55rem}
+.vormonat{display:flex;align-items:center;gap:.55rem;padding:.6rem .8rem}
+.vormonat s{text-decoration:none;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.vormonat b{margin-left:auto;font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--text-dim)}
+
+.box{background:var(--bg2);border:2px solid var(--acc);border-radius:16px;overflow:hidden;
+  box-shadow:0 6px 22px var(--acc-sh)}
+.box-head{display:flex;align-items:center;gap:.55rem;padding:.6rem .8rem;background:var(--acc-bg);
+  border-bottom:1px solid var(--acc)}
+.date-sel{position:relative;flex:1;min-width:0}
+.date-sel select{width:100%;border:none;background:none;outline:none;cursor:pointer;appearance:none;
+  -webkit-appearance:none;font-family:'Poppins',sans-serif;font-size:.84rem;font-weight:700;
+  color:var(--acc-ink);padding:0 1.2rem 0 0}
+.date-sel::after{content:'';position:absolute;right:.35rem;top:50%;margin-top:-2px;width:0;height:0;
+  border:4px solid transparent;border-top-color:var(--acc);pointer-events:none}
+.btn-add{display:inline-flex;align-items:center;gap:.35rem;background:var(--acc);color:#fff;border:none;
+  border-radius:10px;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;
+  padding:.45rem .8rem;cursor:pointer;white-space:nowrap;min-height:36px;box-shadow:0 4px 12px var(--acc-sh)}
+.btn-add:hover{transform:translateY(-1px)}
+.btn-add svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.row{display:flex;align-items:center;gap:.6rem;padding:.85rem .9rem;border-top:1px solid var(--glass-border)}
+.row:first-of-type{border-top:none}
+.row .nm{font-size:.95rem;font-weight:600}
+.row .val{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:1.05rem;font-weight:700;white-space:nowrap}
+.val.minus{color:var(--rot)}
+.val.plus{color:var(--neon-green)}
+.go{width:34px;height:34px;border-radius:11px;border:none;flex-shrink:0;cursor:pointer;
+  background:linear-gradient(135deg,var(--acc-d1),var(--acc-d2));color:#fff;display:flex;
+  align-items:center;justify-content:center;box-shadow:0 4px 12px var(--acc-sh);transition:all .18s}
+.go:hover{transform:translateX(2px);box-shadow:0 8px 20px var(--acc-sh)}
+.go svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.row.total{background:var(--acc-bg);border-top:2px solid var(--acc)}
+.row.total .nm{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--acc-ink)}
+.row.total .val{font-size:1.35rem;color:var(--acc-ink)}
+
+.list{margin-top:1rem;background:var(--bg2);border:1px solid var(--glass-border);
+  border-radius:14px;overflow:hidden}
+.lrow{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;border-top:1px solid var(--glass-border);
+  text-align:left;width:100%;background:none;border-left:none;border-right:none;border-bottom:none;
+  font-family:'Poppins',sans-serif;color:var(--text)}
+.lrow:first-child{border-top:none}
+button.lrow{cursor:pointer}
+button.lrow:hover{background:var(--zebra)}
+.lrow .nm{font-size:.88rem;font-weight:500}
+.lrow .nm s{text-decoration:none;color:var(--text-dim);font-size:.72rem;display:block;margin-top:.05rem}
+.lrow .val{margin-left:auto;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  font-size:.98rem;font-weight:700;white-space:nowrap}
+.tag{font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:20px;
+  padding:.14rem .5rem;background:var(--bg3);color:var(--text-dim)}
+.tag.kredit{background:#FDE8EE;color:#A5103A}
+.tag.schuld{background:#E7F7F1;color:#0A7D5F}
+.euro-in{width:110px;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem;
+  font-weight:700;text-align:right;padding:.35rem .5rem;border:1px solid var(--glass-border);
+  border-radius:9px;outline:none;background:#fff;margin-left:auto}
+.euro-in:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-sh)}
+.formel{font-size:.66rem;color:var(--text-dim);padding:.55rem .95rem .1rem;line-height:1.5}
+.lrow.rest{background:var(--ink);color:#fff;border-top:none}
+.lrow.rest .nm{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#9FB2CE}
+.lrow.rest .val{font-size:1.35rem;color:#7EE7C0}
+
+.plan{margin-top:.9rem;border:1.5px dashed var(--glass-border);border-radius:14px;
+  background:repeating-linear-gradient(135deg,#fff,#fff 10px,#FAFCFE 10px,#FAFCFE 20px);overflow:hidden}
+.plan-head{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;background:var(--bg3)}
+.plan-head s{text-decoration:none;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.mini-add{margin-left:auto;width:28px;height:28px;border-radius:9px;border:1.5px dashed var(--acc);
+  background:var(--acc-bg);color:var(--acc);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-size:1.05rem;font-weight:700;line-height:1}
+.chk{width:26px;height:26px;border-radius:8px;border:1.8px solid var(--glass-border);background:#fff;
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  color:transparent;font-weight:700;font-size:.72rem}
+.chk:hover{border-color:var(--neon-green);color:#B8E5D5}
+
+.done{margin-top:.9rem}
+.done-t{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);
+  font-weight:800;padding:0 .3rem .45rem}
+.drow{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;background:#E9EDF3;
+  border:1px solid var(--glass-border);border-radius:11px;margin-bottom:.4rem;color:#7A8698}
+.drow .nm{font-size:.82rem;font-weight:500;text-decoration:line-through}
+.drow .val{margin-left:auto;font-family:var(--mono);font-size:.88rem;font-weight:700}
+
+table.lt{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg2);
+  border:1px solid var(--glass-border);border-radius:14px;overflow:hidden}
+table.lt th{background:var(--ink2);color:#fff;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:800;padding:.7rem .9rem;text-align:right}
+table.lt th:first-child{text-align:left}
+table.lt th.mid,table.lt td.mid{text-align:center}
+table.lt td{padding:.62rem .9rem;border-top:1px solid var(--glass-border);font-family:var(--mono);
+  font-variant-numeric:tabular-nums;font-size:.95rem;font-weight:600;text-align:right}
+table.lt td:first-child{text-align:left;font-family:'Poppins',sans-serif;font-weight:600;font-size:.88rem}
+table.lt tr.zeb td{background:var(--zebra)}
+table.lt tfoot td{background:var(--acc-bg);border-top:2px solid var(--acc);font-weight:700;
+  font-size:1.02rem;color:var(--acc-ink)}
+table.lt tfoot td:first-child{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800}
+table.lt tr.system td{background:#FFF8EC;border-top:1px solid #F0D9A8}
+table.lt tr.system td:first-child{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:800;color:var(--neon-yellow)}
+table.lt tr.diff td{background:var(--ink);color:#fff;border-top:none}
+table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:800;color:#9FB2CE}
+.sys-in{width:100px;font-family:var(--mono);font-size:.92rem;font-weight:600;text-align:right;
+  padding:.28rem .45rem;border:1px solid #E7CFA0;border-radius:8px;background:#fff;outline:none}
+.sys-in:focus{border-color:var(--neon-yellow)}
+.d-plus{color:#7EE7C0}.d-minus{color:#FF9AB4}.d-null{color:#9FB2CE}
+.tick{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:7px;border:1.6px solid var(--glass-border);background:#fff;color:transparent;
+  font-size:.66rem;font-weight:700}
+.tick.on{background:var(--neon-green);border-color:var(--neon-green);color:#fff}
+.tick.kr.on{background:var(--rot);border-color:var(--rot)}
+.wsum{display:flex;align-items:center;gap:.6rem;margin-top:.9rem;background:var(--ink);color:#fff;
+  border-radius:14px;padding:.9rem 1rem}
+.wsum s{text-decoration:none;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:800;color:#9FB2CE}
+.wsum b{margin-left:auto;font-family:var(--mono);font-size:1.35rem;font-weight:700;color:#FF9AB4}
+.kredit-line{display:flex;align-items:center;gap:.6rem;margin-top:.7rem;background:#FDE8EE;
+  border:1px solid #F6C6D4;border-radius:12px;padding:.7rem .9rem}
+.kredit-line s{text-decoration:none;font-size:.78rem;font-weight:600;color:#A5103A}
+.kredit-line b{margin-left:auto;font-family:var(--mono);font-size:1rem;font-weight:700;color:#A5103A}
+.hint{font-size:.7rem;color:var(--text-dim);margin-top:.55rem;line-height:1.55}
+.leer{padding:1.2rem;text-align:center;color:var(--text-dim);font-size:.85rem}
+
+/* Fenster */
+#modal-leerung .modal,#modal-geber .modal,#modal-plan .modal,#modal-bank .modal,
+#modal-kredit .modal,#modal-vormonat .modal{padding:0;overflow:hidden;display:flex;
+  flex-direction:column;max-height:92vh}
+.dlg-head{background:var(--ink);color:#fff;padding:.9rem 1rem .85rem;position:relative;flex-shrink:0}
+.dlg-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--acc)}
+.dlg-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.dlg-title{font-size:1rem;font-weight:700;margin-top:.15rem;display:flex;align-items:center;gap:.5rem;
+  padding-right:2rem}
+.dlg-pill{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--acc);color:#fff}
+.dlg-close{position:absolute;top:.8rem;right:.95rem;background:none;border:none;color:rgba(255,255,255,.6);
+  font-size:1.15rem;cursor:pointer;line-height:1;z-index:2}
+.dlg-close:hover{color:#fff}
+.dlg-body{flex:1;overflow-y:auto;padding:.9rem 1rem}
+.dlg-foot{display:flex;gap:.5rem;padding:.75rem 1rem 1rem;background:var(--bg);
+  border-top:1px solid var(--glass-border);flex-shrink:0}
+.dlg-foot .btn{flex:1;border:none;border-radius:12px;padding:.8rem;min-height:48px;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700}
+.b-ghost{background:#fff;border:1px solid var(--glass-border)!important;color:var(--text-dim)}
+.b-acc{background:linear-gradient(100deg,var(--acc-d2),var(--acc-d1));color:#fff}
+.b-green{background:linear-gradient(100deg,#0A7D5F,#12B487);color:#fff}
+.fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);
+  font-weight:800;margin:.9rem 0 .35rem}
+.fl:first-child{margin-top:0}
+.num{width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  padding:.6rem .75rem;font-family:var(--mono);font-size:.95rem;font-weight:600;color:var(--text);outline:none}
+.num:focus{border-color:var(--acc)}
+.dcard{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.6rem .7rem}
+.grid-h{display:grid;gap:.35rem;align-items:center}
+.g-ger{grid-template-columns:auto 1fr 1fr}
+.g-w{grid-template-columns:56px 46px 46px 1fr 30px}
+.g-get{grid-template-columns:auto 1fr}
+.hd2{font-size:.53rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);
+  font-weight:800;text-align:center}
+.gn{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text-dim);white-space:nowrap}
+.grid-h input{width:100%;background:var(--zebra);border:1px solid var(--glass-border);border-radius:8px;
+  padding:.35rem .45rem;font-family:var(--mono);font-size:.88rem;font-weight:600;text-align:right;outline:none}
+.grid-h input:focus{border-color:var(--acc);background:#fff}
+.cbx{width:24px;height:24px;margin:0 auto;border-radius:7px;border:1.7px solid var(--glass-border);
+  background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:transparent;font-size:.7rem;font-weight:700}
+.cbx.on{background:var(--neon-green);border-color:var(--neon-green);color:#fff}
+.cbx.kr.on{background:var(--rot);border-color:var(--rot)}
+.plus-s{width:26px;height:26px;border-radius:8px;border:1.4px dashed var(--acc);background:var(--acc-bg);
+  color:var(--acc);cursor:pointer;font-size:.95rem;font-weight:700;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.kred-note{margin-top:.4rem;font-size:.72rem;color:#A5103A;background:#FDE8EE;border-radius:9px;
+  padding:.4rem .6rem;display:flex;align-items:center;gap:.4rem}
+.kred-note b{margin-left:auto;font-family:var(--mono)}
+.geber{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.geber button{padding:.85rem .6rem;border-radius:12px;border:1.5px solid var(--glass-border);
+  background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:.88rem;font-weight:700;
+  color:var(--text);transition:all .15s}
+.geber button:hover{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
+.geber button.on{border-color:var(--rot);background:#FDE8EE;color:#A5103A}
+.det{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.det div{display:flex;justify-content:space-between;padding:.6rem .8rem;font-size:.85rem;
+  border-top:1px solid var(--glass-border);color:var(--text-dim)}
+.det div:first-child{border-top:none}
+.det div b{font-family:var(--mono);font-weight:700;color:var(--text)}
+.seg2{display:flex;gap:.4rem}
+.seg2 button{flex:1;padding:.6rem;border-radius:11px;border:1.5px solid var(--glass-border);
+  background:#fff;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;
+  color:var(--text-dim);cursor:pointer}
+.seg2 button.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
+
+@media(max-width:640px){
+  .main-content{padding:.9rem .8rem 2.5rem}
+  .row .val{font-size:.98rem}
+  .row.total .val{font-size:1.2rem}
+  .euro-in{width:96px}
+  table.lt th,table.lt td{padding:.55rem .55rem;font-size:.86rem}
+  .g-w{grid-template-columns:46px 40px 40px 1fr 26px}
+  .sys-in{width:78px}
+  .tile{padding:.9rem .95rem;border-radius:16px}
+  .tile .t-nm{font-size:1rem}
+  .tile .t-sum{font-size:1.15rem}
+}
+
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="hdr-left">
+    <button class="burger" id="burger-btn" onclick="toggleSidebar()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-org">Daten</div>
+    <div class="hdr-page">Lee<span style="color:#A78BFA">rung</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
+      <span id="hdr-username">Admin</span>
+      <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+  </div>
+</header>
+
+<div class="user-dropdown" id="user-dropdown">
+  <button class="danger" onclick="abmelden()">Abmelden</button>
+</div>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <a class="side-brand" href="startseite.html" title="Zur Startseite">
+    <div class="side-mark"><span>G</span></div>
+    <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
+  </a>
+  <ul class="nav-list">
+    <li class="nav-item nav-home"><a href="startseite.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5h4v5"/></svg>Startseite</a></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html" class="on"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17"/></svg>Bestände</a></li>
+        <li><a href="getraenke-snacks.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M7 8h10l-1 12.5H8L7 8Z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/><path d="M8.6 13h6.8"/></svg>Getränke &amp; Snacks</a></li>
+        <li><a href="lieferplanung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg>Lieferplanung</a></li>
+        <li><a href="inventur.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 11.5l2 2 4-4"/></svg>Inventur</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M12.5 3.5 20.5 11a1.5 1.5 0 0 1 0 2.1l-7.4 7.4a1.5 1.5 0 0 1-2.1 0L3.5 13V5a1.5 1.5 0 0 1 1.5-1.5h7.5Z"/><circle cx="8" cy="8" r="1.4"/></svg>Preise</a></li>
+        <li><a href="rechnungen.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4v-17Z"/><path d="M9 8h6M9 12h6"/></svg>Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item open">
+      <button class="nav-link active" onclick="toggleSubMenu(this)">
+        Daten<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="statistik.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg>Statistik</a></li>
+        <li><a href="leerung.html" class="on"><svg class="nav-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg>Leerung</a></li>
+        <li><a href="konten.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg>Konten</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+<main class="main-content">
+
+  <div class="lager-controls">
+    <div class="seg-group">
+      <div class="seg-cell lg-cell" id="cell-lager" style="display:none"><label>Filiale</label>
+        <select class="ctrl-select" id="sel-lager" onchange="setLg(this.value)"></select></div>
+      <div class="seg-cell"><label>Monat</label>
+        <select class="ctrl-select" id="sel-monat" onchange="setMonat(this.value)"></select></div>
+    </div>
+  </div>
+
+  <!-- ══ Startansicht ══ -->
+  <div class="view on" id="v-hub">
+    <div class="bank-all">
+      <div class="bank-all-head"><s>Bank geplant — alle Filialen</s><em>noch nicht eingezahlt</em></div>
+      <div id="hub-bank"></div>
+    </div>
+    <div class="tiles" id="hub-tiles"></div>
+  </div>
+
+  <!-- ══ Filiale ══ -->
+  <div class="view" id="v-main">
+    <button class="back" onclick="show('v-hub')">← Alle Filialen</button>
+    <div class="sub-title" id="lg-name">—</div>
+    <div class="sub-sub" id="lg-sub">Leerung</div>
+
+    <div class="vm-wrap">
+      <div class="vormonat">
+        <s>Von Vormonat</s>
+        <button class="i-btn" onclick="tog('s0',this)">i</button>
+        <b id="vm-sum">—</b>
+        <button class="edit-link" onclick="openVormonat()">ändern</button>
+      </div>
+      <div class="split" id="s0" style="padding-left:.9rem">
+        <div>Scheine<b id="vm-s">—</b></div>
+        <div>Münzen<b id="vm-m">—</b></div>
+        <div id="vm-hinweis" style="color:var(--neon-yellow)"></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-head">
+        <div class="date-sel"><select id="sel-datum" onchange="renderMain()"></select></div>
+        <button class="btn-add" onclick="openLeerung()">
+          <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>Leerung
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="nm">Geräte</span>
+        <button class="i-btn" onclick="tog('s1',this)">i</button>
+        <span class="val" id="v-ger">—</span>
+        <button class="go" onclick="show('v-geraete')"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="split" id="s1"><div>Scheine<b id="ger-s">—</b></div><div>Münzen<b id="ger-m">—</b></div></div>
+
+      <div class="row">
+        <span class="nm">Wechsler</span>
+        <button class="i-btn" onclick="tog('s2',this)">i</button>
+        <span class="val" id="v-wex">—</span>
+        <button class="go" onclick="show('v-wechsler')"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="split" id="s2"><div>Aus Wechsler<b id="wex-a">—</b></div><div>In Wechsler<b id="wex-i">—</b></div></div>
+
+      <div class="row">
+        <span class="nm">Getränke</span>
+        <button class="i-btn" onclick="tog('s3',this)">i</button>
+        <span class="val" id="v-get">—</span>
+        <button class="go" onclick="show('v-getraenke')"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <div class="split" id="s3">
+        <div>Kaffeeautomat<b id="get-k">—</b></div>
+        <div>Getränkeautomat<b id="get-g">—</b></div>
+        <div>Snack<b id="get-s">—</b></div>
+      </div>
+
+      <div class="row total"><span class="nm">Gesamt</span><span class="val" id="v-ges">—</span></div>
+    </div>
+
+    <div class="list" id="liste"></div>
+    <div class="plan" id="planung"></div>
+    <div class="done" id="getilgt"></div>
+  </div>
+
+  <!-- ══ Geräte ══ -->
+  <div class="view" id="v-geraete">
+    <button class="back" onclick="show('v-main')">← Zurück</button>
+    <div class="sub-title">Geräte</div>
+    <div class="sub-sub" id="sub-ger">—</div>
+    <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
+      <div class="date-sel"><select id="sel-datum-g" onchange="renderGeraete()"></select></div>
+    </div>
+    <div id="tbl-geraete"></div>
+    <p class="hint">System = die Zahlen aus dem Programm, von Hand eingetragen. Differenz = Gesamt − System:
+      Plus heißt, wir haben mehr gezählt als das System meldet, Minus heißt weniger.</p>
+  </div>
+
+  <!-- ══ Wechsler ══ -->
+  <div class="view" id="v-wechsler">
+    <button class="back" onclick="show('v-main')">← Zurück</button>
+    <div class="sub-title">Wechsler</div>
+    <div class="sub-sub" id="sub-wex">—</div>
+    <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
+      <div class="date-sel"><select id="sel-datum-w" onchange="renderWechsler()"></select></div>
+    </div>
+    <div id="tbl-wechsler"></div>
+  </div>
+
+  <!-- ══ Getränke ══ -->
+  <div class="view" id="v-getraenke">
+    <button class="back" onclick="show('v-main')">← Zurück</button>
+    <div class="sub-title">Getränke</div>
+    <div class="sub-sub" id="sub-get">—</div>
+    <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
+      <div class="date-sel"><select id="sel-datum-t" onchange="renderGetraenke()"></select></div>
+    </div>
+    <div id="tbl-getraenke"></div>
+  </div>
+
+</main>
+
+<!-- ══ Fenster: neue Leerung ══ -->
+<div class="modal-overlay" id="modal-leerung" onclick="if(event.target===this)closeM('modal-leerung')">
+  <div class="modal" style="max-width:640px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-leerung')">✕</button>
+      <div class="dlg-eyebrow">Erfassen</div>
+      <div class="dlg-title">Neue Leerung <span class="dlg-pill" id="dlg-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="le-datum">
+      <label class="fl">Geräte</label>
+      <div class="dcard grid-h g-ger" id="le-geraete"></div>
+      <label class="fl">Wechsler — entnommen</label>
+      <input class="num" id="le-aus" inputmode="decimal" placeholder="0,00">
+      <label class="fl">Wechsler — eingelegt</label>
+      <div class="dcard grid-h g-w" id="le-wechsler"></div>
+      <div id="le-kredit"></div>
+      <label class="fl">Getränke</label>
+      <div class="dcard grid-h g-get" id="le-getraenke"></div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-leerung')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveLeerung()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Kreditgeber ══ -->
+<div class="modal-overlay" id="modal-geber" onclick="if(event.target===this)closeM('modal-geber')">
+  <div class="modal" style="max-width:420px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="cancelGeber()">✕</button>
+      <div class="dlg-eyebrow">Kredit</div>
+      <div class="dlg-title">Von wem kommt das Geld?</div>
+    </div>
+    <div class="dlg-body">
+      <div class="geber" id="geber-list"></div>
+      <p class="hint">Die eigene Filiale steht nicht zur Wahl. Der Betrag wird als Schuld
+        gegenüber dem Gewählten geführt und erscheint auf der Hauptseite.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="cancelGeber()">Abbrechen</button>
+      <button class="btn b-acc" onclick="confirmGeber()">✓ Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Bank geplant ══ -->
+<div class="modal-overlay" id="modal-plan" onclick="if(event.target===this)closeM('modal-plan')">
+  <div class="modal" style="max-width:560px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-plan')">✕</button>
+      <div class="dlg-eyebrow">Planung</div>
+      <div class="dlg-title">Bank geplant <span class="dlg-pill" id="plan-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Art</label>
+      <div class="seg2" id="plan-art">
+        <button class="on" onclick="planArt('scheine',this)">Scheine</button>
+        <button onclick="planArt('muenzen',this)">Münzen</button>
+      </div>
+      <label class="fl">Herkunft und Beträge</label>
+      <div class="dcard grid-h g-w" id="plan-zeilen"></div>
+      <div id="plan-kredit"></div>
+      <p class="hint">Geplant heißt: der Betrag liegt noch nicht auf dem Konto. Er zählt deshalb
+        nicht in „Rest in der Kasse“ hinein — erst nach dem Häkchen wandert er nach „Bank eingezahlt“.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" id="plan-del" onclick="deletePlan()" style="display:none;flex:0 0 auto;padding:.8rem 1rem">Löschen</button>
+      <button class="btn b-ghost" onclick="closeM('modal-plan')">Abbrechen</button>
+      <button class="btn b-acc" onclick="savePlan()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Einzahlung bestätigen ══ -->
+<div class="modal-overlay" id="modal-bank" onclick="if(event.target===this)closeM('modal-bank')">
+  <div class="modal" style="max-width:420px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-bank')">✕</button>
+      <div class="dlg-eyebrow">Bank</div>
+      <div class="dlg-title">Einzahlung bestätigen</div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Betrag</label>
+      <input class="num" id="bank-betrag" readonly style="background:var(--zebra)">
+      <label class="fl">Eingezahlt am</label>
+      <input type="date" class="num" id="bank-datum">
+      <p class="hint">Danach steht der Betrag unter „Bank eingezahlt“ und verschwindet aus der Planung.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-bank')">Abbrechen</button>
+      <button class="btn b-green" onclick="confirmBank()">✓ Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Kredit ══ -->
+<div class="modal-overlay" id="modal-kredit" onclick="if(event.target===this)closeM('modal-kredit')">
+  <div class="modal" style="max-width:420px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-kredit')">✕</button>
+      <div class="dlg-eyebrow">Kredit</div>
+      <div class="dlg-title" id="kr-titel">—</div>
+    </div>
+    <div class="dlg-body">
+      <div class="det" id="kr-det"></div>
+      <label class="fl">Rückgabe in</label>
+      <div class="seg2" id="kr-art">
+        <button onclick="krArt('scheine',this)">Scheine</button>
+        <button onclick="krArt('muenzen',this)">Münzen</button>
+      </div>
+      <p class="hint" id="kr-hint"></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-kredit')">Schließen</button>
+      <button class="btn b-green" id="kr-btn" onclick="tilgen()">✓ Kredit tilgen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Von Vormonat ══ -->
+<div class="modal-overlay" id="modal-vormonat" onclick="if(event.target===this)closeM('modal-vormonat')">
+  <div class="modal" style="max-width:420px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-vormonat')">✕</button>
+      <div class="dlg-eyebrow">Startwert</div>
+      <div class="dlg-title">Von Vormonat</div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Scheine</label>
+      <input class="num" id="vm-in-s" inputmode="decimal" placeholder="0,00">
+      <label class="fl">Münzen</label>
+      <input class="num" id="vm-in-m" inputmode="decimal" placeholder="0,00">
+      <p class="hint">Nur nötig, solange es keinen Vormonat im Programm gibt. Sobald ein Vormonat
+        erfasst ist, übernimmt die Seite dessen Rest von selbst.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-vormonat')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveVormonat()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ══ Stammdaten ══════════════════════════════════════════════════════ */
+const FILIALEN = ['nettetal','brüggen','viersen','köln'];
+const NAMEN = {nettetal:'Nettetal','brüggen':'Brüggen',viersen:'Viersen','köln':'Köln'};
+const FARBEN = {
+  nettetal:{t1:'#2E7BE0',t2:'#16307A',sh:'rgba(37,99,235,.35)',dot:'#2E7BE0'},
+  'brüggen':{t1:'#F0325C',t2:'#8A0D30',sh:'rgba(225,29,72,.35)',dot:'#F0325C'},
+  viersen:{t1:'#EE8A2B',t2:'#A64A0B',sh:'rgba(234,88,12,.35)',dot:'#EE8A2B'},
+  'köln':{t1:'#8258E8',t2:'#4E2AA8',sh:'rgba(124,58,237,.35)',dot:'#8258E8'},
+};
+const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
+const GERAETE_ZAHL = 12;
+const NOMINALE = [50,20,10,2,1];
+const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
+                'September','Oktober','November','Dezember'];
+
+let lg = 'nettetal';
+let monat = new Date().toISOString().slice(0,7);
+let leerungen = [];      // Leerungen der Filiale im Monat
+let monatDoc = {};       // Zusatzangaben des Monats
+let kredite = [];        // alle Kredite, die diese Filiale betreffen
+let hubDaten = {};       // Zahlen aller Filialen für die Startansicht
+
+/* ══ Helfer ══════════════════════════════════════════════════════════ */
+const eur = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const zahl = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+// „1.234,56" und „1234.56" sollen beide funktionieren
+function parseNum(v){
+  if(v===null||v===undefined) return 0;
+  let s = String(v).trim().replace(/[^0-9.,-]/g,'');
+  if(!s) return 0;
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+const dmy = d => d ? d.split('-').reverse().join('.') : '—';
+function showSpinner(){document.getElementById('spinner').classList.add('show')}
+function hideSpinner(){document.getElementById('spinner').classList.remove('show')}
+let toastT;
+function showToast(t){
+  const el=document.getElementById('toast');
+  el.textContent=t; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600);
+}
+function closeM(id){document.getElementById(id).classList.remove('show')}
+function openM(id){document.getElementById(id).classList.add('show')}
+function tog(id,btn){document.getElementById(id).classList.toggle('show');btn.classList.toggle('on')}
+
+/* ══ Gerüst ══════════════════════════════════════════════════════════ */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+  document.getElementById('burger-btn').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.getElementById('burger-btn').classList.remove('open');
+}
+function toggleSubMenu(btn){ btn.parentElement.classList.toggle('open'); }
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('show');
+  document.addEventListener('click',function h(e){
+    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){
+      document.getElementById('user-dropdown').classList.remove('show');
+      document.removeEventListener('click',h);
+    }
+  });
+}
+function abmelden(){ localStorage.removeItem('gg_user'); window.location.href='gg-portal.html'; }
+
+/* ══ Monatsliste ═════════════════════════════════════════════════════ */
+function buildMonate(){
+  const sel=document.getElementById('sel-monat');
+  const heute=new Date(); const opts=[];
+  for(let i=0;i<14;i++){
+    const d=new Date(heute.getFullYear(),heute.getMonth()-i,1);
+    const key=d.toISOString().slice(0,7);
+    opts.push(`<option value="${key}">${MONATE[d.getMonth()]} ${d.getFullYear()}</option>`);
+  }
+  sel.innerHTML=opts.join('');
+  sel.value=monat;
+  const sl=document.getElementById('sel-lager');
+  sl.innerHTML=FILIALEN.map(f=>`<option value="${f}">${NAMEN[f]}</option>`).join('');
+}
+function monatText(m){
+  const [y,mm]=m.split('-'); return MONATE[Number(mm)-1]+' '+y;
+}
+function vorMonat(m){
+  const [y,mm]=m.split('-').map(Number);
+  const d=new Date(y,mm-2,1);
+  return d.toISOString().slice(0,7);
+}
+
+/* ══ Rechnen ═════════════════════════════════════════════════════════ */
+// Aufteilung in Scheine und Münzen — so ist der Betrieb aufgestellt:
+//   Geräte  : Scheine und Münzen werden getrennt erfasst.
+//   Wechsler: entnommen wird immer in Scheinen; eingelegt zählen 50/20/10 als
+//             Scheine, 2/1 als Münzen.
+//   Getränke: die Automaten nehmen zurzeit nur Münzen, deshalb voll auf Münzen.
+//   Sonstige Kosten gehen zu Lasten der Scheine.
+//   Kredite zählen in der Form, in der sie geflossen sind: ein Kredit aus
+//   2-€-Stücken verändert nur die Münzen (siehe kreditBewegung).
+function summen(liste){
+  let gerS=0,gerM=0,aus=0,ein=0,einS=0,einM=0,getr=0,kaffee=0,getrA=0,snack=0;
+  liste.forEach(l=>{
+    Object.values(l.geraete||{}).forEach(g=>{ gerS+=Number(g.s)||0; gerM+=Number(g.m)||0; });
+    aus += Number(l.wechslerAus)||0;
+    (l.wechslerIn||[]).forEach(w=>{
+      const b=Number(w.betrag)||0; ein+=b;
+      if(Number(w.wert)>=10) einS+=b; else einM+=b;
+    });
+    const g=l.getraenke||{};
+    kaffee+=Number(g.kaffee)||0; getrA+=Number(g.getraenke)||0; snack+=Number(g.snack)||0;
+  });
+  getr = kaffee+getrA+snack;
+  return {gerS,gerM,ger:gerS+gerM,aus,ein,einS,einM,wex:aus-ein,
+          getr,kaffee,getrA,snack,
+          gesamt:gerS+gerM+(aus-ein)+getr,
+          scheine:gerS+aus-einS, muenzen:gerM+getr-einM};
+}
+function bankSummen(doc){
+  let s=0,m=0;
+  (doc.bankEin||[]).forEach(b=>{ if(b.art==='muenzen') m+=Number(b.betrag)||0; else s+=Number(b.betrag)||0; });
+  return {s,m,gesamt:s+m};
+}
+// Kreditbewegungen des Monats — nur sie verändern den Kassenbestand.
+// Getrennt nach Scheinen und Münzen: ein Kredit in 2-€-Stücken darf den
+// Scheinbestand nicht verändern. Beim Tilgen zählt die Form der Rückgabe,
+// die kann von der Form der Aufnahme abweichen.
+function kreditBewegung(m, liste){
+  const k$ = liste || kredite;
+  let s=0, mz=0;
+  const zu = (art, betrag) => { if(art==='muenzen') mz+=betrag; else s+=betrag; };
+  k$.forEach(k=>{
+    const b = Number(k.betrag)||0;
+    const artAuf = k.art==='muenzen' ? 'muenzen' : 'scheine';
+    const artZur = k.getilgtArt || artAuf;
+    if(k.nehmer===lg && k.monat===m) zu(artAuf,  b);   // aufgenommen
+    if(k.geber===lg  && k.monat===m) zu(artAuf, -b);   // vergeben
+    const t=(k.getilgtAm||'').slice(0,7);
+    if(t===m && k.nehmer===lg) zu(artZur, -b);         // zurückgezahlt
+    if(t===m && k.geber===lg)  zu(artZur,  b);         // zurückbekommen
+  });
+  return {s, m:mz, gesamt:s+mz};
+}
+
+/* ══ Laden ═══════════════════════════════════════════════════════════ */
+async function ladeFiliale(){
+  vmCache = {};
+  showSpinner();
+  try{
+    const [snapL, docM, snapK] = await Promise.all([
+      db.collection('leerung').where('lager','==',lg).where('monat','==',monat).get(),
+      db.collection('leerung_monat').doc(lg+'_'+monat).get(),
+      db.collection('leerung_kredit').get(),
+    ]);
+    leerungen = snapL.docs.map(d=>({id:d.id,...d.data()}))
+                          .sort((a,b)=>(a.datum||'').localeCompare(b.datum||''));
+    monatDoc = docM.exists ? docM.data() : {};
+    kredite = snapK.docs.map(d=>({id:d.id,...d.data()}))
+                        .filter(k=>k.geber===lg || k.nehmer===lg);
+  }catch(e){
+    showToast('Daten konnten nicht geladen werden.');
+    leerungen=[]; monatDoc={}; kredite=[];
+  }
+  hideSpinner();
+  fillDatumSelects();
+  renderMain(); renderGeraete(); renderWechsler(); renderGetraenke();
+}
+
+// Der Startwert kommt aus dem Vormonat; nur wenn es dort nichts gibt,
+// zählt der von Hand erfasste Wert.
+let vmCache = {};   // damit der Vormonat nicht bei jedem Neuzeichnen neu geladen wird
+async function vormonatWert(){
+  if(monatDoc.vormonat) return {...monatDoc.vormonat, manuell:true};
+  const vm = vorMonat(monat);
+  const key = lg+'_'+vm;
+  if(vmCache[key]) return vmCache[key];
+  try{
+    const [snapL, docM, snapK] = await Promise.all([
+      db.collection('leerung').where('lager','==',lg).where('monat','==',vm).get(),
+      db.collection('leerung_monat').doc(lg+'_'+vm).get(),
+      db.collection('leerung_kredit').get(),
+    ]);
+    if(snapL.empty && !docM.exists) return {s:0,m:0,leer:true};
+    const li = snapL.docs.map(d=>d.data());
+    const md = docM.exists ? docM.data() : {};
+    const su = summen(li);
+    const bk = bankSummen(md);
+    const kr=snapK.docs.map(d=>d.data()).filter(k=>k.geber===lg||k.nehmer===lg);
+    const kb=kreditBewegung(vm, kr);
+    const start = md.vormonat || {s:0,m:0};
+    const kosten = Number(md.sonstige)||0;
+    const wert = {
+      s: (Number(start.s)||0) + su.scheine - bk.s - kosten + kb.s,
+      m: (Number(start.m)||0) + su.muenzen - bk.m + kb.m,
+      berechnet:true
+    };
+    vmCache[key] = wert;
+    return wert;
+  }catch(e){ return {s:0,m:0,leer:true}; }
+}
+
+/* ══ Startansicht ════════════════════════════════════════════════════ */
+async function ladeHub(){
+  showSpinner();
+  const box=document.getElementById('hub-bank');
+  const tiles=document.getElementById('hub-tiles');
+  try{
+    const [snapL, snapM] = await Promise.all([
+      db.collection('leerung').where('monat','==',monat).get(),
+      db.collection('leerung_monat').get(),
+    ]);
+    const proLager={}; FILIALEN.forEach(f=>proLager[f]={liste:[],doc:{}});
+    snapL.forEach(d=>{ const x=d.data(); if(proLager[x.lager]) proLager[x.lager].liste.push(x); });
+    snapM.forEach(d=>{ if(d.id.endsWith('_'+monat)){
+      const f=d.id.slice(0,d.id.length-monat.length-1);
+      if(proLager[f]) proLager[f].doc=d.data();
+    }});
+
+    let bankHtml='', gesamtPlan=0;
+    FILIALEN.forEach(f=>{
+      const plan=(proLager[f].doc.bankPlan)||[];
+      let ps=0,pm=0;
+      plan.forEach(p=>{ if(p.art==='muenzen') pm+=Number(p.gesamt)||0; else ps+=Number(p.gesamt)||0; });
+      const su=ps+pm; gesamtPlan+=su;
+      const teile=[]; if(ps) teile.push('Scheine '+zahl(ps)); if(pm) teile.push('Münzen '+zahl(pm));
+      bankHtml += `<div class="brow">
+        <span class="bdot" style="background:${FARBEN[f].dot}"></span>
+        <span class="nm">${NAMEN[f]}<s>${teile.join(' · ')||'nichts geplant'}</s></span>
+        <span class="val"${su?'':' style="color:#7E90AE"'}>${su?eur(su):'—'}</span></div>`;
+    });
+    bankHtml += `<div class="brow sum"><span class="nm">Gesamt</span><span class="val">${eur(gesamtPlan)}</span></div>`;
+    box.innerHTML = bankHtml;
+
+    tiles.innerHTML = FILIALEN.map(f=>{
+      const su=summen(proLager[f].liste);
+      const daten=proLager[f].liste.map(x=>x.datum).filter(Boolean).sort();
+      const letzte=daten.length?dmy(daten[daten.length-1]):'noch keine Leerung';
+      const c=FARBEN[f];
+      return `<button class="tile" style="--t1:${c.t1};--t2:${c.t2};--tsh:${c.sh}"
+          onclick="setLg('${f}');show('v-main')">
+        <span class="t-nm">${NAMEN[f]}<s>Leerung</s></span>
+        <span class="t-right"><span class="t-sum">${eur(su.gesamt)}</span>
+          <span class="t-date">${daten.length?'letzte Leerung '+letzte:letzte}</span></span>
+        <span class="t-arw"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+      </button>`;
+    }).join('');
+  }catch(e){
+    box.innerHTML='<div class="brow"><span class="nm">Daten nicht erreichbar</span></div>';
+    tiles.innerHTML='';
+  }
+  hideSpinner();
+}
+
+/* ══ Datumsauswahl ═══════════════════════════════════════════════════ */
+function fillDatumSelects(){
+  const opts = ['<option value="">Ganzer Monat</option>']
+    .concat(leerungen.map(l=>`<option value="${l.id}">${dmy(l.datum)}</option>`)).join('');
+  ['sel-datum','sel-datum-g','sel-datum-w','sel-datum-t'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const alt=el.value; el.innerHTML=opts;
+    if([...el.options].some(o=>o.value===alt)) el.value=alt;
+  });
+}
+function auswahl(id){
+  const v=document.getElementById(id).value;
+  return v ? leerungen.filter(l=>l.id===v) : leerungen;
+}
+
+/* ══ Filialansicht ═══════════════════════════════════════════════════ */
+async function renderMain(){
+  document.getElementById('lg-name').textContent=NAMEN[lg];
+  document.getElementById('lg-sub').textContent='Leerung · '+monatText(monat);
+  ['sub-ger','sub-wex','sub-get'].forEach(id=>{
+    document.getElementById(id).textContent=NAMEN[lg]+' · '+monatText(monat);
+  });
+
+  const su=summen(auswahl('sel-datum'));
+  const suMonat=summen(leerungen);
+  document.getElementById('v-ger').textContent=eur(su.ger);
+  document.getElementById('ger-s').textContent=eur(su.gerS);
+  document.getElementById('ger-m').textContent=eur(su.gerM);
+  document.getElementById('v-wex').textContent=(su.wex<0?'−':'')+eur(Math.abs(su.wex));
+  document.getElementById('v-wex').className='val'+(su.wex<0?' minus':'');
+  document.getElementById('wex-a').textContent=eur(su.aus);
+  document.getElementById('wex-i').textContent=eur(su.ein);
+  document.getElementById('v-get').textContent=eur(su.getr);
+  document.getElementById('get-k').textContent=eur(su.kaffee);
+  document.getElementById('get-g').textContent=eur(su.getrA);
+  document.getElementById('get-s').textContent=eur(su.snack);
+  document.getElementById('v-ges').textContent=eur(su.gesamt);
+
+  const vm=await vormonatWert();
+  document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0));
+  document.getElementById('vm-s').textContent=eur(vm.s);
+  document.getElementById('vm-m').textContent=eur(vm.m);
+  document.getElementById('vm-hinweis').textContent =
+    vm.manuell ? 'Von Hand erfasst.' :
+    vm.leer ? 'Kein Vormonat vorhanden — bitte einmalig von Hand erfassen.' :
+    'Aus dem Vormonat übernommen.';
+
+  const bk=bankSummen(monatDoc);
+  const kosten=Number(monatDoc.sonstige)||0;
+  const kb=kreditBewegung(monat);
+  const restS=(vm.s||0)+suMonat.scheine-bk.s-kosten+kb.s;
+  const restM=(vm.m||0)+suMonat.muenzen-bk.m+kb.m;
+  const rest=restS+restM;
+
+  // Liste der echten Beträge
+  let html='';
+  html+=`<div class="lrow"><span class="nm">Bank eingezahlt</span>
+    <button class="i-btn" onclick="tog('s4',this)">i</button>
+    <span class="val">${eur(bk.gesamt)}</span></div>
+    <div class="split" id="s4" style="padding-left:.9rem">${
+      (monatDoc.bankEin||[]).length
+        ? (monatDoc.bankEin||[]).map(b=>`<div>${dmy(b.datum)} · ${b.art==='muenzen'?'Münzen':'Scheine'}<b>${eur(b.betrag)}</b></div>`).join('')
+        : '<div>Noch nichts eingezahlt<b>—</b></div>'}</div>`;
+
+  html+=`<div class="lrow"><span class="nm">Sonstige Kosten</span>
+    <input class="euro-in" id="in-kosten" value="${kosten?zahl(kosten):''}" placeholder="0,00"
+      onchange="saveKosten(this.value)"></div>`;
+
+  const offen=kredite.filter(k=>!k.getilgtAm);
+  offen.forEach(k=>{
+    const eigen = k.nehmer===lg;
+    const alt = k.monat!==monat ? ' · aus '+monatText(k.monat) : '';
+    html+=`<button class="lrow" onclick="openKredit('${k.id}')">
+      <span class="nm">${eigen?'Schuld an':'Kredit an'} <b style="font-weight:700">${eigen?(NAMEN[k.geber]||k.geber):(NAMEN[k.nehmer]||k.nehmer)}</b>
+        <s>${k.art==='muenzen'?'Münzen':'Scheine'} · ${k.zweck==='bank'?'Bank-Einzahlung':'Wechsler-Einlage'} · ${dmy(k.datum)}${alt}</s></span>
+      <span class="tag ${eigen?'schuld':'kredit'}">${eigen?'erhalten':'vergeben'}</span>
+      <span class="val ${eigen?'plus':'minus'}">${eigen?'+':'−'}${eur(k.betrag)}</span></button>`;
+  });
+
+  const teile=[`Vormonat ${zahl((vm.s||0)+(vm.m||0))}`,`Gesamt ${zahl(suMonat.gesamt)}`,
+               `− Bank ${zahl(bk.gesamt)}`,`− Kosten ${zahl(kosten)}`];
+  if(kb.gesamt) teile.push((kb.gesamt>0?'+ ':'− ')+'Kredite '+zahl(Math.abs(kb.gesamt)));
+  html+=`<div class="formel">Rest = ${teile.join(' ')}</div>`;
+  html+=`<div class="lrow rest"><span class="nm">Rest in der Kasse</span>
+    <button class="i-btn light" onclick="tog('s5',this)">i</button>
+    <span class="val">${eur(rest)}</span></div>
+    <div class="split dark" id="s5" style="padding-left:.9rem">
+      <div>Scheine<b>${eur(restS)}</b></div>
+      <div>Münzen<b>${eur(restM)}</b></div></div>`;
+  document.getElementById('liste').innerHTML=html;
+
+  // Planung
+  const plan=monatDoc.bankPlan||[];
+  let ph=`<div class="plan-head"><s>Bank geplant</s>
+    <button class="mini-add" onclick="openPlan(null)">+</button></div>`;
+  if(!plan.length){
+    ph+=`<div class="leer">Noch nichts geplant.</div>`;
+  }else{
+    plan.forEach((p,i)=>{
+      const q=(p.zeilen||[]).map(z=>z.herkunft==='kredit'
+        ? 'Kredit '+(NAMEN[z.geber]||z.geber)+' '+zahl(z.betrag)
+        : 'Kasse '+zahl(z.betrag)).join(' · ');
+      ph+=`<button class="lrow" onclick="openPlan(${i})">
+        <span class="nm">${p.art==='muenzen'?'Münzen':'Scheine'}<s>${q||'—'}</s></span>
+        <span class="val">${eur(p.gesamt)}</span>
+        <span class="chk" onclick="event.stopPropagation();openBank(${i})">✓</span></button>`;
+    });
+  }
+  document.getElementById('planung').innerHTML=ph;
+
+  // getilgte Kredite dieses Monats
+  const fertig=kredite.filter(k=>(k.getilgtAm||'').slice(0,7)===monat);
+  document.getElementById('getilgt').innerHTML = fertig.length
+    ? `<div class="done-t">Getilgte Kredite</div>`+fertig.map(k=>{
+        const eigen=k.nehmer===lg;
+        const art=(k.getilgtArt||k.art)==='muenzen'?'Münzen':'Scheine';
+        return `<div class="drow"><span class="nm">${eigen?'Schuld an '+(NAMEN[k.geber]||k.geber):'Kredit an '+(NAMEN[k.nehmer]||k.nehmer)} · ${eigen?'getilgt':'zurück'} am ${dmy(k.getilgtAm)} · ${art}</span>
+          <span class="val">${eur(k.betrag)}</span></div>`;
+      }).join('')
+    : '';
+}
+
+function renderGeraete(){
+  const liste=auswahl('sel-datum-g');
+  const proGeraet={};
+  for(let i=1;i<=GERAETE_ZAHL;i++) proGeraet[i]={s:0,m:0,da:false};
+  liste.forEach(l=>Object.entries(l.geraete||{}).forEach(([k,g])=>{
+    const i=Number(k); if(!proGeraet[i]) return;
+    proGeraet[i].s+=Number(g.s)||0; proGeraet[i].m+=Number(g.m)||0;
+    if((Number(g.s)||0)||(Number(g.m)||0)) proGeraet[i].da=true;
+  }));
+  const su=summen(liste);
+  const sys=monatDoc.system||{};
+  const sysS=Number(sys.s)||0, sysM=Number(sys.m)||0;
+  const dS=su.gerS-sysS, dM=su.gerM-sysM, dG=(su.gerS+su.gerM)-(sysS+sysM);
+  const dz=v=>{
+    const cls=v>0?'d-plus':(v<0?'d-minus':'d-null');
+    const vz=v>0?'+':(v<0?'−':'');
+    return `<td class="${cls}">${vz}${zahl(Math.abs(v))}</td>`;
+  };
+  let rows='';
+  for(let i=1;i<=GERAETE_ZAHL;i++){
+    const g=proGeraet[i];
+    rows+=`<tr${i%2?'':' class="zeb"'}><td>Gerät ${i}</td>
+      <td>${g.da?zahl(g.s):'—'}</td><td>${g.da?zahl(g.m):'—'}</td>
+      <td>${g.da?zahl(g.s+g.m):'—'}</td></tr>`;
+  }
+  document.getElementById('tbl-geraete').innerHTML=`<table class="lt">
+    <thead><tr><th>Gerät</th><th>Scheine</th><th>Münzen</th><th>Summe</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot>
+      <tr><td>Gesamt</td><td>${zahl(su.gerS)}</td><td>${zahl(su.gerM)}</td><td>${zahl(su.ger)}</td></tr>
+      <tr class="system"><td>System</td>
+        <td><input class="sys-in" value="${sysS?zahl(sysS):''}" placeholder="0,00" onchange="saveSystem('s',this.value)"></td>
+        <td><input class="sys-in" value="${sysM?zahl(sysM):''}" placeholder="0,00" onchange="saveSystem('m',this.value)"></td>
+        <td>${zahl(sysS+sysM)}</td></tr>
+      <tr class="diff"><td>Differenz</td>${dz(dS)}${dz(dM)}${dz(dG)}</tr>
+    </tfoot></table>`;
+}
+
+function renderWechsler(){
+  const liste=auswahl('sel-datum-w');
+  const su=summen(liste);
+  const zeilen=[];
+  liste.forEach(l=>(l.wechslerIn||[]).forEach(w=>zeilen.push(w)));
+  zeilen.sort((a,b)=>Number(b.wert)-Number(a.wert));
+  const rows=zeilen.length ? zeilen.map((w,i)=>`<tr${i%2?' class="zeb"':''}>
+      <td>${w.wert} €</td>
+      <td class="mid"><span class="tick${w.herkunft==='kasse'?' on':''}">✓</span></td>
+      <td class="mid"><span class="tick kr${w.herkunft==='kredit'?' on':''}">✓</span></td>
+      <td>${zahl(w.betrag)}</td></tr>`).join('')
+    : `<tr><td colspan="4" style="text-align:center;color:var(--text-dim)">Nichts eingelegt</td></tr>`;
+  const kredSumme=zeilen.filter(w=>w.herkunft==='kredit')
+    .reduce((a,w)=>a+(Number(w.betrag)||0),0);
+  const geber=[...new Set(zeilen.filter(w=>w.herkunft==='kredit').map(w=>NAMEN[w.geber]||w.geber))].join(', ');
+  document.getElementById('tbl-wechsler').innerHTML=`
+    <table class="lt"><thead><tr><th>Aus Wechsler</th><th>Betrag</th></tr></thead>
+      <tbody><tr><td>Entnommen</td><td>${zahl(su.aus)}</td></tr></tbody></table>
+    <table class="lt" style="margin-top:.9rem">
+      <thead><tr><th>In Wechsler</th><th class="mid">Kasse</th><th class="mid">Kredit</th><th>Betrag</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td>Summe</td><td></td><td></td><td>${zahl(su.ein)}</td></tr></tfoot></table>
+    ${kredSumme?`<div class="kredit-line"><s>Davon Kredit von <b>${geber}</b> — als Schuld erfasst</s>
+      <b>${eur(kredSumme)}</b></div>`:''}
+    <div class="wsum"><s>Gesamt-Einlage</s><b>${su.wex<0?'−':''}${eur(Math.abs(su.wex))}</b></div>
+    <p class="hint">Entnommen minus eingelegt. Ein Minus ist normal: dann wurde mehr eingelegt als geholt.</p>`;
+}
+
+function renderGetraenke(){
+  const su=summen(auswahl('sel-datum-t'));
+  document.getElementById('tbl-getraenke').innerHTML=`<table class="lt">
+    <thead><tr><th>Automat</th><th>Betrag</th></tr></thead>
+    <tbody>
+      <tr><td>Kaffeeautomat</td><td>${zahl(su.kaffee)}</td></tr>
+      <tr class="zeb"><td>Getränkeautomat</td><td>${zahl(su.getrA)}</td></tr>
+      <tr><td>Snack</td><td>${zahl(su.snack)}</td></tr>
+    </tbody>
+    <tfoot><tr><td>Gesamt</td><td>${zahl(su.getr)}</td></tr></tfoot></table>`;
+}
+
+/* ══ Ansicht wechseln ════════════════════════════════════════════════ */
+function show(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('cell-lager').style.display = id==='v-hub' ? 'none' : '';
+  if(id==='v-hub'){ document.body.removeAttribute('data-lg'); ladeHub(); }
+  else document.body.dataset.lg=lg;
+  window.scrollTo(0,0);
+}
+function setLg(v){
+  lg=v;
+  document.body.dataset.lg=v;
+  document.getElementById('sel-lager').value=v;
+  ladeFiliale();
+}
+function setMonat(v){
+  monat=v;
+  if(document.getElementById('v-hub').classList.contains('on')) ladeHub();
+  else ladeFiliale();
+}
+
+/* ══ Neue Leerung ════════════════════════════════════════════════════ */
+let wexZeilen=[];   // {wert,betrag,herkunft,geber}
+let geberZiel=null; // wohin die Auswahl des Kreditgebers zurückfließt
+
+function openLeerung(){
+  document.getElementById('dlg-lg').textContent=NAMEN[lg];
+  document.getElementById('le-datum').value=new Date().toISOString().slice(0,10);
+  document.getElementById('le-aus').value='';
+  let g='<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>';
+  for(let i=1;i<=GERAETE_ZAHL;i++){
+    g+=`<span class="gn">Gerät ${i}</span>
+      <input id="ge-s-${i}" inputmode="decimal" placeholder="—">
+      <input id="ge-m-${i}" inputmode="decimal" placeholder="—">`;
+  }
+  document.getElementById('le-geraete').innerHTML=g;
+  document.getElementById('le-getraenke').innerHTML=`
+    <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" placeholder="—">
+    <span class="gn">Getränkeautomat</span><input id="ge-getr" inputmode="decimal" placeholder="—">
+    <span class="gn">Snack</span><input id="ge-snack" inputmode="decimal" placeholder="—">`;
+  wexZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
+  renderWexZeilen();
+  openM('modal-leerung');
+}
+function renderWexZeilen(){
+  let h='<span></span><span class="hd2">Kasse</span><span class="hd2">Kredit</span><span class="hd2">Betrag</span><span></span>';
+  wexZeilen.forEach((z,i)=>{
+    h+=`<span class="gn">${z.wert} €</span>
+      <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="wexPick(${i},'kasse')">✓</span>
+      <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="wexPick(${i},'kredit')">✓</span>
+      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="wexZeilen[${i}].betrag=this.value">
+      <button class="plus-s" onclick="wexPlus(${i})" title="Zeile mit ${z.wert} € ergänzen">+</button>`;
+  });
+  document.getElementById('le-wechsler').innerHTML=h;
+  const kr=wexZeilen.filter(z=>z.herkunft==='kredit'&&parseNum(z.betrag)>0);
+  const su=kr.reduce((a,z)=>a+parseNum(z.betrag),0);
+  const geber=[...new Set(kr.map(z=>NAMEN[z.geber]||z.geber).filter(Boolean))].join(', ');
+  document.getElementById('le-kredit').innerHTML = kr.length
+    ? `<div class="kred-note">Kredit von ${geber||'—'}
+        <button class="edit-link" onclick="openGeber('wechsler',null)">ändern</button>
+        <b>${eur(su)}</b></div>` : '';
+}
+function wexPick(i,art){
+  const z=wexZeilen[i];
+  if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderWexZeilen(); return; }
+  z.herkunft=art;
+  if(art==='kasse'){ z.geber=''; renderWexZeilen(); }
+  else openGeber('wechsler',i);
+}
+function wexPlus(i){
+  wexZeilen.splice(i+1,0,{wert:wexZeilen[i].wert,betrag:'',herkunft:'',geber:''});
+  renderWexZeilen();
+}
+
+/* Kreditgeber */
+function openGeber(ziel,index){
+  geberZiel={ziel,index};
+  const wahl=EXTERN.concat(FILIALEN.filter(f=>f!==lg));
+  document.getElementById('geber-list').innerHTML=
+    wahl.map(w=>`<button onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
+  openM('modal-geber');
+}
+function markGeber(b){
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function confirmGeber(){
+  const sel=document.querySelector('#geber-list button.on');
+  if(!sel){ showToast('Bitte einen Geldgeber wählen.'); return; }
+  const v=sel.dataset.v;
+  if(geberZiel.ziel==='wechsler'){
+    if(geberZiel.index===null) wexZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
+    else wexZeilen[geberZiel.index].geber=v;
+    renderWexZeilen();
+  }else{
+    if(geberZiel.index===null) planZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
+    else planZeilen[geberZiel.index].geber=v;
+    renderPlanZeilen();
+  }
+  closeM('modal-geber');
+}
+function cancelGeber(){
+  // ohne Geldgeber bleibt die Zeile bei „Kasse" — sonst hinge ein Kredit ohne Gegenüber
+  if(geberZiel){
+    const arr = geberZiel.ziel==='wechsler' ? wexZeilen : planZeilen;
+    if(geberZiel.index!==null && arr[geberZiel.index] && !arr[geberZiel.index].geber){
+      arr[geberZiel.index].herkunft='';
+    }
+    geberZiel.ziel==='wechsler' ? renderWexZeilen() : renderPlanZeilen();
+  }
+  closeM('modal-geber');
+}
+
+async function saveLeerung(){
+  const datum=document.getElementById('le-datum').value;
+  if(!datum){ showToast('Bitte ein Datum wählen.'); return; }
+  const geraete={};
+  for(let i=1;i<=GERAETE_ZAHL;i++){
+    const s=parseNum(document.getElementById('ge-s-'+i).value);
+    const m=parseNum(document.getElementById('ge-m-'+i).value);
+    if(s||m) geraete[i]={s,m};
+  }
+  const wIn=wexZeilen.filter(z=>parseNum(z.betrag)>0).map(z=>({
+    wert:z.wert, betrag:parseNum(z.betrag),
+    herkunft:z.herkunft||'kasse', geber:z.herkunft==='kredit'?z.geber:''
+  }));
+  const fehlt=wIn.find(z=>z.herkunft==='kredit'&&!z.geber);
+  if(fehlt){ showToast('Bei einem Kredit fehlt der Geldgeber.'); return; }
+  const eintrag={
+    lager:lg, datum, monat:datum.slice(0,7),
+    geraete,
+    wechslerAus:parseNum(document.getElementById('le-aus').value),
+    wechslerIn:wIn,
+    getraenke:{
+      kaffee:parseNum(document.getElementById('ge-kaffee').value),
+      getraenke:parseNum(document.getElementById('ge-getr').value),
+      snack:parseNum(document.getElementById('ge-snack').value)
+    },
+    erstellt:new Date().toISOString()
+  };
+  showSpinner();
+  try{
+    await db.collection('leerung').add(eintrag);
+    // Kredite aus der Wechsler-Einlage getrennt festhalten
+    for(const z of wIn.filter(x=>x.herkunft==='kredit')){
+      await db.collection('leerung_kredit').add({
+        geber:z.geber, nehmer:lg, betrag:z.betrag, datum,
+        monat:datum.slice(0,7), zweck:'wechsler',
+        // 50/20/10 sind Scheine, 2 und 1 sind Münzen
+        art: Number(z.wert)>=10 ? 'scheine' : 'muenzen',
+        getilgtAm:null, getilgtArt:null
+      });
+    }
+    closeM('modal-leerung');
+    showToast('Leerung gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Bank geplant ════════════════════════════════════════════════════ */
+let planZeilen=[], planArtWert='scheine', planIndex=null;
+function openPlan(i){
+  planIndex = (i===null||i===undefined) ? null : i;
+  document.getElementById('plan-lg').textContent=NAMEN[lg];
+  const p = planIndex===null ? null : (monatDoc.bankPlan||[])[planIndex];
+  planArtWert = p ? (p.art||'scheine') : 'scheine';
+  planZeilen = p ? (p.zeilen||[]).map(z=>({...z,betrag:zahl(z.betrag)}))
+                 : [{betrag:'',herkunft:'kasse',geber:''}];
+  document.querySelectorAll('#plan-art button').forEach((b,ix)=>
+    b.classList.toggle('on', (ix===0)===(planArtWert==='scheine')));
+  document.getElementById('plan-del').style.display = planIndex===null ? 'none' : '';
+  renderPlanZeilen();
+  openM('modal-plan');
+}
+function planArt(v,b){
+  planArtWert=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function renderPlanZeilen(){
+  let h='<span></span><span class="hd2">Kasse</span><span class="hd2">Kredit</span><span class="hd2">Betrag</span><span></span>';
+  planZeilen.forEach((z,i)=>{
+    h+=`<span class="gn">Zeile ${i+1}</span>
+      <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="planPick(${i},'kasse')">✓</span>
+      <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="planPick(${i},'kredit')">✓</span>
+      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="planZeilen[${i}].betrag=this.value">
+      <button class="plus-s" onclick="planPlus()">+</button>`;
+  });
+  document.getElementById('plan-zeilen').innerHTML=h;
+  const kr=planZeilen.filter(z=>z.herkunft==='kredit'&&parseNum(z.betrag)>0);
+  const su=kr.reduce((a,z)=>a+parseNum(z.betrag),0);
+  const geber=[...new Set(kr.map(z=>NAMEN[z.geber]||z.geber).filter(Boolean))].join(', ');
+  document.getElementById('plan-kredit').innerHTML = kr.length
+    ? `<div class="kred-note">Kredit von ${geber||'—'}
+        <button class="edit-link" onclick="openGeber('plan',null)">ändern</button>
+        <b>${eur(su)}</b></div>` : '';
+}
+function planPick(i,art){
+  const z=planZeilen[i];
+  if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderPlanZeilen(); return; }
+  z.herkunft=art;
+  if(art==='kasse'){ z.geber=''; renderPlanZeilen(); }
+  else openGeber('plan',i);
+}
+function planPlus(){ planZeilen.push({betrag:'',herkunft:'kasse',geber:''}); renderPlanZeilen(); }
+
+async function savePlan(){
+  const zeilen=planZeilen.filter(z=>parseNum(z.betrag)>0)
+    .map(z=>({betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
+              geber:z.herkunft==='kredit'?z.geber:''}));
+  if(!zeilen.length){ showToast('Bitte einen Betrag eintragen.'); return; }
+  const fehlt=zeilen.find(z=>z.herkunft==='kredit'&&!z.geber);
+  if(fehlt){ showToast('Bei einem Kredit fehlt der Geldgeber.'); return; }
+  const eintrag={art:planArtWert,zeilen,gesamt:zeilen.reduce((a,z)=>a+z.betrag,0)};
+  const plan=(monatDoc.bankPlan||[]).slice();
+  const alt = planIndex===null ? null : plan[planIndex];
+  if(planIndex===null) plan.push(eintrag); else plan[planIndex]=eintrag;
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat)
+      .set({bankPlan:plan}, {merge:true});
+    // Kredite, die neu in der Planung stecken, als Schuld festhalten
+    const vorher = alt ? (alt.zeilen||[]).filter(z=>z.herkunft==='kredit').length : 0;
+    const nachher = zeilen.filter(z=>z.herkunft==='kredit');
+    if(nachher.length && !vorher){
+      for(const z of nachher){
+        await db.collection('leerung_kredit').add({
+          geber:z.geber, nehmer:lg, betrag:z.betrag,
+          datum:new Date().toISOString().slice(0,10), monat, zweck:'bank',
+          art: planArtWert, getilgtAm:null, getilgtArt:null
+        });
+      }
+    }
+    monatDoc.bankPlan=plan;
+    closeM('modal-plan');
+    showToast('Planung gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function deletePlan(){
+  if(planIndex===null) return;
+  const plan=(monatDoc.bankPlan||[]).slice();
+  plan.splice(planIndex,1);
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankPlan:plan},{merge:true});
+    monatDoc.bankPlan=plan;
+    closeM('modal-plan');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Einzahlung ══════════════════════════════════════════════════════ */
+let bankIndex=null;
+function openBank(i){
+  bankIndex=i;
+  const p=(monatDoc.bankPlan||[])[i];
+  if(!p) return;
+  document.getElementById('bank-betrag').value=zahl(p.gesamt);
+  document.getElementById('bank-datum').value=new Date().toISOString().slice(0,10);
+  openM('modal-bank');
+}
+async function confirmBank(){
+  const p=(monatDoc.bankPlan||[])[bankIndex];
+  if(!p) return;
+  const datum=document.getElementById('bank-datum').value;
+  if(!datum){ showToast('Bitte ein Datum wählen.'); return; }
+  const plan=(monatDoc.bankPlan||[]).slice();
+  plan.splice(bankIndex,1);
+  const ein=(monatDoc.bankEin||[]).slice();
+  ein.push({art:p.art,betrag:p.gesamt,datum});
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat)
+      .set({bankPlan:plan,bankEin:ein},{merge:true});
+    monatDoc.bankPlan=plan; monatDoc.bankEin=ein;
+    closeM('modal-bank');
+    showToast('Einzahlung erfasst ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Kredite ═════════════════════════════════════════════════════════ */
+let kreditId=null, kreditArt='scheine';
+function krArt(v,b){
+  kreditArt=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function openKredit(id){
+  const k=kredite.find(x=>x.id===id); if(!k) return;
+  kreditId=id;
+  const eigen=k.nehmer===lg;
+  document.getElementById('kr-titel').textContent =
+    eigen ? 'Schuld an '+(NAMEN[k.geber]||k.geber) : 'Kredit an '+(NAMEN[k.nehmer]||k.nehmer);
+  document.getElementById('kr-det').innerHTML=`
+    <div>${eigen?'Aufgenommen am':'Vergeben am'}<b>${dmy(k.datum)}</b></div>
+    <div>Verwendet für<b>${k.zweck==='bank'?'Bank-Einzahlung':'Wechsler-Einlage'}</b></div>
+    <div>Betrag<b>${eur(k.betrag)}</b></div>
+    <div>Monat<b>${monatText(k.monat)}</b></div>`;
+  document.getElementById('kr-hint').textContent = eigen
+    ? 'Nach dem Tilgen sinkt „Rest in der Kasse" um diesen Betrag und die Zeile rutscht grau nach unten. Bleibt sie offen, geht sie in den nächsten Monat mit.'
+    : 'Diese Zeile entstand in der anderen Filiale. Nach der Rückzahlung steigt „Rest in der Kasse" wieder.';
+  document.getElementById('kr-btn').textContent = eigen ? '✓ Kredit tilgen' : '✓ Rückzahlung erfassen';
+  // Vorbelegt ist die Form, in der das Geld kam — änderbar, falls anders zurückgegeben wird
+  kreditArt = k.art==='muenzen' ? 'muenzen' : 'scheine';
+  document.querySelectorAll('#kr-art button').forEach((b,ix)=>
+    b.classList.toggle('on', (ix===0)===(kreditArt==='scheine')));
+  openM('modal-kredit');
+}
+async function tilgen(){
+  if(!kreditId) return;
+  showSpinner();
+  try{
+    await db.collection('leerung_kredit').doc(kreditId)
+      .set({getilgtAm:new Date().toISOString().slice(0,10),
+            getilgtArt:kreditArt},{merge:true});
+    closeM('modal-kredit');
+    showToast('Kredit erledigt ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Kleinkram ═══════════════════════════════════════════════════════ */
+async function saveKosten(v){
+  const n=parseNum(v);
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({sonstige:n},{merge:true});
+    monatDoc.sonstige=n;
+    renderMain();
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+async function saveSystem(feld,v){
+  const sys={...(monatDoc.system||{})};
+  sys[feld]=parseNum(v);
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({system:sys},{merge:true});
+    monatDoc.system=sys;
+    renderGeraete();
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+function openVormonat(){
+  const vm=monatDoc.vormonat||{};
+  document.getElementById('vm-in-s').value = vm.s ? zahl(vm.s) : '';
+  document.getElementById('vm-in-m').value = vm.m ? zahl(vm.m) : '';
+  openM('modal-vormonat');
+}
+async function saveVormonat(){
+  const v={s:parseNum(document.getElementById('vm-in-s').value),
+           m:parseNum(document.getElementById('vm-in-m').value)};
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({vormonat:v},{merge:true});
+    monatDoc.vormonat=v;
+    closeM('modal-vormonat');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Start ═══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function(){
+  const user=window.GG_USER;
+  if(user){
+    const el=document.getElementById('hdr-username');
+    if(el) el.textContent=user.name;
+    const av=document.querySelector('.hdr-ava');
+    if(av) av.textContent=(user.name||'A').trim().charAt(0).toUpperCase();
+  }
+  buildMonate();
+  ladeHub();
+});
+
+</script>
+</body>
+</html>

@@ -238,7 +238,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <a class="rail-btn on" href="startseite.html"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5h4v5"/></svg><span>Startseite</span></a>
     <div class="rail-sep"></div>
     <a class="rail-btn" href="lieferplanung.html"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg><span>Lieferplanung</span></a>
-    <a class="rail-btn soon" href="#" onclick="bald(event,'Leerung')"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg><span>Leerung</span></a>
+    <a class="rail-btn" href="leerung.html"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg><span>Leerung</span></a>
     <a class="rail-btn soon" href="#" onclick="bald(event,'Statistik')"><svg viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg><span>Statistik</span></a>
     <a class="rail-btn soon" href="#" onclick="bald(event,'Konten')"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg><span>Konten</span></a>
     <div class="rail-sep"></div>
@@ -270,8 +270,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <span><h2>Lieferplanung</h2><p>Einkauf und Lieferungen planen</p></span>
     </a>
 
-    <a class="tile soon" style="--c1:#8258E8;--c2:#3A1D82;--tline:rgba(150,110,255,.5);--glow:rgba(124,58,237,.35);--glowh:rgba(124,58,237,.55)" href="#" onclick="bald(event,'Leerung')">
-      <span class="num">Bald</span>
+    <a class="tile" style="--c1:#8258E8;--c2:#3A1D82;--tline:rgba(150,110,255,.5);--glow:rgba(124,58,237,.35);--glowh:rgba(124,58,237,.55)" href="leerung.html">
+      <span class="num" id="badge-leerung">—</span>
       <span class="tile-ico"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg></span>
       <span><h2>Leerung</h2><p>Automaten leeren und abrechnen</p></span>
     </a>
@@ -381,12 +381,31 @@ async function ladeStatus(){
     });
     box.innerHTML = html || '<span class="st-pill" style="cursor:default">Nichts offen — alles erledigt</span>';
     if(badge) badge.textContent = gesamt ? gesamt+' offen' : 'frei';
+    ladeLeerungBadge();
   }catch(e){
     box.innerHTML='<span class="st-pill" style="cursor:default">Daten nicht erreichbar</span>';
     if(badge) badge.textContent='—';
   }
 }
 ladeStatus();
+
+// Auf der Leerung-Kachel steht, wie viel noch zur Bank gebracht werden muss
+async function ladeLeerungBadge(){
+  const el=document.getElementById('badge-leerung');
+  if(!el) return;
+  const monat=new Date().toISOString().slice(0,7);
+  try{
+    const snap=await db.collection('leerung_monat').get();
+    let summe=0;
+    snap.forEach(d=>{
+      if(!d.id.endsWith('_'+monat)) return;
+      (d.data().bankPlan||[]).forEach(p=>summe+=Number(p.gesamt)||0);
+    });
+    el.textContent = summe
+      ? summe.toLocaleString('de-DE',{maximumFractionDigits:0})+' € zur Bank'
+      : 'aktuell';
+  }catch(e){ el.textContent='—'; }
+}
 
 function toggleUser(){ document.getElementById('user-menu').classList.toggle('show'); }
 window.abmelden = function(e){
