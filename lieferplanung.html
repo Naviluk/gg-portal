@@ -1361,6 +1361,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 
     <div class="field">
       <label class="field-label">Preis pro St. (Einkaufspreis)</label>
+      <div class="ekd-hint" id="ekd-kolli-hint" style="margin-bottom:.3rem"></div>
       <div class="ekd-row">
         <input id="ekd-price" class="ekd-input" type="number" min="0" step="0.01" placeholder="—"
           style="flex:1;min-width:0" oninput="ekdRecalc()">
@@ -1630,13 +1631,14 @@ async function loadProducts(){
     snap.forEach(d=>{
       const p = d.data();
       if(!byCat[p.cat]) byCat[p.cat] = [];
-      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0});
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦',
+        order:Number(p.order)||0, kolli:Number(p.kolli)||1});
     });
     const catOrder = DEFAULT_PRODUCTS.map(c=>c.cat);
     Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
     PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
       cat,
-      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon}))
+      items: byCat[cat].sort((a,b)=>a.order-b.order).map(p=>({id:p.id,name:p.name,unit:p.unit,icon:p.icon,kolli:p.kolli}))
     }));
   }catch(e){
     console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
@@ -1958,12 +1960,25 @@ async function loadEkPreise(){
     ekPricesLoaded = true;
   }catch(e){ console.warn('Preise laden fehlgeschlagen:', e.message); }
 }
-function getEinkaufspreis(prodId){
+// In der Sammlung „preise" steht der Preis für ein ganzes Gebinde (Kolli).
+// Geplant und gerechnet wird hier aber in Stück — deshalb zwei Funktionen:
+// getGebindepreis liefert den gespeicherten Wert, getEinkaufspreis den je Stück.
+function getGebindepreis(prodId){
   const c = ekPriceDocs.filter(d=>d.prodId===prodId && d.monat<=currentZeitraum && d.einkauf!==undefined && d.einkauf!==null);
   if(!c.length) return null;
   c.sort((a,b)=>b.monat.localeCompare(a.monat));
   const v = Number(c[0].einkauf);
   return isNaN(v) ? null : v;
+}
+function getKolli(prodId){
+  for(const cat of PRODUCTS){
+    for(const p of cat.items){ if(p.id===prodId) return Math.max(1, Number(p.kolli)||1); }
+  }
+  return 1;
+}
+function getEinkaufspreis(prodId){
+  const g = getGebindepreis(prodId);
+  return g===null ? null : g / getKolli(prodId);
 }
 function fmtEUR(v){ return (Number(v)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
 
@@ -2225,7 +2240,13 @@ window.openEkDetail = async function(prodId, mode){
   document.getElementById('ekd-qty').value  = qty ? qty : '';
 
   const pr = getEinkaufspreis(prodId);
-  document.getElementById('ekd-price').value = pr!==null ? pr : '';
+  // im Feld steht der Stückpreis, gerundet auf Cent-Genauigkeit
+  document.getElementById('ekd-price').value = pr!==null ? Math.round(pr*10000)/10000 : '';
+  const k = getKolli(prodId);
+  const kh = document.getElementById('ekd-kolli-hint');
+  if(kh) kh.textContent = k>1
+    ? `Kolli ${k} St. · Gebinde ${fmtEUR(getGebindepreis(prodId)||0)}`
+    : '';
 
   ekdRecalc();
   document.getElementById('modal-ek-detail').classList.add('show');
@@ -2269,12 +2290,14 @@ window.confirmEkDetail = async function(){
     // 3) Geänderter Einkaufspreis wird nach preise.html zurückgeschrieben
     if(priceRaw!==''){
       const pv = parseFloat(priceRaw);
-      if(!isNaN(pv) && pv!==getEinkaufspreis(prodId)){
+      if(!isNaN(pv) && Math.abs(pv-(getEinkaufspreis(prodId)||0))>0.0001){
+        // Eingegeben wird der Stückpreis — gespeichert wird wie überall der Gebindepreis
+        const geb = Math.round(pv*getKolli(prodId)*100)/100;
         try{
           await db.collection('preise').doc(prodId+'_'+currentZeitraum)
-            .set({prodId, monat:currentZeitraum, einkauf:pv},{merge:true});
+            .set({prodId, monat:currentZeitraum, einkauf:geb},{merge:true});
           ekPriceDocs = ekPriceDocs.filter(d=>!(d.prodId===prodId && d.monat===currentZeitraum));
-          ekPriceDocs.push({prodId, monat:currentZeitraum, einkauf:pv});
+          ekPriceDocs.push({prodId, monat:currentZeitraum, einkauf:geb});
         }catch(e){ console.warn('Preis speichern fehlgeschlagen:', e.message); }
       }
     }

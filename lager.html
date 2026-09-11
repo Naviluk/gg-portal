@@ -1829,7 +1829,9 @@ window.saveAllConfig = async function(){
         }
         const item = {id, name, unit:(p.unit||'').trim(), icon:p.icon||'📦'};
         validItems.push(item);
-        batch.set(db.collection('produkte').doc(id), {name:item.name, unit:item.unit, icon:item.icon, cat:catObj.cat, order:idx});
+        // merge:true, sonst fallen Felder weg, die andere Seiten pflegen (z. B. Kolli)
+        batch.set(db.collection('produkte').doc(id),
+          {name:item.name, unit:item.unit, icon:item.icon, cat:catObj.cat, order:idx}, {merge:true});
       });
       validData.push({cat:catObj.cat, items:validItems});
     });
