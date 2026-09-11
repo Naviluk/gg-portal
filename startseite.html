@@ -339,6 +339,20 @@ const LAGER_NAMEN = {zentrallager:'Zentrallager',nettetal:'Nettetal','brüggen':
 const LAGER_PUNKT = {zentrallager:'#3EDCA9',nettetal:'#5A9CF8','brüggen':'#F0325C',
   viersen:'#F59E4B','köln':'#A78BFA'};
 
+// Welche Rolle darf welche Seite öffnen. Admin und Einkaufsleiter dürfen alles;
+// bei den übrigen Rollen stehen die erlaubten Seiten einzeln drin.
+const RECHTE = {
+  Admin:          '*',
+  Einkaufsleiter: '*',
+  Kollege:        ['leerung.html','konten.html','statistik.html'],
+};
+function darf(href, rolle){
+  const r = RECHTE[rolle];
+  if(r === '*') return true;
+  if(!r) return false;
+  return r.includes(href);
+}
+
 // Wer ist angemeldet? Ohne Sitzung geht es zurück zur Anmeldung.
 (function(){
   let user=null;
@@ -348,6 +362,31 @@ const LAGER_PUNKT = {zentrallager:'#3EDCA9',nettetal:'#5A9CF8','brüggen':'#F032
   document.querySelectorAll('.rail-ava,.hdr-ava').forEach(el=>el.textContent=kurz);
   const nameEl=document.getElementById('hdr-name');
   if(nameEl) nameEl.textContent = user.name;
+  window.GG_ROLLE = user.role;
+
+  // Gesperrte Bereiche gar nicht erst anbieten — sonst klickt man ins Leere
+  if(RECHTE[user.role] !== '*'){
+    document.querySelectorAll('.rail-btn,.tile,.mini').forEach(el=>{
+      const href = el.getAttribute('href') || '';
+      if(href && href!=='startseite.html' && href!=='#' && !darf(href, user.role)){
+        el.remove();
+      }
+    });
+    const sec=document.querySelector('.sec-title');
+    if(sec && !document.querySelector('.grid-small a')) sec.remove();
+  }
+
+  // Hinweis, wenn jemand über eine gesperrte Seite hierher geschickt wurde
+  const gesperrt = new URLSearchParams(location.search).get('gesperrt');
+  if(gesperrt){
+    setTimeout(()=>{
+      const t=document.getElementById('toast');
+      t.textContent = gesperrt+' ist für deine Rolle nicht freigegeben.';
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),3600);
+    },400);
+    history.replaceState(null,'','startseite.html');
+  }
 })();
 
 // Datum in der Kopfzeile
@@ -363,6 +402,7 @@ const LAGER_PUNKT = {zentrallager:'#3EDCA9',nettetal:'#5A9CF8','brüggen':'#F032
 async function ladeStatus(){
   const box=document.getElementById('status');
   const badge=document.getElementById('badge-lp');
+  if(!darf('lieferplanung.html', window.GG_ROLLE)){ box.style.display='none'; return; }
   try{
     const snap=await db.collection('lp_planung').get();
     const plan={};

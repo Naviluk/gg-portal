@@ -464,6 +464,14 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 .g-ger{grid-template-columns:auto 1fr 1fr}
 .g-w{grid-template-columns:56px 46px 46px 1fr 30px}
 .g-get{grid-template-columns:auto 1fr}
+.g-ein{grid-template-columns:44px 44px 1fr 1.1fr 30px}
+.g-ein input[type=date]{background:var(--zebra);border:1px solid var(--glass-border);
+  border-radius:8px;padding:.35rem .4rem;font-family:var(--mono);font-size:.82rem;
+  text-align:left;outline:none;width:100%}
+.g-ein .weg{width:26px;height:26px;border-radius:8px;border:1.4px solid var(--glass-border);
+  background:#fff;color:var(--text-dim);cursor:pointer;font-size:.8rem;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.g-ein .weg:hover{border-color:var(--rot);color:var(--rot);background:#FDE8EE}
 .hd2{font-size:.53rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);
   font-weight:800;text-align:center}
 .gn{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text-dim);white-space:nowrap}
@@ -801,6 +809,27 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-bank')">Abbrechen</button>
       <button class="btn b-green" onclick="confirmBank()">✓ Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Bank eingezahlt ══ -->
+<div class="modal-overlay" id="modal-ein" onclick="if(event.target===this)closeM('modal-ein')">
+  <div class="modal" style="max-width:560px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-ein')">✕</button>
+      <div class="dlg-eyebrow">Bank</div>
+      <div class="dlg-title">Bank eingezahlt <span class="dlg-pill" id="ein-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <div class="dcard grid-h g-ein" id="ein-zeilen"></div>
+      <button class="mini-add" style="margin:.6rem 0 0 auto" onclick="einAdd()">+</button>
+      <p class="hint">Hier stehen die Beträge, die schon auf dem Konto sind. Änderungen wirken
+        sofort auf „Rest in der Kasse“.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-ein')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveEin()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -1198,9 +1227,10 @@ async function renderMain(){
 
   // Liste der echten Beträge
   let html='';
-  html+=`<div class="lrow"><span class="nm">Bank eingezahlt</span>
-    <button class="i-btn" onclick="tog('s4',this)">i</button>
-    <span class="val">${eur(bk.gesamt)}</span></div>
+  html+=`<button class="lrow" onclick="openEin()" title="Einzahlungen bearbeiten">
+    <span class="nm">Bank eingezahlt</span>
+    <span class="i-btn" onclick="event.stopPropagation();tog('s4',this)">i</span>
+    <span class="val">${eur(bk.gesamt)}</span></button>
     <div class="split" id="s4" style="padding-left:.9rem">${
       (monatDoc.bankEin||[]).length
         ? (monatDoc.bankEin||[]).map(b=>`<div>${dmy(b.datum)} · ${b.art==='muenzen'?'Münzen':'Scheine'}<b>${eur(b.betrag)}</b></div>`).join('')
@@ -1628,6 +1658,48 @@ async function confirmBank(){
     monatDoc.bankPlan=plan; monatDoc.bankEin=ein;
     closeM('modal-bank');
     showToast('Einzahlung erfasst ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Bank eingezahlt: nachträglich ändern ════════════════════════════ */
+let einZeilen=[];
+function openEin(){
+  document.getElementById('ein-lg').textContent=NAMEN[lg];
+  einZeilen=(monatDoc.bankEin||[]).map(b=>({
+    art: b.art==='muenzen'?'muenzen':'scheine',
+    betrag: zahl(b.betrag),
+    datum: b.datum||heute()
+  }));
+  if(!einZeilen.length) einZeilen=[{art:'scheine',betrag:'',datum:heute()}];
+  renderEinZeilen();
+  openM('modal-ein');
+}
+function renderEinZeilen(){
+  let h='<span class="hd2">Sch.</span><span class="hd2">Mün.</span>'+
+        '<span class="hd2">Betrag</span><span class="hd2">Datum</span><span></span>';
+  einZeilen.forEach((z,i)=>{
+    h+=`<span class="cbx${z.art==='scheine'?' on':''}" onclick="einPick(${i},'scheine')">✓</span>
+      <span class="cbx kr${z.art==='muenzen'?' on':''}" onclick="einPick(${i},'muenzen')">✓</span>
+      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="einZeilen[${i}].betrag=this.value">
+      <input type="date" value="${z.datum}" onchange="einZeilen[${i}].datum=this.value">
+      <button class="weg" onclick="einDel(${i})" title="Zeile entfernen">✕</button>`;
+  });
+  document.getElementById('ein-zeilen').innerHTML=h;
+}
+function einPick(i,art){ einZeilen[i].art=art; renderEinZeilen(); }
+function einAdd(){ einZeilen.push({art:'scheine',betrag:'',datum:heute()}); renderEinZeilen(); }
+function einDel(i){ einZeilen.splice(i,1); if(!einZeilen.length) einAdd(); else renderEinZeilen(); }
+async function saveEin(){
+  const ein=einZeilen.filter(z=>parseNum(z.betrag)>0)
+    .map(z=>({art:z.art, betrag:parseNum(z.betrag), datum:z.datum||heute()}));
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankEin:ein},{merge:true});
+    monatDoc.bankEin=ein;
+    closeM('modal-ein');
+    showToast('Einzahlungen gespeichert ✓');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
