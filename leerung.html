@@ -927,6 +927,14 @@ function showToast(t){
   clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2600);
 }
 function closeM(id){document.getElementById(id).classList.remove('show')}
+// Kein Ladekreis darf ewig stehen bleiben: bricht die Verbindung weg oder
+// antwortet Firestore nicht, gibt es nach 12 Sekunden eine Meldung statt Stillstand.
+function mitZeitlimit(p, sek){
+  return Promise.race([
+    p,
+    new Promise((_,ab)=>setTimeout(()=>ab(new Error('Zeitüberschreitung')), (sek||12)*1000))
+  ]);
+}
 function openM(id){document.getElementById(id).classList.add('show')}
 function tog(id,btn){document.getElementById(id).classList.toggle('show');btn.classList.toggle('on')}
 
@@ -1033,18 +1041,19 @@ async function ladeFiliale(){
   vmCache = {};
   showSpinner();
   try{
-    const [snapL, docM, snapK] = await Promise.all([
+    const [snapL, docM, snapK] = await mitZeitlimit(Promise.all([
       db.collection('leerung').where('lager','==',lg).where('monat','==',monat).get(),
       db.collection('leerung_monat').doc(lg+'_'+monat).get(),
       db.collection('leerung_kredit').get(),
-    ]);
+    ]));
     leerungen = snapL.docs.map(d=>({id:d.id,...d.data()}))
                           .sort((a,b)=>(a.datum||'').localeCompare(b.datum||''));
     monatDoc = docM.exists ? docM.data() : {};
     kredite = snapK.docs.map(d=>({id:d.id,...d.data()}))
                         .filter(k=>k.geber===lg || k.nehmer===lg);
   }catch(e){
-    showToast('Daten konnten nicht geladen werden.');
+    console.error('Leerung laden:', e);
+    showToast('Daten nicht geladen: '+e.message);
     leerungen=[]; monatDoc={}; kredite=[];
   }
   hideSpinner();
@@ -1061,11 +1070,11 @@ async function vormonatWert(){
   const key = lg+'_'+vm;
   if(vmCache[key]) return vmCache[key];
   try{
-    const [snapL, docM, snapK] = await Promise.all([
+    const [snapL, docM, snapK] = await mitZeitlimit(Promise.all([
       db.collection('leerung').where('lager','==',lg).where('monat','==',vm).get(),
       db.collection('leerung_monat').doc(lg+'_'+vm).get(),
       db.collection('leerung_kredit').get(),
-    ]);
+    ]), 8);
     if(snapL.empty && !docM.exists) return {s:0,m:0,leer:true};
     const li = snapL.docs.map(d=>d.data());
     const md = docM.exists ? docM.data() : {};
@@ -1091,10 +1100,10 @@ async function ladeHub(){
   const box=document.getElementById('hub-bank');
   const tiles=document.getElementById('hub-tiles');
   try{
-    const [snapL, snapM] = await Promise.all([
+    const [snapL, snapM] = await mitZeitlimit(Promise.all([
       db.collection('leerung').where('monat','==',monat).get(),
       db.collection('leerung_monat').get(),
-    ]);
+    ]));
     const proLager={}; FILIALEN.forEach(f=>proLager[f]={liste:[],doc:{}});
     snapL.forEach(d=>{ const x=d.data(); if(proLager[x.lager]) proLager[x.lager].liste.push(x); });
     snapM.forEach(d=>{ if(d.id.endsWith('_'+monat)){
@@ -1132,7 +1141,8 @@ async function ladeHub(){
       </button>`;
     }).join('');
   }catch(e){
-    box.innerHTML='<div class="brow"><span class="nm">Daten nicht erreichbar</span></div>';
+    console.error('Startansicht laden:', e);
+    box.innerHTML='<div class="brow"><span class="nm">Daten nicht erreichbar — '+e.message+'</span></div>';
     tiles.innerHTML='';
   }
   hideSpinner();
