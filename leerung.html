@@ -496,8 +496,18 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   color:var(--text-dim);cursor:pointer}
 .seg2 button.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
 
+/* Geräte jenseits der ersten zwölf heben sich ab */
+.g-extra{font-weight:800!important;color:var(--acc-ink)!important}
+.grid-h .gn.nr{text-align:center;font-size:.85rem;color:var(--text)}
+
 @media(max-width:640px){
   .main-content{padding:.9rem .8rem 2.5rem}
+  /* Tabellenköpfe: kleiner und ohne breite Sperrung, sonst sprengen sie die Zeile */
+  table.lt th{font-size:.52rem;letter-spacing:.05em;padding:.5rem .4rem}
+  table.lt td{font-size:.82rem;padding:.5rem .4rem}
+  table.lt td:first-child{font-size:.78rem}
+  .sub-title{font-size:1.1rem}
+  .tick{width:20px;height:20px}
   .row .val{font-size:.98rem}
   .row.total .val{font-size:1.2rem}
   .euro-in{width:96px}
@@ -869,7 +879,15 @@ const FARBEN = {
   viersen:{t1:'#EE8A2B',t2:'#A64A0B',sh:'rgba(234,88,12,.35)',dot:'#EE8A2B'},
 };
 const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
-const GERAETE_ZAHL = 12;
+// Geräte je Filiale. Nettetal hat zusätzlich 14–17 (eine 13 gibt es nicht) —
+// die stehen fett, damit sie sich von den ersten zwölf abheben.
+const GERAETE = {
+  nettetal: [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17],
+  'brüggen':[1,2,3,4,5,6,7,8,9,10,11,12],
+  viersen:  [1,2,3,4,5,6,7,8,9,10,11,12],
+};
+const geraeteListe = () => GERAETE[lg] || GERAETE.nettetal;
+const istExtra = n => Number(n) > 12;
 const NOMINALE = [50,20,10,2,1];
 const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
                 'September','Oktober','November','Dezember'];
@@ -1236,8 +1254,9 @@ async function renderMain(){
 
 function renderGeraete(){
   const liste=auswahl('sel-datum-g');
+  const nummern=geraeteListe();
   const proGeraet={};
-  for(let i=1;i<=GERAETE_ZAHL;i++) proGeraet[i]={s:0,m:0,da:false};
+  nummern.forEach(i=>proGeraet[i]={s:0,m:0,da:false});
   liste.forEach(l=>Object.entries(l.geraete||{}).forEach(([k,g])=>{
     const i=Number(k); if(!proGeraet[i]) return;
     proGeraet[i].s+=Number(g.s)||0; proGeraet[i].m+=Number(g.m)||0;
@@ -1253,12 +1272,12 @@ function renderGeraete(){
     return `<td class="${cls}">${vz}${zahl(Math.abs(v))}</td>`;
   };
   let rows='';
-  for(let i=1;i<=GERAETE_ZAHL;i++){
+  nummern.forEach((i,ix)=>{
     const g=proGeraet[i];
-    rows+=`<tr${i%2?'':' class="zeb"'}><td>Gerät ${i}</td>
+    rows+=`<tr${ix%2?' class="zeb"':''}><td${istExtra(i)?' class="g-extra"':''}>Gerät ${i}</td>
       <td>${g.da?zahl(g.s):'—'}</td><td>${g.da?zahl(g.m):'—'}</td>
       <td>${g.da?zahl(g.s+g.m):'—'}</td></tr>`;
-  }
+  });
   document.getElementById('tbl-geraete').innerHTML=`<table class="lt">
     <thead><tr><th>Gerät</th><th>Scheine</th><th>Münzen</th><th>Summe</th></tr></thead>
     <tbody>${rows}</tbody>
@@ -1342,11 +1361,11 @@ function openLeerung(){
   document.getElementById('le-datum').value=heute();
   document.getElementById('le-aus').value='';
   let g='<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>';
-  for(let i=1;i<=GERAETE_ZAHL;i++){
-    g+=`<span class="gn">Gerät ${i}</span>
+  geraeteListe().forEach(i=>{
+    g+=`<span class="gn${istExtra(i)?' g-extra':''}">Gerät ${i}</span>
       <input id="ge-s-${i}" inputmode="decimal" placeholder="—">
       <input id="ge-m-${i}" inputmode="decimal" placeholder="—">`;
-  }
+  });
   document.getElementById('le-geraete').innerHTML=g;
   document.getElementById('le-getraenke').innerHTML=`
     <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" placeholder="—">
@@ -1429,11 +1448,11 @@ async function saveLeerung(){
   const datum=document.getElementById('le-datum').value;
   if(!datum){ showToast('Bitte ein Datum wählen.'); return; }
   const geraete={};
-  for(let i=1;i<=GERAETE_ZAHL;i++){
+  geraeteListe().forEach(i=>{
     const s=parseNum(document.getElementById('ge-s-'+i).value);
     const m=parseNum(document.getElementById('ge-m-'+i).value);
     if(s||m) geraete[i]={s,m};
-  }
+  });
   const wIn=wexZeilen.filter(z=>parseNum(z.betrag)>0).map(z=>({
     wert:z.wert, betrag:parseNum(z.betrag),
     herkunft:z.herkunft||'kasse', geber:z.herkunft==='kredit'?z.geber:''
@@ -1495,7 +1514,7 @@ function planArt(v,b){
 function renderPlanZeilen(){
   let h='<span></span><span class="hd2">Kasse</span><span class="hd2">Kredit</span><span class="hd2">Betrag</span><span></span>';
   planZeilen.forEach((z,i)=>{
-    h+=`<span class="gn">Zeile ${i+1}</span>
+    h+=`<span class="gn nr">${i+1}</span>
       <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="planPick(${i},'kasse')">✓</span>
       <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="planPick(${i},'kredit')">✓</span>
       <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="planZeilen[${i}].betrag=this.value">
