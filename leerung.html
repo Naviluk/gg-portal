@@ -846,11 +846,13 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <div class="dlg-head">
       <button class="dlg-close" onclick="closeM('modal-neukredit')">✕</button>
       <div class="dlg-eyebrow">Kredit</div>
-      <div class="dlg-title">Kredit aufnehmen <span class="dlg-pill" id="nk-lg">—</span></div>
+      <div class="dlg-title">Kredit vergeben <span class="dlg-pill" id="nk-lg">—</span></div>
     </div>
     <div class="dlg-body">
-      <label class="fl">Von wem</label>
-      <div class="geber" id="nk-geber"></div>
+      <label class="fl">An wen</label>
+      <input class="num" id="nk-name" placeholder="Name des Mitarbeiters"
+        style="font-family:'Poppins',sans-serif;font-weight:600">
+      <div class="geber" id="nk-geber" style="margin-top:.45rem"></div>
       <label class="fl">Betrag</label>
       <input class="num" id="nk-betrag" inputmode="decimal" placeholder="0,00">
       <label class="fl">Art</label>
@@ -860,8 +862,9 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
       </div>
       <label class="fl">Datum</label>
       <input type="date" class="num" id="nk-datum">
-      <p class="hint">Das Geld liegt danach in der Kasse und erscheint als Schuld
-        über der Zeile „Rest in der Kasse“.</p>
+      <p class="hint">Das Geld verlässt die Kasse und steht ab sofort als offener
+        Kredit über der Zeile „Rest in der Kasse“. Zurückgezahlt werden kann
+        alles auf einmal oder in Teilen.</p>
     </div>
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-neukredit')">Abbrechen</button>
@@ -1468,10 +1471,11 @@ async function renderMain(){
 
   // Kredit aufnehmen
   document.getElementById('kredit-block').innerHTML =
-    `<div class="plan-head"><s>Kredit aufnehmen</s>
+    `<div class="plan-head"><s>Kredit vergeben</s>
       <button class="mini-add" onclick="openNeuKredit()">+</button></div>
-     <div class="leer">Für Geld, das die Filiale von LL, VL oder einem anderen Haus
-       bekommen hat. Es erscheint oben als Schuld.</div>`;
+     <div class="leer">Für Geld, das die Filiale herausgegeben hat — an einen
+       Mitarbeiter oder ein anderes Haus. Es erscheint oben als offener Kredit
+       und kann ganz oder in Teilen zurückgezahlt werden.</div>`;
 
   // Geld tauschen
   const tl=(monatDoc.tausch||[]);
@@ -1857,25 +1861,34 @@ function nkArt(v,b){
 }
 function openNeuKredit(){
   document.getElementById('nk-lg').textContent=NAMEN[lg];
+  document.getElementById('nk-name').value='';
   document.getElementById('nk-betrag').value='';
   document.getElementById('nk-datum').value=heute();
   nkArtWert='scheine';
   document.querySelectorAll('#nk-art button').forEach((b,i)=>b.classList.toggle('on', i===0));
+  // Meist geht das Geld an einen Mitarbeiter; die Schaltflächen sind nur eine
+  // Abkürzung, falls eine andere Firma das Geld bekommt.
   const wahl=EXTERN.concat(FILIALEN.filter(f=>f!==lg));
   document.getElementById('nk-geber').innerHTML =
-    wahl.map(w=>`<button onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
+    wahl.map(w=>`<button onclick="nkNameSetzen(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
   openM('modal-neukredit');
 }
+function nkNameSetzen(b){
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.getElementById('nk-name').value = b.textContent.trim();
+}
 async function saveNeuKredit(){
-  const sel=document.querySelector('#nk-geber button.on');
-  if(!sel){ showToast('Bitte einen Geldgeber wählen.'); return; }
+  const name=(document.getElementById('nk-name').value||'').trim();
+  if(!name){ showToast('Bitte eintragen, wer das Geld bekommt.'); return; }
   const betrag=parseNum(document.getElementById('nk-betrag').value);
   if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
   const datum=document.getElementById('nk-datum').value||heute();
   showSpinner();
   try{
+    // Wir geben das Geld heraus: Geber ist die Filiale, Nehmer der Empfänger.
     await db.collection('leerung_kredit').add({
-      geber:sel.dataset.v, nehmer:lg, betrag, datum, monat:datum.slice(0,7),
+      geber:lg, nehmer:name, betrag, datum, monat:datum.slice(0,7),
       zweck:'kasse', art:nkArtWert, getilgtAm:null, getilgtArt:null
     });
     closeM('modal-neukredit');
@@ -2206,7 +2219,7 @@ function openKredit(id){
     <div>Monat<b>${monatText(k.monat)}</b></div>`;
   document.getElementById('kr-hint').textContent = eigen
     ? 'Nach dem Tilgen sinkt „Rest in der Kasse" um diesen Betrag und die Zeile rutscht grau nach unten. Bleibt sie offen, geht sie in den nächsten Monat mit.'
-    : 'Diese Zeile entstand in der anderen Filiale. Nach der Rückzahlung steigt „Rest in der Kasse" wieder.';
+    : 'Das Geld kommt zurück in die Kasse. Ein kleinerer Betrag ist erlaubt — der Rest bleibt als offener Kredit stehen.';
   document.getElementById('kr-btn').textContent = eigen ? '✓ Kredit tilgen' : '✓ Rückzahlung erfassen';
   // Vorbelegt ist die Form, in der das Geld kam — änderbar, falls anders zurückgegeben wird
   kreditArt = k.art==='muenzen' ? 'muenzen' : 'scheine';
