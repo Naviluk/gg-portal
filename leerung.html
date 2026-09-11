@@ -290,6 +290,11 @@ body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-f
   background:var(--bg2);color:var(--text-dim);font-size:.62rem;font-weight:800;cursor:pointer;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .i-btn:hover,.i-btn.on{border-color:var(--acc);color:var(--acc);background:var(--acc-bg)}
+.i-btn.acc{border-color:var(--acc);background:#fff;color:var(--acc-ink)}
+.i-btn.acc:hover,.i-btn.acc.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.split.acc{background:var(--acc-bg);border-top:1px dashed var(--acc)}
+.split.acc div{color:var(--acc-ink)}
+.split.acc div b{color:var(--acc-ink)}
 .i-btn.light{border-color:rgba(255,255,255,.3);background:none;color:#9FB2CE}
 .i-btn.light:hover,.i-btn.light.on{border-color:#7EE7C0;color:#7EE7C0;background:rgba(126,231,192,.12)}
 .split{display:none;padding:.1rem .9rem .7rem 2.6rem;background:var(--zebra);border-top:1px dashed var(--glass-border)}
@@ -464,14 +469,20 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 .g-ger{grid-template-columns:auto 1fr 1fr}
 .g-w{grid-template-columns:56px 46px 46px 1fr 30px}
 .g-get{grid-template-columns:auto 1fr}
-.g-ein{grid-template-columns:44px 44px 1fr 1.1fr 30px}
-.g-ein input[type=date]{background:var(--zebra);border:1px solid var(--glass-border);
-  border-radius:8px;padding:.35rem .4rem;font-family:var(--mono);font-size:.82rem;
-  text-align:left;outline:none;width:100%}
-.g-ein .weg{width:26px;height:26px;border-radius:8px;border:1.4px solid var(--glass-border);
-  background:#fff;color:var(--text-dim);cursor:pointer;font-size:.8rem;line-height:1;
+.ein-block{border:1px solid var(--glass-border);border-radius:13px;padding:.6rem;margin-bottom:.7rem;
+  background:var(--zebra)}
+.ein-kopf{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap}
+.ein-lbl{font-size:.74rem;font-weight:700;color:var(--text-dim);margin-right:.3rem}
+.ein-datum{background:#fff;border:1px solid var(--glass-border);border-radius:9px;
+  padding:.35rem .5rem;font-family:var(--mono);font-size:.84rem;outline:none;margin-left:auto}
+.ein-datum:focus{border-color:var(--acc)}
+.ein-summe{display:flex;justify-content:flex-end;gap:.5rem;align-items:baseline;
+  margin-top:.45rem;font-size:.72rem;color:var(--text-dim);font-weight:700}
+.ein-summe b{font-family:var(--mono);font-size:.95rem;color:var(--text)}
+.weg{width:28px;height:28px;border-radius:8px;border:1.4px solid var(--glass-border);
+  background:#fff;color:var(--text-dim);cursor:pointer;font-size:.85rem;line-height:1;
   display:flex;align-items:center;justify-content:center}
-.g-ein .weg:hover{border-color:var(--rot);color:var(--rot);background:#FDE8EE}
+.weg:hover{border-color:var(--rot);color:var(--rot);background:#FDE8EE}
 .hd2{font-size:.53rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);
   font-weight:800;text-align:center}
 .gn{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text-dim);white-space:nowrap}
@@ -673,7 +684,15 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
         <div>Snack<b id="get-s">—</b></div>
       </div>
 
-      <div class="row total"><span class="nm">Gesamt</span><span class="val" id="v-ges">—</span></div>
+      <div class="row total">
+        <span class="nm">Gesamt</span>
+        <button class="i-btn acc" onclick="tog('sg',this)">i</button>
+        <span class="val" id="v-ges">—</span>
+      </div>
+      <div class="split acc" id="sg">
+        <div>Scheine<b id="ges-s">—</b></div>
+        <div>Münzen<b id="ges-m">—</b></div>
+      </div>
     </div>
 
     <div class="list" id="liste"></div>
@@ -822,10 +841,14 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
       <div class="dlg-title">Bank eingezahlt <span class="dlg-pill" id="ein-lg">—</span></div>
     </div>
     <div class="dlg-body">
-      <div class="dcard grid-h g-ein" id="ein-zeilen"></div>
-      <button class="mini-add" style="margin:.6rem 0 0 auto" onclick="einAdd()">+</button>
-      <p class="hint">Hier stehen die Beträge, die schon auf dem Konto sind. Änderungen wirken
-        sofort auf „Rest in der Kasse“.</p>
+      <div id="ein-liste"></div>
+      <button class="btn-add" style="margin-top:.7rem" onclick="einAdd()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg>Einzahlung
+      </button>
+      <p class="hint">Hier stehen die Beträge, die schon auf dem Konto sind — je Einzahlung
+        aufgeteilt nach eigenem Geld und Kredit. Änderungen wirken sofort auf
+        „Rest in der Kasse“ und auf die Kreditzeilen.</p>
     </div>
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-ein')">Abbrechen</button>
@@ -1208,6 +1231,9 @@ async function renderMain(){
   document.getElementById('get-g').textContent=eur(su.getrA);
   document.getElementById('get-s').textContent=eur(su.snack);
   document.getElementById('v-ges').textContent=eur(su.gesamt);
+  // Wie viel von der Leerung sind Scheine, wie viel Münzen
+  document.getElementById('ges-s').textContent=eur(su.scheine);
+  document.getElementById('ges-m').textContent=eur(su.muenzen);
 
   const vm=await vormonatWert();
   document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0));
@@ -1449,10 +1475,17 @@ function wexPlus(i){
 }
 
 /* Kreditgeber */
-function openGeber(ziel,index){
-  geberZiel={ziel,index};
-  const arr = ziel==='wechsler' ? wexZeilen : planZeilen;
-  const schon = (index!==null && arr[index]) ? arr[index].geber : '';
+function openGeber(ziel,index,unterIndex){
+  geberZiel={ziel,index,unterIndex:(unterIndex===undefined?null:unterIndex)};
+  let schon='';
+  if(ziel==='wechsler') schon = (index!==null&&wexZeilen[index]) ? wexZeilen[index].geber : '';
+  else if(ziel==='plan') schon = (index!==null&&planZeilen[index]) ? planZeilen[index].geber : '';
+  else if(ziel==='ein'){
+    const e=einListe[index];
+    if(e){ const z = unterIndex!==undefined&&unterIndex!==null ? e.zeilen[unterIndex]
+      : e.zeilen.find(x=>x.herkunft==='kredit');
+      schon = z ? z.geber : ''; }
+  }
   const wahl=EXTERN.concat(FILIALEN.filter(f=>f!==lg));
   document.getElementById('geber-list').innerHTML=
     wahl.map(w=>`<button class="${w===schon?'on':''}" onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
@@ -1470,21 +1503,37 @@ function confirmGeber(){
     if(geberZiel.index===null) wexZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
     else wexZeilen[geberZiel.index].geber=v;
     renderWexZeilen();
-  }else{
+  }else if(geberZiel.ziel==='plan'){
     if(geberZiel.index===null) planZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
     else planZeilen[geberZiel.index].geber=v;
     renderPlanZeilen();
+  }else{
+    const e=einListe[geberZiel.index];
+    if(e){
+      if(geberZiel.unterIndex===null) e.zeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
+      else e.zeilen[geberZiel.unterIndex].geber=v;
+    }
+    renderEin();
   }
   closeM('modal-geber');
 }
 function cancelGeber(){
-  // ohne Geldgeber bleibt die Zeile bei „Kasse" — sonst hinge ein Kredit ohne Gegenüber
+  // ohne Geldgeber bleibt die Zeile ohne Herkunft — sonst hinge ein Kredit ohne Gegenüber
   if(geberZiel){
-    const arr = geberZiel.ziel==='wechsler' ? wexZeilen : planZeilen;
-    if(geberZiel.index!==null && arr[geberZiel.index] && !arr[geberZiel.index].geber){
-      arr[geberZiel.index].herkunft='';
+    if(geberZiel.ziel==='ein'){
+      const e=einListe[geberZiel.index];
+      if(e && geberZiel.unterIndex!==null){
+        const z=e.zeilen[geberZiel.unterIndex];
+        if(z && !z.geber) z.herkunft='';
+      }
+      renderEin();
+    }else{
+      const arr = geberZiel.ziel==='wechsler' ? wexZeilen : planZeilen;
+      if(geberZiel.index!==null && arr[geberZiel.index] && !arr[geberZiel.index].geber){
+        arr[geberZiel.index].herkunft='';
+      }
+      geberZiel.ziel==='wechsler' ? renderWexZeilen() : renderPlanZeilen();
     }
-    geberZiel.ziel==='wechsler' ? renderWexZeilen() : renderPlanZeilen();
   }
   closeM('modal-geber');
 }
@@ -1599,19 +1648,8 @@ async function savePlan(){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat)
       .set({bankPlan:plan}, {merge:true});
-    // Kredite, die neu in der Planung stecken, als Schuld festhalten
-    const vorher = alt ? (alt.zeilen||[]).filter(z=>z.herkunft==='kredit').length : 0;
-    const nachher = zeilen.filter(z=>z.herkunft==='kredit');
-    if(nachher.length && !vorher){
-      for(const z of nachher){
-        await db.collection('leerung_kredit').add({
-          geber:z.geber, nehmer:lg, betrag:z.betrag,
-          datum:heute(), monat, zweck:'bank',
-          art: planArtWert, getilgtAm:null, getilgtArt:null
-        });
-      }
-    }
     monatDoc.bankPlan=plan;
+    await syncBankKredite();
     closeM('modal-plan');
     showToast('Planung gespeichert ✓');
     await ladeFiliale();
@@ -1626,6 +1664,7 @@ async function deletePlan(){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankPlan:plan},{merge:true});
     monatDoc.bankPlan=plan;
+    await syncBankKredite();
     closeM('modal-plan');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
@@ -1650,12 +1689,15 @@ async function confirmBank(){
   const plan=(monatDoc.bankPlan||[]).slice();
   plan.splice(bankIndex,1);
   const ein=(monatDoc.bankEin||[]).slice();
-  ein.push({art:p.art,betrag:p.gesamt,datum});
+  // Die Aufteilung nach Kasse und Kredit wandert mit — sonst wäre später nicht
+  // mehr nachvollziehbar, wessen Geld auf dem Konto liegt.
+  ein.push({art:p.art, betrag:p.gesamt, datum, zeilen:(p.zeilen||[]).slice()});
   showSpinner();
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat)
       .set({bankPlan:plan,bankEin:ein},{merge:true});
     monatDoc.bankPlan=plan; monatDoc.bankEin=ein;
+    await syncBankKredite();
     closeM('modal-bank');
     showToast('Einzahlung erfasst ✓');
     await ladeFiliale();
@@ -1664,45 +1706,132 @@ async function confirmBank(){
 }
 
 /* ══ Bank eingezahlt: nachträglich ändern ════════════════════════════ */
-let einZeilen=[];
+// Jede Einzahlung hat eine Art, ein Datum und darunter Zeilen mit der Herkunft
+// des Geldes (eigene Kasse oder Kredit von wem).
+let einListe=[];
 function openEin(){
   document.getElementById('ein-lg').textContent=NAMEN[lg];
-  einZeilen=(monatDoc.bankEin||[]).map(b=>({
+  einListe=(monatDoc.bankEin||[]).map(b=>({
     art: b.art==='muenzen'?'muenzen':'scheine',
-    betrag: zahl(b.betrag),
-    datum: b.datum||heute()
+    datum: b.datum||heute(),
+    zeilen: (b.zeilen&&b.zeilen.length)
+      ? b.zeilen.map(z=>({betrag:zahl(z.betrag),herkunft:z.herkunft||'kasse',geber:z.geber||''}))
+      // ältere Einträge kennen die Aufteilung noch nicht — sie gelten als eigenes Geld
+      : [{betrag:zahl(b.betrag),herkunft:'kasse',geber:''}]
   }));
-  if(!einZeilen.length) einZeilen=[{art:'scheine',betrag:'',datum:heute()}];
-  renderEinZeilen();
+  if(!einListe.length) einAdd(true);
+  renderEin();
   openM('modal-ein');
 }
-function renderEinZeilen(){
-  let h='<span class="hd2">Sch.</span><span class="hd2">Mün.</span>'+
-        '<span class="hd2">Betrag</span><span class="hd2">Datum</span><span></span>';
-  einZeilen.forEach((z,i)=>{
-    h+=`<span class="cbx${z.art==='scheine'?' on':''}" onclick="einPick(${i},'scheine')">✓</span>
-      <span class="cbx kr${z.art==='muenzen'?' on':''}" onclick="einPick(${i},'muenzen')">✓</span>
-      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="einZeilen[${i}].betrag=this.value">
-      <input type="date" value="${z.datum}" onchange="einZeilen[${i}].datum=this.value">
-      <button class="weg" onclick="einDel(${i})" title="Zeile entfernen">✕</button>`;
+function einSumme(e){ return (e.zeilen||[]).reduce((a,z)=>a+parseNum(z.betrag),0); }
+function renderEin(){
+  let h='';
+  einListe.forEach((e,i)=>{
+    let zeilen='<span></span><span class="hd2">Kasse</span><span class="hd2">Kredit</span>'+
+               '<span class="hd2">Betrag</span><span></span>';
+    e.zeilen.forEach((z,j)=>{
+      zeilen+=`<span class="gn nr">${j+1}</span>
+        <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="einHerkunft(${i},${j},'kasse')">✓</span>
+        <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="einHerkunft(${i},${j},'kredit')">✓</span>
+        <input value="${z.betrag}" inputmode="decimal" placeholder="—"
+          onchange="einListe[${i}].zeilen[${j}].betrag=this.value;renderEin()">
+        <button class="plus-s" onclick="einZeilePlus(${i},${j})" title="Zeile ergänzen">+</button>`;
+    });
+    const kr=e.zeilen.filter(z=>z.herkunft==='kredit'&&parseNum(z.betrag)>0);
+    const geber=[...new Set(kr.map(z=>NAMEN[z.geber]||z.geber).filter(Boolean))].join(', ');
+    h+=`<div class="ein-block">
+      <div class="ein-kopf">
+        <span class="cbx${e.art==='scheine'?' on':''}" onclick="einArt(${i},'scheine')">✓</span>
+        <span class="ein-lbl">Scheine</span>
+        <span class="cbx kr${e.art==='muenzen'?' on':''}" onclick="einArt(${i},'muenzen')">✓</span>
+        <span class="ein-lbl">Münzen</span>
+        <input type="date" class="ein-datum" value="${e.datum}"
+          onchange="einListe[${i}].datum=this.value">
+        <button class="weg" onclick="einDel(${i})" title="Einzahlung entfernen">✕</button>
+      </div>
+      <div class="dcard grid-h g-w">${zeilen}</div>
+      ${kr.length?`<div class="kred-note">Kredit von ${geber||'—'}
+        <button class="edit-link" onclick="openGeber('ein',${i})">ändern</button>
+        <b>${eur(kr.reduce((a,z)=>a+parseNum(z.betrag),0))}</b></div>`:''}
+      <div class="ein-summe">Summe <b>${eur(einSumme(e))}</b></div>
+    </div>`;
   });
-  document.getElementById('ein-zeilen').innerHTML=h;
+  document.getElementById('ein-liste').innerHTML=h;
 }
-function einPick(i,art){ einZeilen[i].art=art; renderEinZeilen(); }
-function einAdd(){ einZeilen.push({art:'scheine',betrag:'',datum:heute()}); renderEinZeilen(); }
-function einDel(i){ einZeilen.splice(i,1); if(!einZeilen.length) einAdd(); else renderEinZeilen(); }
+function einArt(i,art){ einListe[i].art=art; renderEin(); }
+function einHerkunft(i,j,art){
+  const z=einListe[i].zeilen[j];
+  if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderEin(); return; }
+  z.herkunft=art;
+  if(art==='kasse') z.geber='';
+  renderEin();
+  if(art==='kredit') openGeber('ein',i,j);
+}
+function einZeilePlus(i,j){
+  einListe[i].zeilen.splice(j+1,0,{betrag:'',herkunft:'kasse',geber:''});
+  renderEin();
+}
+function einAdd(still){
+  einListe.push({art:'scheine',datum:heute(),
+                 zeilen:[{betrag:'',herkunft:'kasse',geber:''}]});
+  if(!still) renderEin();
+}
+function einDel(i){ einListe.splice(i,1); if(!einListe.length) einAdd(true); renderEin(); }
+
 async function saveEin(){
-  const ein=einZeilen.filter(z=>parseNum(z.betrag)>0)
-    .map(z=>({art:z.art, betrag:parseNum(z.betrag), datum:z.datum||heute()}));
+  const ein=[];
+  for(const e of einListe){
+    const zeilen=e.zeilen.filter(z=>parseNum(z.betrag)>0)
+      .map(z=>({betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
+                geber:z.herkunft==='kredit'?z.geber:''}));
+    if(!zeilen.length) continue;
+    if(zeilen.find(z=>z.herkunft==='kredit'&&!z.geber)){
+      showToast('Bei einem Kredit fehlt der Geldgeber.'); return;
+    }
+    ein.push({art:e.art, datum:e.datum||heute(),
+              betrag:zeilen.reduce((a,z)=>a+z.betrag,0), zeilen});
+  }
   showSpinner();
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankEin:ein},{merge:true});
     monatDoc.bankEin=ein;
+    await syncBankKredite();
     closeM('modal-ein');
     showToast('Einzahlungen gespeichert ✓');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
+}
+
+// Die Kreditzeilen aus Planung und Einzahlungen sind die Quelle der Wahrheit.
+// Offene Bank-Kredite des Monats werden danach neu aufgebaut; bereits getilgte
+// bleiben unberührt und gelten als erledigt.
+async function syncBankKredite(){
+  const soll=[];
+  (monatDoc.bankPlan||[]).forEach(p=>(p.zeilen||[]).forEach(z=>{
+    if(z.herkunft==='kredit'&&z.geber) soll.push({geber:z.geber,betrag:z.betrag,datum:heute()});
+  }));
+  (monatDoc.bankEin||[]).forEach(b=>(b.zeilen||[]).forEach(z=>{
+    if(z.herkunft==='kredit'&&z.geber) soll.push({geber:z.geber,betrag:z.betrag,datum:b.datum||heute()});
+  }));
+  const bank = kredite.filter(k=>k.nehmer===lg&&k.monat===monat&&k.zweck==='bank');
+  const getilgt = bank.filter(k=>k.getilgtAm);
+  const offen   = bank.filter(k=>!k.getilgtAm);
+  // Was schon getilgt ist, zählt als abgedeckt und wird nicht neu angelegt
+  const rest=[];
+  const benutzt=new Set();
+  soll.forEach(z=>{
+    const treffer=getilgt.findIndex((k,ix)=>!benutzt.has(ix)&&k.geber===z.geber&&
+      Math.abs(Number(k.betrag)-z.betrag)<0.01);
+    if(treffer>=0) benutzt.add(treffer); else rest.push(z);
+  });
+  for(const k of offen) await db.collection('leerung_kredit').doc(k.id).delete();
+  for(const z of rest){
+    await db.collection('leerung_kredit').add({
+      geber:z.geber, nehmer:lg, betrag:z.betrag, datum:z.datum,
+      monat, zweck:'bank', art:'scheine', getilgtAm:null, getilgtArt:null
+    });
+  }
 }
 
 /* ══ Kredite ═════════════════════════════════════════════════════════ */
