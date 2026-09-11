@@ -82,6 +82,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   font-weight:500;color:var(--txt);cursor:pointer;transition:all .18s;min-height:40px}
 .st-pill:hover{border-color:var(--line2);background:rgba(255,255,255,.08);transform:translateY(-1px)}
 .st-pill b{font-family:var(--mono);font-weight:700;color:var(--cyan)}
+.st-pill s{text-decoration:none;color:var(--dim);font-weight:600}
 .st-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
 /* ══ Kacheln ════════════════════════════════════════════════════════════ */
@@ -344,7 +345,8 @@ const LAGER_PUNKT = {zentrallager:'#3EDCA9',nettetal:'#5A9CF8','brüggen':'#F032
 const RECHTE = {
   Admin:          '*',
   Einkaufsleiter: '*',
-  Kollege:        ['leerung.html','konten.html','statistik.html'],
+  // Lieferplanung nur zum Ansehen — die Seite selbst sperrt dort das Ändern
+  Kollege:        ['leerung.html','konten.html','statistik.html','lieferplanung.html'],
 };
 function darf(href, rolle){
   const r = RECHTE[rolle];
@@ -415,7 +417,10 @@ async function ladeStatus(){
       const n=Object.keys(items).filter(k=>Number(items[k])>0).length;
       if(!n) return;
       gesamt+=n;
-      const txt = lg==='zentrallager' ? 'Einkauf offen' : 'Lieferung '+LAGER_NAMEN[lg];
+      // Beide Arten heißen gleich aufgebaut: was offen ist und wo
+      const txt = lg==='zentrallager'
+        ? 'Einkauf offen'
+        : 'Lieferung offen <s>'+LAGER_NAMEN[lg]+'</s>';
       html+=`<a class="st-pill" href="lieferplanung.html">
         <span class="st-dot" style="background:${LAGER_PUNKT[lg]}"></span>${txt} <b>${n}</b></a>`;
     });

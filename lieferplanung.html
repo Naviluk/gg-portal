@@ -6,10 +6,14 @@
   if(!u){location.replace('gg-portal.html');return;}
   try{
     var r=JSON.parse(u).role;
-    var ok={'lager.html':1,'getraenke-snacks.html':1,'lieferplanung.html':1,
-            'inventur.html':1,'erfassungen.html':1,'getraenke.html':1,'preise.html':1,'rechnungen.html':1};
-    var p=location.pathname.split('/').pop();
-    if(ok[p]&&r!=='Admin'&&r!=='Einkaufsleiter'){location.replace('gg-portal.html');}
+    // Angemeldet, aber ohne Rechte: zurück auf die Startseite. Ein Sprung zum
+    // Portal würde endlos hin und her gehen, weil das Portal die bestehende
+    // Sitzung sofort wieder hierher schickt.
+    // Kollege darf mitlesen — Änderungen sperrt der Nur-Lese-Modus weiter unten
+    if(['Admin','Einkaufsleiter','Kollege'].indexOf(r)<0){
+      location.replace('startseite.html?gesperrt='+encodeURIComponent(document.title.split(' —')[0]));
+      return;
+    }
     window.GG_USER=JSON.parse(u);
   }catch(e){localStorage.removeItem('gg_user');location.replace('gg-portal.html');}
 })();
@@ -728,6 +732,14 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .cs-hint{font-size:.62rem;color:var(--text-dim);letter-spacing:.02em;margin-top:.1rem}
 
+/* Nur-Lese-Modus: ein ruhiger Hinweis, kein Alarm */
+.nur-lesen{display:none;align-items:center;gap:.4rem;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:.24rem .7rem;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#CFE6F2}
+body.nur-lesen-an .nur-lesen{display:inline-flex}
+.nur-lesen svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
   background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
@@ -1064,6 +1076,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="hdr-page">Liefer<span style="color:#4FD2F5">planung</span></div>
   </div>
   <div class="hdr-right">
+    <span class="nur-lesen" title="Nur-Lese-Modus">
+      <svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+      Nur Lesen
+    </span>
     <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
@@ -3567,6 +3583,45 @@ window.changeMonat = async function(m){
 };
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
+
+/* ══ Nur-Lese-Modus ═══════════════════════════════════════════════════
+   Kollegen dürfen die Planung ansehen, aber nichts verändern. Statt jede
+   Schaltfläche einzeln zu entschärfen, werden hier die ändernden Funktionen
+   ersetzt — ansehen, aufklappen und umschalten bleibt erlaubt. */
+(function(){
+  const rolle = (window.GG_USER||{}).role;
+  if(rolle!=='Kollege') return;
+  document.body.classList.add('nur-lesen-an');
+
+  let letzteMeldung = 0;
+  function hinweis(){
+    const jetzt = Date.now();
+    if(jetzt - letzteMeldung > 600) showToast('Nur-Lese-Modus — Änderungen sind gesperrt.');
+    letzteMeldung = jetzt;
+  }
+
+  const gesperrt = ['openPlanForm','openPlanFormFromPanel','addArtikelDirekt','savePlan',
+    'openPlanConfirm','toggleEkCheck','toggleLiefCheck','openEkDetail','confirmEkDetail',
+    'setEkShop','openSoll','saveSoll','toggleSollProd','updateSollQty','switchSollLager',
+    'openCompleteEinkauf','openCompleteDelivery','openLiefGeplModal','saveLiefGepl',
+    'checkListAction','buildConfirm','confirmWareneingang','toggleWeProd','updateWeQty',
+    'addShopRow','removeShopRow','weShopAdd','weShopEdit','weShopRemove','weSetDate',
+    'openHubActionSoll'];
+  gesperrt.forEach(name=>{
+    if(typeof window[name] === 'function'){
+      window[name] = function(){ hinweis(); return false; };
+    }
+  });
+
+  // Eingabefelder in Fenstern und Schubladen sind ebenfalls tabu
+  document.addEventListener('focusin', e=>{
+    const el = e.target;
+    if(el.matches && el.matches('input, textarea') && !el.closest('.lager-controls, .lp-bar')){
+      el.blur(); hinweis();
+    }
+  }, true);
+})();
+
 document.addEventListener('DOMContentLoaded', function(){
   const user = window.GG_USER;
   if(!user) return;
