@@ -9,18 +9,21 @@
 <link rel="manifest" href="manifest.webmanifest">
 <script>
 (function(){
-  var u=localStorage.getItem('gg_user');
-  if(!u){location.replace('gg-portal.html');return;}
-  try{
-    var r=JSON.parse(u).role;
-    // Leerung ist auch für Kollege freigegeben. Wer keine Rechte hat, landet auf
-    // der Startseite — zurück zum Portal würde nur hin und her springen.
-    if(['Admin','Einkaufsleiter','Kollege'].indexOf(r)<0){
-      location.replace('startseite.html?gesperrt=Leerung');
-      return;
-    }
-    window.GG_USER=JSON.parse(u);
-  }catch(e){localStorage.removeItem('gg_user');location.replace('gg-portal.html');}
+  var u = localStorage.getItem('gg_user');
+  // Ohne Sitzung geht es zur Anmeldung.
+  if(!u){ location.replace('gg-portal.html'); return; }
+  // Das Portal legt die Sitzung je nach Anmeldeweg als JSON oder als bloßen
+  // Namen ab. Beides wird hier verstanden, und eine Sitzung wird nie gelöscht —
+  // sonst landet man unversehens wieder bei der Anmeldung.
+  var user = null;
+  try{ user = JSON.parse(u); }catch(e){ user = {name:u, role:localStorage.getItem('gg_role')||''}; }
+  if(!user || typeof user !== 'object') user = {name:String(u), role:''};
+  var r = user.role || '';
+  if(['Admin','Einkaufsleiter','Kollege'].indexOf(r) < 0){
+    location.replace('startseite.html?gesperrt=' + encodeURIComponent('Leerung (Rolle: ' + (r||'keine') + ')'));
+    return;
+  }
+  window.GG_USER = user;
 })();
 </script>
 <style>
