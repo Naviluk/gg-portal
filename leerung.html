@@ -406,8 +406,10 @@ button.lrow:hover{background:var(--zebra)}
   display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px var(--acc-sh)}
 .tausch-pfeil:hover{transform:scale(1.05)}
 .tausch-pfeil svg{width:20px;height:20px}
-.tausch-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;
-  border-top:1px solid var(--glass-border);font-size:.84rem}
+.tausch-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;width:100%;
+  border:none;border-top:1px solid var(--glass-border);background:none;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.84rem;color:var(--text);text-align:left}
+.tausch-zeile:hover{background:var(--zebra)}
 .tausch-zeile .wann{color:var(--text-dim);font-family:var(--mono);font-size:.76rem}
 .tausch-zeile .val{margin-left:auto;font-family:var(--mono);font-weight:700}
 
@@ -485,8 +487,14 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 .fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);
   font-weight:800;margin:.9rem 0 .35rem}
 .fl:first-child{margin-top:0}
-.num{width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
-  padding:.6rem .75rem;font-family:var(--mono);font-size:.95rem;font-weight:600;color:var(--text);outline:none}
+.num{width:100%;max-width:100%;min-width:0;background:#fff;border:1px solid var(--glass-border);
+  border-radius:11px;padding:.6rem .75rem;font-family:var(--mono);font-size:.95rem;
+  font-weight:600;color:var(--text);outline:none}
+/* Datumsfelder haben auf iOS eine eigene Mindestbreite und ragen sonst aus der
+   Karte heraus — min-width:0 und -webkit-appearance:none bändigen sie. */
+input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;
+  text-align:left}
+.ein-datum{flex:1 1 130px;min-width:0}
 .num:focus{border-color:var(--acc)}
 .dcard{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.6rem .7rem}
 .grid-h{display:grid;gap:.35rem;align-items:center}
@@ -899,6 +907,8 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
         zwischen Scheinen und Münzen verschiebt sich.</p>
     </div>
     <div class="dlg-foot">
+      <button class="btn b-ghost" id="tw-del" onclick="tauschLoeschen()"
+        style="display:none;flex:0 0 auto;padding:.8rem 1rem">Löschen</button>
       <button class="btn b-ghost" onclick="closeM('modal-tausch')">Abbrechen</button>
       <button class="btn b-acc" onclick="saveTausch()">✓ Speichern</button>
     </div>
@@ -1478,12 +1488,11 @@ async function renderMain(){
   let th_=`<div class="plan-head"><s>Geld tauschen</s>
       <button class="mini-add" onclick="openTausch()">+</button></div>`;
   th_ += tl.length
-    ? tl.map((t,i)=>`<div class="tausch-zeile">
+    ? tl.map((t,i)=>`<button class="tausch-zeile" onclick="openTausch(${i})">
         <span>${t.von==='muenzen'?'Münzen → Scheine':'Scheine → Münzen'}</span>
         <span class="wann">${dmy(t.datum)}</span>
         <span class="val">${eur(t.betrag)}</span>
-        <button class="weg" onclick="tauschLoeschen(${i})" title="Eintrag entfernen">✕</button>
-      </div>`).join('')
+      </button>`).join('')
     : `<div class="leer">Noch nichts getauscht.</div>`;
   document.getElementById('tausch-block').innerHTML = th_;
 
@@ -1895,12 +1904,15 @@ async function saveNeuKredit(){
 }
 
 /* ══ Geld tauschen: Münzen ↔ Scheine ═════════════════════════════════ */
-let tauschVon='muenzen';
-function openTausch(){
+let tauschVon='muenzen', tauschIndex=null;
+function openTausch(i){
+  tauschIndex = (i===undefined || i===null) ? null : i;
+  const t = tauschIndex===null ? null : (monatDoc.tausch||[])[tauschIndex];
   document.getElementById('tw-lg').textContent=NAMEN[lg];
-  document.getElementById('tw-betrag').value='';
-  document.getElementById('tw-datum').value=heute();
-  tauschVon='muenzen';
+  document.getElementById('tw-betrag').value = t ? zahl(t.betrag) : '';
+  document.getElementById('tw-datum').value  = t ? (t.datum||heute()) : heute();
+  tauschVon = t ? t.von : 'muenzen';
+  document.getElementById('tw-del').style.display = tauschIndex===null ? 'none' : '';
   zeigeTauschRichtung();
   openM('modal-tausch');
 }
@@ -1914,7 +1926,8 @@ async function saveTausch(){
   if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
   const datum=document.getElementById('tw-datum').value||heute();
   const liste=(monatDoc.tausch||[]).slice();
-  liste.push({von:tauschVon, nach:(tauschVon==='muenzen'?'scheine':'muenzen'), betrag, datum});
+  const eintrag={von:tauschVon, nach:(tauschVon==='muenzen'?'scheine':'muenzen'), betrag, datum};
+  if(tauschIndex===null) liste.push(eintrag); else liste[tauschIndex]=eintrag;
   showSpinner();
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
@@ -1925,13 +1938,16 @@ async function saveTausch(){
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
 }
-async function tauschLoeschen(i){
+async function tauschLoeschen(){
+  if(tauschIndex===null) return;
   const liste=(monatDoc.tausch||[]).slice();
-  liste.splice(i,1);
+  liste.splice(tauschIndex,1);
   showSpinner();
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
     monatDoc.tausch=liste;
+    closeM('modal-tausch');
+    showToast('Eintrag entfernt');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
