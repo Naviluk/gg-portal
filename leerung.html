@@ -525,16 +525,26 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   color:var(--text-dim);cursor:pointer}
 .seg2 button.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
 
+/* Notausgang: passt eine Tabelle doch nicht, wird sie seitlich rollbar,
+   statt aus der Seite herauszuragen. */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+.tbl-wrap table.lt{min-width:100%}
+.g-kurz{display:none}
+
 /* Geräte jenseits der ersten zwölf heben sich ab */
 .g-extra{font-weight:800!important;color:var(--acc-ink)!important}
 .grid-h .gn.nr{text-align:center;font-size:.85rem;color:var(--text)}
 
 @media(max-width:640px){
   .main-content{padding:.9rem .8rem 2.5rem}
-  /* Tabellenköpfe: kleiner und ohne breite Sperrung, sonst sprengen sie die Zeile */
-  table.lt th{font-size:.52rem;letter-spacing:.05em;padding:.5rem .4rem}
-  table.lt td{font-size:.82rem;padding:.5rem .4rem}
-  table.lt td:first-child{font-size:.78rem}
+  /* Tabellenköpfe kleiner, und in der ersten Spalte steht nur noch die Nummer —
+     „Gerät 12" braucht zu viel Platz, den die Beträge nötiger haben. */
+  table.lt th{font-size:.5rem;letter-spacing:.03em;padding:.45rem .3rem}
+  table.lt td{font-size:.78rem;padding:.45rem .3rem}
+  table.lt td:first-child{font-size:.78rem;font-weight:700}
+  .g-lang{display:none}
+  .g-kurz{display:inline}
+  #tbl-geraete th:first-child,#tbl-geraete td:first-child{width:34px;text-align:center}
   .sub-title{font-size:1.1rem}
   .tick{width:20px;height:20px}
   .row .val{font-size:.98rem}
@@ -1350,12 +1360,13 @@ function renderGeraete(){
   let rows='';
   nummern.forEach((i,ix)=>{
     const g=proGeraet[i];
-    rows+=`<tr${ix%2?' class="zeb"':''}><td${istExtra(i)?' class="g-extra"':''}>Gerät ${i}</td>
+    rows+=`<tr${ix%2?' class="zeb"':''}><td${istExtra(i)?' class="g-extra"':''}><span class="g-lang">Gerät </span>${i}</td>
       <td>${g.da?zahl(g.s):'—'}</td><td>${g.da?zahl(g.m):'—'}</td>
       <td>${g.da?zahl(g.s+g.m):'—'}</td></tr>`;
   });
-  document.getElementById('tbl-geraete').innerHTML=`<table class="lt">
-    <thead><tr><th>Gerät</th><th>Scheine</th><th>Münzen</th><th>Summe</th></tr></thead>
+  document.getElementById('tbl-geraete').innerHTML=`<div class="tbl-wrap"><table class="lt">
+    <thead><tr><th><span class="g-lang">Gerät</span><span class="g-kurz">Nr.</span></th>
+      <th>Scheine</th><th>Münzen</th><th>Summe</th></tr></thead>
     <tbody>${rows}</tbody>
     <tfoot>
       <tr><td>Gesamt</td><td>${zahl(su.gerS)}</td><td>${zahl(su.gerM)}</td><td>${zahl(su.ger)}</td></tr>
@@ -1364,7 +1375,7 @@ function renderGeraete(){
         <td><input class="sys-in" value="${sysM?zahl(sysM):''}" placeholder="0,00" onchange="saveSystem('m',this.value)"></td>
         <td>${zahl(sysS+sysM)}</td></tr>
       <tr class="diff"><td>Differenz</td>${dz(dS)}${dz(dM)}${dz(dG)}</tr>
-    </tfoot></table>`;
+    </tfoot></table></div>`;
 }
 
 function renderWechsler(){
@@ -1383,12 +1394,12 @@ function renderWechsler(){
     .reduce((a,w)=>a+(Number(w.betrag)||0),0);
   const geber=[...new Set(zeilen.filter(w=>w.herkunft==='kredit').map(w=>NAMEN[w.geber]||w.geber))].join(', ');
   document.getElementById('tbl-wechsler').innerHTML=`
-    <table class="lt"><thead><tr><th>Aus Wechsler</th><th>Betrag</th></tr></thead>
-      <tbody><tr><td>Entnommen</td><td>${zahl(su.aus)}</td></tr></tbody></table>
-    <table class="lt" style="margin-top:.9rem">
+    <div class="tbl-wrap"><table class="lt"><thead><tr><th>Aus Wechsler</th><th>Betrag</th></tr></thead>
+      <tbody><tr><td>Entnommen</td><td>${zahl(su.aus)}</td></tr></tbody></table></div>
+    <div class="tbl-wrap" style="margin-top:.9rem"><table class="lt">
       <thead><tr><th>In Wechsler</th><th class="mid">Kasse</th><th class="mid">Kredit</th><th>Betrag</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr><td>Summe</td><td></td><td></td><td>${zahl(su.ein)}</td></tr></tfoot></table>
+      <tfoot><tr><td>Summe</td><td></td><td></td><td>${zahl(su.ein)}</td></tr></tfoot></table></div>
     ${kredSumme?`<div class="kredit-line"><s>Davon Kredit von <b>${geber}</b> — als Schuld erfasst</s>
       <b>${eur(kredSumme)}</b></div>`:''}
     <div class="wsum"><s>Gesamt-Einlage</s><b>${su.wex<0?'−':''}${eur(Math.abs(su.wex))}</b></div>
@@ -1397,14 +1408,14 @@ function renderWechsler(){
 
 function renderGetraenke(){
   const su=summen(auswahl('sel-datum-t'));
-  document.getElementById('tbl-getraenke').innerHTML=`<table class="lt">
+  document.getElementById('tbl-getraenke').innerHTML=`<div class="tbl-wrap"><table class="lt">
     <thead><tr><th>Automat</th><th>Betrag</th></tr></thead>
     <tbody>
       <tr><td>Kaffeeautomat</td><td>${zahl(su.kaffee)}</td></tr>
       <tr class="zeb"><td>Getränkeautomat</td><td>${zahl(su.getrA)}</td></tr>
       <tr><td>Snack</td><td>${zahl(su.snack)}</td></tr>
     </tbody>
-    <tfoot><tr><td>Gesamt</td><td>${zahl(su.getr)}</td></tr></tfoot></table>`;
+    <tfoot><tr><td>Gesamt</td><td>${zahl(su.getr)}</td></tr></tfoot></table></div>`;
 }
 
 /* ══ Ansicht wechseln ════════════════════════════════════════════════ */
