@@ -1017,8 +1017,6 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
       </div>
       <label class="fl">Betrag der Rückzahlung</label>
       <input class="num" id="kr-betrag" inputmode="decimal">
-      <p class="hint" style="margin-top:.3rem">Weniger als der offene Betrag ist erlaubt —
-        der Rest bleibt als Kredit stehen.</p>
       <p class="hint" id="kr-hint"></p>
     </div>
     <div class="dlg-foot">
@@ -1433,7 +1431,7 @@ async function renderMain(){
     const alt = k.monat!==monat ? ' · aus '+monatText(k.monat) : '';
     html+=`<button class="lrow" onclick="openKredit('${k.id}')">
       <span class="nm">${eigen?'Schuld an':'Kredit an'} <b style="font-weight:700">${eigen?(NAMEN[k.geber]||k.geber):(NAMEN[k.nehmer]||k.nehmer)}</b>
-        <s>${k.art==='muenzen'?'Münzen':'Scheine'} · ${ZWECK[k.zweck]||'Kasse'} · ${dmy(k.datum)}${alt}</s></span>
+        <s>${k.art==='muenzen'?'Münzen':'Scheine'}${eigen?' · '+(ZWECK[k.zweck]||'Kasse'):''} · ${dmy(k.datum)}${alt}</s></span>
       <span class="tag ${eigen?'schuld':'kredit'}">${eigen?'erhalten':'vergeben'}</span>
       <span class="val ${eigen?'plus':'minus'}">${eigen?'+':'−'}${eur(k.betrag)}</span></button>`;
   });
@@ -2212,8 +2210,10 @@ function openKredit(id){
     eigen ? 'Schuld an '+(NAMEN[k.geber]||k.geber) : 'Kredit an '+(NAMEN[k.nehmer]||k.nehmer);
   document.getElementById('kr-det').innerHTML=`
     <div>${eigen?'Aufgenommen am':'Vergeben am'}<b>${dmy(k.datum)}</b></div>
-    <div>Verwendet für<b>${ZWECK[k.zweck]||'Kasse'}</b></div>
-    <div>Betrag<b>${eur(k.betrag)}</b></div>
+    ${eigen
+      ? `<div>Verwendet für<b>${ZWECK[k.zweck]||'Kasse'}</b></div>`
+      : `<div>Empfänger<b>${NAMEN[k.nehmer]||k.nehmer}</b></div>`}
+    <div>${eigen?'Offener Betrag':'Noch offen'}<b>${eur(k.betrag)}</b></div>
     <div>Monat<b>${monatText(k.monat)}</b></div>`;
   document.getElementById('kr-hint').textContent = eigen
     ? 'Nach dem Tilgen sinkt „Rest in der Kasse" um diesen Betrag und die Zeile rutscht grau nach unten. Bleibt sie offen, geht sie in den nächsten Monat mit.'
