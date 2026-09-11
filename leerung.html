@@ -396,6 +396,22 @@ button.lrow:hover{background:var(--zebra)}
   color:transparent;font-weight:700;font-size:.72rem}
 .chk:hover{border-color:var(--neon-green);color:#B8E5D5}
 
+/* Geldtausch: zwei Seiten und ein Pfeil dazwischen */
+.tausch-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem}
+.tausch-seite{flex:1;text-align:center;background:#fff;border:1.5px solid var(--glass-border);
+  border-radius:12px;padding:.8rem .5rem;font-family:'Poppins',sans-serif;font-size:.95rem;
+  font-weight:700;color:var(--text)}
+.tausch-pfeil{width:42px;height:42px;flex-shrink:0;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--acc-d1),var(--acc-d2));color:#fff;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px var(--acc-sh)}
+.tausch-pfeil:hover{transform:scale(1.05)}
+.tausch-pfeil svg{width:20px;height:20px}
+.tausch-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;
+  border-top:1px solid var(--glass-border);font-size:.84rem}
+.tausch-zeile .wann{color:var(--text-dim);font-family:var(--mono);font-size:.76rem}
+.tausch-zeile .val{margin-left:auto;font-family:var(--mono);font-weight:700}
+
+/* getilgte Kredite */
 .done{margin-top:.9rem}
 .done-t{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);
   font-weight:800;padding:0 .3rem .45rem}
@@ -551,11 +567,13 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   #tbl-geraete th:first-child,#tbl-geraete td:first-child{width:28px;text-align:center;padding-left:.2rem;padding-right:.2rem}
   #tbl-geraete th,#tbl-geraete td{font-size:.72rem;padding:.45rem .25rem}
   #tbl-geraete th{font-size:.47rem}
+  /* Der Wechsler hat nur eine Zahlenspalte — hier ist Platz für normale Schrift */
   #tbl-wechsler table.lt{table-layout:fixed;width:100%}
-  #tbl-wechsler th:first-child,#tbl-wechsler td:first-child{width:54px}
-  #tbl-wechsler th.mid,#tbl-wechsler td.mid{width:46px}
-  #tbl-wechsler th,#tbl-wechsler td{font-size:.72rem;padding:.45rem .25rem}
-  #tbl-wechsler th{font-size:.47rem}
+  #tbl-wechsler th:first-child,#tbl-wechsler td:first-child{width:64px}
+  #tbl-wechsler th.mid,#tbl-wechsler td.mid{width:54px}
+  #tbl-wechsler th,#tbl-wechsler td{font-size:.86rem;padding:.55rem .4rem}
+  #tbl-wechsler th{font-size:.56rem;letter-spacing:.08em}
+  #tbl-wechsler .tick{width:24px;height:24px}
   .sub-title{font-size:1.1rem}
   .tick{width:20px;height:20px}
   .row .val{font-size:.98rem}
@@ -679,7 +697,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 
     <div class="box">
       <div class="box-head">
-        <div class="date-sel"><select id="sel-datum" onchange="renderMain()"></select></div>
+        <div class="date-sel"><select id="sel-datum" onchange="setDatum(this.value)"></select></div>
         <button class="btn-add" onclick="openLeerung()">
           <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>Leerung
         </button>
@@ -726,6 +744,8 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 
     <div class="list" id="liste"></div>
     <div class="plan" id="planung"></div>
+    <div class="plan" id="kredit-block"></div>
+    <div class="plan" id="tausch-block"></div>
     <div class="done" id="getilgt"></div>
   </div>
 
@@ -734,7 +754,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <button class="back" onclick="show('v-main')">← Zurück</button>
     <div class="sub-title" style="margin-bottom:.9rem">Geräte</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
-      <div class="date-sel"><select id="sel-datum-g" onchange="renderGeraete()"></select></div>
+      <div class="date-sel"><select id="sel-datum-g" onchange="setDatum(this.value)"></select></div>
     </div>
     <div id="tbl-geraete"></div>
     <p class="hint">System = die Zahlen aus dem Programm, von Hand eingetragen. Differenz = Gesamt − System:
@@ -746,7 +766,10 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <button class="back" onclick="show('v-main')">← Zurück</button>
     <div class="sub-title" style="margin-bottom:.9rem">Wechsler</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
-      <div class="date-sel"><select id="sel-datum-w" onchange="renderWechsler()"></select></div>
+      <div class="date-sel"><select id="sel-datum-w" onchange="setDatum(this.value)"></select></div>
+      <button class="btn-add" onclick="openWechslerForm()">
+        <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>Wechsler
+      </button>
     </div>
     <div id="tbl-wechsler"></div>
   </div>
@@ -756,7 +779,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <button class="back" onclick="show('v-main')">← Zurück</button>
     <div class="sub-title" style="margin-bottom:.9rem">Getränke</div>
     <div class="box-head" style="border:1px solid var(--glass-border);border-radius:12px;margin-bottom:.8rem">
-      <div class="date-sel"><select id="sel-datum-t" onchange="renderGetraenke()"></select></div>
+      <div class="date-sel"><select id="sel-datum-t" onchange="setDatum(this.value)"></select></div>
     </div>
     <div id="tbl-getraenke"></div>
   </div>
@@ -787,6 +810,94 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-leerung')">Abbrechen</button>
       <button class="btn b-acc" onclick="saveLeerung()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: nur Wechsler nachfüllen ══ -->
+<div class="modal-overlay" id="modal-wechsler" onclick="if(event.target===this)closeM('modal-wechsler')">
+  <div class="modal" style="max-width:560px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-wechsler')">✕</button>
+      <div class="dlg-eyebrow">Erfassen</div>
+      <div class="dlg-title">Wechsler <span class="dlg-pill" id="wf-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="wf-datum">
+      <label class="fl">Entnommen</label>
+      <input class="num" id="wf-aus" inputmode="decimal" placeholder="0,00">
+      <label class="fl">Eingelegt</label>
+      <div class="dcard grid-h g-w" id="wf-zeilen"></div>
+      <div id="wf-kredit"></div>
+      <p class="hint">Ein Eintrag nur für den Wechsler — Geräte und Getränke bleiben leer.
+        Er erscheint als eigener Termin in der Auswahl oben.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-wechsler')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveWechslerForm()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Kredit aufnehmen ══ -->
+<div class="modal-overlay" id="modal-neukredit" onclick="if(event.target===this)closeM('modal-neukredit')">
+  <div class="modal" style="max-width:460px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-neukredit')">✕</button>
+      <div class="dlg-eyebrow">Kredit</div>
+      <div class="dlg-title">Kredit aufnehmen <span class="dlg-pill" id="nk-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Von wem</label>
+      <div class="geber" id="nk-geber"></div>
+      <label class="fl">Betrag</label>
+      <input class="num" id="nk-betrag" inputmode="decimal" placeholder="0,00">
+      <label class="fl">Art</label>
+      <div class="seg2" id="nk-art">
+        <button class="on" onclick="nkArt('scheine',this)">Scheine</button>
+        <button onclick="nkArt('muenzen',this)">Münzen</button>
+      </div>
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="nk-datum">
+      <p class="hint">Das Geld liegt danach in der Kasse und erscheint als Schuld
+        über der Zeile „Rest in der Kasse“.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-neukredit')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveNeuKredit()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Geld tauschen ══ -->
+<div class="modal-overlay" id="modal-tausch" onclick="if(event.target===this)closeM('modal-tausch')">
+  <div class="modal" style="max-width:440px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-tausch')">✕</button>
+      <div class="dlg-eyebrow">Kasse</div>
+      <div class="dlg-title">Geld tauschen <span class="dlg-pill" id="tw-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <div class="tausch-row">
+        <div class="tausch-seite" id="tw-von">Münzen</div>
+        <button class="tausch-pfeil" onclick="tauschDrehen()" title="Richtung wechseln">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9h13l-3.5-3.5M20 15H7l3.5 3.5"/></svg>
+        </button>
+        <div class="tausch-seite" id="tw-nach">Scheine</div>
+      </div>
+      <label class="fl">Betrag</label>
+      <input class="num" id="tw-betrag" inputmode="decimal" placeholder="0,00">
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="tw-datum">
+      <p class="hint">Der Kassenbestand bleibt in der Summe gleich — nur die Aufteilung
+        zwischen Scheinen und Münzen verschiebt sich.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-tausch')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveTausch()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -901,6 +1012,10 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
         <button onclick="krArt('scheine',this)">Scheine</button>
         <button onclick="krArt('muenzen',this)">Münzen</button>
       </div>
+      <label class="fl">Betrag der Rückzahlung</label>
+      <input class="num" id="kr-betrag" inputmode="decimal">
+      <p class="hint" style="margin-top:.3rem">Weniger als der offene Betrag ist erlaubt —
+        der Rest bleibt als Kredit stehen.</p>
       <p class="hint" id="kr-hint"></p>
     </div>
     <div class="dlg-foot">
@@ -962,6 +1077,7 @@ const FARBEN = {
   viersen:{t1:'#EE8A2B',t2:'#A64A0B',sh:'rgba(234,88,12,.35)',dot:'#EE8A2B'},
 };
 const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
+const ZWECK = {bank:'Bank-Einzahlung', wechsler:'Wechsler-Einlage', kasse:'In die Kasse'};
 // Geräte je Filiale. Nettetal hat zusätzlich 14–17 (eine 13 gibt es nicht) —
 // die stehen fett, damit sie sich von den ersten zwölf abheben.
 const GERAETE = {
@@ -1230,23 +1346,35 @@ async function ladeHub(){
 }
 
 /* ══ Datumsauswahl ═══════════════════════════════════════════════════ */
+// Die gewählte Leerung gilt für alle vier Ansichten. Vorher hatte jede Ansicht
+// ihre eigene Auswahl — wer auf der Übersicht einen Tag wählte und dann zu den
+// Geräten wechselte, sah wieder den ganzen Monat.
+let datumWahl = '';
+const DATUM_SELECTS = ['sel-datum','sel-datum-g','sel-datum-w','sel-datum-t'];
 function fillDatumSelects(){
   const opts = ['<option value="">Ganzer Monat</option>']
     .concat(leerungen.map(l=>`<option value="${l.id}">${dmy(l.datum)}</option>`)).join('');
-  ['sel-datum','sel-datum-g','sel-datum-w','sel-datum-t'].forEach(id=>{
+  if(datumWahl && !leerungen.some(l=>l.id===datumWahl)) datumWahl='';
+  DATUM_SELECTS.forEach(id=>{
     const el=document.getElementById(id); if(!el) return;
-    const alt=el.value; el.innerHTML=opts;
-    if([...el.options].some(o=>o.value===alt)) el.value=alt;
+    el.innerHTML=opts;
+    el.value=datumWahl;
   });
 }
-function auswahl(id){
-  const v=document.getElementById(id).value;
-  return v ? leerungen.filter(l=>l.id===v) : leerungen;
+function setDatum(v){
+  datumWahl = v;
+  DATUM_SELECTS.forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value=v;
+  });
+  renderMain(); renderGeraete(); renderWechsler(); renderGetraenke();
+}
+function auswahl(){
+  return datumWahl ? leerungen.filter(l=>l.id===datumWahl) : leerungen;
 }
 
 /* ══ Filialansicht ═══════════════════════════════════════════════════ */
 async function renderMain(){
-  const su=summen(auswahl('sel-datum'));
+  const su=summen(auswahl());
   const suMonat=summen(leerungen);
   document.getElementById('v-ger').textContent=eur(su.ger);
   document.getElementById('ger-s').textContent=eur(su.gerS);
@@ -1276,8 +1404,9 @@ async function renderMain(){
   const bk=bankSummen(monatDoc);
   const kosten=Number(monatDoc.sonstige)||0;
   const kb=kreditBewegung(monat);
-  const restS=(vm.s||0)+suMonat.scheine-bk.s-kosten+kb.s;
-  const restM=(vm.m||0)+suMonat.muenzen-bk.m+kb.m;
+  const tw=tauschSaldo();
+  const restS=(vm.s||0)+suMonat.scheine-bk.s-kosten+kb.s+tw.s;
+  const restM=(vm.m||0)+suMonat.muenzen-bk.m+kb.m+tw.m;
   const rest=restS+restM;
 
   // Liste der echten Beträge
@@ -1301,7 +1430,7 @@ async function renderMain(){
     const alt = k.monat!==monat ? ' · aus '+monatText(k.monat) : '';
     html+=`<button class="lrow" onclick="openKredit('${k.id}')">
       <span class="nm">${eigen?'Schuld an':'Kredit an'} <b style="font-weight:700">${eigen?(NAMEN[k.geber]||k.geber):(NAMEN[k.nehmer]||k.nehmer)}</b>
-        <s>${k.art==='muenzen'?'Münzen':'Scheine'} · ${k.zweck==='bank'?'Bank-Einzahlung':'Wechsler-Einlage'} · ${dmy(k.datum)}${alt}</s></span>
+        <s>${k.art==='muenzen'?'Münzen':'Scheine'} · ${ZWECK[k.zweck]||'Kasse'} · ${dmy(k.datum)}${alt}</s></span>
       <span class="tag ${eigen?'schuld':'kredit'}">${eigen?'erhalten':'vergeben'}</span>
       <span class="val ${eigen?'plus':'minus'}">${eigen?'+':'−'}${eur(k.betrag)}</span></button>`;
   });
@@ -1337,20 +1466,42 @@ async function renderMain(){
   }
   document.getElementById('planung').innerHTML=ph;
 
+  // Kredit aufnehmen
+  document.getElementById('kredit-block').innerHTML =
+    `<div class="plan-head"><s>Kredit aufnehmen</s>
+      <button class="mini-add" onclick="openNeuKredit()">+</button></div>
+     <div class="leer">Für Geld, das die Filiale von LL, VL oder einem anderen Haus
+       bekommen hat. Es erscheint oben als Schuld.</div>`;
+
+  // Geld tauschen
+  const tl=(monatDoc.tausch||[]);
+  let th_=`<div class="plan-head"><s>Geld tauschen</s>
+      <button class="mini-add" onclick="openTausch()">+</button></div>`;
+  th_ += tl.length
+    ? tl.map((t,i)=>`<div class="tausch-zeile">
+        <span>${t.von==='muenzen'?'Münzen → Scheine':'Scheine → Münzen'}</span>
+        <span class="wann">${dmy(t.datum)}</span>
+        <span class="val">${eur(t.betrag)}</span>
+        <button class="weg" onclick="tauschLoeschen(${i})" title="Eintrag entfernen">✕</button>
+      </div>`).join('')
+    : `<div class="leer">Noch nichts getauscht.</div>`;
+  document.getElementById('tausch-block').innerHTML = th_;
+
   // getilgte Kredite dieses Monats
   const fertig=kredite.filter(k=>(k.getilgtAm||'').slice(0,7)===monat);
   document.getElementById('getilgt').innerHTML = fertig.length
     ? `<div class="done-t">Getilgte Kredite</div>`+fertig.map(k=>{
         const eigen=k.nehmer===lg;
         const art=(k.getilgtArt||k.art)==='muenzen'?'Münzen':'Scheine';
-        return `<div class="drow"><span class="nm">${eigen?'Schuld an '+(NAMEN[k.geber]||k.geber):'Kredit an '+(NAMEN[k.nehmer]||k.nehmer)} · ${eigen?'getilgt':'zurück'} am ${dmy(k.getilgtAm)} · ${art}</span>
+        const teil=k.teilVon?' · Teilzahlung':'';
+        return `<div class="drow"><span class="nm">${eigen?'Schuld an '+(NAMEN[k.geber]||k.geber):'Kredit an '+(NAMEN[k.nehmer]||k.nehmer)} · ${eigen?'getilgt':'zurück'} am ${dmy(k.getilgtAm)} · ${art}${teil}</span>
           <span class="val">${eur(k.betrag)}</span></div>`;
       }).join('')
     : '';
 }
 
 function renderGeraete(){
-  const liste=auswahl('sel-datum-g');
+  const liste=auswahl();
   const nummern=geraeteListe();
   const proGeraet={};
   nummern.forEach(i=>proGeraet[i]={s:0,m:0,da:false});
@@ -1390,7 +1541,7 @@ function renderGeraete(){
 }
 
 function renderWechsler(){
-  const liste=auswahl('sel-datum-w');
+  const liste=auswahl();
   const su=summen(liste);
   const zeilen=[];
   liste.forEach(l=>(l.wechslerIn||[]).forEach(w=>zeilen.push(w)));
@@ -1418,7 +1569,7 @@ function renderWechsler(){
 }
 
 function renderGetraenke(){
-  const su=summen(auswahl('sel-datum-t'));
+  const su=summen(auswahl());
   document.getElementById('tbl-getraenke').innerHTML=`<div class="tbl-wrap"><table class="lt">
     <thead><tr><th>Automat</th><th>Betrag</th></tr></thead>
     <tbody>
@@ -1509,6 +1660,7 @@ function openGeber(ziel,index,unterIndex){
   geberZiel={ziel,index,unterIndex:(unterIndex===undefined?null:unterIndex)};
   let schon='';
   if(ziel==='wechsler') schon = (index!==null&&wexZeilen[index]) ? wexZeilen[index].geber : '';
+  else if(ziel==='wf') schon = (index!==null&&wfZeilen[index]) ? wfZeilen[index].geber : '';
   else if(ziel==='plan') schon = (index!==null&&planZeilen[index]) ? planZeilen[index].geber : '';
   else if(ziel==='ein'){
     const e=einListe[index];
@@ -1533,6 +1685,10 @@ function confirmGeber(){
     if(geberZiel.index===null) wexZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
     else wexZeilen[geberZiel.index].geber=v;
     renderWexZeilen();
+  }else if(geberZiel.ziel==='wf'){
+    if(geberZiel.index===null) wfZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
+    else wfZeilen[geberZiel.index].geber=v;
+    renderWfZeilen();
   }else if(geberZiel.ziel==='plan'){
     if(geberZiel.index===null) planZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
     else planZeilen[geberZiel.index].geber=v;
@@ -1558,11 +1714,14 @@ function cancelGeber(){
       }
       renderEin();
     }else{
-      const arr = geberZiel.ziel==='wechsler' ? wexZeilen : planZeilen;
+      const arr = geberZiel.ziel==='wechsler' ? wexZeilen
+                : geberZiel.ziel==='wf' ? wfZeilen : planZeilen;
       if(geberZiel.index!==null && arr[geberZiel.index] && !arr[geberZiel.index].geber){
         arr[geberZiel.index].herkunft='';
       }
-      geberZiel.ziel==='wechsler' ? renderWexZeilen() : renderPlanZeilen();
+      if(geberZiel.ziel==='wechsler') renderWexZeilen();
+      else if(geberZiel.ziel==='wf')  renderWfZeilen();
+      else renderPlanZeilen();
     }
   }
   closeM('modal-geber');
@@ -1613,6 +1772,169 @@ async function saveLeerung(){
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
+}
+
+/* ══ Nur den Wechsler nachfüllen ═════════════════════════════════════
+   Der Wechsler wird öfter befüllt als eine ganze Leerung stattfindet. Das
+   Formular legt denselben Eintrag an, nur ohne Geräte und Getränke. */
+let wfZeilen=[];
+function openWechslerForm(){
+  document.getElementById('wf-lg').textContent=NAMEN[lg];
+  document.getElementById('wf-datum').value=heute();
+  document.getElementById('wf-aus').value='';
+  wfZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
+  renderWfZeilen();
+  openM('modal-wechsler');
+}
+function renderWfZeilen(){
+  let h='<span></span><span class="hd2">Kasse</span><span class="hd2">Kredit</span><span class="hd2">Betrag</span><span></span>';
+  wfZeilen.forEach((z,i)=>{
+    h+=`<span class="gn">${z.wert} €</span>
+      <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="wfPick(${i},'kasse')">✓</span>
+      <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="wfPick(${i},'kredit')">✓</span>
+      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="wfZeilen[${i}].betrag=this.value">
+      <button class="plus-s" onclick="wfPlus(${i})" title="Zeile mit ${z.wert} € ergänzen">+</button>`;
+  });
+  document.getElementById('wf-zeilen').innerHTML=h;
+  const kr=wfZeilen.filter(z=>z.herkunft==='kredit'&&parseNum(z.betrag)>0);
+  const geber=[...new Set(kr.map(z=>NAMEN[z.geber]||z.geber).filter(Boolean))].join(', ');
+  document.getElementById('wf-kredit').innerHTML = kr.length
+    ? `<div class="kred-note">Kredit von ${geber||'—'}
+        <button class="edit-link" onclick="openGeber('wf',null)">ändern</button>
+        <b>${eur(kr.reduce((a,z)=>a+parseNum(z.betrag),0))}</b></div>` : '';
+}
+function wfPick(i,art){
+  const z=wfZeilen[i];
+  if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderWfZeilen(); return; }
+  z.herkunft=art;
+  if(art==='kasse') z.geber='';
+  renderWfZeilen();
+  if(art==='kredit') openGeber('wf',i);
+}
+function wfPlus(i){
+  wfZeilen.splice(i+1,0,{wert:wfZeilen[i].wert,betrag:'',herkunft:'',geber:''});
+  renderWfZeilen();
+}
+async function saveWechslerForm(){
+  const datum=document.getElementById('wf-datum').value;
+  if(!datum){ showToast('Bitte ein Datum wählen.'); return; }
+  const wIn=wfZeilen.filter(z=>parseNum(z.betrag)>0).map(z=>({
+    wert:z.wert, betrag:parseNum(z.betrag),
+    herkunft:z.herkunft||'kasse', geber:z.herkunft==='kredit'?z.geber:''
+  }));
+  const aus=parseNum(document.getElementById('wf-aus').value);
+  if(!wIn.length && !aus){ showToast('Bitte einen Betrag eintragen.'); return; }
+  if(wIn.find(z=>z.herkunft==='kredit'&&!z.geber)){
+    showToast('Bei einem Kredit fehlt der Geldgeber.'); return;
+  }
+  showSpinner();
+  try{
+    await db.collection('leerung').add({
+      lager:lg, datum, monat:datum.slice(0,7), nurWechsler:true,
+      geraete:{}, wechslerAus:aus, wechslerIn:wIn,
+      getraenke:{kaffee:0,getraenke:0,snack:0}, erstellt:new Date().toISOString()
+    });
+    for(const z of wIn.filter(x=>x.herkunft==='kredit')){
+      await db.collection('leerung_kredit').add({
+        geber:z.geber, nehmer:lg, betrag:z.betrag, datum, monat:datum.slice(0,7),
+        zweck:'wechsler', art: Number(z.wert)>=10 ? 'scheine' : 'muenzen',
+        getilgtAm:null, getilgtArt:null
+      });
+    }
+    closeM('modal-wechsler');
+    showToast('Wechsler gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Kredit aufnehmen ════════════════════════════════════════════════ */
+let nkArtWert='scheine';
+function nkArt(v,b){
+  nkArtWert=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function openNeuKredit(){
+  document.getElementById('nk-lg').textContent=NAMEN[lg];
+  document.getElementById('nk-betrag').value='';
+  document.getElementById('nk-datum').value=heute();
+  nkArtWert='scheine';
+  document.querySelectorAll('#nk-art button').forEach((b,i)=>b.classList.toggle('on', i===0));
+  const wahl=EXTERN.concat(FILIALEN.filter(f=>f!==lg));
+  document.getElementById('nk-geber').innerHTML =
+    wahl.map(w=>`<button onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
+  openM('modal-neukredit');
+}
+async function saveNeuKredit(){
+  const sel=document.querySelector('#nk-geber button.on');
+  if(!sel){ showToast('Bitte einen Geldgeber wählen.'); return; }
+  const betrag=parseNum(document.getElementById('nk-betrag').value);
+  if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
+  const datum=document.getElementById('nk-datum').value||heute();
+  showSpinner();
+  try{
+    await db.collection('leerung_kredit').add({
+      geber:sel.dataset.v, nehmer:lg, betrag, datum, monat:datum.slice(0,7),
+      zweck:'kasse', art:nkArtWert, getilgtAm:null, getilgtArt:null
+    });
+    closeM('modal-neukredit');
+    showToast('Kredit erfasst ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Geld tauschen: Münzen ↔ Scheine ═════════════════════════════════ */
+let tauschVon='muenzen';
+function openTausch(){
+  document.getElementById('tw-lg').textContent=NAMEN[lg];
+  document.getElementById('tw-betrag').value='';
+  document.getElementById('tw-datum').value=heute();
+  tauschVon='muenzen';
+  zeigeTauschRichtung();
+  openM('modal-tausch');
+}
+function zeigeTauschRichtung(){
+  document.getElementById('tw-von').textContent  = tauschVon==='muenzen'?'Münzen':'Scheine';
+  document.getElementById('tw-nach').textContent = tauschVon==='muenzen'?'Scheine':'Münzen';
+}
+function tauschDrehen(){ tauschVon = tauschVon==='muenzen'?'scheine':'muenzen'; zeigeTauschRichtung(); }
+async function saveTausch(){
+  const betrag=parseNum(document.getElementById('tw-betrag').value);
+  if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
+  const datum=document.getElementById('tw-datum').value||heute();
+  const liste=(monatDoc.tausch||[]).slice();
+  liste.push({von:tauschVon, nach:(tauschVon==='muenzen'?'scheine':'muenzen'), betrag, datum});
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
+    monatDoc.tausch=liste;
+    closeM('modal-tausch');
+    showToast('Tausch gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function tauschLoeschen(i){
+  const liste=(monatDoc.tausch||[]).slice();
+  liste.splice(i,1);
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
+    monatDoc.tausch=liste;
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+// Verschiebung zwischen Scheinen und Münzen, Summe bleibt gleich
+function tauschSaldo(){
+  let s=0,m=0;
+  (monatDoc.tausch||[]).forEach(t=>{
+    const b=Number(t.betrag)||0;
+    if(t.von==='muenzen'){ m-=b; s+=b; } else { s-=b; m+=b; }
+  });
+  return {s,m};
 }
 
 /* ══ Bank geplant ════════════════════════════════════════════════════ */
@@ -1879,7 +2201,7 @@ function openKredit(id){
     eigen ? 'Schuld an '+(NAMEN[k.geber]||k.geber) : 'Kredit an '+(NAMEN[k.nehmer]||k.nehmer);
   document.getElementById('kr-det').innerHTML=`
     <div>${eigen?'Aufgenommen am':'Vergeben am'}<b>${dmy(k.datum)}</b></div>
-    <div>Verwendet für<b>${k.zweck==='bank'?'Bank-Einzahlung':'Wechsler-Einlage'}</b></div>
+    <div>Verwendet für<b>${ZWECK[k.zweck]||'Kasse'}</b></div>
     <div>Betrag<b>${eur(k.betrag)}</b></div>
     <div>Monat<b>${monatText(k.monat)}</b></div>`;
   document.getElementById('kr-hint').textContent = eigen
@@ -1890,17 +2212,36 @@ function openKredit(id){
   kreditArt = k.art==='muenzen' ? 'muenzen' : 'scheine';
   document.querySelectorAll('#kr-art button').forEach((b,ix)=>
     b.classList.toggle('on', (ix===0)===(kreditArt==='scheine')));
+  document.getElementById('kr-betrag').value = zahl(k.betrag);
   openM('modal-kredit');
 }
 async function tilgen(){
   if(!kreditId) return;
+  const k=kredite.find(x=>x.id===kreditId);
+  if(!k) return;
+  const offen = Number(k.betrag)||0;
+  let zahl_ = parseNum(document.getElementById('kr-betrag').value);
+  if(!zahl_ || zahl_<=0){ showToast('Bitte einen Betrag eintragen.'); return; }
+  if(zahl_ > offen + 0.001){ showToast('Mehr als offen ist nicht möglich.'); return; }
   showSpinner();
   try{
-    await db.collection('leerung_kredit').doc(kreditId)
-      .set({getilgtAm:heute(),
-            getilgtArt:kreditArt},{merge:true});
+    if(Math.abs(zahl_-offen) < 0.01){
+      // vollständig
+      await db.collection('leerung_kredit').doc(kreditId)
+        .set({getilgtAm:heute(), getilgtArt:kreditArt},{merge:true});
+      showToast('Kredit erledigt ✓');
+    }else{
+      // Teilzahlung: der gezahlte Anteil wird als eigener, erledigter Eintrag
+      // festgehalten, der Rest bleibt als offener Kredit stehen.
+      await db.collection('leerung_kredit').add({
+        geber:k.geber, nehmer:k.nehmer, betrag:zahl_, datum:k.datum, monat:k.monat,
+        zweck:k.zweck, art:k.art, getilgtAm:heute(), getilgtArt:kreditArt, teilVon:kreditId
+      });
+      await db.collection('leerung_kredit').doc(kreditId)
+        .set({betrag: Math.round((offen-zahl_)*100)/100},{merge:true});
+      showToast('Teilzahlung erfasst ✓');
+    }
     closeM('modal-kredit');
-    showToast('Kredit erledigt ✓');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();

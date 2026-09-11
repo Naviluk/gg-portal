@@ -254,6 +254,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ══ Rechnungsstellung ══ */
 .kpi{position:relative}
+/* Fehlte auf dieser Seite — deshalb blieben beide Reiter gleichzeitig sichtbar */
+.we-hidden{display:none!important}
 .kpi-rg{position:absolute;top:.45rem;right:.45rem;width:30px;height:30px;border-radius:9px;
   border:1.5px solid var(--c,#DCE3ED);background:#fff;cursor:pointer;font-size:.9rem;line-height:1;
   display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s}
@@ -261,6 +263,28 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .kpi.total .kpi-rg{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.12)}
 .kpi.total .kpi-rg:hover{background:rgba(255,255,255,.22)}
 .kpi b{padding-right:2.2rem}
+/* Bezahlte Rechnung: grüner Haken am Beleg-Zeichen */
+.kpi-rg .ok{position:absolute;right:-4px;bottom:-4px;width:14px;height:14px;border-radius:50%;
+  background:var(--neon-green);border:2px solid #fff;display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:.5rem;font-weight:800;line-height:1}
+.kpi.total .kpi-rg .ok{border-color:var(--ink)}
+.kpi-rg{position:relative}
+.kpi-rg svg.beleg{width:17px;height:17px;fill:none;stroke:var(--c,#5A6980);stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.rg-pay{display:flex;align-items:center;gap:.6rem;background:var(--bg2);
+  border:1.5px solid var(--glass-border);border-radius:12px;padding:.7rem .8rem;margin-top:.2rem}
+.rg-pay.on{border-color:var(--neon-green);background:#F1FAF6}
+.rg-pay .chk{width:28px;height:28px;border-radius:9px;border:1.8px solid var(--glass-border);
+  background:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  color:transparent;font-weight:700;font-size:.8rem}
+.rg-pay.on .chk{background:var(--neon-green);border-color:var(--neon-green);color:#fff}
+.rg-pay .lbl{font-size:.9rem;font-weight:600}
+.rg-pay .lbl s{display:block;text-decoration:none;font-size:.7rem;color:var(--text-dim);font-weight:500}
+.rg-pay input[type=date]{margin-left:auto;width:auto;background:#fff;border:1.5px solid var(--glass-border);
+  border-radius:10px;padding:.45rem .6rem;font-family:var(--mono);font-size:.9rem;font-weight:600;
+  color:var(--text);outline:none}
+.rg-pay input[type=date]:disabled{opacity:.4}
+.rg-pay input[type=date]:focus{border-color:var(--neon-green)}
 .rg-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 .rg-input{width:100%;background:#fff;border:1.5px solid var(--glass-border);border-radius:10px;
   padding:.55rem .7rem;font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:600;
@@ -716,6 +740,13 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <input type="text" id="rg-betreff" class="rg-input"></div>
       <div class="field"><label class="field-label">Übersicht</label>
         <div class="rg-prev" id="rg-vorschau"></div></div>
+      <div class="field"><label class="field-label">Zahlung</label>
+        <div class="rg-pay" id="rg-pay">
+          <button class="chk" onclick="toggleBezahlt()">&#x2713;</button>
+          <span class="lbl">Bezahlt<s id="rg-pay-sub">noch offen</s></span>
+          <input type="date" id="rg-pay-datum" disabled onchange="saveBezahlt()">
+        </div>
+      </div>
       <div class="modal-btn-row we-foot">
         <button class="btn btn-ghost" onclick="closeRechnung()">Abbrechen</button>
         <button class="btn btn-primary btn-acc" id="rg-print-btn" onclick="printRechnung()">Rechnung öffnen &#x2192;</button>
@@ -1166,13 +1197,14 @@ function renderTableActual(){
     kpi.innerHTML = BRANCHES.map(br=>
       `<div class="kpi"><s>${BRANCH_LABELS[br]}</s>
          <b style="color:${BRANCH_COLORS[br]}">${fmt(grandTotals[br])}</b>
-         <button class="kpi-rg" style="--c:${BRANCH_COLORS[br]}" title="Rechnung erstellen"
-           onclick="openRechnung('${br}')">🧾</button></div>`
+         <button class="kpi-rg" data-br="${br}" style="--c:${BRANCH_COLORS[br]}" title="Rechnung erstellen"
+           onclick="openRechnung('${br}')"><svg class="beleg" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4v-17Z"/><path d="M9 8h6M9 12h6"/></svg></button></div>`
     ).join('') + `<div class="kpi total"><s>Gesamt</s><b>${fmt(grandTotals.gesamt)}</b>
          <button class="kpi-rg cfg" title="Rechnungstexte &amp; Stammdaten"
            onclick="openRgConfig()"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg></button></div>`;
   }
   buildColPager();
+  ladeRgStatus();
 }
 
 // Ermittelt den zum gewählten Monat gültigen Preis: der zuletzt EXPLIZIT gesetzte Wert
@@ -1386,12 +1418,22 @@ const DEFAULT_RG_CONFIG = {
     viersen:{ firma:'Game Galaxy Viersen UG',  strasse:'',                ort:'', code:'103'},
     'köln':{  firma:'Game Galaxy Köln UG',     strasse:'',                ort:'', code:'104'}
   },
-  dl:{
-    inventur:'Inventur und Warenkontrolle\nPauschale gemäß Leistungsumfang',
-    beschaffung:'Beschaffungsmanagement (Einkäufe / Lieferungen / Nachfüllungen des Getränkeautomaten)\nPauschale gemäß Leistungsumfang'
-  }
+  // Dienstleistungen je Filiale — die Häuser haben nicht denselben Umfang
+  dl:{}
 };
 let rgTexte = {}, rgConfig = {};
+
+// Vorgabetexte, solange für eine Filiale nichts eigenes hinterlegt ist
+const DL_VORGABE = {
+  inventur:'Inventur und Warenkontrolle\nPauschale gemäß Leistungsumfang',
+  beschaffung:'Beschaffungsmanagement (Einkäufe / Lieferungen / Nachfüllungen des Getränkeautomaten)\nPauschale gemäß Leistungsumfang'
+};
+// Holt den Rechnungstext einer Dienstleistung für eine Filiale.
+function dlText(branch, id){
+  const proFiliale = (rgConfig.dl && rgConfig.dl[branch]) || {};
+  if(proFiliale[id] !== undefined) return proFiliale[id];
+  return DL_VORGABE[id] || '';
+}
 
 // Mehrwertsteuer je Rechnungsgruppe
 const RG_MWST = {'Getränke':0.19,'Suesswaren/Snack':0.07,'Heißgetränke':0.07,
@@ -1417,7 +1459,14 @@ async function loadRgConfig(){
       const d=c.data();
       if(d.absender)   Object.assign(rgConfig.absender, d.absender);
       if(d.empfaenger) Object.keys(d.empfaenger).forEach(k=>Object.assign(rgConfig.empfaenger[k]||{}, d.empfaenger[k]));
-      if(d.dl)         Object.assign(rgConfig.dl, d.dl);
+      if(d.dl){
+        // Frühere Fassung hatte einen Text für alle Filialen — er gilt weiter als Vorgabe
+        const alt = {};
+        Object.keys(d.dl).forEach(k=>{ if(typeof d.dl[k]==='string') alt[k]=d.dl[k]; });
+        BRANCHES.forEach(br=>{
+          rgConfig.dl[br] = Object.assign({}, alt, d.dl[br] || {});
+        });
+      }
     }
   }catch(e){}
 }
@@ -1453,7 +1502,7 @@ function buildRechnungData(branch){
   DL_ROWS.forEach(row=>{
     const v = getDlValue(row.id, branch, zeit);
     if(!v) return;
-    add('Dienstleistungen', {text:(rgConfig.dl[row.id]||row.name), anzahl:1, einzel:v, gesamt:v});
+    add('Dienstleistungen', {text:(dlText(branch, row.id) || row.name), anzahl:1, einzel:v, gesamt:v});
   });
 
   const gruppenListe = Object.keys(RG_MWST).filter(g=>gruppen[g]).map(g=>{
@@ -1926,6 +1975,78 @@ const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
 const eur = v => v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const num = v => (Math.round(v*100)/100).toLocaleString('de-DE',{maximumFractionDigits:2});
 
+/* ══ Bezahlt-Vermerk ═══════════════════════════════════════════════════
+   Ein Eintrag je Filiale und Monat in der Sammlung „rechnung_status".
+   Er hängt nicht an der erzeugten PDF-Datei, sondern am Abrechnungsmonat —
+   die Rechnung kann beliebig oft neu geöffnet werden. */
+let rgStatus = {};
+
+async function ladeRgStatus(){
+  rgStatus = {};
+  if(currentZeitraum.length!==7) return;
+  try{
+    const docs = await Promise.all(BRANCHES.map(br=>
+      db.collection('rechnung_status').doc(br+'_'+currentZeitraum).get()));
+    docs.forEach((d,i)=>{ if(d.exists) rgStatus[BRANCHES[i]] = d.data(); });
+  }catch(e){ console.warn('Zahlungsstand:', e.message); }
+  markiereBezahlt();
+}
+// Setzt den Haken an den Beleg-Zeichen der Kacheln
+function markiereBezahlt(){
+  BRANCHES.forEach(br=>{
+    const btn = document.querySelector('.kpi-rg[data-br="'+br+'"]');
+    if(!btn) return;
+    const bez = rgStatus[br] && rgStatus[br].bezahlt;
+    btn.classList.toggle('bezahlt', !!bez);
+    btn.title = bez
+      ? 'Bezahlt am '+((rgStatus[br].datum||'').split('-').reverse().join('.'))
+      : 'Rechnung erstellen';
+    const alt = btn.querySelector('.ok');
+    if(bez && !alt){
+      const s=document.createElement('span'); s.className='ok'; s.textContent='✓';
+      btn.appendChild(s);
+    }else if(!bez && alt){ alt.remove(); }
+  });
+}
+function zeigeBezahlt(branch){
+  const st = rgStatus[branch] || {};
+  const box = document.getElementById('rg-pay');
+  const inp = document.getElementById('rg-pay-datum');
+  const sub = document.getElementById('rg-pay-sub');
+  box.classList.toggle('on', !!st.bezahlt);
+  inp.disabled = !st.bezahlt;
+  inp.value = st.datum || new Date().toISOString().slice(0,10);
+  sub.textContent = st.bezahlt
+    ? 'am '+(st.datum||'').split('-').reverse().join('.')
+    : 'noch offen';
+}
+window.toggleBezahlt = async function(){
+  const branch = document.getElementById('rg-branch').value;
+  const st = rgStatus[branch] || {};
+  const neu = !st.bezahlt;
+  const datum = document.getElementById('rg-pay-datum').value || new Date().toISOString().slice(0,10);
+  rgStatus[branch] = neu ? {bezahlt:true, datum} : {bezahlt:false, datum:null};
+  zeigeBezahlt(branch);
+  markiereBezahlt();
+  await speichereStatus(branch);
+};
+window.saveBezahlt = async function(){
+  const branch = document.getElementById('rg-branch').value;
+  if(!rgStatus[branch] || !rgStatus[branch].bezahlt) return;
+  rgStatus[branch].datum = document.getElementById('rg-pay-datum').value;
+  zeigeBezahlt(branch);
+  markiereBezahlt();
+  await speichereStatus(branch);
+};
+async function speichereStatus(branch){
+  try{
+    await db.collection('rechnung_status').doc(branch+'_'+currentZeitraum)
+      .set(rgStatus[branch] || {bezahlt:false}, {merge:true});
+    showToast(rgStatus[branch] && rgStatus[branch].bezahlt
+      ? 'Als bezahlt vermerkt ✓' : 'Vermerk entfernt');
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+
 // Nummernkreis wie bisher von Hand geführt: Jahr - Filialcode - Monat
 function rgNummer(branch){
   const t = currentZeitraum.split('-');
@@ -1953,6 +2074,7 @@ window.openRechnung = async function(branch){
       + '<div class="rg-prev-row total"><span>Gesamtbetrag (brutto)</span><b>'+eur(data.bruttoSumme)+'</b></div>'
     : '<div class="rg-prev-empty">Für diesen Monat gibt es keine Positionen.</div>';
   document.getElementById('rg-print-btn').disabled = !data.gruppen.length;
+  zeigeBezahlt(branch);
   document.getElementById('modal-rechnung').classList.add('show');
 };
 window.closeRechnung = function(){ document.getElementById('modal-rechnung').classList.remove('show'); };
@@ -2188,12 +2310,16 @@ window.openRgConfig = async function(){
             + 'placeholder="'+String(prod.name).replace(/"/g,'&quot;')+'"></div>';
     });
   });
-  html += '<div class="rgcfg-cat">Dienstleistungen</div>';
-  DL_ROWS.forEach(function(row){
-    html += '<div class="rgcfg-row">'
-          + '<div class="rgcfg-name">'+row.name+'</div>'
-          + '<textarea class="rgcfg-input" rows="2" data-dl="'+row.id+'">'
-          + String(rgConfig.dl[row.id]||'')+'</textarea></div>';
+  // Dienstleistungen: je Filiale eigene Texte, der Umfang ist nicht überall gleich
+  BRANCHES.forEach(function(br){
+    html += '<div class="rgcfg-cat">Dienstleistungen — '+BRANCH_LABELS[br]+'</div>';
+    DL_ROWS.forEach(function(row){
+      html += '<div class="rgcfg-row">'
+            + '<div class="rgcfg-name">'+row.name+'</div>'
+            + '<textarea class="rgcfg-input" rows="2" data-dl="'+br+'|'+row.id+'" '
+            + 'placeholder="'+String(DL_VORGABE[row.id]||'').replace(/"/g,'&quot;').replace(/\n/g,' ')+'">'
+            + String(dlText(br, row.id))+'</textarea></div>';
+    });
   });
   document.getElementById('rgcfg-texte').innerHTML = html;
 
@@ -2235,8 +2361,11 @@ window.saveRgConfig = async function(){
       const v = el.value.trim();
       if(v) texte[el.dataset.prod] = v;
     });
+    rgConfig.dl = {};
     document.querySelectorAll('#rgcfg-texte [data-dl]').forEach(function(el){
-      rgConfig.dl[el.dataset.dl] = el.value;
+      const teile = el.dataset.dl.split('|');
+      if(!rgConfig.dl[teile[0]]) rgConfig.dl[teile[0]] = {};
+      rgConfig.dl[teile[0]][teile[1]] = el.value;
     });
     document.querySelectorAll('#rgcfg-stamm [data-abs]').forEach(function(el){
       rgConfig.absender[el.dataset.abs] = el.value;
