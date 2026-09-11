@@ -415,12 +415,15 @@ button.lrow:hover{background:var(--zebra)}
 
 /* getilgte Kredite */
 .done{margin-top:.9rem}
-.done-t{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);
-  font-weight:800;padding:0 .3rem .45rem}
-.drow{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;background:#E9EDF3;
-  border:1px solid var(--glass-border);border-radius:11px;margin-bottom:.4rem;color:#7A8698}
-.drow .nm{font-size:.82rem;font-weight:500;text-decoration:line-through}
-.drow .val{margin-left:auto;font-family:var(--mono);font-size:.88rem;font-weight:700}
+.done-t{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#A4AFC0;
+  font-weight:800;padding:0 .3rem .4rem}
+/* Erledigtes tritt zurück: ohne Rahmen, blasser und etwas kleiner — der Betrag
+   soll dabei in einer Zeile bleiben, auch mit Tausendertrennung. */
+.drow{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;background:#EDF0F5;
+  border:none;border-radius:10px;margin-bottom:.3rem;color:#9AA6B6}
+.drow .nm{font-size:.74rem;font-weight:500;text-decoration:line-through;line-height:1.35;min-width:0}
+.drow .val{margin-left:auto;flex-shrink:0;white-space:nowrap;font-family:var(--mono);
+  font-size:.78rem;font-weight:700}
 
 table.lt{width:100%;border-collapse:separate;border-spacing:0;background:var(--bg2);
   border:1px solid var(--glass-border);border-radius:14px;overflow:hidden}
