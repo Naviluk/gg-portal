@@ -544,7 +544,18 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
   table.lt td:first-child{font-size:.78rem;font-weight:700}
   .g-lang{display:none}
   .g-kurz{display:inline}
-  #tbl-geraete th:first-child,#tbl-geraete td:first-child{width:34px;text-align:center}
+  /* Feste Spaltenbreiten: bei automatischer Verteilung nimmt sich jede Spalte so
+     viel, wie ihr längster Wert braucht — zusammen mehr, als der Schirm hergibt.
+     Mit table-layout:fixed hält sich die Tabelle an die Vorgaben und passt. */
+  #tbl-geraete table.lt{table-layout:fixed;width:100%}
+  #tbl-geraete th:first-child,#tbl-geraete td:first-child{width:28px;text-align:center;padding-left:.2rem;padding-right:.2rem}
+  #tbl-geraete th,#tbl-geraete td{font-size:.72rem;padding:.45rem .25rem}
+  #tbl-geraete th{font-size:.47rem}
+  #tbl-wechsler table.lt{table-layout:fixed;width:100%}
+  #tbl-wechsler th:first-child,#tbl-wechsler td:first-child{width:54px}
+  #tbl-wechsler th.mid,#tbl-wechsler td.mid{width:46px}
+  #tbl-wechsler th,#tbl-wechsler td{font-size:.72rem;padding:.45rem .25rem}
+  #tbl-wechsler th{font-size:.47rem}
   .sub-title{font-size:1.1rem}
   .tick{width:20px;height:20px}
   .row .val{font-size:.98rem}
