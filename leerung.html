@@ -231,6 +231,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .modal-overlay.show{display:flex}
 .modal{background:#ffffff;border:1px solid var(--glass-border);border-radius:16px;
   width:100%;max-width:600px;position:relative;box-shadow:0 20px 60px rgba(30,37,50,.25);margin:auto}
+/* Diese Auswahl erscheint über einem anderen Fenster und muss deshalb höher liegen */
+#modal-geber{z-index:600}
 
 /* ══════════ Leerung ══════════════════════════════════════════════════ */
 :root{--acc:#7C3AED;--acc-ink:#5A2FB0;--acc-bg:#F1EAFE;--acc-fg:#DFD2FF;
@@ -1397,8 +1399,9 @@ function wexPick(i,art){
   const z=wexZeilen[i];
   if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderWexZeilen(); return; }
   z.herkunft=art;
-  if(art==='kasse'){ z.geber=''; renderWexZeilen(); }
-  else openGeber('wechsler',i);
+  if(art==='kasse') z.geber='';
+  renderWexZeilen();
+  if(art==='kredit') openGeber('wechsler',i);
 }
 function wexPlus(i){
   wexZeilen.splice(i+1,0,{wert:wexZeilen[i].wert,betrag:'',herkunft:'',geber:''});
@@ -1408,9 +1411,11 @@ function wexPlus(i){
 /* Kreditgeber */
 function openGeber(ziel,index){
   geberZiel={ziel,index};
+  const arr = ziel==='wechsler' ? wexZeilen : planZeilen;
+  const schon = (index!==null && arr[index]) ? arr[index].geber : '';
   const wahl=EXTERN.concat(FILIALEN.filter(f=>f!==lg));
   document.getElementById('geber-list').innerHTML=
-    wahl.map(w=>`<button onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
+    wahl.map(w=>`<button class="${w===schon?'on':''}" onclick="markGeber(this)" data-v="${w}">${NAMEN[w]||w}</button>`).join('');
   openM('modal-geber');
 }
 function markGeber(b){
@@ -1533,8 +1538,9 @@ function planPick(i,art){
   const z=planZeilen[i];
   if(z.herkunft===art){ z.herkunft=''; z.geber=''; renderPlanZeilen(); return; }
   z.herkunft=art;
-  if(art==='kasse'){ z.geber=''; renderPlanZeilen(); }
-  else openGeber('plan',i);
+  if(art==='kasse') z.geber='';
+  renderPlanZeilen();
+  if(art==='kredit') openGeber('plan',i);
 }
 function planPlus(){ planZeilen.push({betrag:'',herkunft:'kasse',geber:''}); renderPlanZeilen(); }
 
