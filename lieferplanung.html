@@ -3596,7 +3596,7 @@ window.changeMonat = async function(m){
   let letzteMeldung = 0;
   function hinweis(){
     const jetzt = Date.now();
-    if(jetzt - letzteMeldung > 600) showToast('Nur-Lese-Modus — Änderungen sind gesperrt.');
+    if(jetzt - letzteMeldung > 600) showToast('Nur-Lese-Modus');
     letzteMeldung = jetzt;
   }
 
