@@ -268,7 +268,6 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
   background:var(--neon-green);border:2px solid #fff;display:flex;align-items:center;
   justify-content:center;color:#fff;font-size:.5rem;font-weight:800;line-height:1}
 .kpi.total .kpi-rg .ok{border-color:var(--ink)}
-.kpi-rg{position:relative}
 .kpi-rg svg.beleg{width:17px;height:17px;fill:none;stroke:var(--c,#5A6980);stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
 .rg-pay{display:flex;align-items:center;gap:.6rem;background:var(--bg2);
@@ -421,7 +420,9 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
   .th-col-einkauf .th-icon,.th-col-liefer .th-icon{display:inline;font-size:1rem}
   .th-col-bestand .th-icon,.th-col-anfang .th-icon{display:none}
   .th-col-bestand .th-text,.th-col-anfang .th-text{display:inline;font-size:.58rem}
-  .num-cell{font-size:.92rem!important;font-weight:700}
+  td.num-cell{font-weight:700}
+  /* Nur Zellen, nicht die Kopfzeilen: sonst werden NETTETAL, BRÜGGEN … riesig */
+  th.num-cell{font-size:.54rem!important;letter-spacing:.04em;line-height:1.25}
   .prod-name{font-size:.88rem;white-space:normal;word-break:break-word}
   .prod-unit{font-size:.66rem}
   .prod-icon{width:26px;height:26px;font-size:.82rem}
@@ -650,13 +651,9 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .text-dim-small{color:var(--text-dim);font-size:.72rem}
 
-/* --- Datei-spezifische Regeln (übernommen, Farben angepasst) --- */
-:root{
-  --bg:#e4e8ef;--bg2:#eef1f6;--bg3:#eef1f6;
-  --neon-cyan:#0891b2;--neon-magenta:#db2777;--neon-yellow:#b45309;--neon-green:#059669;
-  --glass:#e9edf3;--glass-border:#c9d1dc;
-  --text:#1e2532;--text-dim:#616d7d;--header-h:64px;
-}
+/* --- Datei-spezifische Regeln --- */
+/* Hier stand noch ein zweiter :root-Block mit der alten Palette. Er kam später
+   im Stylesheet und hat die neuen Farben stillschweigend überschrieben. */
 @keyframes scan{0%,100%{opacity:.3}
 50%{opacity:1}
 }
