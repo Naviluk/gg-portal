@@ -9,7 +9,7 @@
     // Angemeldet, aber ohne Rechte: zurück auf die Startseite. Ein Sprung zum
     // Portal würde endlos hin und her gehen, weil das Portal die bestehende
     // Sitzung sofort wieder hierher schickt.
-    // Kollege darf mitlesen — Änderungen sperrt der Nur-Lese-Modus weiter unten
+    // Kollege arbeitet hier wie Admin und Einkaufsleiter
     if(['Admin','Einkaufsleiter','Kollege'].indexOf(r)<0){
       location.replace('startseite.html?gesperrt='+encodeURIComponent(document.title.split(' —')[0]));
       return;
@@ -732,14 +732,82 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .cs-hint{font-size:.62rem;color:var(--text-dim);letter-spacing:.02em;margin-top:.1rem}
 
-/* Nur-Lese-Modus: ein ruhiger Hinweis, kein Alarm */
-.nur-lesen{display:none;align-items:center;gap:.4rem;background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:.24rem .7rem;
-  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
-  font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#CFE6F2}
-body.nur-lesen-an .nur-lesen{display:inline-flex}
-.nur-lesen svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;
-  stroke-linecap:round;stroke-linejoin:round}
+/* ══ Neuigkeiten: wer hat was in der Planung getan ════════════════════ */
+.news{max-width:660px;margin:1.2rem auto 0;background:var(--bg2);
+  border:1px solid var(--glass-border);border-radius:16px;overflow:hidden}
+.news-head{display:flex;align-items:center;gap:.5rem;padding:.7rem .9rem;background:var(--bg3)}
+.news-head s{text-decoration:none;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.news-zahl{margin-left:auto;font-family:var(--mono);font-size:.7rem;font-weight:700;color:#fff;
+  background:var(--neon-magenta);border-radius:20px;padding:.12rem .5rem}
+.news-zahl.leer{background:#9AA6B6}
+.n-row{display:flex;align-items:center;gap:.65rem;width:100%;padding:.75rem .9rem;
+  border-top:1px solid var(--glass-border);background:none;border-left:none;border-right:none;
+  border-bottom:none;cursor:pointer;text-align:left;font-family:'Poppins',sans-serif;color:var(--text)}
+.n-row:hover{background:var(--zebra)}
+.n-row.neu{background:#F4FAFD}
+.n-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--neon-magenta)}
+.n-row:not(.neu) .n-dot{background:transparent}
+.n-ava{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:.72rem;font-weight:700;color:#fff}
+.n-mid{flex:1;min-width:0}
+.n-mid b{display:block;font-size:.86rem;font-weight:600;line-height:1.25}
+.n-mid s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim);margin-top:.1rem}
+.n-zeit{font-family:var(--mono);font-size:.68rem;color:var(--text-dim);white-space:nowrap;flex-shrink:0}
+.n-pfeil{color:var(--text-dim);font-size:1rem;flex-shrink:0}
+.n-tag{display:inline-flex;align-items:center;font-size:.56rem;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;border-radius:20px;padding:.12rem .45rem;background:var(--bg3);
+  color:var(--text-dim);margin-left:.35rem;vertical-align:.05em}
+.n-tag.abschluss{background:#E7F7F1;color:#0A7D5F}
+.n-leer{padding:1.3rem;text-align:center;color:var(--text-dim);font-size:.85rem}
+/* Inhalt der Fenster */
+.wer{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid var(--glass-border);
+  border-radius:12px;padding:.7rem .8rem;margin-bottom:.8rem}
+.wer .n-ava{width:34px;height:34px;font-size:.8rem}
+.wer b{font-size:.9rem;font-weight:700;display:block}
+.wer s{text-decoration:none;font-size:.72rem;color:var(--text-dim)}
+.akt{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.akt-row{display:flex;align-items:flex-start;gap:.6rem;padding:.6rem .8rem;
+  border-top:1px solid var(--glass-border);font-size:.85rem}
+.akt-row:first-child{border-top:none}
+.akt-ico{width:24px;height:24px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:.7rem;font-weight:800;color:#fff}
+.akt-ico.plus{background:var(--neon-cyan)}
+.akt-ico.pack{background:#3FA9D4}
+.akt-ico.ok{background:var(--neon-green)}
+.akt-txt b{font-weight:600}
+.akt-txt s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim);margin-top:.05rem}
+.akt-zeit{margin-left:auto;font-family:var(--mono);font-size:.66rem;color:var(--text-dim);flex-shrink:0}
+.gehe{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.8rem;
+  background:#fff;border:1.5px solid var(--neon-cyan);color:var(--neon-cyan);border-radius:12px;
+  padding:.7rem;font-family:'Poppins',sans-serif;font-size:.84rem;font-weight:700;cursor:pointer}
+.gehe:hover{background:#E4F2F8}
+.n-summe{display:flex;align-items:center;gap:.6rem;background:var(--ink);color:#fff;border-radius:12px;
+  padding:.8rem .9rem;margin-bottom:.8rem}
+.n-summe s{text-decoration:none;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;
+  color:#9FB2CE;font-weight:800}
+.n-summe b{margin-left:auto;font-family:var(--mono);font-size:1.15rem;font-weight:700;color:#7EE7C0}
+.n-grp{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;
+  margin-bottom:.6rem}
+.n-grp-h{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;background:#E7ECF4;
+  font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.n-grp-h span{margin-left:auto;font-family:var(--mono);font-size:.74rem;font-weight:700;color:#fff;
+  background:var(--neon-green);border-radius:20px;padding:.1rem .5rem;letter-spacing:0}
+.n-pos{display:flex;align-items:center;gap:.55rem;padding:.5rem .75rem;
+  border-top:1px solid var(--glass-border)}
+.n-pos-nm{font-size:.84rem;font-weight:600}
+.n-pos-nm s{text-decoration:none;color:var(--text-dim);font-size:.7rem;font-weight:500}
+.n-pos-menge{margin-left:auto;font-family:var(--mono);font-size:.86rem;font-weight:700;
+  color:var(--neon-magenta)}
+.teil-hinweis{font-size:.72rem;color:var(--neon-yellow);background:#FFF8EC;border-radius:10px;
+  padding:.5rem .7rem;margin-bottom:.7rem;line-height:1.45}
+textarea.note{width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:12px;
+  padding:.6rem .75rem;font-family:'Poppins',sans-serif;font-size:.86rem;color:var(--text);
+  outline:none;resize:vertical;min-height:74px}
+textarea.note:focus{border-color:var(--neon-cyan)}
+.n-fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800;margin:.9rem 0 .35rem}
+
 /* success toast */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
   background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
@@ -1076,10 +1144,6 @@ body.nur-lesen-an .nur-lesen{display:inline-flex}
     <div class="hdr-page">Liefer<span style="color:#4FD2F5">planung</span></div>
   </div>
   <div class="hdr-right">
-    <span class="nur-lesen" title="Nur-Lese-Modus">
-      <svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
-      Nur Lesen
-    </span>
     <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava">A</span>
       <span id="hdr-username">Admin</span>
       <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
@@ -1174,6 +1238,11 @@ body.nur-lesen-an .nur-lesen{display:inline-flex}
         </button>
       </div>
     </div>
+    <div class="news" id="news" style="display:none">
+      <div class="news-head"><s>Neuigkeiten</s><span class="news-zahl" id="news-zahl"></span></div>
+      <div id="news-liste"></div>
+    </div>
+
     <button class="lp-hub-soll-link" onclick="openHubAction('zentrallager','soll')"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg> Soll-Bestand konfigurieren</button>
   </div>
 
@@ -1206,6 +1275,24 @@ body.nur-lesen-an .nur-lesen{display:inline-flex}
       <thead id="lp-thead"></thead>
       <tbody id="lp-tbody"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- ══ Fenster: einzelne Handlungen ══ -->
+<div class="modal-overlay" id="modal-news" onclick="if(event.target===this)closeM('modal-news')">
+  <div class="pmodal" id="news-modal" style="max-width:560px">
+    <div class="pm-head">
+      <button class="pm-close" onclick="closeM('modal-news')">✕</button>
+      <div class="pm-eyebrow" id="news-eyebrow">Änderung</div>
+      <div class="pm-title"><span id="news-titel">—</span>
+        <span class="pm-lgr" id="news-lager">—</span></div>
+    </div>
+    <div class="pm-body" id="news-body"></div>
+    <div class="pm-foot">
+      <button class="btn btn-ghost" onclick="newsSchliessen()">Schließen</button>
+      <button class="btn btn-acc" style="background:linear-gradient(100deg,#0A7D5F,#12B487)"
+        onclick="newsGeprueft()">✓ Geprüft</button>
+    </div>
   </div>
 </div>
 
@@ -2209,6 +2296,10 @@ window.toggleEkCheck = function(prodId){
   const toSave={};
   Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSave[id]=true; });
   db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
+  const info = artikelInfo(prodId);
+  meldeAktion('zentrallager','einkauf','ok',
+    ekState[prodId].bought ? 'Als gekauft markiert' : 'Haken entfernt',
+    info.name + (info.unit?' '+info.unit:''));
 };
 
 window.openCompleteEinkauf = function(){
@@ -2506,6 +2597,12 @@ window.toggleLiefCheck = function(lg, prodId, type){
   if(packEl){ packEl.className='tick pack'+(liefState[lg][prodId].packed?' on':''); }
   if(delivEl){ delivEl.className='tick'+(liefState[lg][prodId].delivered?' on':''); }
   updateCompleteBtn(lg);
+  const info = artikelInfo(prodId);
+  const an = liefState[lg][prodId][type];
+  meldeAktion(lg,'lieferung', type==='packed'?'pack':'ok',
+    type==='packed' ? (an?'Als gepackt markiert':'Haken „gepackt" entfernt')
+                    : (an?'Als geliefert markiert':'Haken „geliefert" entfernt'),
+    info.name + (info.unit?' '+info.unit:''));
   // Speichern, damit die Galken beim Verlassen/Wiederöffnen der Form erhalten bleiben
   const toSave={};
   Object.entries(liefState[lg]).forEach(([id,st])=>{ if(st.packed||st.delivered) toSave[id]={packed:!!st.packed,delivered:!!st.delivered}; });
@@ -2530,6 +2627,245 @@ function updateCompleteBtn(lg){
 window.openCompleteDelivery = function(){
   weOpenFromAbschluss(currentLiefLager,'lieferung');
 };
+
+/* ══ Neuigkeiten ══════════════════════════════════════════════════════
+   Jede Handlung in der Planung wird in „lp_events" festgehalten. Handlungen
+   derselben Person im selben Bereich sammeln sich fünf Minuten lang in einem
+   Eintrag — erst danach taucht er bei den anderen auf. Gesehen und geprüft
+   wird je Empfänger getrennt vermerkt. */
+const NEWS_PAUSE = 5*60*1000;   // so lange wird gesammelt
+const NEWS_EMPFAENGER = ['Admin','Einkaufsleiter'];
+const NEWS_FARBEN = ['#0E8FB8','#7C3AED','#EA580C','#0C9C77','#D81B7E'];
+let newsListe = [], newsAktuell = null, newsSammler = null;
+
+function artikelInfo(prodId){
+  for(const cat of PRODUCTS){
+    for(const p of cat.items) if(p.id===prodId) return {name:p.name, unit:p.unit||'', kat:cat.cat};
+  }
+  return {name:prodId, unit:'', kat:'Artikel'};
+}
+function ichBin(){
+  const u = window.GG_USER || {};
+  return {name: u.name || 'Unbekannt', rolle: u.role || ''};
+}
+function newsFarbe(name){
+  let x = 0;
+  for(let i=0;i<name.length;i++) x += name.charCodeAt(i);
+  return NEWS_FARBEN[x % NEWS_FARBEN.length];
+}
+function zeitKurz(iso){
+  const d = new Date(iso), jetzt = new Date();
+  const min = Math.round((jetzt - d)/60000);
+  if(min < 60) return 'vor '+Math.max(1,min)+' Min.';
+  if(d.toDateString() === jetzt.toDateString())
+    return d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  const gestern = new Date(jetzt); gestern.setDate(gestern.getDate()-1);
+  const uhr = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  if(d.toDateString() === gestern.toDateString()) return 'gestern, '+uhr;
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+', '+uhr;
+}
+const NEWS_BEREICH = (lager,mode) => mode==='einkauf'
+  ? 'Zentrallager · Einkauf' : (LAGER_NAMES[lager]||lager)+' · Lieferung';
+
+// ── Handlung festhalten ───────────────────────────────────────────────
+async function meldeAktion(lager, mode, art, text, detail){
+  const ich = ichBin();
+  const jetzt = new Date();
+  const eintrag = {art, text, detail:detail||'', zeit:jetzt.toISOString()};
+  try{
+    const passt = newsSammler
+      && newsSammler.lager===lager && newsSammler.mode===mode
+      && (jetzt - new Date(newsSammler.bis)) < NEWS_PAUSE;
+    if(passt){
+      await db.collection('lp_events').doc(newsSammler.id).set({
+        aktionen: firebase.firestore.FieldValue.arrayUnion(eintrag),
+        bis: jetzt.toISOString()
+      },{merge:true});
+      newsSammler.bis = jetzt.toISOString();
+    }else{
+      const ref = await db.collection('lp_events').add({
+        typ:'aktion', wer:ich.name, rolle:ich.rolle, lager, mode,
+        von:jetzt.toISOString(), bis:jetzt.toISOString(),
+        aktionen:[eintrag], gelesen:{}, geprueft:{}
+      });
+      newsSammler = {id:ref.id, lager, mode, bis:jetzt.toISOString()};
+    }
+  }catch(e){ console.warn('Meldung nicht gespeichert:', e.message); }
+}
+
+// Abschlüsse gehen sofort raus — sie sind ein fertiges Ereignis
+async function meldeAbschluss(lager, mode, gebucht, offen){
+  const ich = ichBin();
+  const jetzt = new Date();
+  newsSammler = null;
+  try{
+    await db.collection('lp_events').add({
+      typ:'abschluss', wer:ich.name, rolle:ich.rolle, lager, mode,
+      von:jetzt.toISOString(), bis:jetzt.toISOString(),
+      gebucht, offen: offen||[], notiz:'', gelesen:{}, geprueft:{}
+    });
+  }catch(e){ console.warn('Meldung nicht gespeichert:', e.message); }
+}
+
+// ── Leiste zeichnen ───────────────────────────────────────────────────
+async function ladeNews(){
+  const ich = ichBin();
+  const box = document.getElementById('news');
+  if(!box) return;
+  if(NEWS_EMPFAENGER.indexOf(ich.rolle) < 0){ box.style.display='none'; return; }
+  try{
+    const grenze = new Date(Date.now() - 14*24*3600*1000).toISOString();
+    const snap = await db.collection('lp_events').where('bis','>=',grenze).get();
+    newsListe = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(e => e.wer !== ich.name)
+      .filter(e => !(e.geprueft||{})[ich.name])
+      // Sammel-Einträge erscheinen erst, wenn fünf Minuten Ruhe war
+      .filter(e => e.typ==='abschluss' || (Date.now() - new Date(e.bis)) > NEWS_PAUSE)
+      .sort((a,b)=> (b.bis||'').localeCompare(a.bis||''))
+      .slice(0,30);
+  }catch(e){ console.warn('Neuigkeiten:', e.message); newsListe=[]; }
+  zeichneNews();
+}
+function zeichneNews(){
+  const ich = ichBin();
+  const box = document.getElementById('news');
+  const liste = document.getElementById('news-liste');
+  const zahl = document.getElementById('news-zahl');
+  box.style.display = '';
+  const neu = newsListe.filter(e=>!(e.gelesen||{})[ich.name]).length;
+  zahl.textContent = neu ? neu+' neu' : 'alles gelesen';
+  zahl.classList.toggle('leer', !neu);
+  if(!newsListe.length){
+    liste.innerHTML = '<div class="n-leer">Nichts Neues.</div>';
+    return;
+  }
+  liste.innerHTML = newsListe.map(e=>{
+    const istNeu = !(e.gelesen||{})[ich.name];
+    let titel, sub;
+    if(e.typ==='abschluss'){
+      const n = (e.gebucht||[]).length, o = (e.offen||[]).length;
+      titel = (e.mode==='einkauf'?'Einkauf':'Lieferung')+' abgeschlossen'
+            + '<span class="n-tag abschluss">Abschluss</span>';
+      sub = NEWS_BEREICH(e.lager,e.mode)+' · '+n+' Artikel gebucht'
+          + (o?', '+o+' offen geblieben':'');
+    }else{
+      const a = e.aktionen||[];
+      titel = a.length+' '+(a.length===1?'Änderung':'Änderungen');
+      sub = NEWS_BEREICH(e.lager,e.mode)+' · '+a.slice(0,2).map(x=>x.text).join(', ')
+          + (a.length>2 ? ' …' : '');
+    }
+    return `<button class="n-row${istNeu?' neu':''}" onclick="openNews('${e.id}')">
+      <span class="n-dot"></span>
+      <span class="n-ava" style="background:${newsFarbe(e.wer)}">${e.wer.charAt(0).toUpperCase()}</span>
+      <span class="n-mid"><b>${e.wer} · ${titel}</b><s>${sub}</s></span>
+      <span class="n-zeit">${zeitKurz(e.bis)}</span>
+      <span class="n-pfeil">›</span>
+    </button>`;
+  }).join('');
+}
+
+// ── Fenster ───────────────────────────────────────────────────────────
+window.openNews = function(id){
+  const e = newsListe.find(x=>x.id===id);
+  if(!e) return;
+  newsAktuell = e;
+  document.getElementById('news-eyebrow').textContent =
+    e.typ==='abschluss' ? 'Abgeschlossen' : 'Änderung';
+  document.getElementById('news-titel').textContent =
+    e.mode==='einkauf' ? 'Einkauf' : 'Lieferung';
+  document.getElementById('news-lager').textContent =
+    e.mode==='einkauf' ? 'Zentrallager' : (LAGER_NAMES[e.lager]||e.lager);
+  const d = new Date(e.von), bis = new Date(e.bis);
+  const spanne = e.typ==='aktion' && (bis-d) > 60000
+    ? d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' – '
+      +bis.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})
+    : d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  let html = `<div class="wer">
+    <span class="n-ava" style="background:${newsFarbe(e.wer)}">${e.wer.charAt(0).toUpperCase()}</span>
+    <span><b>${e.wer}</b><s>${e.rolle||'—'} · ${d.toLocaleDateString('de-DE')}, ${spanne}</s></span>
+  </div>`;
+
+  if(e.typ==='aktion'){
+    const ICO = {plus:['plus','＋'], pack:['pack','📦'], ok:['ok','✓']};
+    html += `<label class="n-fl">Was wurde gemacht</label><div class="akt">`;
+    (e.aktionen||[]).forEach(a=>{
+      const ic = ICO[a.art] || ICO.ok;
+      html += `<div class="akt-row">
+        <span class="akt-ico ${ic[0]}">${ic[1]}</span>
+        <span class="akt-txt"><b>${a.text}</b>${a.detail?`<s>${a.detail}</s>`:''}</span>
+        <span class="akt-zeit">${new Date(a.zeit).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</span>
+      </div>`;
+    });
+    html += `</div><button class="gehe" onclick="newsGeheZu()">Zu den Änderungen <span>→</span></button>`;
+  }else{
+    const stk = (e.gebucht||[]).reduce((a,x)=>a+(Number(x.menge)||0),0);
+    if((e.offen||[]).length){
+      html += `<div class="teil-hinweis">Teilweise abgeschlossen — ${(e.offen||[]).length}
+        von ${(e.gebucht||[]).length+(e.offen||[]).length} geplanten Artikeln blieben offen
+        und stehen weiter in der Planung.</div>`;
+    }
+    html += `<div class="n-summe"><s>Gebucht</s><b>${(e.gebucht||[]).length} Artikel · ${stk} St.</b></div>`;
+    const nachKat = {};
+    (e.gebucht||[]).forEach(x=>{ (nachKat[x.kat||'Artikel'] = nachKat[x.kat||'Artikel']||[]).push(x); });
+    html += `<label class="n-fl">Was gebucht wurde</label>`;
+    Object.entries(nachKat).forEach(([kat,items])=>{
+      const summe = items.reduce((a,x)=>a+(Number(x.menge)||0),0);
+      html += `<div class="n-grp"><div class="n-grp-h">${kat}<span>${summe} St.</span></div>`
+        + items.map(x=>`<div class="n-pos">
+            <span class="n-pos-nm">${x.name}${x.unit?` <s>${x.unit}</s>`:''}</span>
+            <span class="n-pos-menge">${x.menge}</span></div>`).join('')
+        + `</div>`;
+    });
+    if((e.offen||[]).length){
+      html += `<div class="n-grp"><div class="n-grp-h" style="background:#FFF8EC;color:var(--neon-yellow)">
+        Offen geblieben<span style="background:var(--neon-yellow)">${e.offen.length}</span></div>`
+        + e.offen.map(x=>`<div class="n-pos" style="background:#FFF8EC">
+            <span class="n-pos-nm">${x.name}${x.unit?` <s>${x.unit}</s>`:''}</span>
+            <span class="n-pos-menge" style="color:var(--text-dim)">${x.menge}</span></div>`).join('')
+        + `</div>`;
+    }
+    html += `<label class="n-fl">Notiz für später</label>
+      <textarea class="note" id="news-notiz" placeholder="z. B. „Red Bull fehlte im Lager — in Bestände nachtragen“">${e.notiz||''}</textarea>
+      <p class="hint" style="margin-top:.5rem">Die Buchung selbst ist bereits in den Beständen.
+        Die Notiz bleibt hier stehen, bis jemand sie abgearbeitet hat.</p>`;
+  }
+  document.getElementById('news-body').innerHTML = html;
+  document.getElementById('modal-news').classList.add('show');
+};
+
+async function newsMerken(feld){
+  if(!newsAktuell) return;
+  const ich = ichBin();
+  const daten = {};
+  daten[feld] = Object.assign({}, newsAktuell[feld]||{});
+  daten[feld][ich.name] = true;
+  const notizEl = document.getElementById('news-notiz');
+  if(notizEl) daten.notiz = notizEl.value;
+  try{
+    await db.collection('lp_events').doc(newsAktuell.id).set(daten,{merge:true});
+    Object.assign(newsAktuell, daten);
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+window.newsSchliessen = async function(){
+  await newsMerken('gelesen');
+  closeM('modal-news');
+  zeichneNews();
+};
+window.newsGeprueft = async function(){
+  await newsMerken('geprueft');
+  newsListe = newsListe.filter(x=>x.id!==newsAktuell.id);
+  closeM('modal-news');
+  zeichneNews();
+  showToast('Als geprüft vermerkt ✓');
+};
+window.newsGeheZu = async function(){
+  const e = newsAktuell;
+  await newsMerken('gelesen');
+  closeM('modal-news');
+  if(e.mode==='einkauf') openEinkaeufe();
+  else { currentLiefLager = e.lager; openLieferungen(); }
+};
+function closeM(id){ document.getElementById(id).classList.remove('show'); }
 
 // ══════════════ WARENEINGANG MODAL (gemeinsame Form, wie auf lager.html) ══════════════
 // Einheitliche Logik für Einkäufe (Zentrallager) und Lieferungen (Filialen):
@@ -2934,8 +3270,20 @@ window.confirmWareneingang = async function(){
   };
   if(weLpMode==='einkauf' && activeShops.length) entry.shops = activeShops;
 
+  // Was gebucht wird und was in der Planung stehen bleibt — für die Neuigkeiten
+  const gebuchtListe = ids.map(id=>{
+    const info = artikelInfo(id);
+    return {name:info.name, unit:info.unit, kat:info.kat, menge:Number(weSelectedItems[id])||0};
+  });
+  const geplantAlle = planData[lager] || {};
+  const offenListe = Object.keys(geplantAlle)
+    .filter(id => ids.indexOf(id) < 0 && Number(geplantAlle[id])>0)
+    .map(id=>{ const info=artikelInfo(id);
+      return {name:info.name, unit:info.unit, menge:Number(geplantAlle[id])||0}; });
+
   try{
     await db.collection('wareneingang').add(entry);
+    await meldeAbschluss(lager, weLpMode, gebuchtListe, offenListe);
 
     if(weLpMode==='einkauf'){
       // Zentrallager-Einkauf: NUR die soeben bestätigten (als gekauft markierten)
@@ -3438,6 +3786,12 @@ window.addArtikelDirekt = async function(){
       lager:currentLager, monat, datum, items:planData[currentLager], type:planType,
       updatedAt:new Date().toISOString()
     });
+    // Für die Neuigkeiten festhalten, was ergänzt wurde
+    for(const [id,menge] of Object.entries(items)){
+      const info = artikelInfo(id);
+      await meldeAktion(currentLager, planType, 'plus', 'Artikel ergänzt',
+        info.name + (info.unit?' '+info.unit:'') + ' · ' + menge + ' St.');
+    }
     showToast('Artikel hinzugefügt ✓');
     closePlan();
     // Die gerade geöffnete Ansicht sofort aktualisieren
@@ -3549,6 +3903,10 @@ document.addEventListener('DOMContentLoaded', async function(){
   // Kacheln sollen schon beim Öffnen zeigen, was geplant ist — dafür reicht die
   // Planungs-Sammlung. Die schwere Bestandsrechnung läuft erst beim Öffnen einer Kachel.
   await ladePlanung();
+  ladeNews();
+  // Gesammelte Meldungen werden erst nach fünf Minuten Ruhe sichtbar —
+  // deshalb hin und wieder nachsehen, ohne die Seite neu zu laden.
+  setInterval(ladeNews, 60*1000);
 });
 
 // Nur lp_planung lesen: eine Abfrage, keine Monatsketten, kein Wartekreis.
@@ -3583,44 +3941,6 @@ window.changeMonat = async function(m){
 };
 
 // ── ПОЛЬЗОВАТЕЛЬ ИЗ СЕССИИ ──
-
-/* ══ Nur-Lese-Modus ═══════════════════════════════════════════════════
-   Kollegen dürfen die Planung ansehen, aber nichts verändern. Statt jede
-   Schaltfläche einzeln zu entschärfen, werden hier die ändernden Funktionen
-   ersetzt — ansehen, aufklappen und umschalten bleibt erlaubt. */
-(function(){
-  const rolle = (window.GG_USER||{}).role;
-  if(rolle!=='Kollege') return;
-  document.body.classList.add('nur-lesen-an');
-
-  let letzteMeldung = 0;
-  function hinweis(){
-    const jetzt = Date.now();
-    if(jetzt - letzteMeldung > 600) showToast('Nur-Lese-Modus');
-    letzteMeldung = jetzt;
-  }
-
-  const gesperrt = ['openPlanForm','openPlanFormFromPanel','addArtikelDirekt','savePlan',
-    'openPlanConfirm','toggleEkCheck','toggleLiefCheck','openEkDetail','confirmEkDetail',
-    'setEkShop','openSoll','saveSoll','toggleSollProd','updateSollQty','switchSollLager',
-    'openCompleteEinkauf','openCompleteDelivery','openLiefGeplModal','saveLiefGepl',
-    'checkListAction','buildConfirm','confirmWareneingang','toggleWeProd','updateWeQty',
-    'addShopRow','removeShopRow','weShopAdd','weShopEdit','weShopRemove','weSetDate',
-    'openHubActionSoll'];
-  gesperrt.forEach(name=>{
-    if(typeof window[name] === 'function'){
-      window[name] = function(){ hinweis(); return false; };
-    }
-  });
-
-  // Eingabefelder in Fenstern und Schubladen sind ebenfalls tabu
-  document.addEventListener('focusin', e=>{
-    const el = e.target;
-    if(el.matches && el.matches('input, textarea') && !el.closest('.lager-controls, .lp-bar')){
-      el.blur(); hinweis();
-    }
-  }, true);
-})();
 
 document.addEventListener('DOMContentLoaded', function(){
   const user = window.GG_USER;
