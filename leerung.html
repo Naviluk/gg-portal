@@ -552,6 +552,88 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
   color:var(--text-dim);cursor:pointer}
 .seg2 button.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
 
+/* Liste der erfassten Einträge */
+.ei-row{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid var(--glass-border);
+  border-radius:12px;padding:.65rem .75rem;margin-bottom:.5rem}
+.ei-row .nm{font-size:.88rem;font-weight:600;min-width:0}
+.ei-row .nm s{display:block;text-decoration:none;font-size:.7rem;color:var(--text-dim);font-weight:500}
+.ei-row .val{margin-left:auto;font-family:var(--mono);font-size:.9rem;font-weight:700;
+  white-space:nowrap;flex-shrink:0}
+.ei-row .weg,.ei-row .stift{width:30px;height:30px;flex-shrink:0}
+.ei-typ{font-size:.54rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:20px;padding:.12rem .45rem;background:var(--acc-bg);color:var(--acc-ink);
+  margin-left:.35rem;vertical-align:.08em}
+
+/* ══ Neuigkeiten: was in der Leerung passiert ist ═════════════════════ */
+.news{margin-top:1.1rem;background:var(--bg2);border:1px solid var(--glass-border);
+  border-radius:16px;overflow:hidden}
+.news-head{display:flex;align-items:center;gap:.5rem;padding:.7rem .9rem;background:var(--bg3)}
+.news-head s{text-decoration:none;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.news-zahl{margin-left:auto;font-family:var(--mono);font-size:.7rem;font-weight:700;color:#fff;
+  background:var(--neon-magenta);border-radius:20px;padding:.12rem .5rem}
+.news-zahl.leer{background:#9AA6B6}
+.n-row{display:flex;align-items:center;gap:.65rem;width:100%;padding:.75rem .9rem;
+  border-top:1px solid var(--glass-border);background:none;border-left:none;border-right:none;
+  border-bottom:none;cursor:pointer;text-align:left;font-family:'Poppins',sans-serif;color:var(--text)}
+.n-row:hover{background:var(--zebra)}
+.n-row.neu{background:#F4FAFD}
+.n-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--neon-magenta)}
+.n-row:not(.neu) .n-dot{background:transparent}
+.n-ava{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:.72rem;font-weight:700;color:#fff}
+.n-mid{flex:1;min-width:0}
+.n-mid b{display:block;font-size:.86rem;font-weight:600;line-height:1.25}
+.n-mid s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim);margin-top:.1rem}
+.n-zeit{font-family:var(--mono);font-size:.68rem;color:var(--text-dim);white-space:nowrap;flex-shrink:0}
+.n-pfeil{color:var(--text-dim);font-size:1rem;flex-shrink:0}
+.n-tag{display:inline-flex;align-items:center;font-size:.56rem;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;border-radius:20px;padding:.12rem .45rem;margin-left:.35rem;
+  vertical-align:.05em;background:var(--bg3);color:var(--text-dim)}
+.n-tag.geld{background:#FDE8EE;color:#A5103A}
+.n-tag.leerung{background:#F1EAFE;color:#5A2FB0}
+.n-leer{padding:1.3rem;text-align:center;color:var(--text-dim);font-size:.85rem}
+.wer{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid var(--glass-border);
+  border-radius:12px;padding:.7rem .8rem;margin-bottom:.8rem}
+.wer .n-ava{width:34px;height:34px;font-size:.8rem}
+.wer b{font-size:.9rem;font-weight:700;display:block}
+.wer s{text-decoration:none;font-size:.72rem;color:var(--text-dim)}
+.akt{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.akt-row{display:flex;align-items:flex-start;gap:.6rem;padding:.6rem .8rem;
+  border-top:1px solid var(--glass-border);font-size:.85rem}
+.akt-row:first-child{border-top:none}
+.akt-ico{width:24px;height:24px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:.68rem;font-weight:800;color:#fff}
+.akt-ico.neu{background:#8258E8}
+.akt-ico.geld{background:var(--neon-green)}
+.akt-ico.minus{background:var(--rot)}
+.akt-ico.tausch{background:var(--neon-cyan)}
+.akt-txt{min-width:0}
+.akt-txt b{font-weight:600}
+.akt-txt s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim);margin-top:.05rem}
+.akt-wert{margin-left:auto;font-family:var(--mono);font-size:.86rem;font-weight:700;
+  white-space:nowrap;flex-shrink:0;text-align:right}
+.akt-wert.minus{color:var(--rot)}
+.akt-wert.plus{color:var(--neon-green)}
+.akt-wert i{font-style:normal;display:block;font-size:.64rem;color:var(--text-dim);font-weight:500}
+.gehe{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.8rem;
+  background:#fff;border:1.5px solid var(--acc);color:var(--acc);border-radius:12px;padding:.7rem;
+  font-family:'Poppins',sans-serif;font-size:.84rem;font-weight:700;cursor:pointer}
+.gehe:hover{background:var(--acc-bg)}
+.zus{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.zus div{background:#fff;border:1px solid var(--glass-border);border-radius:12px;padding:.6rem .7rem}
+.zus s{text-decoration:none;display:block;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.zus b{display:block;font-family:var(--mono);font-size:1rem;font-weight:700;margin-top:.15rem}
+.zus .gesamt{grid-column:1 / -1;background:var(--ink);border-color:var(--ink)}
+.zus .gesamt s{color:#9FB2CE}
+.zus .gesamt b{color:#7EE7C0;font-size:1.25rem}
+textarea.note{width:100%;background:#fff;border:1px solid var(--glass-border);border-radius:12px;
+  padding:.6rem .75rem;font-family:'Poppins',sans-serif;font-size:.86rem;color:var(--text);
+  outline:none;resize:vertical;min-height:70px}
+textarea.note:focus{border-color:var(--acc)}
+@media(max-width:640px){.zus{grid-template-columns:1fr}}
+
 /* Notausgang: passt eine Tabelle doch nicht, wird sie seitlich rollbar,
    statt aus der Seite herauszuragen. */
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
@@ -686,6 +768,11 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
       <div id="hub-bank"></div>
     </div>
     <div class="tiles" id="hub-tiles"></div>
+
+    <div class="news" id="news" style="display:none">
+      <div class="news-head"><s>Neuigkeiten</s><span class="news-zahl" id="news-zahl"></span></div>
+      <div id="news-liste"></div>
+    </div>
   </div>
 
   <!-- ══ Filiale ══ -->
@@ -709,6 +796,7 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
     <div class="box">
       <div class="box-head">
         <div class="date-sel"><select id="sel-datum" onchange="setDatum(this.value)"></select></div>
+        <button class="mini-add" style="margin:0" onclick="openEintraege()" title="Erfasstes ändern">✎</button>
         <button class="btn-add" onclick="openLeerung()">
           <svg viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></svg>Leerung
         </button>
@@ -821,6 +909,38 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-leerung')">Abbrechen</button>
       <button class="btn b-acc" onclick="saveLeerung()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Erfasstes ändern ══ -->
+<div class="modal-overlay" id="modal-eintraege" onclick="if(event.target===this)closeM('modal-eintraege')">
+  <div class="modal" style="max-width:520px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-eintraege')">✕</button>
+      <div class="dlg-eyebrow">Ändern</div>
+      <div class="dlg-title">Erfasste Einträge <span class="dlg-pill" id="ei-lg">—</span></div>
+    </div>
+    <div class="dlg-body" id="ei-liste"></div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('modal-eintraege')">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Meldung ══ -->
+<div class="modal-overlay" id="modal-news" onclick="if(event.target===this)closeM('modal-news')">
+  <div class="modal" style="max-width:540px;width:100%" id="news-modal">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-news')">✕</button>
+      <div class="dlg-eyebrow" id="news-eyebrow">Änderung</div>
+      <div class="dlg-title"><span id="news-titel">—</span>
+        <span class="dlg-pill" id="news-lager">—</span></div>
+    </div>
+    <div class="dlg-body" id="news-body"></div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="newsSchliessen()">Schließen</button>
+      <button class="btn b-green" onclick="newsGeprueft()">✓ Geprüft</button>
     </div>
   </div>
 </div>
@@ -1305,6 +1425,215 @@ async function vormonatWert(){
   }catch(e){ return {s:0,m:0,leer:true}; }
 }
 
+/* ══ Neuigkeiten ══════════════════════════════════════════════════════
+   Jede Handlung wandert nach „leerung_events". Handlungen derselben Person in
+   derselben Filiale sammeln sich fünf Minuten lang; erst danach erscheint der
+   Eintrag. Empfänger ist allein der Admin. */
+const NEWS_PAUSE = 5*60*1000;
+const NEWS_EMPFAENGER = ['Admin'];
+const NEWS_FARBEN = ['#0E8FB8','#7C3AED','#EA580C','#0C9C77','#D81B7E'];
+let newsListe = [], newsAktuell = null, newsSammler = null;
+
+function ichBin(){
+  const u = window.GG_USER || {};
+  return {name: u.name || 'Unbekannt', rolle: u.role || ''};
+}
+function newsFarbe(name){
+  let x = 0;
+  for(let i=0;i<name.length;i++) x += name.charCodeAt(i);
+  return NEWS_FARBEN[x % NEWS_FARBEN.length];
+}
+function zeitKurz(iso){
+  const d = new Date(iso), jetzt = new Date();
+  const min = Math.round((jetzt - d)/60000);
+  if(min < 60) return 'vor '+Math.max(1,min)+' Min.';
+  const uhr = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  if(d.toDateString() === jetzt.toDateString()) return uhr;
+  const gestern = new Date(jetzt); gestern.setDate(gestern.getDate()-1);
+  if(d.toDateString() === gestern.toDateString()) return 'gestern, '+uhr;
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+', '+uhr;
+}
+
+// ── Handlung festhalten ───────────────────────────────────────────────
+// art: neu | geld | minus | tausch · wert und zusatz sind freiwillig
+async function melde(art, text, detail, wert, extra){
+  const ich = ichBin();
+  const jetzt = new Date();
+  const eintrag = {art, text, detail:detail||'', wert:(wert===undefined?null:wert),
+                   zeit:jetzt.toISOString()};
+  try{
+    const passt = newsSammler && newsSammler.lager===lg
+      && (jetzt - new Date(newsSammler.bis)) < NEWS_PAUSE;
+    if(passt){
+      const daten = {
+        aktionen: firebase.firestore.FieldValue.arrayUnion(eintrag),
+        bis: jetzt.toISOString()
+      };
+      if(extra) Object.assign(daten, extra);
+      await db.collection('leerung_events').doc(newsSammler.id).set(daten,{merge:true});
+      newsSammler.bis = jetzt.toISOString();
+    }else{
+      const daten = {
+        wer:ich.name, rolle:ich.rolle, lager:lg, monat,
+        von:jetzt.toISOString(), bis:jetzt.toISOString(),
+        aktionen:[eintrag], notiz:'', gelesen:{}, geprueft:{}
+      };
+      if(extra) Object.assign(daten, extra);
+      const ref = await db.collection('leerung_events').add(daten);
+      newsSammler = {id:ref.id, lager:lg, bis:jetzt.toISOString()};
+    }
+  }catch(e){ console.warn('Meldung nicht gespeichert:', e.message); }
+}
+
+// ── Leiste ────────────────────────────────────────────────────────────
+async function ladeNews(){
+  const ich = ichBin();
+  const box = document.getElementById('news');
+  if(!box) return;
+  if(NEWS_EMPFAENGER.indexOf(ich.rolle) < 0){ box.style.display='none'; return; }
+  try{
+    const grenze = new Date(Date.now() - 14*24*3600*1000).toISOString();
+    const snap = await db.collection('leerung_events').where('bis','>=',grenze).get();
+    newsListe = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(e => e.wer !== ich.name)
+      .filter(e => !(e.geprueft||{})[ich.name])
+      .filter(e => (Date.now() - new Date(e.bis)) > NEWS_PAUSE)
+      .sort((a,b)=> (b.bis||'').localeCompare(a.bis||''))
+      .slice(0,30);
+  }catch(e){ console.warn('Neuigkeiten:', e.message); newsListe=[]; }
+  zeichneNews();
+}
+function zeichneNews(){
+  const ich = ichBin();
+  const box = document.getElementById('news');
+  const liste = document.getElementById('news-liste');
+  const zahl = document.getElementById('news-zahl');
+  if(!box) return;
+  box.style.display = '';
+  const neu = newsListe.filter(e=>!(e.gelesen||{})[ich.name]).length;
+  zahl.textContent = neu ? neu+' neu' : 'alles gelesen';
+  zahl.classList.toggle('leer', !neu);
+  if(!newsListe.length){
+    liste.innerHTML = '<div class="n-leer">Nichts Neues.</div>';
+    return;
+  }
+  liste.innerHTML = newsListe.map(e=>{
+    const istNeu = !(e.gelesen||{})[ich.name];
+    const a = e.aktionen||[];
+    const geld = a.some(x=>x.art==='geld'||x.art==='minus'||x.art==='tausch');
+    const tag = e.leerung ? '<span class="n-tag leerung">Leerung</span>'
+              : geld ? '<span class="n-tag geld">Kasse</span>' : '';
+    const titel = e.leerung ? 'Neue Leerung erfasst'
+                : a.length+' '+(a.length===1?'Änderung':'Änderungen');
+    const sub = (NAMEN[e.lager]||e.lager)+' · '
+              + a.slice(0,2).map(x=>x.text).join(', ') + (a.length>2?' …':'');
+    return `<button class="n-row${istNeu?' neu':''}" onclick="openNews('${e.id}')">
+      <span class="n-dot"></span>
+      <span class="n-ava" style="background:${newsFarbe(e.wer)}">${e.wer.charAt(0).toUpperCase()}</span>
+      <span class="n-mid"><b>${e.wer} · ${titel}${tag}</b><s>${sub}</s></span>
+      <span class="n-zeit">${zeitKurz(e.bis)}</span>
+      <span class="n-pfeil">›</span>
+    </button>`;
+  }).join('');
+}
+
+// ── Fenster ───────────────────────────────────────────────────────────
+window.openNews = function(id){
+  const e = newsListe.find(x=>x.id===id);
+  if(!e) return;
+  newsAktuell = e;
+  const m = document.getElementById('news-modal');
+  const f = FARBEN[e.lager] || FARBEN.nettetal;
+  m.style.setProperty('--acc', f.t1);
+  m.style.setProperty('--acc-bg', '#F3F6FA');
+  document.getElementById('news-eyebrow').textContent = e.leerung ? 'Erfasst' : 'Änderung';
+  document.getElementById('news-titel').textContent = e.leerung ? 'Neue Leerung' : 'Kasse';
+  document.getElementById('news-lager').textContent = NAMEN[e.lager]||e.lager;
+  document.getElementById('news-lager').style.background = f.t1;
+
+  const von = new Date(e.von), bis = new Date(e.bis);
+  const spanne = (bis-von) > 60000
+    ? von.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' – '
+      +bis.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})
+    : von.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+
+  let html = `<div class="wer">
+    <span class="n-ava" style="background:${newsFarbe(e.wer)}">${e.wer.charAt(0).toUpperCase()}</span>
+    <span><b>${e.wer}</b><s>${e.rolle||'—'} · ${von.toLocaleDateString('de-DE')}, ${spanne}</s></span>
+  </div>`;
+
+  if(e.leerung){
+    const z = e.leerung;
+    html += `<label class="fl">Leerung vom ${dmy(z.datum)}</label>
+      <div class="zus">
+        <div><s>Geräte</s><b>${eur(z.ger)}</b></div>
+        <div><s>Getränke</s><b>${eur(z.getr)}</b></div>
+        <div><s>Wechsler</s><b${z.wex<0?' style="color:var(--rot)"':''}>${z.wex<0?'−':''}${eur(Math.abs(z.wex))}</b></div>
+        <div><s>Scheine / Münzen</s><b>${zahl(z.scheine)} / ${zahl(z.muenzen)}</b></div>
+        <div class="gesamt"><s>Gesamt</s><b>${eur(z.gesamt)}</b></div>
+      </div>`;
+    if((z.hinweise||[]).length){
+      html += `<label class="fl">Auffälligkeiten</label><div class="akt">`
+        + z.hinweise.map(h=>`<div class="akt-row">
+            <span class="akt-ico ${h.art||'minus'}">!</span>
+            <span class="akt-txt"><b>${h.text}</b>${h.detail?`<s>${h.detail}</s>`:''}</span>
+          </div>`).join('') + `</div>`;
+    }
+  }else{
+    html += `<label class="fl">Was wurde gemacht</label><div class="akt">`;
+    (e.aktionen||[]).forEach(a=>{
+      const ZEI = {neu:'＋', geld:'€', minus:'↗', tausch:'⇄'};
+      const wert = (a.wert===null||a.wert===undefined) ? ''
+        : `<span class="akt-wert${a.art==='minus'?' minus':''}">${a.art==='minus'?'−':''}${eur(Math.abs(a.wert))}`
+          + `<i>${new Date(a.zeit).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</i></span>`;
+      html += `<div class="akt-row">
+        <span class="akt-ico ${a.art}">${ZEI[a.art]||'•'}</span>
+        <span class="akt-txt"><b>${a.text}</b>${a.detail?`<s>${a.detail}</s>`:''}</span>
+        ${wert || `<span class="akt-wert"><i>${new Date(a.zeit).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</i></span>`}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `<button class="gehe" onclick="newsGeheZu()">Zur Filiale <span>→</span></button>
+    <label class="fl">Notiz für später</label>
+    <textarea class="note" id="news-notiz">${e.notiz||''}</textarea>`;
+  document.getElementById('news-body').innerHTML = html;
+  openM('modal-news');
+};
+
+async function newsMerken(feld){
+  if(!newsAktuell) return;
+  const ich = ichBin();
+  const daten = {};
+  daten[feld] = Object.assign({}, newsAktuell[feld]||{});
+  daten[feld][ich.name] = true;
+  const notizEl = document.getElementById('news-notiz');
+  if(notizEl) daten.notiz = notizEl.value;
+  try{
+    await db.collection('leerung_events').doc(newsAktuell.id).set(daten,{merge:true});
+    Object.assign(newsAktuell, daten);
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+window.newsSchliessen = async function(){
+  await newsMerken('gelesen');
+  closeM('modal-news');
+  zeichneNews();
+};
+window.newsGeprueft = async function(){
+  await newsMerken('geprueft');
+  newsListe = newsListe.filter(x=>x.id!==newsAktuell.id);
+  closeM('modal-news');
+  zeichneNews();
+  showToast('Als geprüft vermerkt ✓');
+};
+window.newsGeheZu = async function(){
+  const e = newsAktuell;
+  await newsMerken('gelesen');
+  closeM('modal-news');
+  setLg(e.lager);
+  show('v-main');
+};
+
 /* ══ Startansicht ════════════════════════════════════════════════════ */
 async function ladeHub(){
   showSpinner();
@@ -1366,9 +1695,11 @@ async function ladeHub(){
 let datumWahl = '';
 const DATUM_SELECTS = ['sel-datum','sel-datum-g','sel-datum-w','sel-datum-t'];
 function fillDatumSelects(){
+  // Ein Tag, eine Zeile — auch wenn an dem Tag mehrfach erfasst wurde
+  const tage = [...new Set(leerungen.map(l=>l.datum).filter(Boolean))].sort();
   const opts = ['<option value="">Ganzer Monat</option>']
-    .concat(leerungen.map(l=>`<option value="${l.id}">${dmy(l.datum)}</option>`)).join('');
-  if(datumWahl && !leerungen.some(l=>l.id===datumWahl)) datumWahl='';
+    .concat(tage.map(d=>`<option value="${d}">${dmy(d)}</option>`)).join('');
+  if(datumWahl && tage.indexOf(datumWahl) < 0) datumWahl='';
   DATUM_SELECTS.forEach(id=>{
     const el=document.getElementById(id); if(!el) return;
     el.innerHTML=opts;
@@ -1383,7 +1714,7 @@ function setDatum(v){
   renderMain(); renderGeraete(); renderWechsler(); renderGetraenke();
 }
 function auswahl(){
-  return datumWahl ? leerungen.filter(l=>l.id===datumWahl) : leerungen;
+  return datumWahl ? leerungen.filter(l=>l.datum===datumWahl) : leerungen;
 }
 
 /* ══ Filialansicht ═══════════════════════════════════════════════════ */
@@ -1555,9 +1886,17 @@ function renderGeraete(){
 function renderWechsler(){
   const liste=auswahl();
   const su=summen(liste);
-  const zeilen=[];
-  liste.forEach(l=>(l.wechslerIn||[]).forEach(w=>zeilen.push(w)));
-  zeilen.sort((a,b)=>Number(b.wert)-Number(a.wert));
+  // Zeilen mit gleicher Stückelung und gleicher Herkunft werden zusammengefasst:
+  // aus der Kasse eine Zeile, je Geldgeber eine weitere.
+  const gebuendelt = {};
+  liste.forEach(l=>(l.wechslerIn||[]).forEach(w=>{
+    const herkunft = w.herkunft==='kredit' ? 'kredit' : 'kasse';
+    const key = w.wert+'|'+herkunft+'|'+(herkunft==='kredit' ? (w.geber||'') : '');
+    if(!gebuendelt[key]) gebuendelt[key] = {wert:w.wert, herkunft, geber:w.geber||'', betrag:0};
+    gebuendelt[key].betrag += Number(w.betrag)||0;
+  }));
+  const zeilen = Object.values(gebuendelt)
+    .sort((a,b)=> Number(b.wert)-Number(a.wert) || a.herkunft.localeCompare(b.herkunft));
   const rows=zeilen.length ? zeilen.map((w,i)=>`<tr${i%2?' class="zeb"':''}>
       <td>${w.wert} €</td>
       <td class="mid"><span class="tick${w.herkunft==='kasse'?' on':''}">✓</span></td>
@@ -1617,10 +1956,13 @@ function setMonat(v){
 let wexZeilen=[];   // {wert,betrag,herkunft,geber}
 let geberZiel=null; // wohin die Auswahl des Kreditgebers zurückfließt
 
-function openLeerung(){
+let leerungEditId=null;
+function openLeerung(id){
+  leerungEditId = id || null;
+  const alt = leerungEditId ? leerungen.find(x=>x.id===leerungEditId) : null;
   document.getElementById('dlg-lg').textContent=NAMEN[lg];
-  document.getElementById('le-datum').value=heute();
-  document.getElementById('le-aus').value='';
+  document.getElementById('le-datum').value = alt ? alt.datum : heute();
+  document.getElementById('le-aus').value = alt && alt.wechslerAus ? zahl(alt.wechslerAus) : '';
   let g='<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>';
   geraeteListe().forEach(i=>{
     g+=`<span class="gn${istExtra(i)?' g-extra':''}">Gerät ${i}</span>
@@ -1632,7 +1974,22 @@ function openLeerung(){
     <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" placeholder="—">
     <span class="gn">Getränkeautomat</span><input id="ge-getr" inputmode="decimal" placeholder="—">
     <span class="gn">Snack</span><input id="ge-snack" inputmode="decimal" placeholder="—">`;
-  wexZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
+  if(alt){
+    // Vorhandene Werte in die Felder zurückschreiben
+    Object.entries(alt.geraete||{}).forEach(([nr,w])=>{
+      const fs=document.getElementById('ge-s-'+nr), fm=document.getElementById('ge-m-'+nr);
+      if(fs && w.s) fs.value=zahl(w.s);
+      if(fm && w.m) fm.value=zahl(w.m);
+    });
+    const gt=alt.getraenke||{};
+    if(gt.kaffee) document.getElementById('ge-kaffee').value=zahl(gt.kaffee);
+    if(gt.getraenke) document.getElementById('ge-getr').value=zahl(gt.getraenke);
+    if(gt.snack) document.getElementById('ge-snack').value=zahl(gt.snack);
+  }
+  wexZeilen = (alt && (alt.wechslerIn||[]).length)
+    ? alt.wechslerIn.map(w=>({wert:w.wert, betrag:zahl(w.betrag),
+        herkunft:w.herkunft||'kasse', geber:w.geber||''}))
+    : NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
   renderWexZeilen();
   openM('modal-leerung');
 }
@@ -1768,7 +2125,14 @@ async function saveLeerung(){
   };
   showSpinner();
   try{
-    await db.collection('leerung').add(eintrag);
+    if(leerungEditId){
+      await db.collection('leerung').doc(leerungEditId).set(eintrag);
+      const altK = kredite.filter(k=>k.zweck==='wechsler' && k.datum===datum
+        && k.nehmer===lg && !k.getilgtAm);
+      for(const k of altK) await db.collection('leerung_kredit').doc(k.id).delete();
+    }else{
+      await db.collection('leerung').add(eintrag);
+    }
     // Kredite aus der Wechsler-Einlage getrennt festhalten
     for(const z of wIn.filter(x=>x.herkunft==='kredit')){
       await db.collection('leerung_kredit').add({
@@ -1779,6 +2143,27 @@ async function saveLeerung(){
         getilgtAm:null, getilgtArt:null
       });
     }
+    // Für die Meldung: Zusammenfassung und das, was auffällt
+    const su = summen([eintrag]);
+    const hinweise = [];
+    const kredSumme = wIn.filter(z=>z.herkunft==='kredit')
+      .reduce((a,z)=>a+(Number(z.betrag)||0),0);
+    if(kredSumme){
+      const geber=[...new Set(wIn.filter(z=>z.herkunft==='kredit')
+        .map(z=>NAMEN[z.geber]||z.geber))].join(', ');
+      hinweise.push({art:'minus', text:'Kredit im Wechsler',
+        detail: eur(kredSumme)+' von '+geber+' — als Schuld erfasst'});
+    }
+    const leere = geraeteListe().filter(i=>!geraete[i]);
+    if(leere.length) hinweise.push({art:'geld',
+      text: leere.length===1 ? 'Gerät '+leere[0]+' ohne Eintrag'
+                             : leere.length+' Geräte ohne Eintrag',
+      detail: leere.length>1 ? 'Nr. '+leere.join(', ') : 'weder Scheine noch Münzen'});
+    await melde('neu', leerungEditId ? 'Leerung geändert' : 'Leerung erfasst',
+      dmy(datum)+' · '+eur(su.gesamt), su.gesamt, {
+      leerung:{datum, ger:su.ger, getr:su.getr, wex:su.wex,
+               scheine:su.scheine, muenzen:su.muenzen, gesamt:su.gesamt, hinweise}
+    });
     closeM('modal-leerung');
     showToast('Leerung gespeichert ✓');
     await ladeFiliale();
@@ -1786,15 +2171,69 @@ async function saveLeerung(){
   hideSpinner();
 }
 
+/* ══ Erfasstes ändern ═════════════════════════════════════════════════
+   Jeder gespeicherte Eintrag lässt sich noch einmal öffnen und überschreiben
+   oder löschen. Beim Löschen verschwinden auch die Kredite, die mit diesem
+   Eintrag entstanden sind — sonst bliebe eine Schuld ohne Ursache stehen. */
+function openEintraege(){
+  document.getElementById('ei-lg').textContent = NAMEN[lg];
+  const box = document.getElementById('ei-liste');
+  const liste = leerungen.slice().sort((a,b)=>(b.datum||'').localeCompare(a.datum||''));
+  box.innerHTML = liste.length ? liste.map(l=>{
+    const su = summen([l]);
+    const nurW = l.nurWechsler;
+    return `<div class="ei-row">
+      <span class="nm">${dmy(l.datum)}<span class="ei-typ">${nurW?'Wechsler':'Leerung'}</span>
+        <s>${nurW ? eur(su.ein)+' eingelegt · '+eur(su.aus)+' entnommen'
+                  : 'Geräte '+eur(su.ger)+' · Getränke '+eur(su.getr)}</s></span>
+      <span class="val">${eur(su.gesamt)}</span>
+      <button class="weg stift" onclick="eintragOeffnen('${l.id}')" title="Ändern">✎</button>
+      <button class="weg" onclick="eintragLoeschen('${l.id}')" title="Löschen">✕</button>
+    </div>`;
+  }).join('') : '<div class="leer">In diesem Monat wurde noch nichts erfasst.</div>';
+  openM('modal-eintraege');
+}
+window.eintragOeffnen = function(id){
+  const l = leerungen.find(x=>x.id===id);
+  if(!l) return;
+  closeM('modal-eintraege');
+  if(l.nurWechsler) openWechslerForm(id); else openLeerung(id);
+};
+window.eintragLoeschen = async function(id){
+  const l = leerungen.find(x=>x.id===id);
+  if(!l) return;
+  showSpinner();
+  try{
+    await db.collection('leerung').doc(id).delete();
+    // Kredite aus diesem Eintrag mitnehmen, sofern noch offen
+    const betroffen = kredite.filter(k=>k.zweck==='wechsler' && k.datum===l.datum
+      && k.nehmer===lg && !k.getilgtAm);
+    for(const k of betroffen) await db.collection('leerung_kredit').doc(k.id).delete();
+    await melde('minus','Eintrag gelöscht',
+      (l.nurWechsler?'Wechsler':'Leerung')+' vom '+dmy(l.datum), null);
+    closeM('modal-eintraege');
+    showToast('Eintrag gelöscht');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
+
 /* ══ Nur den Wechsler nachfüllen ═════════════════════════════════════
    Der Wechsler wird öfter befüllt als eine ganze Leerung stattfindet. Das
    Formular legt denselben Eintrag an, nur ohne Geräte und Getränke. */
-let wfZeilen=[];
-function openWechslerForm(){
+let wfZeilen=[], wfEditId=null;
+function openWechslerForm(id){
+  wfEditId = id || null;
+  const alt = wfEditId ? leerungen.find(x=>x.id===wfEditId) : null;
   document.getElementById('wf-lg').textContent=NAMEN[lg];
-  document.getElementById('wf-datum').value=heute();
-  document.getElementById('wf-aus').value='';
-  wfZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
+  document.getElementById('wf-datum').value = alt ? alt.datum : heute();
+  document.getElementById('wf-aus').value = alt && alt.wechslerAus ? zahl(alt.wechslerAus) : '';
+  if(alt && (alt.wechslerIn||[]).length){
+    wfZeilen = alt.wechslerIn.map(w=>({wert:w.wert, betrag:zahl(w.betrag),
+      herkunft:w.herkunft||'kasse', geber:w.geber||''}));
+  }else{
+    wfZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
+  }
   renderWfZeilen();
   openM('modal-wechsler');
 }
@@ -1841,11 +2280,20 @@ async function saveWechslerForm(){
   }
   showSpinner();
   try{
-    await db.collection('leerung').add({
+    const daten = {
       lager:lg, datum, monat:datum.slice(0,7), nurWechsler:true,
       geraete:{}, wechslerAus:aus, wechslerIn:wIn,
       getraenke:{kaffee:0,getraenke:0,snack:0}, erstellt:new Date().toISOString()
-    });
+    };
+    if(wfEditId){
+      await db.collection('leerung').doc(wfEditId).set(daten);
+      // Alte Kredite dieses Eintrags räumen, gleich werden sie neu angelegt
+      const alt = kredite.filter(k=>k.zweck==='wechsler' && k.datum===datum
+        && k.nehmer===lg && !k.getilgtAm);
+      for(const k of alt) await db.collection('leerung_kredit').doc(k.id).delete();
+    }else{
+      await db.collection('leerung').add(daten);
+    }
     for(const z of wIn.filter(x=>x.herkunft==='kredit')){
       await db.collection('leerung_kredit').add({
         geber:z.geber, nehmer:lg, betrag:z.betrag, datum, monat:datum.slice(0,7),
@@ -1853,6 +2301,9 @@ async function saveWechslerForm(){
         getilgtAm:null, getilgtArt:null
       });
     }
+    const ein = wIn.reduce((a,z)=>a+z.betrag,0);
+    await melde('geld', wfEditId ? 'Wechsler geändert' : 'Wechsler nachgefüllt',
+      dmy(datum)+' · '+eur(ein)+' eingelegt, '+eur(aus)+' entnommen', ein);
     closeM('modal-wechsler');
     showToast('Wechsler gespeichert ✓');
     await ladeFiliale();
@@ -1899,6 +2350,8 @@ async function saveNeuKredit(){
       geber:lg, nehmer:name, betrag, datum, monat:datum.slice(0,7),
       zweck:'kasse', art:nkArtWert, getilgtAm:null, getilgtArt:null
     });
+    await melde('minus','Kredit vergeben',
+      'an '+name+' · '+(nkArtWert==='muenzen'?'Münzen':'Scheine'), betrag);
     closeM('modal-neukredit');
     showToast('Kredit erfasst ✓');
     await ladeFiliale();
@@ -1935,6 +2388,8 @@ async function saveTausch(){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
     monatDoc.tausch=liste;
+    await melde('tausch', tauschIndex===null ? 'Geld getauscht' : 'Tausch geändert',
+      tauschVon==='muenzen' ? 'Münzen → Scheine' : 'Scheine → Münzen', betrag);
     closeM('modal-tausch');
     showToast('Tausch gespeichert ✓');
     await ladeFiliale();
@@ -1949,6 +2404,7 @@ async function tauschLoeschen(){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({tausch:liste},{merge:true});
     monatDoc.tausch=liste;
+    await melde('minus','Tausch gelöscht','', null);
     closeM('modal-tausch');
     showToast('Eintrag entfernt');
     await ladeFiliale();
@@ -2030,6 +2486,8 @@ async function savePlan(){
       .set({bankPlan:plan}, {merge:true});
     monatDoc.bankPlan=plan;
     await syncBankKredite();
+    await melde('geld', planIndex===null ? 'Bank-Planung angelegt' : 'Bank-Planung geändert',
+      (planArtWert==='muenzen'?'Münzen':'Scheine'), eintrag.gesamt);
     closeM('modal-plan');
     showToast('Planung gespeichert ✓');
     await ladeFiliale();
@@ -2045,6 +2503,8 @@ async function deletePlan(){
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankPlan:plan},{merge:true});
     monatDoc.bankPlan=plan;
     await syncBankKredite();
+    await melde('minus','Bank-Planung gelöscht', alt ? (alt.art==='muenzen'?'Münzen':'Scheine') : '',
+      alt ? alt.gesamt : null);
     closeM('modal-plan');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
@@ -2078,6 +2538,8 @@ async function confirmBank(){
       .set({bankPlan:plan,bankEin:ein},{merge:true});
     monatDoc.bankPlan=plan; monatDoc.bankEin=ein;
     await syncBankKredite();
+    await melde('geld','Einzahlung bestätigt',
+      (p.art==='muenzen'?'Münzen':'Scheine')+' · am '+dmy(datum), p.gesamt);
     closeM('modal-bank');
     showToast('Einzahlung erfasst ✓');
     await ladeFiliale();
@@ -2176,6 +2638,9 @@ async function saveEin(){
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({bankEin:ein},{merge:true});
     monatDoc.bankEin=ein;
     await syncBankKredite();
+    await melde('geld','Einzahlungen bearbeitet',
+      ein.length+' '+(ein.length===1?'Eintrag':'Einträge'),
+      ein.reduce((a,b)=>a+(Number(b.betrag)||0),0));
     closeM('modal-ein');
     showToast('Einzahlungen gespeichert ✓');
     await ladeFiliale();
@@ -2259,6 +2724,9 @@ async function tilgen(){
       // vollständig
       await db.collection('leerung_kredit').doc(kreditId)
         .set({getilgtAm:heute(), getilgtArt:kreditArt},{merge:true});
+      await melde('geld','Kredit getilgt',
+        (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
+                       : 'von '+(NAMEN[k.nehmer]||k.nehmer))+' · vollständig', zahl_);
       showToast('Kredit erledigt ✓');
     }else{
       // Teilzahlung: der gezahlte Anteil wird als eigener, erledigter Eintrag
@@ -2269,6 +2737,10 @@ async function tilgen(){
       });
       await db.collection('leerung_kredit').doc(kreditId)
         .set({betrag: Math.round((offen-zahl_)*100)/100},{merge:true});
+      await melde('geld','Kredit teilweise getilgt',
+        (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
+                       : 'von '+(NAMEN[k.nehmer]||k.nehmer))
+        +' · Rest '+eur(offen-zahl_), zahl_);
       showToast('Teilzahlung erfasst ✓');
     }
     closeM('modal-kredit');
@@ -2280,9 +2752,12 @@ async function tilgen(){
 /* ══ Kleinkram ═══════════════════════════════════════════════════════ */
 async function saveKosten(v){
   const n=parseNum(v);
+  const vorher=Number(monatDoc.sonstige)||0;
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({sonstige:n},{merge:true});
     monatDoc.sonstige=n;
+    if(Math.abs(n-vorher)>0.001)
+      await melde('geld','Sonstige Kosten geändert','von '+zahl(vorher)+' auf '+zahl(n), n);
     renderMain();
   }catch(e){ showToast('Fehler: '+e.message); }
 }
@@ -2292,6 +2767,10 @@ async function saveSystem(feld,v){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({system:sys},{merge:true});
     monatDoc.system=sys;
+    const su=summen(leerungen);
+    const diff=(su.gerS+su.gerM)-((Number(sys.s)||0)+(Number(sys.m)||0));
+    await melde('geld','System-Zahlen eingetragen',
+      'Geräte · Differenz '+(diff>0?'+':'')+zahl(diff), null);
     renderGeraete();
   }catch(e){ showToast('Fehler: '+e.message); }
 }
@@ -2308,6 +2787,8 @@ async function saveVormonat(){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({vormonat:v},{merge:true});
     monatDoc.vormonat=v;
+    await melde('geld','Von Vormonat gesetzt',
+      'Scheine '+zahl(v.s)+' · Münzen '+zahl(v.m), v.s+v.m);
     closeM('modal-vormonat');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
@@ -2325,6 +2806,9 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   buildMonate();
   ladeHub();
+  ladeNews();
+  // Gesammelte Meldungen werden erst nach fünf Minuten Ruhe sichtbar
+  setInterval(ladeNews, 60*1000);
 });
 
 </script>
