@@ -586,7 +586,8 @@ table.bt tfoot td{background:var(--acc-bg);font-weight:700;color:var(--acc-ink);
   border-top:1px solid var(--acc)}
 table.bt .nix,table.bt td.nix{color:#C3CBD8}
 /* leere Spalten im Bistro-Block: unsichtbar, halten aber die Breite */
-table.bt .frei{border:none;background:none!important}
+table.bt .frei,table.bt tbody tr:nth-child(even) td.frei,table.bt tfoot td.frei{
+  border:none!important;background:#fff!important}
 /* Feste Spaltenbreiten: nur so stehen die Bistro-Geräte genau unter 7–10 */
 table.bt-ger{table-layout:fixed}
 table.bt-ger th:first-child{width:22px}
@@ -2462,8 +2463,10 @@ function zeichneBlatt(){
 // Dokument samt aller versteckten Ansichten und Fenster noch einmal für A4
 // neu berechnen. Stattdessen bekommt ein leerer Rahmen nur das Blatt und die
 // paar Zeilen Stil, die es braucht — das geht sofort.
+const BLATT_SCHRIFTEN =
+  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800'
+  + '&family=IBM+Plex+Mono:wght@500;600;700&display=swap';
 const BLATT_DRUCK_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
   @page{size:A4 landscape;margin:8mm}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Poppins','Trebuchet MS',sans-serif;color:#141B29;background:#fff}
@@ -2488,7 +2491,8 @@ const BLATT_DRUCK_CSS = `
   table.bt tfoot td{background:var(--acc-bg);font-weight:700;color:var(--acc-ink);
     border-top:1px solid var(--acc)}
   table.bt .nix,table.bt td.nix{color:#C3CBD8}
-  table.bt .frei{border:none;background:none}
+  table.bt .frei,table.bt tbody tr:nth-child(even) td.frei,table.bt tfoot td.frei{
+    border:none!important;background:#fff!important}
   table.bt-ger{table-layout:fixed}
   table.bt-ger th:first-child{width:22px}
   table.bt-ger th:nth-child(2){width:62px}
@@ -2516,34 +2520,57 @@ function druckeBlatt(){
   const st = getComputedStyle(document.body);
   const farben = ['--acc','--acc-ink','--acc-bg','--rot']
     .map(n=>`${n}:${st.getPropertyValue(n).trim()}`).join(';');
+  const titel = (NAMEN[lg]||lg) + ' — ' + monatText(monat);
+  const seite = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+    <meta name="viewport" content="width=1123">
+    <title>${titel}</title>
+    <link rel="stylesheet" href="${BLATT_SCHRIFTEN}">
+    <style>:root{${farben}}${BLATT_DRUCK_CSS}</style></head>
+    <body>${quelle.innerHTML}</body></html>`;
+
+  // Auf dem Telefon druckt ein unsichtbarer Rahmen oft ein leeres Blatt.
+  // Dort wird deshalb ein eigenes Fenster geöffnet.
+  const klein = window.matchMedia('(max-width:820px)').matches;
+  if(klein){
+    const w = window.open('', '_blank');
+    if(w){
+      w.document.open();
+      w.document.write(seite);
+      w.document.close();
+      const drucken = () => { try{ w.focus(); w.print(); }catch(e){} };
+      const bereit = w.document.fonts && w.document.fonts.ready
+        ? w.document.fonts.ready : Promise.resolve();
+      let fertig = false;
+      const einmal = () => { if(!fertig){ fertig = true; setTimeout(drucken, 250); } };
+      bereit.then(einmal);
+      setTimeout(einmal, 2000);
+      return;
+    }
+    showToast('Bitte Pop-ups für diese Seite erlauben.');
+  }
 
   const alt = document.getElementById('druck-rahmen');
   if(alt) alt.remove();
   const rahmen = document.createElement('iframe');
   rahmen.id = 'druck-rahmen';
-  rahmen.setAttribute('style','position:fixed;right:0;bottom:0;width:0;height:0;border:0');
+  // Nicht 0×0: manche Browser drucken einen Rahmen ohne Größe leer aus.
+  rahmen.setAttribute('style',
+    'position:fixed;left:-10000px;top:0;width:1200px;height:1400px;border:0;opacity:0');
   document.body.appendChild(rahmen);
 
   const d = rahmen.contentWindow.document;
-  d.open();
-  d.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
-    <title>${(NAMEN[lg]||lg)} — ${monatText(monat)}</title>
-    <style>:root{${farben}}${BLATT_DRUCK_CSS}</style></head>
-    <body>${quelle.innerHTML}</body></html>`);
-  d.close();
+  d.open(); d.write(seite); d.close();
 
-  // Erst drucken, wenn die Schriften im Rahmen geladen sind — sonst druckt
-  // der Browser mit einer Ersatzschrift, und die Sperrungen sehen zerrissen aus.
   const los = () => {
     rahmen.contentWindow.focus();
     rahmen.contentWindow.print();
-    setTimeout(()=>rahmen.remove(), 1000);
+    setTimeout(()=>rahmen.remove(), 2000);
   };
-  const fertig = d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
+  const bereit = d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
   let gedruckt = false;
-  const einmal = () => { if(!gedruckt){ gedruckt = true; los(); } };
-  fertig.then(()=>setTimeout(einmal, 60));
-  setTimeout(einmal, 1500);   // Notbremse, falls die Schriften nicht kommen
+  const einmal = () => { if(!gedruckt){ gedruckt = true; setTimeout(los, 120); } };
+  bereit.then(einmal);
+  setTimeout(einmal, 2000);   // Notbremse, falls die Schriften nicht kommen
 }
 
 /* ══ Erfasstes ändern ═════════════════════════════════════════════════
