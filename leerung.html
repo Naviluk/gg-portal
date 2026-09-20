@@ -609,12 +609,21 @@ table.bt .nix,table.bt td.nix{color:#C3CBD8}
   .kennz{page-break-inside:avoid}
   .autom{page-break-inside:avoid}
   .bl{page-break-after:avoid}
-  body{background:#fff}
+  /* html und body stehen auf height:100%. Beim Drucken begrenzt das die Seite
+     auf eine Bildschirmhöhe — alles darunter fiel weg. Deshalb hier aufheben. */
+  html,body{height:auto!important;min-height:0!important;overflow:visible!important;
+    background:#fff}
   body::before,.app-header,.sidebar,.sidebar-overlay,.lager-controls,.kopfzeile,
   .news,.user-dropdown,.toast,.spinner-overlay,.modal-overlay{display:none!important}
-  .main-content{margin:0;padding:0;max-width:none}
+  .main-content{margin:0;padding:0;max-width:none;min-height:0!important;
+    overflow:visible!important}
+  .view.on{overflow:visible!important}
   .blatt-huelle{overflow:visible}
-  .blatt{width:auto;border:none;border-radius:0;box-shadow:none;padding:0}
+  .blatt{width:auto;border:none;border-radius:0;box-shadow:none;padding:0;margin:0}
+  /* Kein Rand am Ende — sonst entsteht eine leere letzte Seite */
+  .blatt-anm:last-child{margin-bottom:0}
+  .view{display:none!important}
+  .view.on{display:block!important}
   table.bt thead th,.bl,.kennz .dunkel,table.bt tfoot td{
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
