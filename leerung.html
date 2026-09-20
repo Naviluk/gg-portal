@@ -2521,12 +2521,26 @@ function druckeBlatt(){
   const farben = ['--acc','--acc-ink','--acc-bg','--rot']
     .map(n=>`${n}:${st.getPropertyValue(n).trim()}`).join(';');
   const titel = (NAMEN[lg]||lg) + ' — ' + monatText(monat);
-  const seite = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+  // Auf dem Telefon öffnet sich ein eigenes Fenster. Ohne Leiste bliebe es nach
+  // dem Sichern offen stehen, ohne dass man es schließen könnte.
+  const leiste = `<div class="wz-leiste">
+      <button onclick="window.close()">✕ Schließen</button>
+      <button class="wz-druck" onclick="window.print()">Drucken / PDF</button>
+    </div>`;
+  const leisteCSS = `
+    .wz-leiste{position:sticky;top:0;z-index:9;display:flex;gap:8px;justify-content:flex-end;
+      padding:10px 12px;background:#101A2E;margin:-8mm -8mm 8px}
+    .wz-leiste button{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;
+      border-radius:9px;padding:9px 14px;border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);color:#E4ECF7}
+    .wz-leiste .wz-druck{background:var(--acc);border-color:var(--acc);color:#fff}
+    @media print{.wz-leiste{display:none!important}}`;
+  const seite = (mitLeiste) => `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
     <meta name="viewport" content="width=1123">
     <title>${titel}</title>
     <link rel="stylesheet" href="${BLATT_SCHRIFTEN}">
-    <style>:root{${farben}}${BLATT_DRUCK_CSS}</style></head>
-    <body>${quelle.innerHTML}</body></html>`;
+    <style>:root{${farben}}${BLATT_DRUCK_CSS}${mitLeiste ? leisteCSS : ''}</style></head>
+    <body>${mitLeiste ? leiste : ''}${quelle.innerHTML}</body></html>`;
 
   // Auf dem Telefon druckt ein unsichtbarer Rahmen oft ein leeres Blatt.
   // Dort wird deshalb ein eigenes Fenster geöffnet.
@@ -2535,8 +2549,10 @@ function druckeBlatt(){
     const w = window.open('', '_blank');
     if(w){
       w.document.open();
-      w.document.write(seite);
+      w.document.write(seite(true));
       w.document.close();
+      // Wenn der Browser es meldet, schließt sich das Fenster nach dem Drucken selbst
+      try{ w.onafterprint = () => setTimeout(()=>{ try{ w.close(); }catch(e){} }, 300); }catch(e){}
       const drucken = () => { try{ w.focus(); w.print(); }catch(e){} };
       const bereit = w.document.fonts && w.document.fonts.ready
         ? w.document.fonts.ready : Promise.resolve();
@@ -2559,7 +2575,7 @@ function druckeBlatt(){
   document.body.appendChild(rahmen);
 
   const d = rahmen.contentWindow.document;
-  d.open(); d.write(seite); d.close();
+  d.open(); d.write(seite(false)); d.close();
 
   const los = () => {
     rahmen.contentWindow.focus();
