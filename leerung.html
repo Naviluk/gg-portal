@@ -587,6 +587,10 @@ table.bt tfoot td{background:var(--acc-bg);font-weight:700;color:var(--acc-ink);
 table.bt .nix,table.bt td.nix{color:#C3CBD8}
 /* leere Spalten im Bistro-Block: unsichtbar, halten aber die Breite */
 table.bt .frei{border:none;background:none!important}
+/* Feste Spaltenbreiten: nur so stehen die Bistro-Geräte genau unter 7–10 */
+table.bt-ger{table-layout:fixed}
+table.bt-ger th:first-child{width:22px}
+table.bt-ger th:nth-child(2){width:62px}
 .unten{display:flex;gap:6mm;margin-top:6px;align-items:flex-start}
 .unten>div{flex:1}
 .unten .schmal{flex:0 0 56%}
@@ -2323,7 +2327,7 @@ function blattGeraete(titel, nummern, tage, bistro, spalten){
   const fuss = '<tr><td class="l" colspan="2">Gesamt</td>'
     + nummern.map(n=>`<td>${bz(sS[n])}</td><td>${bz(sM[n])}</td>`).join('')
     + (leer ? `<td colspan="${leer*2}" class="frei"></td>` : '') + '</tr>';
-  return `<div class="bl">${titel}</div><table class="bt"><thead>${kopf}</thead>`
+  return `<div class="bl">${titel}</div><table class="bt bt-ger"><thead>${kopf}</thead>`
        + `<tbody>${zeilen}</tbody><tfoot>${fuss}</tfoot></table>`;
 }
 
@@ -2459,6 +2463,7 @@ function zeichneBlatt(){
 // neu berechnen. Stattdessen bekommt ein leerer Rahmen nur das Blatt und die
 // paar Zeilen Stil, die es braucht — das geht sofort.
 const BLATT_DRUCK_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
   @page{size:A4 landscape;margin:8mm}
   *{box-sizing:border-box}
   body{margin:0;font-family:'Poppins','Trebuchet MS',sans-serif;color:#141B29;background:#fff}
@@ -2484,6 +2489,9 @@ const BLATT_DRUCK_CSS = `
     border-top:1px solid var(--acc)}
   table.bt .nix,table.bt td.nix{color:#C3CBD8}
   table.bt .frei{border:none;background:none}
+  table.bt-ger{table-layout:fixed}
+  table.bt-ger th:first-child{width:22px}
+  table.bt-ger th:nth-child(2){width:62px}
   .unten{display:flex;gap:6mm;margin-top:6px;align-items:flex-start;page-break-inside:avoid}
   .unten>div{flex:1}
   .unten .schmal{flex:0 0 56%}
@@ -2524,12 +2532,18 @@ function druckeBlatt(){
     <body>${quelle.innerHTML}</body></html>`);
   d.close();
 
-  // Kurz warten, bis der Rahmen steht, dann drucken
-  setTimeout(()=>{
+  // Erst drucken, wenn die Schriften im Rahmen geladen sind — sonst druckt
+  // der Browser mit einer Ersatzschrift, und die Sperrungen sehen zerrissen aus.
+  const los = () => {
     rahmen.contentWindow.focus();
     rahmen.contentWindow.print();
     setTimeout(()=>rahmen.remove(), 1000);
-  }, 120);
+  };
+  const fertig = d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
+  let gedruckt = false;
+  const einmal = () => { if(!gedruckt){ gedruckt = true; los(); } };
+  fertig.then(()=>setTimeout(einmal, 60));
+  setTimeout(einmal, 1500);   // Notbremse, falls die Schriften nicht kommen
 }
 
 /* ══ Erfasstes ändern ═════════════════════════════════════════════════
