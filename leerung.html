@@ -601,6 +601,14 @@ table.bt .nix,table.bt td.nix{color:#C3CBD8}
 .blatt-anm{font-family:'Poppins',sans-serif;font-size:6pt;color:#8A96A8;margin-top:4px}
 @media print{
   @page{size:A4 landscape;margin:8mm}
+  /* Nichts mitten in einer Tabelle zerschneiden. Passt alles auf eine Seite,
+     bleibt es auf einer — bei Nettetal mit 16 Geräten rutscht der untere Teil
+     von selbst auf die zweite. */
+  table.bt{page-break-inside:avoid}
+  .unten{page-break-inside:avoid}
+  .kennz{page-break-inside:avoid}
+  .autom{page-break-inside:avoid}
+  .bl{page-break-after:avoid}
   body{background:#fff}
   body::before,.app-header,.sidebar,.sidebar-overlay,.lager-controls,.kopfzeile,
   .news,.user-dropdown,.toast,.spinner-overlay,.modal-overlay{display:none!important}
@@ -1467,6 +1475,9 @@ async function ladeFiliale(){
   hideSpinner();
   fillDatumSelects();
   renderMain(); renderGeraete(); renderWechsler(); renderGetraenke();
+  // Auch das Monatsblatt neu zeichnen — sonst bleibt beim Wechsel der Filiale
+  // die alte Tabelle stehen, obwohl oben schon die neue Filiale gewählt ist.
+  if(document.getElementById('blatt')) zeichneBlatt();
 }
 
 // Der Startwert kommt aus dem Vormonat; nur wenn es dort nichts gibt,
@@ -1789,6 +1800,7 @@ function setDatum(v){
     const el=document.getElementById(id); if(el) el.value=v;
   });
   renderMain(); renderGeraete(); renderWechsler(); renderGetraenke();
+  if(document.getElementById('blatt')) zeichneBlatt();
 }
 function auswahl(){
   return datumWahl ? leerungen.filter(l=>l.datum===datumWahl) : leerungen;
