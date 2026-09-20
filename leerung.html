@@ -585,9 +585,11 @@ table.bt tbody tr:nth-child(even) td{background:var(--zebra)}
 table.bt tfoot td{background:var(--acc-bg);font-weight:700;color:var(--acc-ink);
   border-top:1px solid var(--acc)}
 table.bt .nix,table.bt td.nix{color:#C3CBD8}
+/* leere Spalten im Bistro-Block: unsichtbar, halten aber die Breite */
+table.bt .frei{border:none;background:none!important}
 .unten{display:flex;gap:6mm;margin-top:6px;align-items:flex-start}
 .unten>div{flex:1}
-.unten .schmal{flex:0 0 47%}
+.unten .schmal{flex:0 0 56%}
 .autom-reihe{display:flex;gap:4mm;align-items:flex-start}
 .autom{flex:1;min-width:0}
 .kennz{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px}
@@ -934,7 +936,7 @@ textarea.note:focus{border-color:var(--acc)}
   <div class="view" id="v-tabelle">
     <div class="kopfzeile">
       <button class="back" onclick="show('v-main')">← Zurück</button>
-      <button class="btn-tab" onclick="window.print()">
+      <button class="btn-tab" onclick="druckeBlatt()">
         <svg viewBox="0 0 24 24"><path d="M7 9V3.5h10V9"/><rect x="4.5" y="9" width="15" height="7" rx="1.5"/><path d="M7 16h10v4.5H7z"/></svg>
         Drucken / PDF
       </button>
@@ -2289,11 +2291,17 @@ function blattTage(){
   return Object.values(m).sort((a,b)=>a.datum.localeCompare(b.datum));
 }
 
-function blattGeraete(titel, nummern, tage, bistro){
+function blattGeraete(titel, nummern, tage, bistro, spalten){
   if(!nummern.length) return '';
+  // Bistro hat nur vier Geräte. Damit Gerät 14 genau unter Gerät 7 steht, bekommt
+  // der Block dieselbe Spaltenzahl wie die Blöcke darüber; der Rest bleibt leer.
+  const breit = spalten || nummern.length;
+  const leer = Math.max(0, breit - nummern.length);
   let kopf = '<tr><th class="l" rowspan="2">Nr.</th><th class="l" rowspan="2">Datum</th>'
     + nummern.map(n=>`<th colspan="2">${bistro?'Gerät '+(n-13)+' ('+n+')':'Gerät '+n}</th>`).join('')
-    + '</tr><tr class="u">' + nummern.map(()=>'<th>Sch.</th><th>Mün.</th>').join('') + '</tr>';
+    + (leer ? `<th colspan="${leer*2}" class="frei"></th>` : '')
+    + '</tr><tr class="u">' + nummern.map(()=>'<th>Sch.</th><th>Mün.</th>').join('')
+    + (leer ? `<th colspan="${leer*2}" class="frei"></th>` : '') + '</tr>';
   const sS={}, sM={};
   nummern.forEach(n=>{ sS[n]=0; sM[n]=0; });
   let zeilen='';
@@ -2308,11 +2316,13 @@ function blattGeraete(titel, nummern, tage, bistro){
       sS[n]+=sc; sM[n]+=mz;
       zeilen += `<td>${bz(sc)}</td><td>${bz(mz)}</td>`;
     });
+    if(leer) zeilen += `<td colspan="${leer*2}" class="frei"></td>`;
     zeilen += '</tr>';
   });
   if(!tage.length) zeilen = `<tr><td class="l nix" colspan="${nummern.length*2+2}">Keine Leerung erfasst</td></tr>`;
   const fuss = '<tr><td class="l" colspan="2">Gesamt</td>'
-    + nummern.map(n=>`<td>${bz(sS[n])}</td><td>${bz(sM[n])}</td>`).join('') + '</tr>';
+    + nummern.map(n=>`<td>${bz(sS[n])}</td><td>${bz(sM[n])}</td>`).join('')
+    + (leer ? `<td colspan="${leer*2}" class="frei"></td>` : '') + '</tr>';
   return `<div class="bl">${titel}</div><table class="bt"><thead>${kopf}</thead>`
        + `<tbody>${zeilen}</tbody><tfoot>${fuss}</tfoot></table>`;
 }
@@ -2355,7 +2365,9 @@ function blattWechsler(tage){
 }
 
 function blattAutomaten(tage){
-  const AUT = [['Kaffeeautomat','kaffee'],['Getränkeautomat','getraenke'],['Snack','snack']];
+  // Snack bekommt keine eigene Spalte — die Beträge zählen weiter in die
+  // Gesamtsumme „Getränke“ unten hinein.
+  const AUT = [['Kaffeeautomat','kaffee'],['Getränkeautomat','getraenke']];
   let spalten='';
   AUT.forEach(([name,feld])=>{
     let zeilen='', summe=0;
@@ -2405,7 +2417,7 @@ function zeichneBlatt(){
   }
   if(bistro.length)
     html += blattGeraete('Bistro · Geräte '+bistro[0]+'–'+bistro[bistro.length-1],
-      bistro, geraeteTage, true);
+      bistro, geraeteTage, true, 6);
 
   html += `<div class="unten">
     <div class="schmal">${blattWechsler(tage)}</div>
@@ -2439,6 +2451,85 @@ function zeichneBlatt(){
     tw.s||tw.m ? ' · davon getauscht '+zahl(Math.abs(tw.s))+' €' : ''}</div>`;
 
   document.getElementById('blatt').innerHTML = html;
+}
+
+// ── Drucken ───────────────────────────────────────────────────────────
+// Die ganze Seite zu drucken dauert lange: der Browser muss das komplette
+// Dokument samt aller versteckten Ansichten und Fenster noch einmal für A4
+// neu berechnen. Stattdessen bekommt ein leerer Rahmen nur das Blatt und die
+// paar Zeilen Stil, die es braucht — das geht sofort.
+const BLATT_DRUCK_CSS = `
+  @page{size:A4 landscape;margin:8mm}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Poppins','Trebuchet MS',sans-serif;color:#141B29;background:#fff}
+  .blatt-kopf{display:flex;align-items:baseline;gap:8px;border-bottom:2px solid #101A2E;
+    padding-bottom:4px;margin-bottom:6px}
+  .blatt-kopf b{font-size:14pt;font-weight:800;letter-spacing:.05em}
+  .blatt-kopf s{text-decoration:none;font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#5A6980}
+  .blatt-kopf .rechts{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:8.5pt;color:#5A6980}
+  .blatt-kopf .rechts b{font-size:10.5pt;color:var(--acc-ink);letter-spacing:0}
+  .bl{font-size:6.6pt;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
+    color:var(--acc-ink);background:var(--acc-bg);border-radius:4px;padding:2px 6px;
+    display:inline-block;margin:6px 0 3px;page-break-after:avoid}
+  table.bt{border-collapse:collapse;width:100%;font-family:'IBM Plex Mono',monospace;
+    font-size:7pt;page-break-inside:avoid}
+  table.bt th,table.bt td{border:.5px solid #BAC5D4;padding:1.5px 3px;text-align:right;white-space:nowrap}
+  table.bt thead th{background:#1D2B49;color:#fff;font-family:'Poppins',sans-serif;font-size:5.8pt;
+    letter-spacing:.04em;text-transform:uppercase;font-weight:800;text-align:center}
+  table.bt thead tr.u th{background:#101A2E;font-size:5.4pt;letter-spacing:0}
+  table.bt td.l,table.bt th.l{text-align:left}
+  table.bt td.d{font-weight:700}
+  table.bt tbody tr:nth-child(even) td{background:#F3F6FA}
+  table.bt tfoot td{background:var(--acc-bg);font-weight:700;color:var(--acc-ink);
+    border-top:1px solid var(--acc)}
+  table.bt .nix,table.bt td.nix{color:#C3CBD8}
+  table.bt .frei{border:none;background:none}
+  .unten{display:flex;gap:6mm;margin-top:6px;align-items:flex-start;page-break-inside:avoid}
+  .unten>div{flex:1}
+  .unten .schmal{flex:0 0 56%}
+  .autom-reihe{display:flex;gap:4mm;align-items:flex-start}
+  .autom{flex:1;min-width:0}
+  .kennz{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px;page-break-inside:avoid}
+  .kennz div{flex:1 1 23%;background:#EEF2F8;border:.5px solid #DCE3ED;border-radius:5px;padding:4px 6px}
+  .kennz s{text-decoration:none;display:block;font-size:5.6pt;letter-spacing:.12em;
+    text-transform:uppercase;color:#66748C;font-weight:800}
+  .kennz b{display:block;font-family:'IBM Plex Mono',monospace;font-size:8.6pt;font-weight:700;margin-top:1px}
+  .kennz .dunkel{background:#101A2E;border-color:#101A2E}
+  .kennz .dunkel s{color:#9FB2CE}
+  .kennz .dunkel b{color:#7EE7C0}
+  .blatt-anm{font-size:6pt;color:#8A96A8;margin-top:4px}
+  b[style*="--rot"],.rot{color:#E11D48}
+`;
+
+function druckeBlatt(){
+  const quelle = document.getElementById('blatt');
+  if(!quelle) return;
+  // Hausfarbe der Filiale übernehmen
+  const st = getComputedStyle(document.body);
+  const farben = ['--acc','--acc-ink','--acc-bg','--rot']
+    .map(n=>`${n}:${st.getPropertyValue(n).trim()}`).join(';');
+
+  const alt = document.getElementById('druck-rahmen');
+  if(alt) alt.remove();
+  const rahmen = document.createElement('iframe');
+  rahmen.id = 'druck-rahmen';
+  rahmen.setAttribute('style','position:fixed;right:0;bottom:0;width:0;height:0;border:0');
+  document.body.appendChild(rahmen);
+
+  const d = rahmen.contentWindow.document;
+  d.open();
+  d.write(`<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+    <title>${(NAMEN[lg]||lg)} — ${monatText(monat)}</title>
+    <style>:root{${farben}}${BLATT_DRUCK_CSS}</style></head>
+    <body>${quelle.innerHTML}</body></html>`);
+  d.close();
+
+  // Kurz warten, bis der Rahmen steht, dann drucken
+  setTimeout(()=>{
+    rahmen.contentWindow.focus();
+    rahmen.contentWindow.print();
+    setTimeout(()=>rahmen.remove(), 1000);
+  }, 120);
 }
 
 /* ══ Erfasstes ändern ═════════════════════════════════════════════════
