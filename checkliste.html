@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkliste — GAME GALAXY</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+(function(){
+  var u = localStorage.getItem('gg_user');
+  if(!u){ location.replace('gg-portal.html'); return; }
+  var user = null;
+  try{ user = JSON.parse(u); }catch(e){ user = {name:u, role:localStorage.getItem('gg_role')||''}; }
+  if(!user || typeof user !== 'object') user = {name:String(u), role:''};
+  var r = user.role || '';
+  if(['Admin','Einkaufsleiter','Kollege'].indexOf(r) < 0){
+    location.replace('startseite.html?gesperrt=' + encodeURIComponent(document.title.split(' —')[0]));
+    return;
+  }
+  window.GG_USER = user;
+})();
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap');
+:root{
+  --bg:#EEF2F8;--bg2:#ffffff;--bg3:#E7ECF4;
+  --neon-cyan:#0E8FB8;--neon-magenta:#D81B7E;--neon-yellow:#C2700B;--neon-green:#0C9C77;
+  --glass:#E7ECF4;--glass-border:#DCE3ED;
+  --text:#141B29;--text-dim:#66748C;--header-h:64px;
+  /* Gerüst */
+  --ink:#101A2E;--ink2:#1D2B49;--ink3:#33436A;--zebra:#F3F6FA;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --tbl-top:calc(var(--header-h) + .5rem);
+  /* Hausfarbe je Lager */
+  --violet-role:#6D4AC7;--lg-zl:#0FA574;--lg-ne:#2563EB;--lg-br:#E11D48;--lg-vi:#EA580C;--lg-ko:#7C3AED;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Poppins','Century Gothic','CenturyGothic','Trebuchet MS',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(8,145,178,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(8,145,178,0.035) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── HEADER ── */
+.app-header{position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:var(--ink);border-bottom:none;
+  display:flex;align-items:center;padding:0 1.2rem;gap:1rem;z-index:100;
+  box-shadow:0 2px 10px rgba(16,26,46,.18)}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--neon-cyan),var(--neon-magenta))}
+.hdr-left{display:flex;align-items:center}
+.hdr-center{flex:1;text-align:left;min-width:0}
+.hdr-right{display:flex;align-items:center;gap:.5rem}
+.hdr-org{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:800;
+  font-size:.58rem;letter-spacing:.2em;color:#7E90AE;text-transform:uppercase;line-height:1.1}
+.hdr-page{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:1rem;letter-spacing:.02em;
+  color:#fff;font-weight:700;margin-top:.1rem;line-height:1.15}
+.hdr-page .hdr-page-pre{font-size:.62rem;letter-spacing:.18em;color:#7E90AE;text-transform:uppercase;font-weight:800}
+.hdr-ava{width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
+.hdr-user{font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.86rem;color:#E4ECF7;cursor:pointer;
+  -webkit-tap-highlight-color:rgba(255,255,255,.12);touch-action:manipulation;min-height:40px;
+  display:flex;align-items:center;gap:.4rem;white-space:nowrap;font-weight:600;
+  background:rgba(255,255,255,.09);border-radius:20px;padding:.3rem .7rem}
+
+.hdr-chevron{transition:transform .2s;width:14px;height:14px;fill:none;stroke:var(--neon-cyan);stroke-width:2}
+.burger{background:rgba(255,255,255,.09);border:none;border-radius:10px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;padding:9px;align-items:center;justify-content:center}
+.burger span{display:block;width:22px;height:2px;background:#8FD8EE;border-radius:2px;transition:all .25s}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* sidebar */
+.side-brand{display:flex;align-items:center;gap:.65rem;padding:0 1.1rem;
+  min-height:var(--header-h);border-bottom:1px solid #22314F;margin-bottom:.6rem}
+.side-mark{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--neon-cyan),var(--neon-magenta));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Poppins',sans-serif;font-weight:800;font-size:1.7rem;color:#fff;
+  line-height:1;box-shadow:0 4px 14px rgba(216,27,126,.28)}
+.side-mark span{display:block;transform:translateY(.045em)}
+.side-name{font-family:'Poppins',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.08em;
+  color:#fff;line-height:1.2}
+.side-name span{display:block;font-size:.62rem;font-weight:600;letter-spacing:.12em;color:#7E90AE;margin-top:.1rem}
+.sidebar{position:fixed;top:0;left:-280px;bottom:0;width:260px;background:var(--ink);
+  border-right:none;z-index:200;padding-top:0;color:#AEBCD4;
+  transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:2px 0 18px rgba(16,26,46,.35)}
+.sidebar.open{left:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(30,37,50,.35)}
+.sidebar-overlay.show{display:block}
+/* ══ Menü — gleiche Handschrift wie die Schiene auf der Startseite ══════ */
+.nav-list{list-style:none;padding:.7rem 0 1rem}
+.nav-item>.nav-link{display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem 1.35rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-weight:800;font-size:.6rem;letter-spacing:.2em;color:#5D6E8C;text-transform:uppercase;
+  cursor:pointer;transition:color .2s;border:none;background:none;width:100%;text-align:left}
+.nav-item>.nav-link:hover,.nav-item>.nav-link.active{color:#9FB2CE;background:none}
+.nav-arrow{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.nav-item.open>.nav-link .nav-arrow{transform:rotate(90deg)}
+.nav-sub{display:none;list-style:none;background:none;padding:.1rem .8rem .4rem}
+.nav-item.open>.nav-sub{display:block}
+.nav-sub li a{position:relative;display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:500;
+  color:#7E90AE;text-decoration:none;letter-spacing:.01em;transition:color .18s,background .18s}
+.nav-sub li a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.nav-sub li a.on{color:#5FD3F0;background:rgba(95,211,240,.13);font-weight:600}
+.nav-sub li a.on::before{content:'';position:absolute;left:-.8rem;top:9px;bottom:9px;width:3px;
+  border-radius:0 3px 3px 0;background:#5FD3F0;box-shadow:0 0 10px rgba(95,211,240,.85)}
+/* Gezeichnete Symbole in Knöpfen, Kopfzellen und Titeln — sie übernehmen die
+   Textfarbe und bleiben auf jedem Gerät gleich (Emoji sehen überall anders aus). */
+.ui-i{width:1.05em;height:1.05em;vertical-align:-.16em;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.th-icon .ui-i{width:15px;height:15px;vertical-align:-.2em}
+.th-pen .ui-i{width:12px;height:12px;opacity:.75}
+.modal-title .ui-i,.gesamt-panel-title .ui-i{width:1.05em;height:1.05em;vertical-align:-.15em}
+.lp-hub-icon .ui-i{width:1.45rem;height:1.45rem;stroke-width:1.6;vertical-align:0}
+.nav-i{width:19px;height:19px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.nav-sub li a.on .nav-i{opacity:1}
+.nav-divider{height:1px;background:rgba(255,255,255,.07);margin:.35rem 1.35rem}
+.nav-home a{position:relative;display:flex;align-items:center;gap:.7rem;margin:0 .8rem;
+  padding:.6rem .75rem;border-radius:12px;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.87rem;font-weight:600;
+  color:#7E90AE;text-decoration:none;transition:color .18s,background .18s}
+.nav-home a:hover{color:#CFE6F2;background:rgba(255,255,255,.06)}
+.side-brand{text-decoration:none;transition:background .2s}
+.side-brand:hover{background:rgba(95,211,240,.07)}
+/* Symbole im Menü — gezeichnet, damit sie die Textfarbe übernehmen */
+.nav-i{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.nav-sub li a{display:flex;align-items:center;gap:.6rem;padding-left:1.55rem}
+.nav-sub li a:hover .nav-i{opacity:1}
+.nav-item>.nav-link .nav-lbl{display:flex;align-items:center;gap:.6rem}
+/* Startseite steht über allem und führt aus dem Portal heraus zurück zur Übersicht */
+.nav-home a{display:flex;align-items:center;gap:.6rem;padding:.75rem 1.5rem;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:.1em;text-transform:uppercase;color:#5D6E8C;text-decoration:none;
+  transition:color .2s,background .2s}
+.nav-home a:hover{color:#fff;background:rgba(78,199,235,.10)}
+.side-brand{text-decoration:none;transition:background .2s}
+.side-brand:hover{background:rgba(78,199,235,.08)}
+
+
+/* user dropdown */
+.user-dropdown{position:fixed;top:calc(var(--header-h) + 4px);right:1.2rem;
+  background:#ffffff;border:1px solid var(--glass-border);border-radius:8px;overflow:hidden;
+  display:none;z-index:300;min-width:180px;box-shadow:0 8px 24px rgba(30,37,50,.12)}
+.user-dropdown.show{display:block}
+.user-dropdown button{display:block;width:100%;padding:.7rem 1.2rem;text-align:left;background:none;border:none;
+  cursor:pointer;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.9rem;color:var(--text-dim);letter-spacing:.02em;transition:background .15s,color .15s}
+.user-dropdown button:hover{background:rgba(8,145,178,.08);color:var(--neon-cyan)}
+.user-dropdown button.danger:hover{background:rgba(219,39,60,.08);color:#dc2626}
+
+/* ── MAIN ── */
+.main-content{margin-top:var(--header-h);flex:1;padding:1.5rem;position:relative;z-index:1;min-height:calc(100vh - var(--header-h))}
+
+/* ── TOP CONTROLS ── */
+.lager-controls{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ctrl-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+/* Segment-Steuerung: zwei Felder in einem Rahmen, mit Rubrik über dem Wert */
+.seg-group{display:flex;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
+  overflow:hidden;box-shadow:0 1px 3px rgba(16,26,46,.05)}
+.seg-cell{padding:.3rem .7rem .38rem;min-width:0;position:relative}
+.seg-cell+.seg-cell{border-left:1px solid var(--glass-border)}
+.seg-cell>label{display:block;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;
+  font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);font-weight:800;
+  pointer-events:none}
+.seg-cell .ctrl-select{border:none!important;border-radius:0;background-color:transparent!important;
+  box-shadow:none;padding:.05rem 1.5rem .05rem 0;font-size:.92rem;font-weight:700;width:100%;
+  background-position:right .2rem center}
+.seg-cell.lg-cell{background:var(--lg-tint,#fff)}
+.seg-cell.lg-cell>label{color:var(--lg-ink,var(--text-dim))}
+.seg-cell.lg-cell .ctrl-select{color:var(--lg-ink,var(--text))}
+.ctrl-select{background:#ffffff;border:1px solid var(--glass-border);border-radius:11px;
+  color:var(--text);font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.95rem;padding:.5rem 2.2rem .5rem .9rem;
+  outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230891b2'/%3E%3C/svg%3E\");
+  background-repeat:no-repeat;background-position:right .7rem center;
+  transition:border-color .2s;min-width:0;box-shadow:0 1px 2px rgba(30,37,50,.04)}
+.ctrl-select:focus{border-color:var(--neon-cyan)}
+/* Lager-Auswahl trägt die Hausfarbe des gewählten Lagers */
+
+.ctrl-select option{background:#fff;color:var(--text)}
+.btn-wareneingang{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;
+  background:linear-gradient(100deg,var(--neon-magenta),#F0568F);color:#fff;
+  border:none;border-radius:11px;padding:.62rem 1rem;cursor:pointer;
+  box-shadow:0 3px 10px rgba(219,39,119,.28);transition:all .2s;white-space:nowrap}
+.btn-wareneingang:hover{box-shadow:0 5px 16px rgba(219,39,119,.4);transform:translateY(-1px)}
+.btn-icon-settings{width:2.6rem;height:2.6rem;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid var(--glass-border);border-radius:11px;font-size:1.1rem;cursor:pointer;
+  transition:all .2s;box-shadow:0 1px 3px rgba(30,37,50,.06)}
+.btn-icon-settings:hover{border-color:var(--neon-cyan);box-shadow:0 3px 8px rgba(8,145,178,.15);transform:translateY(-1px)}
+
+/* success toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  background:#ecfdf5;border:1px solid var(--neon-green);border-radius:8px;
+  padding:.8rem 1.4rem;font-family:'Poppins','Century Gothic','CenturyGothic',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.06em;
+  color:var(--neon-green);z-index:999;display:none;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(5,150,105,.18)}
+.toast.show{display:block;animation:fadeInUp .3s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* spinner */
+.spinner-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:999;align-items:center;justify-content:center}
+.spinner-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(8,145,178,.15);border-top-color:var(--neon-cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile: Anfangsbestand header split */
+.th-text-mob{display:none}
+@media(max-width:640px){
+  .th-text-mob{display:inline}
+}
+/* Button text spans */
+.btn-line1{display:inline}
+.btn-line2{display:inline}
+.btn-wareneingang{white-space:nowrap}
+@media(max-width:640px){
+  .btn-line1{display:block}
+  .btn-line2{display:block}
+  .btn-wareneingang{white-space:normal}
+}
+.text-dim-small{color:var(--text-dim);font-size:.72rem}
+
+
+/* ══ Hausfarben der Filialen ══════════════════════════════════════════ */
+:root{--acc:#2563EB;--acc-ink:#1D4FB8;--acc-bg:#E9F0FE;--acc-sh:rgba(37,99,235,.3);
+  --rot:#E11D48;--gruen:#0C9C77;--gelb:#C2700B}
+body[data-lg="nettetal"]{--acc:#2563EB;--acc-ink:#1D4FB8;--acc-bg:#E9F0FE;--acc-sh:rgba(37,99,235,.3)}
+body[data-lg="brüggen"]{--acc:#E11D48;--acc-ink:#C4123E;--acc-bg:#FDE8EE;--acc-sh:rgba(225,29,72,.3)}
+body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-sh:rgba(234,88,12,.3)}
+
+.main-content{max-width:880px;margin:var(--header-h) auto 0;padding:1.3rem 1.2rem 3rem}
+.view{display:none}
+.view.on{display:block}
+
+.fil-wahl{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.fil-wahl button{border:1.5px solid var(--glass-border);background:#fff;border-radius:22px;
+  padding:.45rem 1rem;font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;
+  color:var(--text-dim);cursor:pointer;transition:all .15s}
+.fil-wahl button:hover{border-color:var(--acc)}
+.fil-wahl button.on{background:var(--acc);border-color:var(--acc);color:#fff;
+  box-shadow:0 4px 12px var(--acc-sh)}
+
+.pillen{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.pille{display:inline-flex;align-items:center;gap:.45rem;background:#fff;border:1px solid var(--glass-border);
+  border-radius:22px;padding:.4rem .85rem;font-size:.78rem;cursor:default}
+.pille b{font-family:var(--mono);font-weight:700}
+.pille.warn{background:#FFF8EC;border-color:#F0D9A8;color:#8F5208}
+.pille.rot{background:#FDE8EE;border-color:#F6C6D4;color:#A5103A}
+.pille.klick{cursor:pointer}
+
+.karte{background:#fff;border:1px solid var(--glass-border);border-radius:14px;overflow:hidden;
+  margin-bottom:1rem}
+.k-kopf{display:flex;align-items:center;gap:.5rem;padding:.65rem .9rem;background:var(--acc-bg);
+  border-bottom:1px solid var(--glass-border);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;font-weight:800;color:var(--acc-ink)}
+.k-kopf .rechts{margin-left:auto;display:flex;gap:.4rem}
+.mini-btn{width:28px;height:28px;border-radius:9px;border:1.4px dashed var(--acc);
+  background:#fff;color:var(--acc);font-size:1rem;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1}
+.mini-btn.voll{border-style:solid}
+.mini-btn:hover{background:var(--acc);color:#fff}
+.leer{padding:1rem;text-align:center;color:var(--text-dim);font-size:.83rem}
+.hinweis{font-size:.72rem;color:var(--text-dim);line-height:1.55;margin:.4rem 0 1rem}
+
+.zeile{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-top:1px solid var(--glass-border);
+  width:100%;background:none;border-left:none;border-right:none;border-bottom:none;text-align:left;
+  font-family:'Poppins',sans-serif;color:var(--text)}
+.zeile:first-of-type{border-top:none}
+button.zeile{cursor:pointer}
+button.zeile:hover{background:var(--zebra)}
+.zeile .nm{min-width:0}
+.zeile .nm b{display:block;font-size:.9rem;font-weight:600}
+.zeile .nm s{display:block;text-decoration:none;font-size:.7rem;color:var(--text-dim);margin-top:.05rem}
+.zeile .rechts{margin-left:auto;display:flex;align-items:center;gap:.45rem;flex-shrink:0}
+.pfeil{width:26px;height:26px;border-radius:9px;background:var(--bg3);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.ava{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:.8rem;font-weight:700;color:#fff;background:var(--acc)}
+.marke{font-size:.54rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:20px;padding:.14rem .5rem;white-space:nowrap}
+.marke.voll{background:#E7F7F1;color:#0A7D5F}
+.marke.teil{background:#E9F0FE;color:#1D4FB8}
+.marke.mini{background:#FDF3E3;color:#8F5208}
+.warn{display:inline-flex;align-items:center;font-size:.62rem;font-weight:700;border-radius:20px;
+  padding:.18rem .5rem;white-space:nowrap}
+.warn.rot{background:#FDE8EE;color:#A5103A}
+.warn.gelb{background:#FFF8EC;color:#8F5208}
+.warn.gruen{background:#E7F7F1;color:#0A7D5F}
+.betrag{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.betrag.offen{color:var(--gelb)}
+.akt-btn{border:1.4px solid var(--gruen);color:var(--gruen);background:#fff;border-radius:9px;
+  padding:.3rem .65rem;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer}
+.akt-btn:hover{background:var(--gruen);color:#fff}
+
+table.tb{width:100%;border-collapse:collapse;background:#fff}
+table.tb th{background:var(--ink2);color:#fff;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  font-weight:800;padding:.55rem .7rem;text-align:left}
+table.tb td{border-top:1px solid var(--glass-border);padding:.55rem .7rem;font-size:.82rem}
+table.tb td.num{font-family:var(--mono);text-align:right;font-weight:700;white-space:nowrap}
+table.tb th.num{text-align:right}
+table.tb tr:nth-child(even) td{background:var(--zebra)}
+table.tb tr.klick{cursor:pointer}
+table.tb tr.klick:hover td{background:var(--acc-bg)}
+.tb-huelle{overflow-x:auto}
+
+.back{display:inline-flex;align-items:center;gap:.4rem;background:none;border:none;cursor:pointer;
+  color:var(--acc);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;padding:.3rem 0;
+  margin-bottom:.7rem}
+.sub-titel{font-size:1.2rem;font-weight:700;margin-bottom:.8rem}
+
+/* Fenster */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,37,50,.45);z-index:500;
+  align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg);border-radius:16px;width:100%;max-width:560px;max-height:92vh;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(16,26,46,.35)}
+.dlg-head{background:var(--ink);color:#fff;padding:.9rem 1rem .85rem;position:relative;flex-shrink:0}
+.dlg-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--acc)}
+.dlg-eyebrow{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:#7E90AE;font-weight:800}
+.dlg-title{font-size:1rem;font-weight:700;margin-top:.15rem;display:flex;align-items:center;gap:.5rem;
+  padding-right:2rem;flex-wrap:wrap}
+.dlg-pill{font-size:.56rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  border-radius:20px;padding:.18rem .6rem;background:var(--acc);color:#fff}
+.dlg-close{position:absolute;top:.8rem;right:.95rem;background:none;border:none;
+  color:rgba(255,255,255,.6);font-size:1.15rem;cursor:pointer;line-height:1}
+.dlg-body{flex:1;overflow-y:auto;padding:.9rem 1rem}
+.dlg-foot{display:flex;gap:.5rem;padding:.75rem 1rem 1rem;border-top:1px solid var(--glass-border);flex-shrink:0}
+.dlg-foot .btn{flex:1;border:none;border-radius:12px;padding:.8rem;min-height:46px;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700}
+.b-ghost{background:#fff;border:1px solid var(--glass-border)!important;color:var(--text-dim)}
+.b-acc{background:var(--acc);color:#fff}
+.b-green{background:var(--gruen);color:#fff}
+.b-rot{background:#fff;border:1.4px solid var(--rot)!important;color:var(--rot)}
+.fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);
+  font-weight:800;margin:.9rem 0 .35rem}
+.fl:first-child{margin-top:0}
+.eing{width:100%;max-width:100%;min-width:0;background:#fff;border:1px solid var(--glass-border);
+  border-radius:10px;padding:.55rem .7rem;font-family:'Poppins',sans-serif;font-size:.88rem;
+  color:var(--text);outline:none}
+.eing.mono{font-family:var(--mono)}
+.eing:focus{border-color:var(--acc)}
+input[type=date].eing,input[type=month].eing{-webkit-appearance:none;appearance:none}
+.zwei{display:flex;gap:.5rem}
+.zwei>*{flex:1;min-width:0}
+.wahl{display:flex;gap:.4rem;flex-wrap:wrap}
+.wahl button{border:1.5px solid var(--glass-border);background:#fff;border-radius:10px;padding:.45rem .8rem;
+  font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;color:var(--text-dim);cursor:pointer}
+.wahl button.on{border-color:var(--acc);background:var(--acc-bg);color:var(--acc-ink)}
+.liste{background:#fff;border:1px solid var(--glass-border);border-radius:11px;overflow:hidden}
+.li{display:flex;gap:.5rem;align-items:center;padding:.5rem .7rem;font-size:.8rem;
+  border-top:1px solid var(--glass-border)}
+.li:first-child{border-top:none}
+.li .r{margin-left:auto;display:flex;gap:.35rem;align-items:center}
+.li .b{font-family:var(--mono);font-weight:700}
+.li-add{color:var(--acc);font-weight:700;cursor:pointer;background:none;border:none;width:100%;
+  text-align:left;font-family:'Poppins',sans-serif;font-size:.8rem;padding:.55rem .7rem}
+.li-add:hover{background:var(--acc-bg)}
+.x{width:24px;height:24px;border-radius:7px;border:1px solid var(--glass-border);background:#fff;
+  color:var(--text-dim);cursor:pointer;font-size:.72rem;display:flex;align-items:center;justify-content:center}
+.x:hover{border-color:var(--rot);color:var(--rot)}
+.box-inline{background:#fff;border:1px solid var(--glass-border);border-radius:11px;padding:.7rem;margin-top:.4rem}
+.jetzt{font-size:.52rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  background:#E7F7F1;color:#0A7D5F;border-radius:20px;padding:.12rem .45rem}
+
+@media(max-width:640px){
+  .main-content{padding:.9rem .8rem 2.5rem}
+  .zeile{padding:.65rem .75rem}
+  .zwei{flex-direction:column}
+}
+
+
+.gross{display:flex;align-items:center;gap:.8rem;background:#fff;border:1px solid var(--glass-border);
+  border-radius:13px;padding:.85rem 1rem;margin-bottom:.6rem;width:100%;text-align:left;
+  font-family:'Poppins',sans-serif;color:var(--text)}
+button.gross{cursor:pointer}
+button.gross:hover{border-color:var(--acc)}
+.gross .txt b{display:block;font-size:.95rem;font-weight:700}
+.gross .txt s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim);margin-top:.1rem}
+.gross .zahl{margin-left:auto;font-family:var(--mono);font-size:1.5rem;font-weight:700}
+.gross.warn{background:#FFF8EC;border-color:#F0D9A8}
+.gross.warn .zahl{color:var(--gelb)}
+.gross.gut .zahl{color:var(--gruen)}
+.gross.faellig{background:#FDE8EE;border-color:#F6C6D4}
+.knopf-gr{margin-left:auto;display:inline-flex;align-items:center;gap:.4rem;background:var(--acc);color:#fff;
+  border:none;border-radius:11px;padding:.6rem 1rem;font-family:'Poppins',sans-serif;font-size:.82rem;
+  font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 4px 12px var(--acc-sh)}
+.knopf-r{margin-left:auto;display:inline-flex;align-items:center;background:#fff;border:1.5px solid var(--acc);
+  color:var(--acc);border-radius:11px;padding:.5rem .9rem;font-size:.8rem;font-weight:700;white-space:nowrap}
+
+.grp{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;margin-bottom:.8rem}
+.grp-h{padding:.5rem .85rem;background:var(--acc-bg);color:var(--acc-ink);font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase;font-weight:800}
+.pp{display:flex;align-items:center;gap:.6rem;padding:.55rem .85rem;border-top:1px solid var(--glass-border);
+  font-size:.86rem}
+.pp:first-of-type{border-top:none}
+.pp .nm{min-width:0;flex:1}
+.pp .nm s{display:block;text-decoration:none;font-size:.7rem;color:var(--gelb);margin-top:.1rem}
+.pp.offen{background:#FFF8EC}
+.pp.fehler{background:#FDF1F4}
+.hk{width:32px;height:32px;border-radius:9px;border:1.6px solid var(--glass-border);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#B8C2D0;
+  cursor:pointer;flex-shrink:0}
+.hk.ok.on{background:var(--gruen);border-color:var(--gruen);color:#fff}
+.hk.nok.on{background:var(--rot);border-color:var(--rot);color:#fff}
+.hk:disabled{cursor:default;opacity:.9}
+.fortschritt{position:sticky;top:calc(var(--header-h) + .4rem);z-index:5;display:flex;align-items:center;
+  gap:.7rem;background:var(--ink);color:#fff;border-radius:12px;padding:.6rem .9rem;margin-bottom:.8rem;
+  font-size:.8rem}
+.fortschritt .balken{flex:1;height:6px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden}
+.fortschritt .balken i{display:block;height:100%;background:var(--acc)}
+.fortschritt b{font-family:var(--mono)}
+.pruef-kopf{display:flex;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap}
+.pruef-kopf>div{flex:1;min-width:150px}
+.herkunft{font-size:.66rem;color:var(--text-dim);display:block;margin-top:.1rem}
+.cfg-gruppe{background:#fff;border:1px solid var(--glass-border);border-radius:11px;margin-bottom:.7rem;overflow:hidden}
+.cfg-gh{display:flex;gap:.4rem;align-items:center;padding:.5rem .6rem;background:var(--acc-bg)}
+.cfg-gh input{flex:1;font-weight:700}
+.cfg-p{display:flex;gap:.4rem;align-items:center;padding:.4rem .6rem;border-top:1px solid var(--glass-border)}
+.cfg-p input{flex:1}
+.cfg-p select{width:auto}
+.frist-zeile td:last-child{white-space:nowrap}
+
+</style>
+</head>
+<body data-lg="nettetal">
+<header class="app-header">
+  <div class="hdr-left">
+    <button class="burger" id="burger-btn" onclick="toggleSidebar()" aria-label="Menü">
+      <span></span><span></span><span></span></button>
+  </div>
+  <div class="hdr-center">
+    <div class="hdr-org">Daten</div>
+    <div class="hdr-page">Check<span style="color:#4FD2F5">liste</span></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-user" onclick="toggleUserDropdown()"><span class="hdr-ava" id="hdr-ava">A</span>
+      <span id="hdr-username">Admin</span>
+      <svg class="hdr-chevron" viewBox="0 0 16 16"><polyline points="4,6 8,10 12,6"/></svg>
+    </div>
+  </div>
+</header>
+<div class="user-dropdown" id="user-dropdown">
+  <button class="danger" onclick="abmelden()">Abmelden</button>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<nav class="sidebar" id="sidebar">
+  <a class="side-brand" href="startseite.html" title="Zur Startseite">
+    <div class="side-mark"><span>G</span></div>
+    <div class="side-name">GAME GALAXY<span>Betriebsportal</span></div>
+  </a>
+  <ul class="nav-list">
+    <li class="nav-item nav-home"><a href="startseite.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M10 20v-5h4v5"/></svg>Startseite</a></li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Lager<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="lager.html" ><svg class="nav-i" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17"/></svg>Bestände</a></li>
+        <li><a href="getraenke-snacks.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M7 8h10l-1 12.5H8L7 8Z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8"/><path d="M8.6 13h6.8"/></svg>Getränke &amp; Snacks</a></li>
+        <li><a href="lieferplanung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="7" width="11" height="9" rx="1.5"/><path d="M14 10h3.5L21 13v3h-7"/><circle cx="7" cy="18.5" r="1.8"/><circle cx="17" cy="18.5" r="1.8"/></svg>Lieferplanung</a></li>
+        <li><a href="inventur.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 4.5V3h6v1.5"/><path d="M9 11.5l2 2 4-4"/></svg>Inventur</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Handel<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="preise.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M12.5 3.5 20.5 11a1.5 1.5 0 0 1 0 2.1l-7.4 7.4a1.5 1.5 0 0 1-2.1 0L3.5 13V5a1.5 1.5 0 0 1 1.5-1.5h7.5Z"/><circle cx="8" cy="8" r="1.4"/></svg>Preise</a></li>
+        <li><a href="rechnungen.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4v-17Z"/><path d="M9 8h6M9 12h6"/></svg>Rechnungen</a></li>
+      </ul>
+    </li>
+    <li class="nav-divider"></li>
+    <li class="nav-item">
+      <button class="nav-link" onclick="toggleSubMenu(this)">
+        Daten<svg class="nav-arrow" viewBox="0 0 16 16"><polyline points="6,4 10,8 6,12"/></svg>
+      </button>
+      <ul class="nav-sub">
+        <li><a href="statistik.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg>Statistik</a></li>
+        <li><a href="leerung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg>Leerung</a></li>
+        <li><a href="konten.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg>Konten</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+<main class="main-content">
+
+  <!-- ══ Startseite des Bereichs ══ -->
+  <div class="view on" id="v-start">
+    <div class="fil-wahl" id="fil-wahl"></div>
+    <div id="drei"></div>
+
+    <div class="karte" style="margin-top:.9rem">
+      <div class="k-kopf">Fristen und Nachweise
+        <span class="rechts"><button class="mini-btn" onclick="neueFrist()" title="Frist anlegen">+</button></span></div>
+      <div class="tb-huelle"><table class="tb" id="tb-fristen"></table></div>
+    </div>
+
+    <div class="karte">
+      <div class="k-kopf">Frühere Prüfungen
+        <span class="rechts"><button class="mini-btn voll" onclick="openKonfig()" title="Prüfpunkte verwalten">⚙</button></span></div>
+      <div class="tb-huelle"><table class="tb" id="tb-pruef"></table></div>
+    </div>
+  </div>
+
+  <!-- ══ Offene Punkte ══ -->
+  <div class="view" id="v-offen">
+    <button class="back" onclick="show('v-start')">← Zurück</button>
+    <div class="sub-titel">Offene Punkte · <span id="off-fil">—</span></div>
+    <div id="liste-offen"></div>
+    <p class="hinweis">Ein Haken schließt den Punkt; das Datum der Erledigung wird festgehalten.</p>
+  </div>
+
+  <!-- ══ Prüfung durchführen oder ansehen ══ -->
+  <div class="view" id="v-pruef">
+    <button class="back" onclick="zurueckAusPruefung()">← Zurück</button>
+    <div class="sub-titel" id="pr-titel">Neue Prüfung</div>
+    <div class="pruef-kopf">
+      <div><label class="fl">Datum</label><input type="date" class="eing mono" id="pr-datum"></div>
+      <div><label class="fl">Geprüft von</label><input class="eing" id="pr-pruefer" placeholder="Name"></div>
+    </div>
+    <div class="fortschritt"><span>Geprüft</span>
+      <span class="balken"><i id="pr-balken" style="width:0"></i></span>
+      <b id="pr-zahl">0 / 0</b></div>
+    <div id="pr-gruppen"></div>
+    <div class="dlg-foot" style="border:none;padding:.5rem 0 0">
+      <button class="btn b-rot" id="pr-loesch" onclick="loeschePruefung()" style="display:none">Löschen</button>
+      <button class="btn b-ghost" onclick="zurueckAusPruefung()">Abbrechen</button>
+      <button class="btn b-acc" onclick="savePruefung()">✓ Prüfung speichern</button>
+    </div>
+  </div>
+
+<!-- ══ Fenster: Kreuz ══ -->
+<div class="modal-overlay" id="m-nok" onclick="if(event.target===this)abbruchNok()">
+  <div class="modal" style="max-width:440px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="abbruchNok()">✕</button>
+      <div class="dlg-eyebrow">Prüfpunkt</div>
+      <div class="dlg-title"><span id="nok-name">—</span><span class="dlg-pill" id="nok-fil">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Was ist zu tun?</label>
+      <div class="wahl" id="nok-art">
+        <button onclick="nokArt(false,this)">sofort erledigt</button>
+        <button class="on" onclick="nokArt(true,this)">bleibt offen</button>
+      </div>
+      <label class="fl">Bemerkung / Maßnahme</label>
+      <input class="eing" id="nok-bem" placeholder="Was ist los, was wird getan?">
+      <label class="fl">Zuständig</label>
+      <input class="eing" id="nok-zust" placeholder="Name">
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="abbruchNok()">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveNok()">✓ Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Frist ══ -->
+<div class="modal-overlay" id="m-frist" onclick="if(event.target===this)closeM('m-frist')">
+  <div class="modal" style="max-width:420px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('m-frist')">✕</button>
+      <div class="dlg-eyebrow">Frist</div>
+      <div class="dlg-title"><span id="fr-titel">Neue Frist</span><span class="dlg-pill" id="fr-fil">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Gegenstand</label>
+      <input class="eing" id="fr-name" placeholder="z. B. Feuerlöscher · 4 Stück">
+      <div class="zwei">
+        <div><label class="fl">Geprüft am</label><input type="date" class="eing mono" id="fr-geprueft"></div>
+        <div><label class="fl">Gültig bis</label><input type="date" class="eing mono" id="fr-bis"></div>
+      </div>
+      <p class="hinweis" style="margin-top:.6rem">Zwei Monate vor Ablauf färbt sich die Zeile gelb,
+        nach Ablauf rot.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-rot" id="fr-loesch" onclick="loescheFrist()" style="display:none">Löschen</button>
+      <button class="btn b-ghost" onclick="closeM('m-frist')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveFrist()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Prüfpunkte verwalten ══ -->
+<div class="modal-overlay" id="m-cfg" onclick="if(event.target===this)closeM('m-cfg')">
+  <div class="modal" style="max-width:560px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('m-cfg')">✕</button>
+      <div class="dlg-eyebrow">Konfiguration</div>
+      <div class="dlg-title">Prüfpunkte</div>
+    </div>
+    <div class="dlg-body">
+      <p class="hinweis" style="margin-top:0">Die Punkte gelten für alle Filialen. Bei Bedarf lässt
+        sich ein Punkt auf eine Filiale begrenzen.</p>
+      <div id="cfg-liste"></div>
+      <button class="li-add" style="border:1.5px dashed var(--acc);border-radius:11px"
+        onclick="cfgGruppeNeu()">+ Neue Gruppe</button>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('m-cfg')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveKonfig()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+<div class="spinner-overlay" id="spinner"><div class="spinner"></div></div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDou89Rf_Hv9duDgksKO87kG_eG3abILnk",
+  authDomain: "lager-b898e.firebaseapp.com",
+  projectId: "lager-b898e",
+  storageBucket: "lager-b898e.firebasestorage.app",
+  messagingSenderId: "309166662214",
+  appId: "1:309166662214:web:6576576ac41d1f08aae047"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const FILIALEN = ['nettetal','brüggen','viersen'];
+const NAMEN = {nettetal:'Nettetal','brüggen':'Brüggen',viersen:'Viersen'};
+let lg = localStorage.getItem('gg_filiale_wahl') || 'nettetal';
+if(FILIALEN.indexOf(lg) < 0) lg = 'nettetal';
+
+const monatKey = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const tagKey   = d => monatKey(d)+'-'+String(d.getDate()).padStart(2,'0');
+const heute    = () => tagKey(new Date());
+const dmy = d => d ? d.split('-').reverse().join('.') : '—';
+const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
+                'September','Oktober','November','Dezember'];
+const monatText = m => { if(!m) return '—'; const [y,mm]=m.split('-'); return MONATE[Number(mm)-1]+' '+y; };
+const eur  = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const zahl = n => (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+function parseNum(v){
+  let s=String(v||'').trim().replace(/[^0-9.,-]/g,''); if(!s) return 0;
+  if(s.includes(',')) s=s.replace(/\./g,'').replace(',','.');
+  const n=parseFloat(s); return isNaN(n)?0:n;
+}
+// Tage bis zu einem Datum (negativ = schon vorbei)
+function tageBis(iso){
+  if(!iso) return null;
+  const [y,m,d]=iso.split('-').map(Number);
+  const ziel=new Date(y,m-1,d); const jetzt=new Date(); jetzt.setHours(0,0,0,0);
+  return Math.round((ziel-jetzt)/86400000);
+}
+function naechsterMonat(m){ const [y,mm]=m.split('-').map(Number); return monatKey(new Date(y,mm,1)); }
+const esc = t => String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const neueId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+function showSpinner(){document.getElementById('spinner').classList.add('show')}
+function hideSpinner(){document.getElementById('spinner').classList.remove('show')}
+let toastT;
+function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2600);}
+function openM(id){document.getElementById(id).classList.add('show')}
+function closeM(id){document.getElementById(id).classList.remove('show')}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+  document.getElementById('burger-btn').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+  document.getElementById('burger-btn').classList.remove('open');
+}
+function toggleSubMenu(btn){ btn.parentElement.classList.toggle('open'); }
+function toggleUserDropdown(){
+  document.getElementById('user-dropdown').classList.toggle('show');
+  document.addEventListener('click',function h(e){
+    if(!e.target.closest('.hdr-user')&&!e.target.closest('.user-dropdown')){
+      document.getElementById('user-dropdown').classList.remove('show');
+      document.removeEventListener('click',h);
+    }
+  });
+}
+function abmelden(){ localStorage.removeItem('gg_user'); window.location.href='gg-portal.html'; }
+function show(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function zeichneFilialen(){
+  document.getElementById('fil-wahl').innerHTML = FILIALEN.map(f=>
+    `<button class="${f===lg?'on':''}" onclick="setLg('${f}')">${NAMEN[f]}</button>`).join('');
+  document.body.dataset.lg = lg;
+}
+
+
+/* ══ Daten ════════════════════════════════════════════════════════════
+   check_konfig/punkte — die Prüfpunkte, gemeinsam für alle Filialen
+   check_pruefung      — je Prüfung: Filiale, Datum, Prüfer, Ergebnis je Punkt
+   check_frist         — Nachweise mit Ablaufdatum, je Filiale                */
+const ABSTAND_MONATE = 3;   // Prüfungen finden vierteljährlich statt
+
+const VORGABE = [
+  {name:'Geräte / Halle', punkte:['Jugendschutzaushang','Geräte Kennzeichnung','Öffnungszeiten lesbar',
+    'TÜV Geräte','Uhrzeit Geräte korrekt','Hinweis Kamera Eingang','Kameras sauber',
+    'Videoaufnahme funktioniert','Telefon funktioniert','Panikknöpfe Test','Fluchtwege gekennzeichnet',
+    'Fluchtwege frei zugänglich','Feuerlöscher','Sicherheitsbeleuchtung geprüft']},
+  {name:'Mitarbeiter geschult', punkte:['Überfall — Ablauf Betrieb','Hygiene Schulung',
+    'Brandschutz Schulung','Erste Hilfe Schulung','Unterweisung Geldtransport']},
+  {name:'Aushänge', punkte:['Unfallverhütungsvorschriften','Arbeitnehmerschutzgesetz','BGN Erste Hilfe',
+    'Organisationsstruktur','Brandschutzordnung','Alarmplan','Betriebsanweisungen']},
+  {name:'Sozialkonzept', punkte:['Datenschutz / Jugendschutz','Aushänge 6 Stück','Ausgefüllt']}
+];
+
+let konfig = null, pruefungen = [], fristen = [];
+
+async function start(){ zeichneFilialen(); await laden(); }
+async function setLg(f){ lg=f; localStorage.setItem('gg_filiale_wahl',f); zeichneFilialen(); await laden(); }
+
+async function laden(){
+  showSpinner();
+  try{
+    const [k,p,f] = await Promise.all([
+      db.collection('check_konfig').doc('punkte').get(),
+      db.collection('check_pruefung').where('lager','==',lg).get(),
+      db.collection('check_frist').where('lager','==',lg).get()
+    ]);
+    if(k.exists) konfig = k.data();
+    else{
+      // Beim allerersten Aufruf die Punkte aus der Excel-Liste anlegen
+      konfig = {gruppen: VORGABE.map(g=>({id:neueId(), name:g.name,
+        punkte:g.punkte.map(n=>({id:neueId(), name:n, nur:null}))}))};
+      await db.collection('check_konfig').doc('punkte').set(konfig);
+    }
+    pruefungen = p.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.datum||'').localeCompare(a.datum||''));
+    fristen = f.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){ showToast('Daten nicht geladen: '+e.message); }
+  hideSpinner();
+  zeichne();
+}
+
+// Punkte, die für die gewählte Filiale gelten
+function gueltigeGruppen(){
+  return (konfig ? konfig.gruppen : []).map(g=>({...g,
+    punkte:(g.punkte||[]).filter(p=>!p.nur || p.nur===lg)})).filter(g=>g.punkte.length);
+}
+// Alle offenen Punkte aus allen Prüfungen dieser Filiale
+function offenePunkte(){
+  const liste=[];
+  pruefungen.forEach(pr=>Object.entries(pr.ergebnisse||{}).forEach(([pid,e])=>{
+    if(e.st==='nok' && e.offen) liste.push({pruefung:pr, pid, e,
+      name:(pr.namen||{})[pid] || punktName(pid), gruppe:(pr.gruppen||{})[pid] || gruppeVon(pid)});
+  }));
+  return liste;
+}
+function punktName(pid){
+  for(const g of (konfig?konfig.gruppen:[])) for(const p of g.punkte) if(p.id===pid) return p.name;
+  return 'Punkt';
+}
+function gruppeVon(pid){
+  for(const g of (konfig?konfig.gruppen:[])) for(const p of g.punkte) if(p.id===pid) return g.name;
+  return 'Sonstiges';
+}
+function plusMonate(iso, n){
+  const [y,m,d]=iso.split('-').map(Number);
+  return tagKey(new Date(y, m-1+n, d));
+}
+
+/* ══ Startseite des Bereichs ═════════════════════════════════════════ */
+function zeichne(){
+  const off = offenePunkte();
+  const letzte = pruefungen[0];
+  const naechste = letzte ? plusMonate(letzte.datum, ABSTAND_MONATE) : null;
+  const tage = naechste ? tageBis(naechste) : null;
+  const herkunft = off.length ? [...new Set(off.map(o=>dmy(o.pruefung.datum)))].join(', ') : '';
+
+  let h = '';
+  h += `<button class="gross ${off.length?'warn':'gut'}" onclick="zeigeOffen()">
+    <span class="txt"><b>${off.length ? off.length+' offene '+(off.length===1?'Punkt':'Punkte') : 'Nichts offen'}</b>
+      <s>${off.length ? 'aus der Prüfung vom '+herkunft : 'alle Punkte sind erledigt'}</s></span>
+    <span class="zahl">${off.length}</span></button>`;
+  h += letzte
+    ? `<button class="gross" onclick="oeffnePruefung('${letzte.id}')">
+        <span class="txt"><b>Letzte Prüfung ${dmy(letzte.datum)}</b>
+          <s>${esc(letzte.pruefer||'—')} · ${Object.keys(letzte.ergebnisse||{}).length} Punkte geprüft</s></span>
+        <span class="knopf-r">Ansehen</span></button>`
+    : `<div class="gross"><span class="txt"><b>Noch keine Prüfung</b>
+        <s>für ${NAMEN[lg]} wurde noch nichts erfasst</s></span></div>`;
+  h += `<div class="gross${tage!==null && tage<0 ? ' faellig':''}">
+    <span class="txt"><b>${naechste ? 'Nächste fällig '+dmy(naechste) : 'Erste Prüfung anlegen'}</b>
+      <s>${naechste ? (tage<0 ? 'seit '+(-tage)+' Tagen überfällig' : 'in '+tage+' Tagen · vierteljährlich')
+                   : 'danach vierteljährlich'}</s></span>
+    <button class="knopf-gr" onclick="neuePruefung()">+ Neue Prüfung</button></div>`;
+  document.getElementById('drei').innerHTML = h;
+
+  // Fristen
+  const fr = fristen.slice().sort((a,b)=>(a.bis||'9').localeCompare(b.bis||'9'));
+  document.getElementById('tb-fristen').innerHTML =
+    '<tr><th>Gegenstand</th><th>Geprüft</th><th>Gültig bis</th><th>Status</th></tr>'
+    + (fr.length ? fr.map(x=>{
+        const t = tageBis(x.bis);
+        const st = t===null ? '—' : t<0 ? '<span class="warn rot">abgelaufen</span>'
+                 : t<=60 ? `<span class="warn rot">in ${t} Tagen</span>`
+                 : t<=183 ? `<span class="warn gelb">${Math.round(t/30)} Monate</span>` : '—';
+        return `<tr class="klick frist-zeile" onclick="oeffneFrist('${x.id}')"><td>${esc(x.name)}</td>
+          <td>${dmy(x.geprueft)}</td><td>${dmy(x.bis)}</td><td>${st}</td></tr>`;
+      }).join('') : '<tr><td colspan="4" class="leer">Noch keine Fristen eingetragen.</td></tr>');
+
+  // Frühere Prüfungen
+  document.getElementById('tb-pruef').innerHTML =
+    '<tr><th>Datum</th><th>Geprüft von</th><th class="num">Punkte</th><th>Ergebnis</th></tr>'
+    + (pruefungen.length ? pruefungen.map(p=>{
+        const e = Object.values(p.ergebnisse||{});
+        const o = e.filter(x=>x.st==='nok' && x.offen).length;
+        return `<tr class="klick" onclick="oeffnePruefung('${p.id}')"><td>${dmy(p.datum)}</td>
+          <td>${esc(p.pruefer||'—')}</td><td class="num">${e.length}</td>
+          <td>${o?`<span class="warn gelb">${o} offen</span>`:'<span class="warn gruen">alles erledigt</span>'}</td></tr>`;
+      }).join('') : '<tr><td colspan="4" class="leer">Noch keine Prüfung.</td></tr>');
+}
+
+/* ══ Offene Punkte ═══════════════════════════════════════════════════ */
+function zeigeOffen(){
+  document.getElementById('off-fil').textContent = NAMEN[lg];
+  const off = offenePunkte();
+  const nachGruppe = {};
+  off.forEach(o=>(nachGruppe[o.gruppe]=nachGruppe[o.gruppe]||[]).push(o));
+  document.getElementById('liste-offen').innerHTML = off.length
+    ? Object.entries(nachGruppe).map(([g,items])=>`<div class="grp"><div class="grp-h">${esc(g)}</div>`
+        + items.map(o=>`<div class="pp offen">
+            <button class="hk ok" title="Erledigt" onclick="erledige('${o.pruefung.id}','${o.pid}')">✓</button>
+            <span class="nm">${esc(o.name)}
+              ${o.e.bem?`<s>${esc(o.e.bem)}</s>`:''}
+              <span class="herkunft">Prüfung ${dmy(o.pruefung.datum)}${o.e.zust?' · zuständig: '+esc(o.e.zust):''}</span></span>
+          </div>`).join('') + '</div>').join('')
+    : '<div class="karte"><div class="leer">Nichts offen — alles erledigt.</div></div>';
+  show('v-offen');
+}
+async function erledige(prId, pid){
+  const pr = pruefungen.find(p=>p.id===prId); if(!pr) return;
+  const erg = JSON.parse(JSON.stringify(pr.ergebnisse||{}));
+  if(!erg[pid]) return;
+  erg[pid].offen = false; erg[pid].erledigtAm = heute();
+  showSpinner();
+  try{
+    await db.collection('check_pruefung').doc(prId).set({ergebnisse:erg},{merge:true});
+    pr.ergebnisse = erg; showToast('Erledigt ✓'); zeichne(); zeigeOffen();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Prüfung ═════════════════════════════════════════════════════════ */
+let prId=null, prErg={};
+function neuePruefung(){
+  prId=null; prErg={};
+  document.getElementById('pr-titel').textContent = 'Neue Prüfung · '+NAMEN[lg];
+  document.getElementById('pr-datum').value = heute();
+  document.getElementById('pr-pruefer').value = (window.GG_USER||{}).name || '';
+  document.getElementById('pr-loesch').style.display='none';
+  zeichnePruefung(); show('v-pruef');
+}
+function oeffnePruefung(id){
+  const p = pruefungen.find(x=>x.id===id); if(!p) return;
+  prId=id; prErg=JSON.parse(JSON.stringify(p.ergebnisse||{}));
+  document.getElementById('pr-titel').textContent = 'Prüfung '+dmy(p.datum)+' · '+NAMEN[lg];
+  document.getElementById('pr-datum').value = p.datum||'';
+  document.getElementById('pr-pruefer').value = p.pruefer||'';
+  document.getElementById('pr-loesch').style.display='';
+  zeichnePruefung(); show('v-pruef');
+}
+function zeichnePruefung(){
+  const gruppen = gueltigeGruppen();
+  let alle=0, fertig=0;
+  document.getElementById('pr-gruppen').innerHTML = gruppen.map(g=>`<div class="grp">
+    <div class="grp-h">${esc(g.name)}</div>` + g.punkte.map(p=>{
+      alle++;
+      const e = prErg[p.id];
+      if(e) fertig++;
+      const kl = e && e.st==='nok' ? (e.offen?' offen':' fehler') : '';
+      const unter = e && e.st==='nok'
+        ? `<s>${e.offen?'offen':'sofort erledigt'}${e.bem?' — '+esc(e.bem):''}${e.zust?' · '+esc(e.zust):''}</s>` : '';
+      return `<div class="pp${kl}">
+        <span class="nm">${esc(p.name)}${unter}</span>
+        <button class="hk ok${e&&e.st==='ok'?' on':''}" onclick="setzeOk('${p.id}')" title="in Ordnung">✓</button>
+        <button class="hk nok${e&&e.st==='nok'?' on':''}" onclick="setzeNok('${p.id}')" title="Mangel">✕</button>
+      </div>`;
+    }).join('') + '</div>').join('');
+  document.getElementById('pr-zahl').textContent = fertig+' / '+alle;
+  document.getElementById('pr-balken').style.width = alle ? (fertig/alle*100)+'%' : '0';
+}
+function setzeOk(pid){
+  if(prErg[pid] && prErg[pid].st==='ok'){ delete prErg[pid]; }
+  else prErg[pid] = {st:'ok'};
+  zeichnePruefung();
+}
+// Kreuz: nachfragen, ob sofort erledigt oder offen
+let nokPid=null, nokOffen=true;
+function setzeNok(pid){
+  nokPid=pid;
+  const e = prErg[pid] && prErg[pid].st==='nok' ? prErg[pid] : null;
+  nokOffen = e ? !!e.offen : true;
+  document.getElementById('nok-name').textContent = punktName(pid);
+  document.getElementById('nok-fil').textContent = NAMEN[lg];
+  document.querySelectorAll('#nok-art button').forEach((b,i)=>b.classList.toggle('on', (i===1)===nokOffen));
+  document.getElementById('nok-bem').value = e ? (e.bem||'') : '';
+  document.getElementById('nok-zust').value = e ? (e.zust||'') : '';
+  openM('m-nok');
+}
+function nokArt(offen, b){
+  nokOffen=offen;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function saveNok(){
+  prErg[nokPid] = {st:'nok', offen:nokOffen,
+    bem:document.getElementById('nok-bem').value.trim(),
+    zust:document.getElementById('nok-zust').value.trim(),
+    erledigtAm: nokOffen ? null : (document.getElementById('pr-datum').value||heute())};
+  closeM('m-nok'); zeichnePruefung();
+}
+function abbruchNok(){ closeM('m-nok'); }
+function zurueckAusPruefung(){ show('v-start'); }
+
+async function savePruefung(){
+  const datum = document.getElementById('pr-datum').value;
+  if(!datum){ showToast('Bitte ein Datum wählen.'); return; }
+  const gruppen = gueltigeGruppen();
+  const alle = gruppen.reduce((a,g)=>a+g.punkte.length,0);
+  const fertig = Object.keys(prErg).length;
+  if(!fertig){ showToast('Noch kein Punkt geprüft.'); return; }
+  // Namen festhalten, damit ältere Prüfungen lesbar bleiben, auch wenn Punkte umbenannt werden
+  const namen={}, gname={};
+  gruppen.forEach(g=>g.punkte.forEach(p=>{ namen[p.id]=p.name; gname[p.id]=g.name; }));
+  const daten = {lager:lg, datum, pruefer:document.getElementById('pr-pruefer').value.trim(),
+    ergebnisse:prErg, namen, gruppen:gname, geaendert:new Date().toISOString()};
+  showSpinner();
+  try{
+    if(prId) await db.collection('check_pruefung').doc(prId).set(daten);
+    else await db.collection('check_pruefung').add(daten);
+    showToast(fertig<alle ? 'Gespeichert — '+(alle-fertig)+' Punkte noch ungeprüft' : 'Prüfung gespeichert ✓');
+    await laden(); show('v-start');
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function loeschePruefung(){
+  if(!prId) return;
+  showSpinner();
+  try{
+    await db.collection('check_pruefung').doc(prId).delete();
+    showToast('Prüfung gelöscht'); await laden(); show('v-start');
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Fristen ═════════════════════════════════════════════════════════ */
+let frId=null;
+function neueFrist(){
+  frId=null;
+  document.getElementById('fr-titel').textContent='Neue Frist';
+  document.getElementById('fr-fil').textContent=NAMEN[lg];
+  ['fr-name','fr-geprueft','fr-bis'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fr-geprueft').value=heute();
+  document.getElementById('fr-loesch').style.display='none';
+  openM('m-frist');
+}
+function oeffneFrist(id){
+  const x = fristen.find(f=>f.id===id); if(!x) return;
+  frId=id;
+  document.getElementById('fr-titel').textContent=x.name;
+  document.getElementById('fr-fil').textContent=NAMEN[lg];
+  document.getElementById('fr-name').value=x.name||'';
+  document.getElementById('fr-geprueft').value=x.geprueft||'';
+  document.getElementById('fr-bis').value=x.bis||'';
+  document.getElementById('fr-loesch').style.display='';
+  openM('m-frist');
+}
+async function saveFrist(){
+  const name=document.getElementById('fr-name').value.trim();
+  const bis=document.getElementById('fr-bis').value;
+  if(!name||!bis){ showToast('Bitte Gegenstand und Ablaufdatum angeben.'); return; }
+  const daten={lager:lg, name, geprueft:document.getElementById('fr-geprueft').value, bis};
+  showSpinner();
+  try{
+    if(frId) await db.collection('check_frist').doc(frId).set(daten);
+    else await db.collection('check_frist').add(daten);
+    closeM('m-frist'); showToast('Gespeichert ✓'); await laden();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function loescheFrist(){
+  if(!frId) return;
+  showSpinner();
+  try{
+    await db.collection('check_frist').doc(frId).delete();
+    closeM('m-frist'); showToast('Gelöscht'); await laden();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Prüfpunkte verwalten ════════════════════════════════════════════ */
+let cfg=null;
+function openKonfig(){
+  cfg = JSON.parse(JSON.stringify(konfig||{gruppen:[]}));
+  zeichneKonfig(); openM('m-cfg');
+}
+function zeichneKonfig(){
+  document.getElementById('cfg-liste').innerHTML = cfg.gruppen.map((g,gi)=>`
+    <div class="cfg-gruppe">
+      <div class="cfg-gh"><input class="eing" value="${esc(g.name)}"
+          onchange="cfg.gruppen[${gi}].name=this.value">
+        <button class="x" title="Gruppe löschen" onclick="cfg.gruppen.splice(${gi},1);zeichneKonfig()">✕</button></div>
+      ${(g.punkte||[]).map((p,pi)=>`<div class="cfg-p">
+        <input class="eing" value="${esc(p.name)}" onchange="cfg.gruppen[${gi}].punkte[${pi}].name=this.value">
+        <select class="eing" onchange="cfg.gruppen[${gi}].punkte[${pi}].nur=this.value||null">
+          <option value=""${!p.nur?' selected':''}>alle</option>
+          ${FILIALEN.map(f=>`<option value="${f}"${p.nur===f?' selected':''}>nur ${NAMEN[f]}</option>`).join('')}
+        </select>
+        <button class="x" onclick="cfg.gruppen[${gi}].punkte.splice(${pi},1);zeichneKonfig()">✕</button>
+      </div>`).join('')}
+      <button class="li-add" onclick="cfg.gruppen[${gi}].punkte.push({id:neueId(),name:'',nur:null});zeichneKonfig()">+ Punkt hinzufügen</button>
+    </div>`).join('');
+}
+function cfgGruppeNeu(){ cfg.gruppen.push({id:neueId(), name:'Neue Gruppe', punkte:[]}); zeichneKonfig(); }
+async function saveKonfig(){
+  cfg.gruppen.forEach(g=>g.punkte = (g.punkte||[]).filter(p=>p.name && p.name.trim()));
+  showSpinner();
+  try{
+    await db.collection('check_konfig').doc('punkte').set({gruppen:cfg.gruppen});
+    konfig = cfg; closeM('m-cfg'); showToast('Prüfpunkte gespeichert ✓'); zeichne();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const u = window.GG_USER || {};
+  if(u.name){
+    document.getElementById('hdr-username').textContent = u.name;
+    document.getElementById('hdr-ava').textContent = u.name.trim().charAt(0).toUpperCase();
+  }
+  start();
+});
+</script>
+</body>
+</html>
