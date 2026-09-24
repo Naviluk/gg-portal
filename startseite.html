@@ -140,6 +140,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   stroke-linecap:round;stroke-linejoin:round}
 .mini b{font-size:.84rem;font-weight:600;display:block;line-height:1.15}
 .mini s{text-decoration:none;font-size:.67rem;color:var(--dim)}
+/* Kurzer Merker rechts in der Kachel: sagt auf einen Blick, ob drinnen etwas offen ist */
+.mini-tag{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:.6rem;font-weight:700;
+  letter-spacing:.02em;border-radius:20px;padding:.2rem .5rem;white-space:nowrap;
+  background:rgba(255,255,255,.08);color:var(--dim)}
+.mini-tag.ok{background:rgba(62,220,169,.16);color:#6FE9C4}
+.mini-tag.gelb{background:rgba(245,196,81,.18);color:#F7D98A}
+.mini-tag.rot{background:rgba(240,50,92,.2);color:#FF9DB6}
 
 /* ══ Kopfleiste (nur Telefon) — gleiche Bauweise wie auf den Arbeitsseiten ══ */
 .app-header{display:none;position:fixed;top:0;left:0;right:0;height:64px;background:var(--ink2);
@@ -297,6 +304,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
     <a class="mini" style="--mc:#F5C451;--mbg:rgba(245,196,81,.14)" href="personal.html">
       <span class="mini-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.9-3.2 3-5 5.5-5s4.6 1.8 5.5 5"/><path d="M15.5 7h5M15.5 10.5h5M15.5 14h3"/></svg></span>
       <span><b>Personal</b><s>Verträge, Schulungen</s></span>
+      <span class="mini-tag" id="badge-personal">—</span>
     </a>
     <a class="mini" style="--mc:#3EDCA9;--mbg:rgba(62,220,169,.14)" href="#" onclick="bald(event,'Konten')">
       <span class="mini-ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg></span>
@@ -411,18 +419,25 @@ function darf(href, rolle){
     {weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
 })();
 
-// Was steht an? Gelesen wird dieselbe Sammlung wie in der Lieferplanung.
+// Was steht an? Jeder Bereich liefert seine Zeilen, danach werden sie zusammengesetzt.
+// Für den Kollegen stehen Personal und Checkliste vorn — das ist seine tägliche Arbeit;
+// für Admin und Einkaufsleiter bleibt die Lieferplanung oben.
 async function ladeStatus(){
   const box=document.getElementById('status');
+  const [lp, ck, pe] = await Promise.all([
+    ladeLieferStatus(), ladeCheckStatus(), ladePersonalStatus()
+  ]);
+  const teile = window.GG_ROLLE === 'Kollege' ? [pe, ck, lp] : [lp, ck, pe];
+  const html = teile.filter(Boolean).join('');
+  box.innerHTML = html || '<span class="st-pill" style="cursor:default">Nichts offen — alles erledigt</span>';
+  ladeLeerungBadge();
+}
+ladeStatus();
+
+// Offene Einkäufe und Lieferungen — dieselbe Sammlung wie in der Lieferplanung
+async function ladeLieferStatus(){
   const badge=document.getElementById('badge-lp');
-  // Die Zeilen der Lieferplanung nur, wenn die Rolle sie auch öffnen darf.
-  // Checkliste und Personal hängen nicht daran und werden danach ergänzt.
-  if(!darf('lieferplanung.html', window.GG_ROLLE)){
-    box.innerHTML='';
-    await ladeCheckStatus(); await ladePersonalStatus(); ladeLeerungBadge();
-    if(!box.innerHTML) box.style.display='none';
-    return;
-  }
+  if(!darf('lieferplanung.html', window.GG_ROLLE)) return '';
   try{
     const snap=await db.collection('lp_planung').get();
     const plan={};
@@ -442,24 +457,18 @@ async function ladeStatus(){
       html+=`<a class="st-pill" href="lieferplanung.html">
         <span class="st-dot" style="background:${LAGER_PUNKT[lg]}"></span>${txt} <b>${n}</b></a>`;
     });
-    box.innerHTML = html;
     if(badge) badge.textContent = gesamt ? gesamt+' offen' : 'frei';
-    await ladeCheckStatus();
-    await ladePersonalStatus();
-    if(!box.innerHTML) box.innerHTML='<span class="st-pill" style="cursor:default">Nichts offen — alles erledigt</span>';
-    ladeLeerungBadge();
+    return html;
   }catch(e){
-    box.innerHTML='<span class="st-pill" style="cursor:default">Daten nicht erreichbar</span>';
     if(badge) badge.textContent='—';
+    return '<span class="st-pill" style="cursor:default">Daten nicht erreichbar</span>';
   }
 }
-ladeStatus();
 
 // Offene Punkte aus der Checkliste — eine Zeile je Filiale
 async function ladeCheckStatus(){
-  const box=document.getElementById('status');
   const badge=document.getElementById('badge-check');
-  if(!darf('checkliste.html', window.GG_ROLLE)){ if(badge) badge.remove(); return; }
+  if(!darf('checkliste.html', window.GG_ROLLE)){ if(badge) badge.remove(); return ''; }
   try{
     const snap=await db.collection('check_pruefung').get();
     const offen={};
@@ -476,56 +485,61 @@ async function ladeCheckStatus(){
         <span class="st-dot" style="background:#F5C451"></span>Checkliste offen
         <s>${LAGER_NAMEN[lg]}</s> <b>${n}</b></a>`;
     });
-    box.insertAdjacentHTML('beforeend', html);
     if(badge) badge.textContent = gesamt ? gesamt+' offen' : 'alles ok';
-  }catch(e){ if(badge) badge.textContent='—'; }
+    return html;
+  }catch(e){ if(badge) badge.textContent='—'; return ''; }
 }
 
-// Verträge, die binnen 30 Tagen auslaufen, und abgelaufene Schulungen
+// Verträge, die binnen 30 Tagen auslaufen, fehlende und ablaufende Schulungen.
+// Die Zahl landet zusätzlich als Merker auf der Kachel Personal.
 async function ladePersonalStatus(){
-  const box=document.getElementById('status');
-  if(!darf('personal.html', window.GG_ROLLE)) return;
+  const merker=document.getElementById('badge-personal');
+  if(!darf('personal.html', window.GG_ROLLE)){ if(merker) merker.remove(); return ''; }
   const heute=new Date(); heute.setHours(0,0,0,0);
   const tageBis=d=>{
     if(!d) return null;
     const z=new Date(d+'T00:00:00'); if(isNaN(z)) return null;
     return Math.round((z-heute)/86400000);
   };
+  function setzeMerker(n, schwer){
+    if(!merker) return;
+    merker.textContent = n ? n+(n===1?' Hinweis':' Hinweise') : 'alles ok';
+    merker.className = 'mini-tag' + (n ? (schwer ? ' rot' : ' gelb') : ' ok');
+  }
   try{
     const snap=await db.collection('personal').get();
-    let html='';
+    let html='', anzahl=0, schwer=false;
     snap.forEach(doc=>{
       const p=doc.data();
       if(p.austritt) return;                       // im Archiv, zählt nicht mehr
+      const nm=(p.name||'').replace(/[<>]/g,'');
       const v=(p.vertraege||[]).slice()
         .sort((a,b)=>(b.von||'').localeCompare(a.von||''))[0];
+      const zeile=(txt,rot)=>{
+        anzahl++; if(rot) schwer=true;
+        html+=`<a class="st-pill" href="personal.html">
+          <span class="st-dot" style="background:#F45DA8"></span>${txt} <s>${nm}</s></a>`;
+      };
       if(v && !v.unbefristet && v.bis){
         const t=tageBis(v.bis);
-        if(t!==null && t<=30){
-          const txt = t<0 ? 'Vertrag abgelaufen' : 'Vertrag endet in '+t+' Tg.';
-          html+=`<a class="st-pill" href="personal.html">
-            <span class="st-dot" style="background:#F45DA8"></span>${txt}
-            <s>${(p.name||'').replace(/[<>]/g,'')}</s></a>`;
-        }
+        if(t!==null && t<=30) zeile(t<0 ? 'Vertrag abgelaufen' : 'Vertrag endet in '+t+' Tg.', true);
       }
-      const nm=(p.name||'').replace(/[<>]/g,'');
       const schul=(p.schulungen||[]).filter(s=>s && s.name);
       // Bei Vollzeit und Teilzeit ist eine Schulung Pflicht — fehlt sie ganz, wird gewarnt
       if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ)>=0 && !schul.length){
-        html+=`<a class="st-pill" href="personal.html">
-          <span class="st-dot" style="background:#F45DA8"></span>Schulung fehlt <s>${nm}</s></a>`;
+        zeile('Schulung fehlt', true);
       }
       schul.forEach(s=>{
         const t=tageBis(s.bis);
         // Drei Monate Vorlauf, damit ein Termin noch zu bekommen ist
-        if(t===null || t>90) return;
-        html+=`<a class="st-pill" href="personal.html">
-          <span class="st-dot" style="background:#F45DA8"></span>${t<0?'Schulung abgelaufen':'Schulung läuft ab'}
-          <s>${nm}</s></a>`;
+        if(t===null){ zeile(s.name+' ohne Frist', false); return; }
+        if(t>90) return;
+        zeile(t<0 ? 'Schulung abgelaufen' : 'Schulung läuft ab', t<0);
       });
     });
-    box.insertAdjacentHTML('beforeend', html);
-  }catch(e){}
+    setzeMerker(anzahl, schwer);
+    return html;
+  }catch(e){ if(merker) merker.textContent='—'; return ''; }
 }
 
 // Auf der Leerung-Kachel steht, wie viel noch zur Bank gebracht werden muss
