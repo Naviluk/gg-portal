@@ -2846,8 +2846,13 @@ function openPlan(i){
   document.getElementById('plan-lg').textContent=NAMEN[lg];
   const p = planIndex===null ? null : (monatDoc.bankPlan||[])[planIndex];
   planArtWert = p ? (p.art||'scheine') : 'scheine';
-  planZeilen = p ? (p.zeilen||[]).map(z=>({...z,betrag:zahl(z.betrag)}))
-                 : [{betrag:'',herkunft:'kasse',geber:''}];
+  // Ältere Planungen kennen die Aufteilung nach Kasse und Kredit noch nicht.
+  // Ohne Ersatzzeile stünde das Fenster leer da und sähe aus wie ein neuer Eintrag.
+  planZeilen = p
+    ? ((p.zeilen && p.zeilen.length)
+        ? p.zeilen.map(z=>({...z, betrag:zahl(z.betrag)}))
+        : [{betrag: zahl(p.gesamt||p.betrag||0), herkunft:'kasse', geber:''}])
+    : [{betrag:'',herkunft:'kasse',geber:''}];
   document.querySelectorAll('#plan-art button').forEach((b,ix)=>
     b.classList.toggle('on', (ix===0)===(planArtWert==='scheine')));
   document.getElementById('plan-del').style.display = planIndex===null ? 'none' : '';
