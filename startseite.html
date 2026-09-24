@@ -106,7 +106,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .tile h2{font-size:1.08rem;font-weight:700;line-height:1.15}
 .tile p{font-size:.75rem;opacity:.8;margin-top:.22rem;font-weight:500}
 .tile .num{position:absolute;right:1.05rem;top:1.2rem;font-family:var(--mono);font-size:.72rem;
-  font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:.16rem .6rem}
+  font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:.16rem .6rem;
+  /* nie bis zum Symbol laufen — lieber zweizeilig werden */
+  max-width:calc(100% - 5.2rem);text-align:right;line-height:1.25}
+/* Zweizeilig: oben der Betrag, darunter wofür er gedacht ist */
+.tile .num b{display:block}
+.tile .num s{display:block;text-decoration:none;font-weight:600;font-size:.9em;opacity:.85}
 .tile.soon .num{background:rgba(0,0,0,.25);font-size:.58rem;letter-spacing:.1em;
   text-transform:uppercase;font-family:'Poppins',sans-serif}
 .rail-btn.soon{opacity:.55}
@@ -212,6 +217,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   .tile{min-height:152px;padding:.9rem;border-radius:17px}
   .tile h2{font-size:.94rem}
   .tile p{font-size:.68rem}
+  .tile .num{right:.8rem;top:.9rem;font-size:.62rem;padding:.14rem .5rem;
+    max-width:calc(100% - 3.9rem);border-radius:14px}
   .tile-ico{width:40px;height:40px;border-radius:13px}
   .tile-ico svg{width:22px;height:22px}
   .tile::after{width:140px;height:140px;right:-55px;top:-65px}
@@ -557,8 +564,8 @@ async function ladeLeerungBadge(){
       if(!d.id.endsWith('_'+monat)) return;
       (d.data().bankPlan||[]).forEach(p=>summe+=Number(p.gesamt)||0);
     });
-    el.textContent = summe
-      ? summe.toLocaleString('de-DE',{maximumFractionDigits:0})+' € zur Bank'
+    el.innerHTML = summe
+      ? '<b>'+summe.toLocaleString('de-DE',{maximumFractionDigits:0})+' €</b><s>zur Bank</s>'
       : 'aktuell';
   }catch(e){ el.textContent='—'; }
 }
