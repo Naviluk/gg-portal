@@ -508,12 +508,20 @@ async function ladePersonalStatus(){
             <s>${(p.name||'').replace(/[<>]/g,'')}</s></a>`;
         }
       }
-      (p.schulungen||[]).forEach(s=>{
+      const nm=(p.name||'').replace(/[<>]/g,'');
+      const schul=(p.schulungen||[]).filter(s=>s && s.name);
+      // Bei Vollzeit und Teilzeit ist eine Schulung Pflicht — fehlt sie ganz, wird gewarnt
+      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ)>=0 && !schul.length){
+        html+=`<a class="st-pill" href="personal.html">
+          <span class="st-dot" style="background:#F45DA8"></span>Schulung fehlt <s>${nm}</s></a>`;
+      }
+      schul.forEach(s=>{
         const t=tageBis(s.bis);
-        if(t===null || t>60) return;
+        // Drei Monate Vorlauf, damit ein Termin noch zu bekommen ist
+        if(t===null || t>90) return;
         html+=`<a class="st-pill" href="personal.html">
           <span class="st-dot" style="background:#F45DA8"></span>${t<0?'Schulung abgelaufen':'Schulung läuft ab'}
-          <s>${(p.name||'').replace(/[<>]/g,'')}</s></a>`;
+          <s>${nm}</s></a>`;
       });
     });
     box.insertAdjacentHTML('beforeend', html);

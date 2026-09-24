@@ -715,22 +715,34 @@ function vertragText(v){
   return v.unbefristet ? 'unbefristet · seit '+dmy(v.von).slice(3)
                        : 'befristet bis '+dmy(v.bis);
 }
-// Warnungen: Vertrag endet binnen 30 Tagen, Schulung binnen 60 Tagen
+// Wie früh gewarnt wird: Vertrag 30 Tage vorher, Schulung drei Monate vorher —
+// so bleibt Zeit, einen Termin für die Wiederholung zu bekommen.
+const SCHULUNG_VORLAUF = 90;
+// Für diese Vertragsarten ist eine Schulung Pflicht, es muss also etwas eingetragen sein
+const SCHULUNG_PFLICHT = ['Vollzeit','Teilzeit'];
+
+// Drittes Feld ist die Art der Warnung — danach werden oben die Pillen gezählt
 function warnungen(p){
   const w = [];
   const v = aktVertrag(p);
   if(v && !v.unbefristet && v.bis){
     const t = tageBis(v.bis);
-    if(t!==null && t<0) w.push(['rot','Vertrag abgelaufen']);
-    else if(t!==null && t<=30) w.push(['rot','endet in '+(t<=13?t+' Tagen':Math.round(t/7)+' Wochen')]);
+    if(t!==null && t<0) w.push(['rot','Vertrag abgelaufen','vertrag']);
+    else if(t!==null && t<=30) w.push(['rot','endet in '+(t<=13?t+' Tagen':Math.round(t/7)+' Wochen'),'vertrag']);
   }
-  (p.schulungen||[]).forEach(s=>{
+  const schul = (p.schulungen||[]).filter(s=>s && s.name);
+  // Gar keine Schulung hinterlegt, obwohl der Vertrag eine verlangt
+  if(v && SCHULUNG_PFLICHT.indexOf(v.typ) >= 0 && !schul.length){
+    w.push(['rot','keine Schulung hinterlegt','fehlt']);
+  }
+  schul.forEach(s=>{
     const t = tageBis(s.bis);
-    if(t===null) return;
-    if(t<0) w.push(['rot',s.name+' abgelaufen']);
-    else if(t<=60) w.push(['gelb',s.name+' bis '+dmy(s.bis).slice(0,6)]);
+    // Schulung eingetragen, aber ohne Gültigkeit — dann ist die Frist unbekannt
+    if(t===null){ w.push(['gelb',s.name+' ohne Frist','fehlt']); return; }
+    if(t<0) w.push(['rot',s.name+' abgelaufen','schulung']);
+    else if(t<=SCHULUNG_VORLAUF) w.push(['gelb',s.name+' bis '+dmy(s.bis).slice(0,6),'schulung']);
   });
-  if((p.abmahnungen||[]).length>=2) w.push(['rot',(p.abmahnungen.length)+' Abmahnungen']);
+  if((p.abmahnungen||[]).length>=2) w.push(['rot',(p.abmahnungen.length)+' Abmahnungen','abmahnung']);
   return w;
 }
 
@@ -739,15 +751,18 @@ function zeichne(){
   const aktiv = leute.filter(p=>!p.austritt).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
 
   // Pillen
-  let endet=0, schul=0;
-  aktiv.forEach(p=>warnungen(p).forEach(([a,t])=>{
-    if(t.startsWith('endet')||t.startsWith('Vertrag')) endet++; else if(!t.includes('Abmahnung')) schul++;
+  let endet=0, schul=0, fehlt=0;
+  aktiv.forEach(p=>warnungen(p).forEach(([a,t,art])=>{
+    if(art==='vertrag') endet++;
+    else if(art==='schulung') schul++;
+    else if(art==='fehlt') fehlt++;
   }));
   const offen = vorschuesse.filter(v=>v.status==='offen');
   const offenSumme = offen.reduce((a,v)=>a+(Number(v.betrag)||0),0);
   document.getElementById('pillen').innerHTML =
       (endet ? `<span class="pille rot">⚠ Vertrag endet <b>${endet}</b></span>` : '')
     + (schul ? `<span class="pille warn">Schulung läuft ab <b>${schul}</b></span>` : '')
+    + (fehlt ? `<span class="pille rot">Schulung fehlt <b>${fehlt}</b></span>` : '')
     + `<span class="pille">Offene Vorschüsse <b>${eur(offenSumme)}</b></span>`
     + `<span class="pille">Mitarbeiter <b>${aktiv.length}</b></span>`;
 
