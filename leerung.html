@@ -1328,6 +1328,23 @@ const GERAETE = {
 const geraeteListe = () => GERAETE[lg] || GERAETE.nettetal;
 const istExtra = n => Number(n) > 12;
 const NOMINALE = [50,20,10,2,1];
+// Beim Bearbeiten stehen nur die Stückelungen im Eintrag, die damals gefüllt wurden.
+// Die übrigen kommen als leere Zeile dazu, sonst liesse sich z. B. 1 € nicht nachtragen.
+function mitAllenNominalen(gespeichert){
+  const vorhanden = (gespeichert||[]).map(w=>({wert:w.wert, betrag:zahl(w.betrag),
+    herkunft:w.herkunft||'kasse', geber:w.geber||''}));
+  const zeilen = [];
+  NOMINALE.forEach(n=>{
+    const treffer = vorhanden.filter(w=>Number(w.wert)===Number(n));
+    if(treffer.length) zeilen.push(...treffer);
+    else zeilen.push({wert:n, betrag:'', herkunft:'', geber:''});
+  });
+  // Stückelungen, die es einmal gab, aber nicht mehr in der Liste stehen
+  vorhanden.forEach(w=>{
+    if(!NOMINALE.some(n=>Number(n)===Number(w.wert))) zeilen.push(w);
+  });
+  return zeilen;
+}
 const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August',
                 'September','Oktober','November','Dezember'];
 
@@ -2097,8 +2114,7 @@ function openLeerung(id){
     if(gt.snack) document.getElementById('ge-snack').value=zahl(gt.snack);
   }
   wexZeilen = (alt && (alt.wechslerIn||[]).length)
-    ? alt.wechslerIn.map(w=>({wert:w.wert, betrag:zahl(w.betrag),
-        herkunft:w.herkunft||'kasse', geber:w.geber||''}))
+    ? mitAllenNominalen(alt.wechslerIn)
     : NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
   renderWexZeilen();
   openM('modal-leerung');
@@ -2670,12 +2686,9 @@ function openWechslerForm(id){
   document.getElementById('wf-lg').textContent=NAMEN[lg];
   document.getElementById('wf-datum').value = alt ? alt.datum : heute();
   document.getElementById('wf-aus').value = alt && alt.wechslerAus ? zahl(alt.wechslerAus) : '';
-  if(alt && (alt.wechslerIn||[]).length){
-    wfZeilen = alt.wechslerIn.map(w=>({wert:w.wert, betrag:zahl(w.betrag),
-      herkunft:w.herkunft||'kasse', geber:w.geber||''}));
-  }else{
-    wfZeilen = NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
-  }
+  wfZeilen = (alt && (alt.wechslerIn||[]).length)
+    ? mitAllenNominalen(alt.wechslerIn)
+    : NOMINALE.map(w=>({wert:w,betrag:'',herkunft:'',geber:''}));
   renderWfZeilen();
   openM('modal-wechsler');
 }
