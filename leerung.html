@@ -1492,7 +1492,7 @@ function kreditBewegung(m, liste){
 
 /* ══ Laden ═══════════════════════════════════════════════════════════ */
 async function ladeFiliale(){
-  vmCache = {};
+  vmCache = {}; kreditCache = null;
   showSpinner();
   try{
     const [snapL, docM, snapK] = await mitZeitlimit(Promise.all([
@@ -1520,35 +1520,62 @@ async function ladeFiliale(){
 
 // Der Startwert kommt aus dem Vormonat; nur wenn es dort nichts gibt,
 // zählt der von Hand erfasste Wert.
-let vmCache = {};   // damit der Vormonat nicht bei jedem Neuzeichnen neu geladen wird
-async function vormonatWert(){
-  if(monatDoc.vormonat) return {...monatDoc.vormonat, manuell:true};
-  const vm = vorMonat(monat);
-  const key = lg+'_'+vm;
+let vmCache = {};     // damit ein Monat nicht bei jedem Neuzeichnen neu gerechnet wird
+let kreditCache = null;
+
+// Alle Kredite einmal holen — bei der Kette über mehrere Monate sonst jedes Mal neu
+async function alleKredite(){
+  if(kreditCache) return kreditCache;
+  const snap = await mitZeitlimit(db.collection('leerung_kredit').get(), 8);
+  kreditCache = snap.docs.map(d=>d.data());
+  return kreditCache;
+}
+
+// Was am Ende des Monats mk in der Kasse lag. Steht im Monat ein von Hand
+// erfasster Anfangswert, gilt der; sonst wird der Vormonat davor gerechnet.
+// So trägt sich der Bestand über beliebig viele Monate weiter.
+async function monatsRest(mk, tiefe){
+  if((tiefe||0) > 24) return {s:0,m:0,leer:true};
+  const key = lg+'_'+mk;
   if(vmCache[key]) return vmCache[key];
   try{
-    const [snapL, docM, snapK] = await mitZeitlimit(Promise.all([
-      db.collection('leerung').where('lager','==',lg).where('monat','==',vm).get(),
-      db.collection('leerung_monat').doc(lg+'_'+vm).get(),
-      db.collection('leerung_kredit').get(),
-    ]), 8);
+    const [snapL, docM, kr] = await Promise.all([
+      mitZeitlimit(db.collection('leerung').where('lager','==',lg).where('monat','==',mk).get(), 8),
+      mitZeitlimit(db.collection('leerung_monat').doc(lg+'_'+mk).get(), 8),
+      alleKredite(),
+    ]);
     if(snapL.empty && !docM.exists) return {s:0,m:0,leer:true};
     const li = snapL.docs.map(d=>d.data());
     const md = docM.exists ? docM.data() : {};
+
+    // Anfangsbestand dieses Monats
+    let start;
+    if(md.vormonat){
+      start = {s:Number(md.vormonat.s)||0, m:Number(md.vormonat.m)||0};
+    }else{
+      const davor = await monatsRest(vorMonat(mk), (tiefe||0)+1);
+      start = davor.leer ? {s:0,m:0} : {s:davor.s||0, m:davor.m||0};
+    }
+
+    // Dieselben Posten wie bei „Rest in der Kasse" auf der Hauptseite
     const su = summen(li);
     const bk = bankSummen(md);
-    const kr=snapK.docs.map(d=>d.data()).filter(k=>k.geber===lg||k.nehmer===lg);
-    const kb=kreditBewegung(vm, kr);
-    const start = md.vormonat || {s:0,m:0};
+    const kb = kreditBewegung(mk, kr.filter(k=>k.geber===lg||k.nehmer===lg));
     const kosten = Number(md.sonstige)||0;
+    const tw = tauschSaldo(md);
     const wert = {
-      s: (Number(start.s)||0) + su.scheine - bk.s - kosten + kb.s,
-      m: (Number(start.m)||0) + su.muenzen - bk.m + kb.m,
+      s: start.s + su.scheine - bk.s - kosten + kb.s + tw.s,
+      m: start.m + su.muenzen - bk.m + kb.m + tw.m,
       berechnet:true
     };
     vmCache[key] = wert;
     return wert;
   }catch(e){ return {s:0,m:0,leer:true}; }
+}
+
+async function vormonatWert(){
+  if(monatDoc.vormonat) return {...monatDoc.vormonat, manuell:true};
+  return await monatsRest(vorMonat(monat), 0);
 }
 
 /* ══ Neuigkeiten ══════════════════════════════════════════════════════
@@ -2866,10 +2893,11 @@ async function tauschLoeschen(){
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
 }
-// Verschiebung zwischen Scheinen und Münzen, Summe bleibt gleich
-function tauschSaldo(){
+// Verschiebung zwischen Scheinen und Münzen, Summe bleibt gleich.
+// Ohne Argument gilt der offene Monat; für den Vormonat wird dessen Doc übergeben.
+function tauschSaldo(doc){
   let s=0,m=0;
-  (monatDoc.tausch||[]).forEach(t=>{
+  ((doc||monatDoc).tausch||[]).forEach(t=>{
     const b=Number(t.betrag)||0;
     if(t.von==='muenzen'){ m-=b; s+=b; } else { s-=b; m+=b; }
   });
