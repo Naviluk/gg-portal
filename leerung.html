@@ -599,15 +599,50 @@ table.bt-ger th:nth-child(2){width:62px}
 .unten .schmal{flex:0 0 56%}
 .autom-reihe{display:flex;gap:4mm;align-items:flex-start}
 .autom{flex:1;min-width:0}
+/* Abschlussblock: vier Spalten. Die ersten drei stellen unseren Wert dem aus dem
+   System gegenüber, die vierte rechnet die Kasse von oben nach unten durch. */
 .kennz{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px}
-.kennz div{background:var(--bg);border:.5px solid var(--glass-border);border-radius:5px;padding:4px 6px}
-.kennz s{text-decoration:none;display:block;font-size:5.6pt;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--text-dim);font-weight:800}
-.kennz b{display:block;font-family:var(--mono);font-size:8.6pt;font-weight:700;margin-top:1px}
-.kennz .dunkel{background:var(--ink);border-color:var(--ink)}
-.kennz .dunkel s{color:#9FB2CE}
-.kennz .dunkel b{color:#7EE7C0}
+.kennz .sp{display:flex;flex-direction:column;gap:3px}
+.kennz .zelle{background:var(--bg);border:.5px solid var(--glass-border);border-radius:5px;
+  padding:4px 7px}
+.kennz .wert{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.kennz .wert+.wert{margin-top:3px;padding-top:3px;border-top:.5px dotted #C9D2DF}
+.kennz .wert s{text-decoration:none;font-size:5.5pt;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800;white-space:nowrap}
+.kennz .wert b{font-family:var(--mono);font-size:8.4pt;font-weight:700;white-space:nowrap}
+.kennz .wert.neg b{color:#8C1C34}
+.kennz .nichts{color:#BFC8D6}
+.kennz .diffz{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
+.kennz .diffz s{text-decoration:none;font-size:5.5pt;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.kennz .diffz b{font-family:var(--mono);font-size:9.4pt;font-weight:700}
+.kennz .d-plus b{color:#0A7D5F}
+.kennz .d-minus b{color:var(--rot)}
+.kennz .kasse{background:var(--ink);border-color:var(--ink);border-radius:5px;padding:5px 8px;
+  flex:1;line-height:1.3}
+.kennz .kasse .z{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;
+  font-family:var(--mono);font-size:7.1pt;color:#D7E2F0;padding:.4px 0}
+.kennz .kasse .z u{text-decoration:none;font-family:'Poppins',sans-serif;font-size:6.2pt;
+  font-weight:600;color:#9FB2CE}
+.kennz .kasse .z.ab{color:#F2A0B4}
+.kennz .kasse .erg{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;
+  margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.22);
+  font-family:var(--mono);font-size:7.1pt;color:#7EE7C0}
+.kennz .kasse .erg u{text-decoration:none;font-family:'Poppins',sans-serif;font-size:6.2pt;
+  font-weight:700;color:#7EE7C0}
+.kennz .kasse .erg b{font-family:var(--mono);font-size:7.1pt;font-weight:700;color:#7EE7C0}
 .blatt-anm{font-family:'Poppins',sans-serif;font-size:6pt;color:#8A96A8;margin-top:4px}
+/* Eigenständiger Kasten für einen Wert aus dem System. Steht unter der Tabelle,
+   gehört aber nicht dazu: er ändert weder deren Summen noch die Kasse. */
+.syskarte{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:#FFFCF5;
+  border:1px solid #F0D9A8;border-radius:12px;padding:.7rem .85rem;margin-top:.9rem}
+.syskarte .tt{font-size:.78rem;font-weight:700;color:#8F5208}
+.syskarte .tt s{text-decoration:none;display:block;font-size:.68rem;font-weight:500;
+  color:#A98B55;margin-top:.1rem;max-width:42ch}
+.syskarte input{margin-left:auto;width:140px;text-align:right;font-family:var(--mono);
+  font-size:.88rem;font-weight:700;border:1.5px solid #E3C88E;border-radius:9px;
+  padding:.42rem .6rem;background:#fff;color:#8F5208}
+.syskarte input::placeholder{color:#D4BC94;font-weight:500}
 .bt .rot{color:var(--rot)}
 @media print{
   @page{size:A4 landscape;margin:8mm}
@@ -634,7 +669,7 @@ table.bt-ger th:nth-child(2){width:62px}
   .blatt-anm:last-child{margin-bottom:0}
   .view{display:none!important}
   .view.on{display:block!important}
-  table.bt thead th,.bl,.kennz .dunkel,table.bt tfoot td{
+  table.bt thead th,.bl,.kennz .kasse,table.bt tfoot td{
     -webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 
@@ -1521,6 +1556,7 @@ async function ladeFiliale(){
 // Der Startwert kommt aus dem Vormonat; nur wenn es dort nichts gibt,
 // zählt der von Hand erfasste Wert.
 let vmCache = {};     // damit ein Monat nicht bei jedem Neuzeichnen neu gerechnet wird
+let vmAktuell = null; // zuletzt ermittelter Übertrag — das Blatt rechnet nicht selbst nach
 let kreditCache = null;
 
 // Alle Kredite einmal holen — bei der Kette über mehrere Monate sonst jedes Mal neu
@@ -1892,6 +1928,7 @@ async function renderMain(){
   document.getElementById('ges-m').textContent=eur(su.muenzen);
 
   const vm=await vormonatWert();
+  vmAktuell = vm;
   document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0));
   document.getElementById('vm-s').textContent=eur(vm.s);
   document.getElementById('vm-m').textContent=eur(vm.m);
@@ -2034,7 +2071,14 @@ function renderGeraete(){
         <td><input class="sys-in" value="${sysM?zahl(sysM):''}" placeholder="0,00" onchange="saveSystem('m',this.value)"></td>
         <td>${zahl(sysS+sysM)}</td></tr>
       <tr class="diff"><td>Differenz</td>${dz(dS)}${dz(dM)}${dz(dG)}</tr>
-    </tfoot></table></div>`;
+    </tfoot></table></div>
+    <div class="syskarte">
+      <div class="tt">Saldo 2 laut System
+        <s>Gesamtsaldo des Monats aus dem System. Nur zum Vergleich mit den Ist-Einnahmen —
+        zählt nicht in die Tabelle und nicht in die Kasse.</s></div>
+      <input value="${monatDoc.saldo2!==undefined&&monatDoc.saldo2!==null?zahl(monatDoc.saldo2):''}"
+        inputmode="decimal" placeholder="0,00" onchange="saveVergleich('saldo2',this.value)">
+    </div>`;
 }
 
 function renderWechsler(){
@@ -2070,7 +2114,14 @@ function renderWechsler(){
     ${kredSumme?`<div class="kredit-line"><s>Davon Kredit von <b>${geber}</b> — als Schuld erfasst</s>
       <b>${eur(kredSumme)}</b></div>`:''}
     <div class="wsum"><s>Gesamt-Einlage</s><b>${su.wex<0?'−':''}${eur(Math.abs(su.wex))}</b></div>
-    <p class="hint">Entnommen minus eingelegt. Ein Minus ist normal: dann wurde mehr eingelegt als geholt.</p>`;
+    <p class="hint">Entnommen minus eingelegt. Ein Minus ist normal: dann wurde mehr eingelegt als geholt.</p>
+    <div class="syskarte">
+      <div class="tt">Nachfüllungen laut System
+        <s>Als Minus eintragen. Nur zum Vergleich — zählt nicht in die Tabelle
+        und nicht in die Kasse.</s></div>
+      <input value="${monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null?zahl(monatDoc.nachfuellung):''}"
+        inputmode="decimal" placeholder="0,00" onchange="saveVergleich('nachfuellung',this.value)">
+    </div>`;
 }
 
 function renderGetraenke(){
@@ -2447,7 +2498,9 @@ function zeichneBlatt(){
   const kosten = Number(monatDoc.sonstige)||0;
   const kb = kreditBewegung(monat);
   const tw = tauschSaldo();
-  const vmS = (monatDoc.vormonat||{}).s || 0, vmM = (monatDoc.vormonat||{}).m || 0;
+  // Übertrag aus dem Vormonat: der berechnete Wert, sonst der von Hand erfasste
+  const vmQ = vmAktuell || monatDoc.vormonat || {};
+  const vmS = Number(vmQ.s)||0, vmM = Number(vmQ.m)||0;
   const restS = vmS + su.scheine - bk.s - kosten + kb.s + tw.s;
   const restM = vmM + su.muenzen - bk.m + kb.m + tw.m;
   const sys = monatDoc.system||{};
@@ -2488,15 +2541,65 @@ function zeichneBlatt(){
     </div>
   </div>`;
 
+  // ── Abschlussblock ──────────────────────────────────────────────────
+  // Drei Vergleichsspalten und rechts die Kasse. Fehlt ein Wert aus dem System,
+  // bleibt die Differenz leer statt eine erfundene Zahl zu zeigen.
+  const sys2   = monatDoc.saldo2;
+  const nachf  = monatDoc.nachfuellung;
+  const hatSys = sysS || sysM;
+  const hatS2  = sys2 !== undefined && sys2 !== null && sys2 !== '';
+  const hatNf  = nachf !== undefined && nachf !== null && nachf !== '';
+  const nichts = '<b class="nichts">—</b>';
+  // Eine Differenzzelle: grün mit Plus zu unseren Gunsten, sonst rot mit Minus
+  const dZelle = (da, wert) => {
+    if(!da) return `<div class="zelle diffz"><s>Differenz</s>${nichts}</div>`;
+    const kl = wert>0 ? ' d-plus' : (wert<0 ? ' d-minus' : '');
+    const vzn = wert>0 ? '+' : (wert<0 ? '−' : '');
+    return `<div class="zelle diffz${kl}"><s>Differenz</s>`
+         + `<b>${vzn}${zahl(Math.abs(wert))}</b></div>`;
+  };
+  const neg = v => '−'+zahl(Math.abs(v));   // immer als Minus dargestellt
+
+  const dGer  = su.ger - (sysS+sysM);
+  // Beide Zahlen sind Einzahlungen, also negativ. Hat das System mehr nachgefüllt
+  // als wir eingelegt haben, steht ein Plus.
+  const dWex  = Math.abs(nachf||0) - Math.abs(su.wex);
+  const dEinn = su.gesamt - Number(sys2||0);
+
   html += `<div class="kennz">
-    <div><s>Geräte</s><b>${eur(su.ger)}</b></div>
-    <div><s>Wechsler</s><b${su.wex<0?' style="color:var(--rot)"':''}>${su.wex<0?'−':''}${eur(Math.abs(su.wex))}</b></div>
-    <div><s>Getränke</s><b>${eur(su.getr)}</b></div>
-    <div class="dunkel"><s>Gesamt</s><b>${eur(su.gesamt)}</b></div>
-    <div><s>Von Vormonat</s><b>${eur(vmS+vmM)}</b></div>
-    <div><s>Bank eingezahlt</s><b>${eur(bk.gesamt)}</b></div>
-    <div><s>Kredite / Kosten</s><b>${(kb.gesamt>=0?'+':'−')+eur(Math.abs(kb.gesamt))}${kosten?' / −'+eur(kosten):''}</b></div>
-    <div class="dunkel"><s>Rest in der Kasse</s><b>${eur(restS+restM)}</b></div>
+    <div class="sp">
+      <div class="zelle">
+        <div class="wert"><s>Geräte gezählt</s><b>${zahl(su.ger)}</b></div>
+        <div class="wert"><s>Laut System</s>${hatSys?`<b>${zahl(sysS+sysM)}</b>`:nichts}</div>
+      </div>
+      ${dZelle(hatSys, dGer)}
+    </div>
+    <div class="sp">
+      <div class="zelle">
+        <div class="wert neg"><s>Wechsler</s><b>${neg(su.wex)}</b></div>
+        <div class="wert neg"><s>Nachfüllungen</s>${hatNf?`<b>${neg(nachf)}</b>`:nichts}</div>
+      </div>
+      ${dZelle(hatNf, dWex)}
+    </div>
+    <div class="sp">
+      <div class="zelle">
+        <div class="wert"><s>Ist-Einnahmen</s><b>${zahl(su.gesamt)}</b></div>
+        <div class="wert"><s>Saldo 2</s>${hatS2?`<b>${zahl(sys2)}</b>`:nichts}</div>
+      </div>
+      ${dZelle(hatS2, dEinn)}
+    </div>
+    <div class="sp">
+      <div class="kasse">
+        <div class="z"><u>Von Vormonat</u><span>${zahl(vmS+vmM)}</span></div>
+        <div class="z"><u>Einnahmen von Geräte</u><span>${zahl(su.gesamt)}</span></div>
+        <div class="z"><u>Einnahmen Getränke</u><span>${zahl(su.getr)}</span></div>
+        <div class="z ab"><u>Bank eingezahlt</u><span>${neg(bk.gesamt)}</span></div>
+        <div class="z ab"><u>Sonstige Kosten</u><span>${neg(kosten)}</span></div>
+        <div class="z${kb.gesamt<0?' ab':''}"><u>Kredite</u><span>${
+          kb.gesamt<0?neg(kb.gesamt):(kb.gesamt>0?'+':'')+zahl(kb.gesamt)}</span></div>
+        <div class="erg"><u>Rest in der Kasse</u><b>${zahl(restS+restM)}</b></div>
+      </div>
+    </div>
   </div>
   <div class="blatt-anm">Scheine ${zahl(restS)} € · Münzen ${zahl(restM)} €${
     tw.s||tw.m ? ' · davon getauscht '+zahl(Math.abs(tw.s))+' €' : ''}</div>`;
@@ -2548,14 +2651,38 @@ const BLATT_DRUCK_CSS = `
   .unten .schmal{flex:0 0 56%}
   .autom-reihe{display:flex;gap:4mm;align-items:flex-start}
   .autom{flex:1;min-width:0}
-  .kennz{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px;page-break-inside:avoid}
-  .kennz div{flex:1 1 23%;background:#EEF2F8;border:.5px solid #DCE3ED;border-radius:5px;padding:4px 6px}
-  .kennz s{text-decoration:none;display:block;font-size:5.6pt;letter-spacing:.12em;
-    text-transform:uppercase;color:#66748C;font-weight:800}
-  .kennz b{display:block;font-family:'IBM Plex Mono',monospace;font-size:8.6pt;font-weight:700;margin-top:1px}
-  .kennz .dunkel{background:#101A2E;border-color:#101A2E}
-  .kennz .dunkel s{color:#9FB2CE}
-  .kennz .dunkel b{color:#7EE7C0}
+  .kennz{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px;
+    page-break-inside:avoid}
+  .kennz .sp{display:flex;flex-direction:column;gap:3px}
+  .kennz .zelle{background:#EEF2F8;border:.5px solid #DCE3ED;border-radius:5px;padding:4px 7px}
+  .kennz .wert{display:flex;justify-content:space-between;align-items:baseline;gap:5px}
+  .kennz .wert+.wert{margin-top:3px;padding-top:3px;border-top:.5px dotted #C3CCDA}
+  .kennz .wert s{text-decoration:none;font-size:5.5pt;letter-spacing:.1em;text-transform:uppercase;
+    color:#66748C;font-weight:800;white-space:nowrap}
+  .kennz .wert b{font-family:'IBM Plex Mono',monospace;font-size:8.4pt;font-weight:700;
+    white-space:nowrap}
+  .kennz .wert.neg b{color:#8C1C34}
+  .kennz .nichts{color:#BFC8D6}
+  .kennz .diffz{display:flex;justify-content:space-between;align-items:baseline;gap:5px}
+  .kennz .diffz s{text-decoration:none;font-size:5.5pt;letter-spacing:.1em;text-transform:uppercase;
+    color:#66748C;font-weight:800}
+  .kennz .diffz b{font-family:'IBM Plex Mono',monospace;font-size:9.4pt;font-weight:700}
+  .kennz .d-plus b{color:#0A7D5F}
+  .kennz .d-minus b{color:#C4183C}
+  .kennz .kasse{background:#101A2E;border:.5px solid #101A2E;border-radius:5px;padding:5px 8px;
+    flex:1;line-height:1.3}
+  .kennz .kasse .z{display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+    font-family:'IBM Plex Mono',monospace;font-size:7.1pt;color:#D7E2F0;padding:.4px 0}
+  .kennz .kasse .z u{text-decoration:none;font-family:'Poppins',sans-serif;font-size:6.2pt;
+    font-weight:600;color:#9FB2CE}
+  .kennz .kasse .z.ab{color:#F2A0B4}
+  .kennz .kasse .erg{display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+    margin-top:3px;padding-top:3px;border-top:1px solid rgba(255,255,255,.22);
+    font-family:'IBM Plex Mono',monospace;font-size:7.1pt;color:#7EE7C0}
+  .kennz .kasse .erg u{text-decoration:none;font-family:'Poppins',sans-serif;font-size:6.2pt;
+    font-weight:700;color:#7EE7C0}
+  .kennz .kasse .erg b{font-family:'IBM Plex Mono',monospace;font-size:7.1pt;font-weight:700;
+    color:#7EE7C0}
   .blatt-anm{font-size:6pt;color:#8A96A8;margin-top:4px}
   b[style*="--rot"],.rot{color:#E11D48}
 `;
@@ -3262,6 +3389,21 @@ async function saveSystem(feld,v){
     renderGeraete();
   }catch(e){ showToast('Fehler: '+e.message); }
 }
+// Werte, die nur dem Vergleich mit dem System dienen. Sie stehen für sich und
+// gehen in keine Summe ein. Ein leeres Feld heißt: es gibt noch keinen Wert.
+async function saveVergleich(feld, v){
+  const leer = String(v).trim()==='';
+  const n = leer ? null : parseNum(v);
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({[feld]:n},{merge:true});
+    monatDoc[feld] = n;
+    const name = feld==='saldo2' ? 'Saldo 2' : 'Nachfüllungen';
+    await melde('geld', name+(leer?' gelöscht':' eingetragen'), leer?'—':zahl(n)+' €', null);
+    if(feld==='saldo2') renderGeraete(); else renderWechsler();
+    if(document.getElementById('blatt')) zeichneBlatt();
+  }catch(e){ showToast('Fehler: '+e.message); }
+}
+
 function openVormonat(){
   const vm=monatDoc.vormonat||{};
   document.getElementById('vm-in-s').value = vm.s ? zahl(vm.s) : '';
