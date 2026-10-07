@@ -643,6 +643,14 @@ table.bt-ger th:nth-child(2){width:62px}
   font-size:.88rem;font-weight:700;border:1.5px solid #E3C88E;border-radius:9px;
   padding:.42rem .6rem;background:#fff;color:#8F5208}
 .syskarte input::placeholder{color:#D4BC94;font-weight:500}
+.sys-felder{margin-left:auto;display:flex;align-items:flex-end;gap:.6rem;flex-wrap:wrap}
+.sys-felder label{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:800;color:#A98B55}
+.sys-felder input{margin:.2rem 0 0;width:130px;display:block}
+.sys-erg{font-family:var(--mono);font-size:.8rem;font-weight:600;color:#A98B55;
+  padding-bottom:.5rem;white-space:nowrap}
+.sys-erg b{font-size:.92rem;font-weight:700;color:#8F5208}
+@media (max-width:620px){ .sys-felder{margin-left:0;width:100%} .sys-felder input{width:100%} }
 .bt .rot{color:var(--rot)}
 @media print{
   @page{size:A4 landscape;margin:8mm}
@@ -1960,7 +1968,15 @@ async function renderMain(){
     <input class="euro-in" id="in-kosten" value="${kosten?zahl(kosten):''}" placeholder="0,00"
       onchange="saveKosten(this.value)"></div>`;
 
-  const offen=kredite.filter(k=>!k.getilgtAm);
+  // Offene Kredite aus Sicht des angezeigten Monats: Der Kredit muss zu diesem
+  // Zeitpunkt schon bestanden haben, und er darf bis zum Monatsende noch nicht
+  // getilgt gewesen sein. Ein Kredit aus einem späteren Monat gehört nicht hierher,
+  // ein noch offener aus einem früheren dagegen schon.
+  const offen=kredite.filter(k=>{
+    if((k.monat||'') > monat) return false;
+    const t=(k.getilgtAm||'').slice(0,7);
+    return !t || t > monat;
+  });
   offen.forEach(k=>{
     const eigen = k.nehmer===lg;
     const alt = k.monat!==monat ? ' · aus '+monatText(k.monat) : '';
@@ -2117,10 +2133,21 @@ function renderWechsler(){
     <p class="hint">Entnommen minus eingelegt. Ein Minus ist normal: dann wurde mehr eingelegt als geholt.</p>
     <div class="syskarte">
       <div class="tt">Nachfüllungen laut System
-        <s>Als Minus eintragen. Nur zum Vergleich — zählt nicht in die Tabelle
-        und nicht in die Kasse.</s></div>
-      <input value="${monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null?zahl(monatDoc.nachfuellung):''}"
-        inputmode="decimal" placeholder="0,00" onchange="saveVergleich('nachfuellung',this.value)">
+        <s>Nachfüllungen als Minus, Fehlbeträge als Plus. Im Monatsblatt steht die
+        Summe aus beiden. Nur zum Vergleich — zählt nicht in die Tabelle und nicht
+        in die Kasse.</s></div>
+      <div class="sys-felder">
+        <label>Nachfüllungen
+          <input value="${monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null?zahl(monatDoc.nachfuellung):''}"
+            inputmode="decimal" placeholder="0,00" onchange="saveVergleich('nachfuellung',this.value)"></label>
+        <label>Fehlbeträge
+          <input value="${monatDoc.fehlbetrag!==undefined&&monatDoc.fehlbetrag!==null?zahl(monatDoc.fehlbetrag):''}"
+            inputmode="decimal" placeholder="0,00" onchange="saveVergleich('fehlbetrag',this.value)"></label>
+        <span class="sys-erg">= <b>${
+          (monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null)
+            ? zahl(Number(monatDoc.nachfuellung||0)+Number(monatDoc.fehlbetrag||0))
+            : '—'}</b></span>
+      </div>
     </div>`;
 }
 
@@ -2560,11 +2587,17 @@ function zeichneBlatt(){
   };
   const neg = v => '−'+zahl(Math.abs(v));   // immer als Minus dargestellt
 
+  // Ist-Einnahmen: was die Geräte gebracht haben, abzüglich dessen, was in den
+  // Wechsler zurückgegangen ist. Getränke zählen hier nicht mit.
+  const istEinn = su.ger + su.wex;
+  // Was das System insgesamt nachgefüllt hat: Nachfüllungen plus Fehlbeträge
+  const nachfGes = hatNf ? Number(nachf||0) + Number(monatDoc.fehlbetrag||0) : 0;
+
   const dGer  = su.ger - (sysS+sysM);
   // Beide Zahlen sind Einzahlungen, also negativ. Hat das System mehr nachgefüllt
   // als wir eingelegt haben, steht ein Plus.
-  const dWex  = Math.abs(nachf||0) - Math.abs(su.wex);
-  const dEinn = su.gesamt - Number(sys2||0);
+  const dWex  = Math.abs(nachfGes) - Math.abs(su.wex);
+  const dEinn = istEinn - Number(sys2||0);
 
   html += `<div class="kennz">
     <div class="sp">
@@ -2577,13 +2610,13 @@ function zeichneBlatt(){
     <div class="sp">
       <div class="zelle">
         <div class="wert neg"><s>Wechsler</s><b>${neg(su.wex)}</b></div>
-        <div class="wert neg"><s>Nachfüllungen</s>${hatNf?`<b>${neg(nachf)}</b>`:nichts}</div>
+        <div class="wert neg"><s>Nachfüllungen</s>${hatNf?`<b>${neg(nachfGes)}</b>`:nichts}</div>
       </div>
       ${dZelle(hatNf, dWex)}
     </div>
     <div class="sp">
       <div class="zelle">
-        <div class="wert"><s>Ist-Einnahmen</s><b>${zahl(su.gesamt)}</b></div>
+        <div class="wert"><s>Ist-Einnahmen</s><b>${zahl(istEinn)}</b></div>
         <div class="wert"><s>Saldo 2</s>${hatS2?`<b>${zahl(sys2)}</b>`:nichts}</div>
       </div>
       ${dZelle(hatS2, dEinn)}
@@ -3397,9 +3430,10 @@ async function saveVergleich(feld, v){
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({[feld]:n},{merge:true});
     monatDoc[feld] = n;
-    const name = feld==='saldo2' ? 'Saldo 2' : 'Nachfüllungen';
+    const name = feld==='saldo2' ? 'Saldo 2'
+               : (feld==='fehlbetrag' ? 'Fehlbeträge' : 'Nachfüllungen');
     await melde('geld', name+(leer?' gelöscht':' eingetragen'), leer?'—':zahl(n)+' €', null);
-    if(feld==='saldo2') renderGeraete(); else renderWechsler();
+    if(feld==='saldo2') renderGeraete(); else renderWechsler();   // nachfuellung + fehlbetrag
     if(document.getElementById('blatt')) zeichneBlatt();
   }catch(e){ showToast('Fehler: '+e.message); }
 }
