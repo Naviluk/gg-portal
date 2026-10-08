@@ -1578,7 +1578,6 @@ async function ladeFiliale(){
 // Der Startwert kommt aus dem Vormonat; nur wenn es dort nichts gibt,
 // zählt der von Hand erfasste Wert.
 let vmCache = {};     // damit ein Monat nicht bei jedem Neuzeichnen neu gerechnet wird
-let vmAktuell = null; // zuletzt ermittelter Übertrag — das Blatt rechnet nicht selbst nach
 let kreditCache = null;
 
 // Alle Kredite einmal holen — bei der Kette über mehrere Monate sonst jedes Mal neu
@@ -1950,7 +1949,6 @@ async function renderMain(){
   document.getElementById('ges-m').textContent=eur(su.muenzen);
 
   const vm=await vormonatWert();
-  vmAktuell = vm;
   document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0));
   document.getElementById('vm-s').textContent=eur(vm.s);
   document.getElementById('vm-m').textContent=eur(vm.m);
@@ -2531,7 +2529,13 @@ function blattAutomaten(tage){
   return `<div class="autom-reihe">${spalten}</div>`;
 }
 
-function zeichneBlatt(){
+// Das Blatt holt den Übertrag selbst, statt ihn von renderMain zu erben:
+// renderMain läuft asynchron, und beim Wechsel der Filiale stand sonst noch
+// der Wert der vorigen Filiale im Blatt.
+async function zeichneBlatt(){
+  // Merken, für welche Filiale und welchen Monat gezeichnet wird. Wird in der
+  // Wartezeit umgeschaltet, wirft dieser Aufruf sein Ergebnis weg.
+  const fuer = lg + '_' + monat;
   const tage = blattTage();
   const geraeteTage = tage.filter(t=>t.eintraege.some(l=>Object.keys(l.geraete||{}).length));
   const alle = geraeteListe();
@@ -2542,8 +2546,8 @@ function zeichneBlatt(){
   const kosten = Number(monatDoc.sonstige)||0;
   const kb = kreditBewegung(monat);
   const tw = tauschSaldo();
-  // Übertrag aus dem Vormonat: der berechnete Wert, sonst der von Hand erfasste
-  const vmQ = vmAktuell || monatDoc.vormonat || {};
+  // Übertrag aus dem Vormonat: derselbe Wert wie auf der Hauptseite
+  const vmQ = await vormonatWert();
   const vmS = Number(vmQ.s)||0, vmM = Number(vmQ.m)||0;
   const restS = vmS + su.scheine - bk.s - kosten + kb.s + tw.s;
   const restM = vmM + su.muenzen - bk.m + kb.m + tw.m;
@@ -2657,6 +2661,7 @@ function zeichneBlatt(){
   </div>
   <div class="blatt-anm">Scheine ${zahl(restS)} € · Münzen ${zahl(restM)} €</div>`;
 
+  if(fuer !== lg + '_' + monat) return;   // inzwischen umgeschaltet
   document.getElementById('blatt').innerHTML = html;
 }
 
