@@ -637,7 +637,8 @@ table.bt-ger th:nth-child(2){width:62px}
 .kennz .kasse .erg u{text-decoration:none;font-family:'Poppins',sans-serif;font-size:6.2pt;
   font-weight:700;color:#7EE7C0}
 .kennz .kasse .erg b{font-family:var(--mono);font-size:7.1pt;font-weight:700;color:#7EE7C0}
-.blatt-anm{font-family:'Poppins',sans-serif;font-size:6pt;color:#8A96A8;margin-top:4px}
+/* Endet unter „Rest in der Kasse", zu dem die Aufteilung gehört */
+.blatt-anm{font-family:'Poppins',sans-serif;font-size:6pt;color:#8A96A8;margin-top:4px;text-align:right}
 /* Eigenständiger Kasten für einen Wert aus dem System. Steht unter der Tabelle,
    gehört aber nicht dazu: er ändert weder deren Summen noch die Kasse. */
 .syskarte{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:#FFFCF5;
@@ -2640,8 +2641,7 @@ function zeichneBlatt(){
       </div>
     </div>
   </div>
-  <div class="blatt-anm">Scheine ${zahl(restS)} € · Münzen ${zahl(restM)} €${
-    tw.s||tw.m ? ' · davon getauscht '+zahl(Math.abs(tw.s))+' €' : ''}</div>`;
+  <div class="blatt-anm">Scheine ${zahl(restS)} € · Münzen ${zahl(restM)} €</div>`;
 
   document.getElementById('blatt').innerHTML = html;
 }
@@ -2725,7 +2725,7 @@ const BLATT_DRUCK_CSS = `
     font-weight:700;color:#7EE7C0}
   .kennz .kasse .erg b{font-family:'IBM Plex Mono',monospace;font-size:7.1pt;font-weight:700;
     color:#7EE7C0}
-  .blatt-anm{font-size:6pt;color:#8A96A8;margin-top:4px}
+  .blatt-anm{font-size:6pt;color:#8A96A8;margin-top:4px;text-align:right}
   b[style*="--rot"],.rot{color:#E11D48}
 `;
 
