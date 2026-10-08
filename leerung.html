@@ -638,6 +638,13 @@ table.bt-ger th:nth-child(2){width:62px}
   font-weight:700;color:#7EE7C0}
 .kennz .kasse .erg b{font-family:var(--mono);font-size:7.1pt;font-weight:700;color:#7EE7C0}
 /* Endet unter „Rest in der Kasse", zu dem die Aufteilung gehört */
+/* ── Nettetal: 16 Geräte, das Blatt braucht zwei Seiten und wirkte oben
+   zusammengedrängt. Hier bekommen die Blöcke mehr Abstand zueinander.
+   Brüggen und Viersen passen auf eine Seite und bleiben unverändert. ── */
+body[data-lg="nettetal"] .blatt .blatt-kopf{margin-bottom:10px}
+body[data-lg="nettetal"] .blatt .bl{margin:16px 0 4px}
+body[data-lg="nettetal"] .blatt .unten{margin-top:14px}
+body[data-lg="nettetal"] .blatt .kennz{margin-top:14px}
 .blatt-anm{font-family:'Poppins',sans-serif;font-size:6pt;color:#8A96A8;margin-top:4px;text-align:right}
 /* Eigenständiger Kasten für einen Wert aus dem System. Steht unter der Tabelle,
    gehört aber nicht dazu: er ändert weder deren Summen noch die Kasse. */
@@ -2732,6 +2739,11 @@ const BLATT_DRUCK_CSS = `
     font-weight:700;color:#7EE7C0}
   .kennz .kasse .erg b{font-family:'IBM Plex Mono',monospace;font-size:7.1pt;font-weight:700;
     color:#7EE7C0}
+  /* Nettetal braucht zwei Seiten — mehr Abstand zwischen den Blöcken */
+  body[data-lg="nettetal"] .blatt-kopf{margin-bottom:10px}
+  body[data-lg="nettetal"] .bl{margin:16px 0 4px}
+  body[data-lg="nettetal"] .unten{margin-top:14px}
+  body[data-lg="nettetal"] .kennz{margin-top:14px}
   .blatt-anm{font-size:6pt;color:#8A96A8;margin-top:4px;text-align:right}
   b[style*="--rot"],.rot{color:#E11D48}
 `;
@@ -2779,6 +2791,7 @@ function druckeBlatt(){
     const stil = doc.createElement('style');
     stil.textContent = ':root{' + farben + '}' + BLATT_DRUCK_CSS + (mitLeiste ? leisteCSS : '');
     kopf.appendChild(stil);
+    koerper.dataset.lg = lg;   // steuert die Abstände je Filiale
     koerper.innerHTML = (mitLeiste ? leiste : '') + quelle.innerHTML;
     const fenster = doc.defaultView;
     koerper.querySelectorAll('[data-tun]').forEach(b=>{
