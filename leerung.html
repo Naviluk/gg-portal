@@ -602,8 +602,8 @@ table.bt-ger th:nth-child(2){width:62px}
 /* Abschlussblock: vier Spalten. Die ersten drei stellen unseren Wert dem aus dem
    System gegenüber, die vierte rechnet die Kasse von oben nach unten durch. */
 .kennz{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px}
-/* Unten bündig: die Differenz-Zellen liegen auf Höhe von „Rest in der Kasse“ */
-.kennz .sp{display:flex;flex-direction:column;gap:3px;justify-content:flex-end}
+/* Mittig: die Lücke zur höheren Kasse-Spalte teilt sich auf oben und unten */
+.kennz .sp{display:flex;flex-direction:column;gap:3px;justify-content:center}
 .kennz .zelle{background:var(--bg);border:.5px solid var(--glass-border);border-radius:5px;
   padding:4px 7px}
 .kennz .wert{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem}
@@ -2625,7 +2625,7 @@ function zeichneBlatt(){
     <div class="sp">
       <div class="kasse">
         <div class="z"><u>Von Vormonat</u><span>${zahl(vmS+vmM)}</span></div>
-        <div class="z"><u>Einnahmen von Geräte</u><span>${zahl(istEinn)}</span></div>
+        <div class="z"><u>Einnahmen Geräte</u><span>${zahl(istEinn)}</span></div>
         <div class="z"><u>Einnahmen Getränke</u><span>${zahl(su.getr)}</span></div>
         <div class="z ab"><u>Bank eingezahlt</u><span>${neg(bk.gesamt)}</span></div>
         <div class="z ab"><u>Sonstige Kosten</u><span>${neg(kosten)}</span></div>
@@ -2687,7 +2687,7 @@ const BLATT_DRUCK_CSS = `
   .autom{flex:1;min-width:0}
   .kennz{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px;
     page-break-inside:avoid}
-  .kennz .sp{display:flex;flex-direction:column;gap:3px;justify-content:flex-end}
+  .kennz .sp{display:flex;flex-direction:column;gap:3px;justify-content:center}
   .kennz .zelle{background:#EEF2F8;border:.5px solid #DCE3ED;border-radius:5px;padding:4px 7px}
   .kennz .wert{display:flex;justify-content:space-between;align-items:baseline;gap:5px}
   .kennz .wert+.wert{margin-top:3px;padding-top:3px;border-top:.5px dotted #C3CCDA}
