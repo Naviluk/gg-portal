@@ -2743,7 +2743,9 @@ function druckeBlatt(){
   const st = getComputedStyle(document.body);
   const farben = ['--acc','--acc-ink','--acc-bg','--rot']
     .map(n=>`${n}:${st.getPropertyValue(n).trim()}`).join(';');
-  const titel = (NAMEN[lg]||lg) + ' — ' + monatText(monat);
+  // Dieser Titel wird zum Dateinamen beim Sichern als PDF, deshalb ein
+  // einfacher Bindestrich statt eines Gedankenstrichs
+  const titel = (NAMEN[lg]||lg) + ' - ' + monatText(monat);
   // Auf dem Telefon öffnet sich ein eigenes Fenster. Ohne Leiste bliebe es nach
   // dem Sichern offen stehen, ohne dass man es schließen könnte.
   // Gleiche Leiste wie bisher; die Knöpfe werden unten per DOM verdrahtet
@@ -2820,9 +2822,19 @@ function druckeBlatt(){
   const d = rahmen.contentWindow.document;
   baueSeite(d, false);
 
+  // Beim Druck aus einem Rahmen nimmt der Browser den Titel der Hauptseite als
+  // Dateinamen. Deshalb wird er kurz auf den Blattnamen gesetzt und danach
+  // wieder zurückgestellt.
   const los = () => {
+    const titelVorher = document.title;
+    document.title = titel;
     rahmen.contentWindow.focus();
     rahmen.contentWindow.print();
+    const zurueck = () => { document.title = titelVorher; };
+    if(window.onafterprint !== undefined){
+      window.addEventListener('afterprint', zurueck, {once:true});
+    }
+    setTimeout(zurueck, 60000);       // falls der Browser nichts meldet
     setTimeout(()=>rahmen.remove(), 2000);
   };
   const bereit = d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
