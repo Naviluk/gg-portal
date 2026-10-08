@@ -2140,9 +2140,9 @@ function renderWechsler(){
     <p class="hint">Entnommen minus eingelegt. Ein Minus ist normal: dann wurde mehr eingelegt als geholt.</p>
     <div class="syskarte">
       <div class="tt">Nachfüllungen laut System
-        <s>Nachfüllungen als Minus, Fehlbeträge als Plus. Im Monatsblatt steht die
-        Summe aus beiden. Nur zum Vergleich — zählt nicht in die Tabelle und nicht
-        in die Kasse.</s></div>
+        <s>Beide Beträge ohne Minus eintragen. Nachfüllungen gehen ins Minus,
+        Fehlbeträge werden davon abgezogen. Nur zum Vergleich — zählt nicht in die
+        Tabelle und nicht in die Kasse.</s></div>
       <div class="sys-felder">
         <label>Nachfüllungen
           <input value="${monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null?zahl(monatDoc.nachfuellung):''}"
@@ -2152,7 +2152,8 @@ function renderWechsler(){
             inputmode="decimal" placeholder="0,00" onchange="saveVergleich('fehlbetrag',this.value)"></label>
         <span class="sys-erg">= <b>${
           (monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null)
-            ? zahl(Number(monatDoc.nachfuellung||0)+Number(monatDoc.fehlbetrag||0))
+            ? vzn(-Math.abs(Number(monatDoc.nachfuellung)||0)
+                  + Math.abs(Number(monatDoc.fehlbetrag)||0))
             : '—'}</b></span>
       </div>
     </div>`;
@@ -2418,6 +2419,8 @@ function openTabelle(){
   show('v-tabelle');
 }
 const bz = v => v ? zahl(v) : '<span class="nix">—</span>';
+// Betrag mit Vorzeichen: ein Minus steht nur davor, wenn der Wert negativ ist
+const vzn = v => (v<0 ? '−' : '') + zahl(Math.abs(v));
 // Wechsler-Ergebnis: darf negativ sein, dann rot mit Minuszeichen
 const bzs = v => !v ? '<span class="nix">—</span>'
   : (v < 0 ? '<span class="rot">\u2212' + zahl(Math.abs(v)) + '</span>' : zahl(v));
@@ -2598,7 +2601,11 @@ function zeichneBlatt(){
   // Wechsler zurückgegangen ist. Getränke zählen hier nicht mit.
   const istEinn = su.ger + su.wex;
   // Was das System insgesamt nachgefüllt hat: Nachfüllungen plus Fehlbeträge
-  const nachfGes = hatNf ? Number(nachf||0) + Number(monatDoc.fehlbetrag||0) : 0;
+  // Nachfüllungen gehen ins Minus, Fehlbeträge werden davon abgezogen —
+  // eingetragen werden beide ohne Vorzeichen.
+  const nachfGes = hatNf
+    ? -Math.abs(Number(nachf)||0) + Math.abs(Number(monatDoc.fehlbetrag)||0)
+    : 0;
 
   const dGer  = su.ger - (sysS+sysM);
   // Beide Zahlen sind Einzahlungen, also negativ. Hat das System mehr nachgefüllt
@@ -2616,8 +2623,8 @@ function zeichneBlatt(){
     </div>
     <div class="sp">
       <div class="zelle">
-        <div class="wert neg"><s>Wechsler</s><b>${neg(su.wex)}</b></div>
-        <div class="wert neg"><s>Nachfüllungen<i>inkl. FB</i></s>${hatNf?`<b>${neg(nachfGes)}</b>`:nichts}</div>
+        <div class="wert neg"><s>Wechsler</s><b>${vzn(su.wex)}</b></div>
+        <div class="wert neg"><s>Nachfüllungen<i>inkl. FB</i></s>${hatNf?`<b>${vzn(nachfGes)}</b>`:nichts}</div>
       </div>
       ${dZelle(hatNf, dWex)}
     </div>
@@ -3435,7 +3442,9 @@ async function saveSystem(feld,v){
 // gehen in keine Summe ein. Ein leeres Feld heißt: es gibt noch keinen Wert.
 async function saveVergleich(feld, v){
   const leer = String(v).trim()==='';
-  const n = leer ? null : parseNum(v);
+  let n = leer ? null : parseNum(v);
+  // Nachfüllungen und Fehlbeträge werden ohne Vorzeichen geführt
+  if(n !== null && (feld==='nachfuellung' || feld==='fehlbetrag')) n = Math.abs(n);
   try{
     await db.collection('leerung_monat').doc(lg+'_'+monat).set({[feld]:n},{merge:true});
     monatDoc[feld] = n;
