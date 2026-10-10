@@ -789,6 +789,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <li><a href="statistik.html"><svg class="nav-i" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 19.5v-6M11 19.5V8M15.5 19.5v-8M20 19.5V5"/></svg>Statistik</a></li>
         <li><a href="leerung.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><path d="M7.5 7h9"/><circle cx="12" cy="11.5" r="2"/><path d="M6 20.5h12"/><path d="M8.5 16.5v4M15.5 16.5v4"/></svg>Leerung</a></li>
         <li><a href="konten.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><path d="M6.5 14.5h4"/></svg>Konten</a></li>
+        <li><a href="personal.html"><svg class="nav-i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.9-3.2 3-5 5.5-5s4.6 1.8 5.5 5"/><path d="M15.5 7h5M15.5 10.5h5M15.5 14h3"/></svg>Personal</a></li>
+        <li><a href="checkliste.html"><svg class="nav-i" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 9l1.6 1.6L14 7"/><path d="M8.5 15l1.6 1.6L14 13"/></svg>Checkliste</a></li>
       </ul>
     </li>
   </ul>
@@ -1290,6 +1292,7 @@ window.saveKolli = async function(prodId, rawVal){
   showSpinner();
   try{
     await db.collection('produkte').doc(prodId).set({kolli: val}, {merge:true});
+    await sichereKolli(prodId, val);
     PRODUCTS.forEach(c=>c.items.forEach(p=>{ if(p.id===prodId) p.kolli=val; }));
     showToast('Kolli gespeichert ✓');
   }catch(e){
@@ -1357,17 +1360,53 @@ async function loadShops(){
   }catch(e){ console.warn('Shops laden fehlgeschlagen, nutze Standard-Liste:', e.message); }
 }
 
+// ══ Kolli-Sicherung ═══════════════════════════════════════════════════
+// Kolli steht im Artikel-Dokument, das auch andere Seiten schreiben. Geht das
+// Feld dort einmal verloren, wäre die Eingabe weg. Deshalb liegt zusätzlich
+// eine Kopie in einer eigenen Sammlung, die sonst niemand anfasst. Fehlt das
+// Feld beim Laden, wird es daraus wiederhergestellt.
+let KOLLI_SICHERUNG = {};
+
+async function ladeKolliSicherung(){
+  try{
+    const d = await db.collection('produkt_kolli').doc('werte').get();
+    KOLLI_SICHERUNG = d.exists ? (d.data().werte || {}) : {};
+  }catch(e){ KOLLI_SICHERUNG = {}; }
+}
+
+async function sichereKolli(prodId, wert){
+  KOLLI_SICHERUNG[prodId] = wert;
+  try{
+    await db.collection('produkt_kolli').doc('werte')
+      .set({werte:{[prodId]: wert}}, {merge:true});
+  }catch(e){ /* die Sicherung darf das Speichern nie blockieren */ }
+}
+
 async function loadProducts(){
   const catOrderDefault = ['Getränke','Snacks','Süssigkeiten','Haushaltsartikel'];
   try{
+    await ladeKolliSicherung();
     const snap = await db.collection('produkte').get();
     if(snap.empty){ PRODUCTS = DEFAULT_PRODUCTS; return; }
     const byCat = {};
+    const zuReparieren = [];   // Artikel, bei denen das Feld fehlt
+    const nachzutragen = {};   // Werte, die noch nicht in der Sicherung stehen
     snap.forEach(d=>{
       const p = d.data();
+      let kolli;
+      if(p.kolli === undefined || p.kolli === null){
+        // Feld fehlt — aus der Sicherung holen, falls dort etwas steht
+        kolli = Number(KOLLI_SICHERUNG[d.id]) || 1;
+        if(kolli > 1) zuReparieren.push({id:d.id, kolli});
+      }else{
+        kolli = Number(p.kolli) || 1;
+        if(Number(KOLLI_SICHERUNG[d.id]) !== kolli) nachzutragen[d.id] = kolli;
+      }
       if(!byCat[p.cat]) byCat[p.cat] = [];
-      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0, kolli:Number(p.kolli)||1});
+      byCat[p.cat].push({id:d.id, name:p.name, unit:p.unit||'', icon:p.icon||'📦', order:Number(p.order)||0, kolli});
     });
+    if(zuReparieren.length) repariereKolli(zuReparieren);
+    if(Object.keys(nachzutragen).length) sicherungNachtragen(nachzutragen);
     const catOrder = [...catOrderDefault];
     Object.keys(byCat).forEach(cat=>{ if(!catOrder.includes(cat)) catOrder.push(cat); });
     PRODUCTS = catOrder.filter(cat=>byCat[cat]).map(cat=>({
@@ -1378,6 +1417,25 @@ async function loadProducts(){
     console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
     PRODUCTS = DEFAULT_PRODUCTS;
   }
+}
+
+// Verlorene Kolli-Werte still zurückschreiben und einmal Bescheid geben
+async function repariereKolli(liste){
+  try{
+    const batch = db.batch();
+    liste.forEach(x => batch.set(db.collection('produkte').doc(x.id),
+      {kolli:x.kolli}, {merge:true}));
+    await batch.commit();
+    showToast(liste.length + ' Kolli aus der Sicherung wiederhergestellt');
+  }catch(e){ /* beim nächsten Laden erneut versuchen */ }
+}
+
+// Werte, die noch keine Sicherung haben, nachtragen
+async function sicherungNachtragen(werte){
+  try{
+    await db.collection('produkt_kolli').doc('werte').set({werte}, {merge:true});
+    Object.assign(KOLLI_SICHERUNG, werte);
+  }catch(e){}
 }
 
 // ── VERBRAUCH-ÜBERSICHT (alle Filialen außer Zentrallager) ──
