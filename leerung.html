@@ -466,8 +466,14 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 .leer{padding:1.2rem;text-align:center;color:var(--text-dim);font-size:.85rem}
 
 /* Fenster */
-#modal-leerung .modal,#modal-geber .modal,#modal-plan .modal,#modal-bank .modal,
-#modal-kredit .modal,#modal-vormonat .modal{padding:0;overflow:hidden;display:flex;
+/* Jedes Fenster mit Kopf und Fuß bekommt eine feste Höhe, damit der Inhalt
+   dazwischen scrollt statt unten aus dem Bild zu laufen. */
+#modal-leerung .modal,#modal-eintraege .modal,#modal-news .modal,#modal-wechsler .modal,
+#modal-neukredit .modal,#modal-tausch .modal,#modal-geber .modal,#modal-plan .modal,
+#modal-bank .modal,#modal-ein .modal,#modal-kredit .modal,#modal-vormonat .modal{
+  padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
+/* Sicherheitsnetz für später hinzukommende Fenster — ältere Browser überspringen die Regel */
+.modal-overlay .modal:has(> .dlg-head){padding:0;overflow:hidden;display:flex;
   flex-direction:column;max-height:92vh}
 .dlg-head{background:var(--ink);color:#fff;padding:.9rem 1rem .85rem;position:relative;flex-shrink:0}
 .dlg-head::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--acc)}
@@ -1062,7 +1068,7 @@ textarea.note:focus{border-color:var(--acc)}
       <label class="fl">Geräte</label>
       <div class="dcard grid-h g-ger" id="le-geraete"></div>
       <label class="fl">Wechsler — entnommen</label>
-      <input class="num" id="le-aus" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="le-aus" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <label class="fl">Wechsler — eingelegt</label>
       <div class="dcard grid-h g-w" id="le-wechsler"></div>
       <div id="le-kredit"></div>
@@ -1120,7 +1126,7 @@ textarea.note:focus{border-color:var(--acc)}
       <label class="fl">Datum</label>
       <input type="date" class="num" id="wf-datum">
       <label class="fl">Entnommen</label>
-      <input class="num" id="wf-aus" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="wf-aus" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <label class="fl">Eingelegt</label>
       <div class="dcard grid-h g-w" id="wf-zeilen"></div>
       <div id="wf-kredit"></div>
@@ -1148,7 +1154,7 @@ textarea.note:focus{border-color:var(--acc)}
         style="font-family:'Poppins',sans-serif;font-weight:600">
       <div class="geber" id="nk-geber" style="margin-top:.45rem"></div>
       <label class="fl">Betrag</label>
-      <input class="num" id="nk-betrag" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="nk-betrag" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <label class="fl">Art</label>
       <div class="seg2" id="nk-art">
         <button class="on" onclick="nkArt('scheine',this)">Scheine</button>
@@ -1186,7 +1192,7 @@ textarea.note:focus{border-color:var(--acc)}
         <div class="tausch-seite" id="tw-nach">Scheine</div>
       </div>
       <label class="fl">Betrag</label>
-      <input class="num" id="tw-betrag" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="tw-betrag" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <label class="fl">Datum</label>
       <input type="date" class="num" id="tw-datum">
       <p class="hint">Der Kassenbestand bleibt in der Summe gleich — nur die Aufteilung
@@ -1312,7 +1318,7 @@ textarea.note:focus{border-color:var(--acc)}
         <button onclick="krArt('muenzen',this)">Münzen</button>
       </div>
       <label class="fl">Betrag der Rückzahlung</label>
-      <input class="num" id="kr-betrag" inputmode="decimal">
+      <input class="num" id="kr-betrag" inputmode="decimal" autocomplete="off">
       <p class="hint" id="kr-hint"></p>
     </div>
     <div class="dlg-foot">
@@ -1332,9 +1338,9 @@ textarea.note:focus{border-color:var(--acc)}
     </div>
     <div class="dlg-body">
       <label class="fl">Scheine</label>
-      <input class="num" id="vm-in-s" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="vm-in-s" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <label class="fl">Münzen</label>
-      <input class="num" id="vm-in-m" inputmode="decimal" placeholder="0,00">
+      <input class="num" id="vm-in-m" inputmode="decimal" autocomplete="off" placeholder="0,00">
       <p class="hint">Nur nötig, solange es keinen Vormonat im Programm gibt. Sobald ein Vormonat
         erfasst ist, übernimmt die Seite dessen Rest von selbst.</p>
     </div>
@@ -2105,7 +2111,7 @@ function renderGeraete(){
         <s>Gesamtsaldo des Monats aus dem System. Nur zum Vergleich mit den Ist-Einnahmen —
         zählt nicht in die Tabelle und nicht in die Kasse.</s></div>
       <input value="${monatDoc.saldo2!==undefined&&monatDoc.saldo2!==null?zahl(monatDoc.saldo2):''}"
-        inputmode="decimal" placeholder="0,00" onchange="saveVergleich('saldo2',this.value)">
+        inputmode="decimal" autocomplete="off" placeholder="0,00" onchange="saveVergleich('saldo2',this.value)">
     </div>`;
 }
 
@@ -2151,10 +2157,10 @@ function renderWechsler(){
       <div class="sys-felder">
         <label>Nachfüllungen
           <input value="${monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null?zahl(monatDoc.nachfuellung):''}"
-            inputmode="decimal" placeholder="0,00" onchange="saveVergleich('nachfuellung',this.value)"></label>
+            inputmode="decimal" autocomplete="off" placeholder="0,00" onchange="saveVergleich('nachfuellung',this.value)"></label>
         <label>Fehlbeträge
           <input value="${monatDoc.fehlbetrag!==undefined&&monatDoc.fehlbetrag!==null?zahl(monatDoc.fehlbetrag):''}"
-            inputmode="decimal" placeholder="0,00" onchange="saveVergleich('fehlbetrag',this.value)"></label>
+            inputmode="decimal" autocomplete="off" placeholder="0,00" onchange="saveVergleich('fehlbetrag',this.value)"></label>
         <span class="sys-erg">= <b>${
           (monatDoc.nachfuellung!==undefined&&monatDoc.nachfuellung!==null)
             ? vzn(-Math.abs(Number(monatDoc.nachfuellung)||0)
@@ -2211,14 +2217,14 @@ function openLeerung(id){
   let g='<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>';
   geraeteListe().forEach(i=>{
     g+=`<span class="gn${istExtra(i)?' g-extra':''}">Gerät ${i}</span>
-      <input id="ge-s-${i}" inputmode="decimal" placeholder="—">
-      <input id="ge-m-${i}" inputmode="decimal" placeholder="—">`;
+      <input id="ge-s-${i}" inputmode="decimal" autocomplete="off" placeholder="—">
+      <input id="ge-m-${i}" inputmode="decimal" autocomplete="off" placeholder="—">`;
   });
   document.getElementById('le-geraete').innerHTML=g;
   document.getElementById('le-getraenke').innerHTML=`
-    <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" placeholder="—">
-    <span class="gn">Getränkeautomat</span><input id="ge-getr" inputmode="decimal" placeholder="—">
-    <span class="gn">Snack</span><input id="ge-snack" inputmode="decimal" placeholder="—">`;
+    <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" autocomplete="off" placeholder="—">
+    <span class="gn">Getränkeautomat</span><input id="ge-getr" inputmode="decimal" autocomplete="off" placeholder="—">
+    <span class="gn">Snack</span><input id="ge-snack" inputmode="decimal" autocomplete="off" placeholder="—">`;
   if(alt){
     // Vorhandene Werte in die Felder zurückschreiben
     Object.entries(alt.geraete||{}).forEach(([nr,w])=>{
@@ -2243,7 +2249,7 @@ function renderWexZeilen(){
     h+=`<span class="gn">${z.wert} €</span>
       <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="wexPick(${i},'kasse')">✓</span>
       <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="wexPick(${i},'kredit')">✓</span>
-      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="wexZeilen[${i}].betrag=this.value">
+      <input value="${z.betrag}" inputmode="decimal" autocomplete="off" placeholder="—" onchange="wexZeilen[${i}].betrag=betragNorm(this.value)">
       <button class="plus-s" onclick="wexPlus(${i})" title="Zeile mit ${z.wert} € ergänzen">+</button>`;
   });
   document.getElementById('le-wechsler').innerHTML=h;
@@ -2424,6 +2430,19 @@ function openTabelle(){
   show('v-tabelle');
 }
 const bz = v => v ? zahl(v) : '<span class="nix">—</span>';
+
+// Eingegebenen Betrag in die endgültige Schreibweise bringen: 1900 → 1.900,00.
+// Leeres Feld bleibt leer, damit „nichts erfasst" nicht zu 0,00 wird.
+const betragNorm = v => String(v).trim()==='' ? '' : zahl(parseNum(v));
+
+// Sobald ein Betragsfeld verlassen wird, steht die Zahl fertig formatiert da.
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if(!el || el.tagName!=='INPUT') return;
+  if(el.getAttribute('inputmode')!=='decimal') return;
+  const neu = betragNorm(el.value);
+  if(neu !== el.value) el.value = neu;
+});
 // Betrag mit Vorzeichen: ein Minus steht nur davor, wenn der Wert negativ ist
 const vzn = v => (v<0 ? '−' : '') + zahl(Math.abs(v));
 // Wechsler-Ergebnis: darf negativ sein, dann rot mit Minuszeichen
@@ -2931,7 +2950,7 @@ function renderWfZeilen(){
     h+=`<span class="gn">${z.wert} €</span>
       <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="wfPick(${i},'kasse')">✓</span>
       <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="wfPick(${i},'kredit')">✓</span>
-      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="wfZeilen[${i}].betrag=this.value">
+      <input value="${z.betrag}" inputmode="decimal" autocomplete="off" placeholder="—" onchange="wfZeilen[${i}].betrag=betragNorm(this.value)">
       <button class="plus-s" onclick="wfPlus(${i})" title="Zeile mit ${z.wert} € ergänzen">+</button>`;
   });
   document.getElementById('wf-zeilen').innerHTML=h;
@@ -3141,7 +3160,7 @@ function renderPlanZeilen(){
     h+=`<span class="gn nr">${i+1}</span>
       <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="planPick(${i},'kasse')">✓</span>
       <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="planPick(${i},'kredit')">✓</span>
-      <input value="${z.betrag}" inputmode="decimal" placeholder="—" onchange="planZeilen[${i}].betrag=this.value">
+      <input value="${z.betrag}" inputmode="decimal" autocomplete="off" placeholder="—" onchange="planZeilen[${i}].betrag=betragNorm(this.value)">
       <button class="plus-s" onclick="planPlus()">+</button>`;
   });
   document.getElementById('plan-zeilen').innerHTML=h;
@@ -3269,8 +3288,8 @@ function renderEin(){
       zeilen+=`<span class="gn nr">${j+1}</span>
         <span class="cbx${z.herkunft==='kasse'?' on':''}" onclick="einHerkunft(${i},${j},'kasse')">✓</span>
         <span class="cbx kr${z.herkunft==='kredit'?' on':''}" onclick="einHerkunft(${i},${j},'kredit')">✓</span>
-        <input value="${z.betrag}" inputmode="decimal" placeholder="—"
-          onchange="einListe[${i}].zeilen[${j}].betrag=this.value;renderEin()">
+        <input value="${z.betrag}" inputmode="decimal" autocomplete="off" placeholder="—"
+          onchange="einListe[${i}].zeilen[${j}].betrag=betragNorm(this.value);renderEin()">
         <button class="plus-s" onclick="einZeilePlus(${i},${j})" title="Zeile ergänzen">+</button>`;
     });
     const kr=e.zeilen.filter(z=>z.herkunft==='kredit'&&parseNum(z.betrag)>0);
@@ -3312,7 +3331,17 @@ function einAdd(still){
                  zeilen:[{betrag:'',herkunft:'kasse',geber:''}]});
   if(!still) renderEin();
 }
-function einDel(i){ einListe.splice(i,1); if(!einListe.length) einAdd(true); renderEin(); }
+function einDel(i){
+  const e = einListe[i];
+  const was = dmy(e.datum) + ' · ' + (e.art==='muenzen'?'Münzen':'Scheine')
+            + ' · ' + eur(einSumme(e));
+  if(!confirm('Diese Einzahlung entfernen?\n\n' + was
+      + '\n\nDie Änderung gilt erst nach „Speichern".')) return;
+  einListe.splice(i,1);
+  if(!einListe.length) einAdd(true);
+  renderEin();
+  showToast('Entfernt — zum Übernehmen „Speichern" drücken');
+}
 
 async function saveEin(){
   const ein=[];
