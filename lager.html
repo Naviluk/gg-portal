@@ -1114,6 +1114,37 @@ let currentLager    = 'zentrallager';
 let currentZeitraum = '2026-06';
 let detailExpanded  = false;
 let wareneingangs   = []; // loaded from Firebase
+let weDoppelIds     = []; // weitere Einträge desselben Datums, beim Bearbeiten zusammenzuführen
+
+// Zu einem Datum kann es mehrere Einträge geben: eine abgeschlossene Bestellung
+// aus der Lieferplanung legt jedes Mal einen neuen an, und von Hand erfasste
+// Lieferungen kommen dazu. Früher wurde nur der erste gelesen — alles Weitere
+// fiel aus der Tabelle. Deshalb hier immer alle eines Datums.
+function weAlleFuerDatum(d){ return wareneingangs.filter(w=>w.datum===d); }
+
+// Mengen aller Einträge eines Datums je Artikel addiert
+function weItemsFuerDatum(d){
+  const summe = {};
+  weAlleFuerDatum(d).forEach(w=>{
+    Object.entries(w.items||{}).forEach(([pid,menge])=>{
+      summe[pid] = (summe[pid]||0) + (Number(menge)||0);
+    });
+  });
+  return summe;
+}
+
+// Geschäfte aller Einträge eines Datums, Beträge je Geschäft addiert
+function weShopsFuerDatum(d){
+  const proShop = {};
+  weAlleFuerDatum(d).forEach(w=>(w.shops||[]).forEach(s=>{
+    if(!s || !s.shop) return;
+    const b = s.betrag==='' || s.betrag==null ? null : (parseFloat(s.betrag)||0);
+    if(!(s.shop in proShop)) proShop[s.shop] = b;
+    else if(b !== null) proShop[s.shop] = (proShop[s.shop]||0) + b;
+  }));
+  return Object.entries(proShop).map(([shop,betrag])=>
+    ({shop, betrag: betrag===null ? '' : String(betrag)}));
+}
 let anfangsbestand  = {}; // from Inventur page
 let bestandData     = {}; // last inventur of period
 
@@ -1251,8 +1282,7 @@ function renderTableActual(){
       // Die Gesamtsumme wird als Summe GENAU DIESER Werte berechnet, damit sie immer übereinstimmt.
       const perDateVals = {};
       dates.forEach(d=>{
-        const we = wareneingangs.find(w=>w.datum===d);
-        perDateVals[d] = we&&we.items&&we.items[prod.id] ? Number(we.items[prod.id])||0 : 0;
+        perDateVals[d] = Number(weItemsFuerDatum(d)[prod.id]) || 0;
       });
       const totalEink = Object.values(perDateVals).reduce((s,v)=>s+v,0);
 
@@ -1356,7 +1386,7 @@ function renderTableActual(){
         let shopTotal = 0;
         const perDateAmt = {};
         dates.forEach(d=>{
-          const we = wareneingangs.find(w=>w.datum===d);
+          const we = {shops: weShopsFuerDatum(d)};
           let amt = '';
           if(we&&we.shops){
             const shopEntry = we.shops.find(s=>s.shop===shop);
@@ -2003,6 +2033,7 @@ window.openWareneingang = function(prefillDate){
   weSelectedItems = {};
   weShopRows = [];
   currentEditWeId = null; // режим создания
+  weDoppelIds = [];
   document.getElementById('we-step1').classList.remove('we-hidden');
   document.getElementById('we-step2').classList.add('we-hidden');
   document.getElementById('modal-we').classList.add('show');
@@ -2088,7 +2119,7 @@ function weSetStep(n){
   const i1=s1.querySelector('i'); if(i1) i1.textContent = (n===2?'✓':'1');
 }
 
-window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; }
+window.closeWareneingang = function(){ document.getElementById('modal-we').classList.remove('show'); currentEditWeId=null; weDoppelIds=[]; }
 
 window.toggleWeProd = function(prodId){
   const cb  = document.getElementById('we-cb-'+prodId);
@@ -2301,7 +2332,16 @@ window.confirmWareneingang = async function(){
     if(currentEditWeId){
       // Редактирование — обновляем существующую запись
       await db.collection('wareneingang').doc(currentEditWeId).update(entry);
-      showToast('Lieferung aktualisiert ✓');
+      // Die übrigen Einträge desselben Datums sind jetzt in diesem enthalten
+      for(const doppelId of weDoppelIds){
+        if(doppelId && doppelId !== currentEditWeId){
+          await db.collection('wareneingang').doc(doppelId).delete();
+        }
+      }
+      showToast(weDoppelIds.length
+        ? `Lieferung aktualisiert ✓ (${weDoppelIds.length+1} Einträge dieses Datums zusammengefasst)`
+        : 'Lieferung aktualisiert ✓');
+      weDoppelIds = [];
     } else {
       // Новая запись
       entry.createdAt = new Date().toISOString();
@@ -2363,8 +2403,12 @@ window.buildConfirmLieferung = function(){
 };
 
 window.openEditLieferung = function(date){
-  const we=wareneingangs.find(w=>w.datum===date);
-  if(!we) return;
+  const alleWe = weAlleFuerDatum(date);
+  if(!alleWe.length) return;
+  // Der erste Eintrag wird bearbeitet, die übrigen desselben Datums gehen beim
+  // Speichern darin auf — sonst stünden dieselben Mengen doppelt in der Tabelle.
+  const we = {...alleWe[0], items: weItemsFuerDatum(date), shops: weShopsFuerDatum(date)};
+  weDoppelIds = alleWe.slice(1).map(w=>w.id);
   const editId = we.id; // сохраняем ID для обновления
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
@@ -2395,8 +2439,12 @@ window.openEditLieferung = function(date){
 };
 
 window.openEditWareneingang = function(date){
-  const we=wareneingangs.find(w=>w.datum===date);
-  if(!we) return;
+  const alleWe = weAlleFuerDatum(date);
+  if(!alleWe.length) return;
+  // Der erste Eintrag wird bearbeitet, die übrigen desselben Datums gehen beim
+  // Speichern darin auf — sonst stünden dieselben Mengen doppelt in der Tabelle.
+  const we = {...alleWe[0], items: weItemsFuerDatum(date), shops: weShopsFuerDatum(date)};
+  weDoppelIds = alleWe.slice(1).map(w=>w.id);
   const editId = we.id; // режим редактирования
   const savedItems={...we.items};
   const savedShops=[...(we.shops||[])];
