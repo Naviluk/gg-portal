@@ -1884,7 +1884,10 @@ async function ladeHub(){
 
     tiles.innerHTML = FILIALEN.map(f=>{
       const su=summen(proLager[f].liste);
-      const daten=proLager[f].liste.map(x=>x.datum).filter(Boolean).sort();
+      // Nur vollständige Leerungen zählen hier. Einträge aus „+ Wechsler" sind
+      // reine Nachfüllungen und sagen nichts darüber, wann zuletzt geleert wurde.
+      const daten=proLager[f].liste.filter(x=>!x.nurWechsler)
+                    .map(x=>x.datum).filter(Boolean).sort();
       const letzte=daten.length?dmy(daten[daten.length-1]):'noch keine Leerung';
       const c=FARBEN[f];
       return `<button class="tile" style="--t1:${c.t1};--t2:${c.t2};--tsh:${c.sh}"
