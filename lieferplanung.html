@@ -2137,12 +2137,32 @@ window.openEinkaeufe = async function(){
     if(doc.exists) ekDefaultShops = doc.data();
   }catch(e){}
   await Promise.all([loadEkPreise(), loadEkPacks()]);
-  // Загружаем сохранённые галочки
+  // Gespeicherte Haken laden — aber nur für Artikel, die auch wirklich im Plan
+  // stehen. Früher blieben Haken von Artikeln liegen, die längst aus dem Plan
+  // genommen waren; wurde derselbe Artikel später neu geplant, war er plötzlich
+  // wieder abgehakt. Veraltete Einträge werden dabei gleich aufgeräumt.
   try{
     const doc2 = await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).get();
     if(doc2.exists){
-      const saved=doc2.data();
-      Object.keys(saved).forEach(id=>{ if(!ekState[id])ekState[id]={bought:false,shop:ekDefaultShops[id]||''}; ekState[id].bought=!!saved[id]; });
+      const saved = doc2.data() || {};
+      const imPlan = planData['zentrallager'] || {};
+      const gueltig = {};
+      let veraltet = 0;
+      Object.keys(saved).forEach(id=>{
+        if(!saved[id]) return;
+        if(Number(imPlan[id]) > 0){
+          if(!ekState[id]) ekState[id]={bought:false, shop:ekDefaultShops[id]||''};
+          ekState[id].bought = true;
+          gueltig[id] = true;
+        }else{
+          veraltet++;                       // steht nicht mehr im Plan
+          if(ekState[id]) ekState[id].bought = false;
+        }
+      });
+      if(veraltet){
+        db.collection('ek_state').doc('zentrallager_'+currentZeitraum)
+          .set(gueltig).catch(()=>{});
+      }
     }
   }catch(e){}
   document.getElementById('einkaeufe-panel').classList.add('open');
@@ -2296,7 +2316,10 @@ window.toggleEkCheck = function(prodId){
   if(el) el.className='tick'+(ekState[prodId].bought?' on':'');
   updateEkCompleteBtn();
   const toSave={};
-  Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSave[id]=true; });
+  const imPlan = planData['zentrallager'] || {};
+  Object.entries(ekState).forEach(([id,st])=>{
+    if(st.bought && Number(imPlan[id]) > 0) toSave[id]=true;
+  });
   db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
   const info = artikelInfo(prodId);
   meldeAktion('zentrallager','einkauf','ok',
@@ -3304,7 +3327,10 @@ window.confirmWareneingang = async function(){
       // Haken der soeben bestätigten Artikel entfernen — Haken der übrigen bleiben.
       ids.forEach(id=>{ delete ekState[id]; });
       const toSaveEk={};
-      Object.entries(ekState).forEach(([id,st])=>{ if(st.bought) toSaveEk[id]=true; });
+      const restPlan = planData['zentrallager'] || {};
+      Object.entries(ekState).forEach(([id,st])=>{
+        if(st.bought && Number(restPlan[id]) > 0) toSaveEk[id]=true;
+      });
       await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSaveEk).catch(()=>{});
       updateEkCompleteBtn();
       closeEinkaeufe();

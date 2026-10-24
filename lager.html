@@ -2330,8 +2330,13 @@ window.confirmWareneingang = async function(){
   };
   try {
     if(currentEditWeId){
-      // Редактирование — обновляем существующую запись
-      await db.collection('wareneingang').doc(currentEditWeId).update(entry);
+      // Redaktion — vorhandenen Eintrag ändern. Ist er inzwischen weg (etwa von
+      // einem anderen Gerät gelöscht), wird er neu angelegt statt die Änderung
+      // stillschweigend zu verlieren.
+      const ref = db.collection('wareneingang').doc(currentEditWeId);
+      const vorhanden = await ref.get();
+      if(vorhanden.exists) await ref.update(entry);
+      else { entry.createdAt = new Date().toISOString(); await ref.set(entry); }
       // Die übrigen Einträge desselben Datums sind jetzt in diesem enthalten
       for(const doppelId of weDoppelIds){
         if(doppelId && doppelId !== currentEditWeId){
@@ -2402,72 +2407,50 @@ window.buildConfirmLieferung = function(){
   if(_cb) _cb.textContent='✓ Änderungen speichern';
 };
 
-window.openEditLieferung = function(date){
+// Eine vorhandene Erfassung öffnen. openWareneingang() baut die Liste sofort
+// auf, deshalb wird hier ohne Wartezeit weitergearbeitet: der frühere Timer von
+// 300 ms konnte sich mit einem zweiten Klick überholen und dann die Kennung des
+// zuvor geöffneten Eintrags setzen — gespeichert wurde dann der falsche.
+function weOeffneZumBearbeiten(date, istLieferung){
   const alleWe = weAlleFuerDatum(date);
   if(!alleWe.length) return;
   // Der erste Eintrag wird bearbeitet, die übrigen desselben Datums gehen beim
   // Speichern darin auf — sonst stünden dieselben Mengen doppelt in der Tabelle.
-  const we = {...alleWe[0], items: weItemsFuerDatum(date), shops: weShopsFuerDatum(date)};
-  weDoppelIds = alleWe.slice(1).map(w=>w.id);
-  const editId = we.id; // сохраняем ID для обновления
-  const savedItems={...we.items};
-  const savedShops=[...(we.shops||[])];
-  const lagerName=LAGER_NAMES[currentLager]||currentLager;
-  const col=LAGER_NEON[currentLager]||'var(--neon-cyan)';
-  openWareneingang(date);
-  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
-  setTimeout(()=>{
-    currentEditWeId = editId; // на всякий случай ещё раз
-    weSelectedItems=savedItems; weShopRows=savedShops;
-    Object.keys(savedItems).forEach(prodId=>{
-      const cb=document.getElementById('we-cb-'+prodId);
-      const qi=document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
-      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
-    });
-    weRebuildShopRowsDom();
-    updateSelectedPreview();
-    document.getElementById('we-title').textContent='Lieferung bearbeiten';
-    const _pl=document.getElementById('we-lager-pill'); if(_pl) _pl.textContent=lagerName;
-    weApplyAccent();
-    // Меняем кнопку подтверждения
-    const saveBtn=document.getElementById('btn-confirm-save');
-    if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
-    buildConfirmLieferung();
-  },300);
-};
+  const basis = alleWe[0];
+  const savedItems = weItemsFuerDatum(date);
+  const savedShops = weShopsFuerDatum(date);
+  const doppel = alleWe.slice(1).map(w=>w.id);
 
-window.openEditWareneingang = function(date){
-  const alleWe = weAlleFuerDatum(date);
-  if(!alleWe.length) return;
-  // Der erste Eintrag wird bearbeitet, die übrigen desselben Datums gehen beim
-  // Speichern darin auf — sonst stünden dieselben Mengen doppelt in der Tabelle.
-  const we = {...alleWe[0], items: weItemsFuerDatum(date), shops: weShopsFuerDatum(date)};
-  weDoppelIds = alleWe.slice(1).map(w=>w.id);
-  const editId = we.id; // режим редактирования
-  const savedItems={...we.items};
-  const savedShops=[...(we.shops||[])];
-  openWareneingang(date);
-  currentEditWeId = editId; // ВАЖНО: устанавливаем ПОСЛЕ openWareneingang(), которая сама сбрасывает его в null
-  setTimeout(()=>{
-    currentEditWeId = editId; // на всякий случай ещё раз, после всех асинхронных операций
-    weSelectedItems=savedItems; weShopRows=savedShops;
-    Object.keys(savedItems).forEach(prodId=>{
-      const cb=document.getElementById('we-cb-'+prodId);
-      const qi=document.getElementById('we-qty-'+prodId);
-      if(cb) cb.classList.add('checked');
-      const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
-      if(qi){qi.classList.add('show');qi.value=savedItems[prodId];}
-    });
-    weRebuildShopRowsDom();
-    updateSelectedPreview();
-    // Меняем кнопку на "Änderungen speichern"
-    const saveBtn=document.getElementById('btn-confirm-save');
-    if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
-    buildConfirm(true);
-  },300);
+  openWareneingang(date);          // setzt currentEditWeId und weDoppelIds zurück
+  currentEditWeId = basis.id;      // deshalb erst danach setzen
+  weDoppelIds = doppel;
+  weSelectedItems = savedItems;
+  weShopRows = savedShops;
+
+  Object.keys(savedItems).forEach(prodId=>{
+    const cb=document.getElementById('we-cb-'+prodId);
+    const qi=document.getElementById('we-qty-'+prodId);
+    if(cb) cb.classList.add('checked');
+    const rw=document.getElementById('we-row-'+prodId); if(rw) rw.classList.add('checked');
+    if(qi){ qi.classList.add('show'); qi.value=savedItems[prodId]; }
+  });
+  weRebuildShopRowsDom();
+  updateSelectedPreview();
+
+  if(istLieferung){
+    document.getElementById('we-title').textContent='Lieferung bearbeiten';
+    const pill=document.getElementById('we-lager-pill');
+    if(pill) pill.textContent=LAGER_NAMES[currentLager]||currentLager;
+    weApplyAccent();
+  }
+  const saveBtn=document.getElementById('btn-confirm-save');
+  if(saveBtn) saveBtn.textContent='✓ Änderungen speichern';
+
+  if(istLieferung) buildConfirmLieferung(); else buildConfirm(true);
 }
+
+window.openEditLieferung    = function(date){ weOeffneZumBearbeiten(date, true); };
+window.openEditWareneingang = function(date){ weOeffneZumBearbeiten(date, false); };
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',async()=>{
