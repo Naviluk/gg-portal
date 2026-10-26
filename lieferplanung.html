@@ -732,6 +732,99 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .cs-hint{font-size:.62rem;color:var(--text-dim);letter-spacing:.02em;margin-top:.1rem}
 
+
+/* ══ Aufgaben ═════════════════════════════════════════════════════════
+   Flache Kachel auf der Startansicht und die Liste dahinter. */
+.lp-hub-card.lp-hub-flach{min-height:0;flex-direction:row;align-items:center;gap:.7rem;
+  padding:.75rem .85rem}
+.lp-hub-card.lp-hub-flach .lp-hub-label{flex:1}
+.lp-hub-card.lp-hub-flach .lp-hub-badge{position:static}
+.lp-hub-badge.spaet{background:#C4183C}
+/* Filialknöpfe über der Liste */
+.fil-leiste{display:flex;gap:.3rem;flex-wrap:wrap;padding:0 .1rem .6rem}
+.fil-leiste button{border:1.5px solid var(--glass-border);background:#fff;border-radius:9px;
+  padding:.3rem .55rem;font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;
+  color:var(--text-dim);cursor:pointer;display:flex;align-items:center;gap:.3rem}
+.fil-leiste button .z{font-family:var(--mono);font-size:.64rem;opacity:.75}
+.fil-leiste button.on{color:#fff;border-color:transparent}
+.a-legend{display:flex;align-items:center;gap:.55rem;
+  padding:0 calc(.7rem + 1px) .5rem;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800}
+.a-legend .l-t{width:28px;text-align:center;font-size:.7rem}
+/* Aufgabenzeilen */
+.ag{border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;margin-bottom:.6rem;
+  background:#fff}
+.ag-row{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem .7rem;
+  border-top:1px solid var(--glass-border)}
+.ag-row:first-child{border-top:none}
+.ag-nr{width:22px;min-width:22px;text-align:right;font-family:var(--mono);font-size:.78rem;
+  font-weight:700;color:#A9B4C4;margin-top:.12rem;flex-shrink:0}
+.ag-mid{flex:1;min-width:0}
+.ag-titel{display:flex;align-items:center;gap:.4rem}
+.ag-titel b{font-size:.84rem;font-weight:600;line-height:1.25;color:var(--text)}
+.ag-mid p{font-size:.73rem;color:var(--text-dim);margin-top:.12rem;line-height:1.4;
+  white-space:pre-wrap;word-break:break-word}
+.ag-chips{display:flex;gap:.25rem;margin-top:.3rem;flex-wrap:wrap}
+.ag-chip{font-size:.62rem;font-weight:700;border-radius:20px;padding:.1rem .45rem;
+  background:#EDF1F7;color:#5A6980;font-family:var(--mono);white-space:nowrap}
+.ag-chip.spaet{background:#FDE8EE;color:#A5103A}
+.ag-chip.bald{background:#FDF2E2;color:#8F5208}
+.ag-chip.zyklus{background:#EAF3FB;color:#1D4FB8}
+.ag-chip.ruht{background:#F1F4F8;color:#9AA6B6}
+.ag-row.ruht{opacity:.62}
+.stift-k{width:21px;height:21px;min-width:21px;border-radius:6px;
+  border:1.3px solid var(--glass-border);background:#fff;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;padding:0}
+.stift-k .ui-i{width:11px;height:11px;fill:none;stroke:var(--text-dim);stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.stift-k:hover{border-color:var(--neon-cyan)}
+.stift-k:hover .ui-i{stroke:var(--neon-cyan)}
+.ag-tick{width:26px;height:26px;min-width:26px;border-radius:8px;
+  border:1.8px solid var(--glass-border);background:#fff;flex-shrink:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+  color:transparent;margin-top:.1rem}
+.ag-tick:hover{border-color:var(--neon-green)}
+/* Erledigte */
+.erl-btn{width:100%;display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;
+  background:#F2F5F9;border:1px solid var(--glass-border);border-radius:11px;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-dim);margin-top:.2rem}
+.erl-btn .pf{margin-left:auto;transition:transform .2s}
+.erl-btn.auf .pf{transform:rotate(180deg)}
+.erl-liste{display:none;margin:.45rem 0 .6rem;border:1px solid var(--glass-border);
+  border-radius:11px;overflow:hidden}
+.erl-liste.auf{display:block}
+.erl-row{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;background:#FAFBFC;
+  border-top:1px solid var(--glass-border)}
+.erl-row:first-child{border-top:none}
+.erl-hak{width:20px;height:20px;border-radius:6px;background:#CBD5E1;color:#fff;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700}
+.erl-mid{flex:1;min-width:0}
+.erl-mid b{display:block;font-size:.78rem;font-weight:600;color:#7E8A9C;
+  text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.erl-mid s{display:block;text-decoration:none;font-size:.66rem;color:#9AA6B6;margin-top:.05rem}
+.erl-zeit{font-family:var(--mono);font-size:.66rem;color:#9AA6B6;white-space:nowrap}
+/* Fenster „Aufgabe" */
+.af-feld{margin-bottom:.8rem}
+.af-feld>label{display:block;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800;margin-bottom:.3rem}
+.af-eing{width:100%;border:1.5px solid var(--glass-border);border-radius:10px;
+  padding:.55rem .65rem;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text);
+  background:#fff}
+textarea.af-eing{resize:vertical;min-height:62px;line-height:1.45}
+.af-art{display:flex;gap:.35rem;margin-bottom:.55rem}
+.af-art button{flex:1;border:1.5px solid var(--glass-border);background:#fff;border-radius:9px;
+  padding:.45rem;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;
+  color:var(--text-dim);cursor:pointer}
+.af-art button.on{background:#FDF2E2;border-color:#E3B261;color:#8F5208}
+.af-zeile2{display:flex;gap:.5rem}
+.af-zeile2>div{flex:1}
+.af-zeile2 label{display:block;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-dim);font-weight:800;margin-bottom:.25rem}
+.af-hinw{font-size:.7rem;color:var(--text-dim);background:#F7F9FC;border-radius:9px;
+  padding:.5rem .6rem;line-height:1.45;margin-top:.55rem}
+.af-leer{color:var(--text-dim);font-size:.85rem;padding:1.2rem .2rem;text-align:center}
+
 /* ══ Neuigkeiten: wer hat was in der Planung getan ════════════════════ */
 .news{max-width:660px;margin:1.2rem auto 0;background:var(--bg2);
   border:1px solid var(--glass-border);border-radius:16px;overflow:hidden}
@@ -1239,6 +1332,12 @@ textarea.note:focus{border-color:var(--neon-cyan)}
           <span class="lp-hub-badge" id="hub-badge-köln"></span>
         </button>
       </div>
+      <button class="lp-hub-card lp-hub-flach" id="hub-aufgaben"
+        style="--card-color:#F59E0B;--card-dark:#C2700B" onclick="openAufgaben()">
+        <div class="lp-hub-icon"><svg class="ui-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 3.5V2h8v1.5"/><path d="M8 10l1.8 1.8L14 7.6"/><path d="M8 16h8"/></svg></div>
+        <div class="lp-hub-label"><b>Aufgaben</b><s>Alle Filialen</s></div>
+        <span class="lp-hub-badge" id="hub-badge-aufgaben">—</span>
+      </button>
     </div>
     <div class="news" id="news" style="display:none">
       <div class="news-head"><s>Neuigkeiten</s><span class="news-zahl" id="news-zahl"></span></div>
@@ -1511,6 +1610,87 @@ textarea.note:focus{border-color:var(--neon-cyan)}
     <button class="btn btn-outline-cyan" onclick="openPlanFormFromPanel('einkauf')">＋ Artikel hinzufügen</button>
     <button class="btn btn-save" id="btn-ek-complete" onclick="openCompleteEinkauf()"
       disabled style="opacity:.4;cursor:not-allowed">✓ Einkauf abschließen</button>
+  </div>
+</div>
+
+
+<!-- AUFGABEN PANEL -->
+<div class="gesamt-panel" id="aufgaben-panel" onclick="event.stopPropagation()"
+     style="right:-101vw;--lg-accent:#F59E0B;--lg-soft:rgba(245,158,11,.25);--lg-fg:#FBBF24;--btn-acc:#C2700B">
+  <div class="panel-head">
+    <button class="gesamt-close" onclick="closeAufgaben()">✕</button>
+    <div class="gesamt-panel-title"><svg class="ui-i" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 3.5V2h8v1.5"/><path d="M8 10l1.8 1.8L14 7.6"/><path d="M8 16h8"/></svg> Aufgaben</div>
+    <div class="panel-sum"><b id="af-panel-lager">—</b><s id="af-panel-sub">0 offen</s></div>
+  </div>
+  <div class="panel-sub">
+    <div class="fil-leiste" id="af-filialen"></div>
+    <div class="a-legend"><span class="l-t">Nr.</span><span style="flex:1"></span>
+      <span class="l-t">✅</span></div>
+  </div>
+  <div class="panel-body">
+    <div id="af-content"></div>
+    <button class="erl-btn" id="af-erl-btn" onclick="afErlUmschalten()">Erledigte Aufgaben
+      <span id="af-erl-zahl" style="font-family:var(--mono);font-weight:700">0</span>
+      <span class="pf">▾</span></button>
+    <div class="erl-liste" id="af-erl-liste"></div>
+  </div>
+  <div class="panel-foot">
+    <button class="btn btn-outline-cyan" onclick="openAufgabeForm(null)">＋ Aufgabe hinzufügen</button>
+  </div>
+</div>
+
+<!-- MODAL: AUFGABE -->
+<div class="modal-overlay" id="modal-aufgabe" onclick="if(event.target===this)closeAufgabeForm()">
+  <div class="modal" style="max-width:430px;max-height:90vh;overflow-y:auto">
+    <button class="modal-close" onclick="closeAufgabeForm()">✕</button>
+    <div class="modal-title" id="af-dlg-titel">Neue Aufgabe</div>
+    <div style="padding:.2rem .2rem .4rem">
+      <div class="af-feld"><label>Filiale</label>
+        <div class="fil-leiste" id="af-dlg-filialen" style="padding-bottom:0"></div></div>
+      <div class="af-feld"><label>Titel</label>
+        <input class="af-eing" id="af-titel" placeholder="z. B. Feuerlöscher prüfen lassen"></div>
+      <div class="af-feld"><label>Beschreibung</label>
+        <textarea class="af-eing" id="af-text" placeholder="Optional"></textarea></div>
+      <div class="af-feld"><label>Fälligkeit</label>
+        <div class="af-art">
+          <button id="af-art-ein" onclick="afSetArt('einmalig')">Einmalig</button>
+          <button id="af-art-wied" onclick="afSetArt('wiederkehrend')">Wiederkehrend</button>
+        </div>
+        <div id="af-block-einmalig">
+          <input type="date" class="af-eing" id="af-datum">
+          <div class="af-hinw">Ohne Datum steht die Aufgabe mit dem Vermerk
+            <b>ohne Frist</b> in der Liste.</div>
+        </div>
+        <div id="af-block-wied" style="display:none">
+          <div class="af-zeile2">
+            <div><label>Rhythmus</label>
+              <select class="af-eing" id="af-rhythmus" onchange="afVorschau()">
+                <option value="1">monatlich</option>
+                <option value="3">vierteljährlich</option>
+                <option value="6">halbjährlich</option>
+                <option value="12">jährlich</option>
+              </select></div>
+            <div><label>zum Tag</label>
+              <select class="af-eing" id="af-tag" onchange="afVorschau()"></select></div>
+          </div>
+          <div class="af-zeile2" style="margin-top:.5rem">
+            <div><label>Vorlauf</label>
+              <select class="af-eing" id="af-vorlauf" onchange="afVorschau()">
+                <option value="3">3 Tage vorher</option>
+                <option value="7" selected>7 Tage vorher</option>
+                <option value="14">14 Tage vorher</option>
+              </select></div>
+          </div>
+          <div class="af-hinw" id="af-vorschau"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.9rem">
+        <button class="btn btn-outline-cyan" id="af-loeschen" style="display:none;flex:0 0 auto"
+          onclick="afLoeschen()">Löschen</button>
+        <button class="btn btn-outline-cyan" style="flex:1" onclick="closeAufgabeForm()">Abbrechen</button>
+        <button class="btn btn-save" style="flex:1" onclick="afSpeichern()">✓ Speichern</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2182,14 +2362,14 @@ window.closeEinkaeufe = function(){
 };
 // Abdunklung liegt hinter beiden Schubladen — sie verschwindet erst, wenn keine offen ist.
 function togglePanelScrim(){
-  const anyOpen = ['einkaeufe-panel','gesamt-panel'].some(id=>{
+  const anyOpen = ['einkaeufe-panel','gesamt-panel','aufgaben-panel'].some(id=>{
     const el=document.getElementById(id); return el && el.classList.contains('open');
   });
   const sc = document.getElementById('panel-scrim');
   if(sc) sc.classList.toggle('show', anyOpen);
 }
 window.closeAllPanels = function(){
-  ['einkaeufe-panel','gesamt-panel'].forEach(id=>{
+  ['einkaeufe-panel','gesamt-panel','aufgaben-panel'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.classList.remove('open');
   });
   togglePanelScrim();
@@ -2681,6 +2861,333 @@ window.openCompleteDelivery = function(){
   weOpenFromAbschluss(currentLiefLager,'lieferung');
 };
 
+
+/* ══ AUFGABEN ═════════════════════════════════════════════════════════
+   Sammlung „aufgaben". Je Aufgabe:
+     lager, titel, text
+     art      'einmalig' | 'wiederkehrend'
+     faellig  Datum der einmaligen Aufgabe ('' = ohne Frist)
+     monate   Abstand in Monaten (1, 3, 6, 12)
+     tag      Tag im Monat (1–28)
+     vorlauf  Tage, ab denen sie vor dem Termin in der Liste steht
+     naechste nächster Termin einer wiederkehrenden Aufgabe
+     offen    false, sobald eine einmalige Aufgabe abgehakt ist
+     verlauf  [{am, von}] — wer sie wann erledigt hat
+   Wiederkehrende Aufgaben ruhen zwischen den Terminen: sie bleiben in der
+   Liste sichtbar, aber blass und ohne Haken, und zählen nicht als offen.  */
+const AF_FILIALEN = ['zentrallager','nettetal','brüggen','viersen','köln'];
+const AF_FARBEN = {zentrallager:['#0FA574','#0A7A5A'], nettetal:['#2563EB','#1B4CA8'],
+  'brüggen':['#E11D48','#A5103A'], viersen:['#EA580C','#A64A0B'], 'köln':['#7C3AED','#4E2AA8']};
+let aufgaben = [];
+let afLager  = localStorage.getItem('gg_aufgaben_lager') || 'zentrallager';
+let afEditId = null, afArt = 'einmalig';
+
+const afHeute = () => { const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const afTage = (von, bis) => Math.round(
+  (new Date(bis+'T00:00:00') - new Date(von+'T00:00:00')) / 86400000);
+const afDMY = d => d ? d.slice(8,10)+'.'+d.slice(5,7)+'.'+d.slice(0,4) : '';
+
+// Nächster Termin nach dem Stichtag: erster passender Tag im Raster
+function afNaechsterTermin(monate, tag, nach){
+  const n = new Date(nach+'T00:00:00');
+  let j = n.getFullYear(), m = n.getMonth();
+  for(let i=0;i<120;i++){
+    const kand = new Date(j, m, Math.min(tag, 28));
+    const s = kand.getFullYear()+'-'+String(kand.getMonth()+1).padStart(2,'0')
+            + '-'+String(kand.getDate()).padStart(2,'0');
+    if(s > nach) return s;
+    m += Number(monate)||1;
+    if(m > 11){ j += Math.floor(m/12); m = m%12; }
+  }
+  return nach;
+}
+
+async function ladeAufgaben(){
+  try{
+    const snap = await db.collection('aufgaben').get();
+    aufgaben = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  }catch(e){ console.warn('Aufgaben:', e.message); aufgaben=[]; }
+  afBadge();
+}
+
+// Steht die Aufgabe gerade zur Erledigung an?
+function afIstOffen(a){
+  if(a.art === 'wiederkehrend'){
+    if(!a.naechste) return true;
+    return afTage(afHeute(), a.naechste) <= (Number(a.vorlauf)||7);
+  }
+  return a.offen !== false;
+}
+function afOffeneFuer(lg){ return aufgaben.filter(a=>a.lager===lg && afIstOffen(a)); }
+
+function afBadge(){
+  const el = document.getElementById('hub-badge-aufgaben');
+  if(!el) return;
+  const offen = aufgaben.filter(afIstOffen);
+  const heute = afHeute();
+  const spaet = offen.some(a=>{
+    const d = a.art==='wiederkehrend' ? a.naechste : a.faellig;
+    return d && d < heute;
+  });
+  el.textContent = offen.length ? offen.length+' offen' : 'alles erledigt';
+  el.classList.toggle('spaet', spaet);
+}
+
+window.openAufgaben = async function(){
+  document.getElementById('aufgaben-panel').classList.add('open');
+  togglePanelScrim(true);
+  document.getElementById('af-content').innerHTML =
+    '<div class="af-leer">Lädt…</div>';
+  await ladeAufgaben();
+  zeichneAufgaben();
+};
+window.closeAufgaben = function(){
+  document.getElementById('aufgaben-panel').classList.remove('open');
+  togglePanelScrim();
+};
+window.afSetLager = function(lg){
+  afLager = lg;
+  localStorage.setItem('gg_aufgaben_lager', lg);
+  zeichneAufgaben();
+};
+window.afErlUmschalten = function(){
+  document.getElementById('af-erl-btn').classList.toggle('auf');
+  document.getElementById('af-erl-liste').classList.toggle('auf');
+};
+
+function afFilialLeiste(zielId, aktiv, klick){
+  const el = document.getElementById(zielId);
+  if(!el) return;
+  el.innerHTML = AF_FILIALEN.map(f=>{
+    const [c,d] = AF_FARBEN[f];
+    const n = afOffeneFuer(f).length;
+    const zahl = zielId==='af-filialen' ? `<span class="z">${n}</span>` : '';
+    return f===aktiv
+      ? `<button class="on" style="background:${c}" onclick="${klick}('${f}')">${LAGER_NAMES[f]} ${zahl}</button>`
+      : `<button style="border-color:${c};color:${d}" onclick="${klick}('${f}')">${LAGER_NAMES[f]} ${zahl}</button>`;
+  }).join('');
+}
+
+function afChips(a){
+  const heute = afHeute();
+  let out = '';
+  if(a.art === 'wiederkehrend'){
+    const rh = {1:'monatlich',3:'vierteljährlich',6:'halbjährlich',12:'jährlich'}[Number(a.monate)||1];
+    out += `<span class="ag-chip zyklus">${rh} zum ${String(a.tag).padStart(2,'0')}.</span>`;
+    if(a.naechste){
+      const t = afTage(heute, a.naechste);
+      if(t < 0)       out += `<span class="ag-chip spaet">überfällig seit ${afDMY(a.naechste)}</span>`;
+      else if(t === 0) out += `<span class="ag-chip bald">heute fällig</span>`;
+      else if(t <= (Number(a.vorlauf)||7))
+                       out += `<span class="ag-chip bald">fällig in ${t} ${t===1?'Tag':'Tagen'}</span>`;
+      else             out += `<span class="ag-chip ruht">ruht bis ${afDMY(a.naechste)}</span>`;
+    }
+  }else if(a.faellig){
+    const t = afTage(heute, a.faellig);
+    if(t < 0)        out += `<span class="ag-chip spaet">überfällig seit ${afDMY(a.faellig)}</span>`;
+    else if(t === 0) out += `<span class="ag-chip bald">heute fällig</span>`;
+    else if(t <= 7)  out += `<span class="ag-chip bald">fällig in ${t} ${t===1?'Tag':'Tagen'}</span>`;
+    else             out += `<span class="ag-chip">bis ${afDMY(a.faellig)}</span>`;
+  }else{
+    out += `<span class="ag-chip">ohne Frist</span>`;
+  }
+  return out;
+}
+
+const afEsc = s => String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function zeichneAufgaben(){
+  afFilialLeiste('af-filialen', afLager, 'afSetLager');
+  const [c] = AF_FARBEN[afLager];
+  const panel = document.getElementById('aufgaben-panel');
+  if(panel){ panel.style.setProperty('--lg-accent', c); }
+  document.getElementById('af-panel-lager').textContent = LAGER_NAMES[afLager]||afLager;
+
+  const meine = aufgaben.filter(a=>a.lager===afLager);
+  // Fällige zuerst, Ruhende ans Ende
+  const liste = meine.filter(a=>a.art==='wiederkehrend' || a.offen!==false)
+    .sort((a,b)=>{
+      const oa = afIstOffen(a)?0:1, ob = afIstOffen(b)?0:1;
+      if(oa!==ob) return oa-ob;
+      const da = (a.art==='wiederkehrend'?a.naechste:a.faellig) || '9999';
+      const db_ = (b.art==='wiederkehrend'?b.naechste:b.faellig) || '9999';
+      return da.localeCompare(db_);
+    });
+
+  let nr = 0;
+  const zeilen = liste.map(a=>{
+    const ruht = !afIstOffen(a);
+    if(!ruht) nr++;
+    return `<div class="ag-row${ruht?' ruht':''}">
+      <div class="ag-nr">${ruht?'·':nr}</div>
+      <div class="ag-mid">
+        <div class="ag-titel"><b>${afEsc(a.titel)}</b>
+          <button class="stift-k" onclick="openAufgabeForm('${a.id}')" title="Ändern">
+            <svg class="ui-i" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14.5 6.5l3 3"/></svg>
+          </button></div>
+        ${a.text?`<p>${afEsc(a.text)}</p>`:''}
+        <div class="ag-chips">${afChips(a)}</div></div>
+      ${ruht ? '<div class="ag-tick" style="visibility:hidden"></div>'
+             : `<div class="ag-tick" onclick="afErledigt('${a.id}')" title="Als erledigt markieren">✓</div>`}
+    </div>`;
+  }).join('');
+
+  document.getElementById('af-content').innerHTML = zeilen
+    ? `<div class="ag">${zeilen}</div>`
+    : '<div class="af-leer">Keine Aufgaben für diese Filiale.</div>';
+  document.getElementById('af-panel-sub').textContent =
+    afOffeneFuer(afLager).length + ' offen';
+
+  // Erledigte dieser Filiale
+  const erl = [];
+  meine.forEach(a=>{
+    (a.verlauf||[]).forEach(v=>erl.push({titel:a.titel, am:v.am, von:v.von}));
+    if(a.art!=='wiederkehrend' && a.offen===false && !(a.verlauf||[]).length)
+      erl.push({titel:a.titel, am:a.erledigtAm||'', von:a.erledigtVon||''});
+  });
+  erl.sort((x,y)=>(y.am||'').localeCompare(x.am||''));
+  const erlTop = erl.slice(0,30);
+  document.getElementById('af-erl-zahl').textContent = erl.length;
+  document.getElementById('af-erl-liste').innerHTML = erlTop.length
+    ? erlTop.map(e=>`<div class="erl-row"><span class="erl-hak">✓</span>
+        <span class="erl-mid"><b>${afEsc(e.titel)}</b>
+          <s>${LAGER_NAMES[afLager]}${e.von?' · '+afEsc(e.von):''}</s></span>
+        <span class="erl-zeit">${afDMY(e.am)}</span></div>`).join('')
+    : '<div class="af-leer" style="padding:.8rem">Noch nichts erledigt.</div>';
+  afBadge();
+}
+
+// Haken setzen
+window.afErledigt = async function(id){
+  const a = aufgaben.find(x=>x.id===id);
+  if(!a) return;
+  const wer = ichBin().name;
+  const heute = afHeute();
+  const verlauf = [{am:heute, von:wer}, ...(a.verlauf||[])].slice(0,50);
+  const daten = {verlauf};
+  if(a.art === 'wiederkehrend'){
+    daten.naechste = afNaechsterTermin(a.monate||1, a.tag||1, a.naechste || heute);
+  }else{
+    daten.offen = false; daten.erledigtAm = heute; daten.erledigtVon = wer;
+  }
+  try{
+    await db.collection('aufgaben').doc(id).set(daten, {merge:true});
+    Object.assign(a, daten);
+    zeichneAufgaben();
+    showToast('Erledigt ✓');
+    meldeAktion(a.lager, 'aufgabe', 'ok', 'Aufgabe erledigt', a.titel);
+  }catch(e){ showToast('Fehler: '+e.message); }
+};
+
+/* ── Fenster zum Anlegen und Ändern ── */
+window.openAufgabeForm = function(id){
+  afEditId = id || null;
+  const a = id ? aufgaben.find(x=>x.id===id) : null;
+  const tagSel = document.getElementById('af-tag');
+  if(!tagSel.options.length){
+    let o=''; for(let i=1;i<=28;i++) o+=`<option value="${i}">${String(i).padStart(2,'0')}.</option>`;
+    tagSel.innerHTML = o;
+  }
+  document.getElementById('af-dlg-titel').textContent = a ? 'Aufgabe ändern' : 'Neue Aufgabe';
+  document.getElementById('af-titel').value = a ? (a.titel||'') : '';
+  document.getElementById('af-text').value  = a ? (a.text||'')  : '';
+  document.getElementById('af-datum').value = a && a.art!=='wiederkehrend' ? (a.faellig||'') : '';
+  document.getElementById('af-rhythmus').value = a ? String(a.monate||1) : '1';
+  tagSel.value = a ? String(a.tag||1) : '1';
+  document.getElementById('af-vorlauf').value = a ? String(a.vorlauf||7) : '7';
+  document.getElementById('af-loeschen').style.display = a ? '' : 'none';
+  afDlgLager = a ? a.lager : afLager;
+  afFilialLeiste('af-dlg-filialen', afDlgLager, 'afDlgSetLager');
+  afSetArt(a ? (a.art||'einmalig') : 'einmalig');
+  document.getElementById('modal-aufgabe').classList.add('show');
+};
+let afDlgLager = 'zentrallager';
+window.afDlgSetLager = function(lg){ afDlgLager = lg; afFilialLeiste('af-dlg-filialen', lg, 'afDlgSetLager'); };
+window.closeAufgabeForm = function(){ document.getElementById('modal-aufgabe').classList.remove('show'); };
+window.afSetArt = function(art){
+  afArt = art;
+  document.getElementById('af-art-ein').className  = art==='einmalig' ? 'on' : '';
+  document.getElementById('af-art-wied').className = art==='wiederkehrend' ? 'on' : '';
+  document.getElementById('af-block-einmalig').style.display = art==='einmalig' ? '' : 'none';
+  document.getElementById('af-block-wied').style.display     = art==='wiederkehrend' ? '' : 'none';
+  if(art==='wiederkehrend') afVorschau();
+};
+window.afVorschau = function(){
+  const monate = Number(document.getElementById('af-rhythmus').value)||1;
+  const tag    = Number(document.getElementById('af-tag').value)||1;
+  const vorl   = Number(document.getElementById('af-vorlauf').value)||7;
+  const naechste = afNaechsterTermin(monate, tag, afHeute());
+  const ab = new Date(new Date(naechste+'T00:00:00').getTime() - vorl*86400000);
+  const abS = String(ab.getDate()).padStart(2,'0')+'.'+String(ab.getMonth()+1).padStart(2,'0')+'.';
+  document.getElementById('af-vorschau').innerHTML =
+    `Erscheint ab dem <b>${abS}</b> in der Liste und ist am <b>${afDMY(naechste)}</b> fällig. `
+    + `Nach dem Abhaken ruht sie bis zum nächsten Termin.`;
+};
+
+window.afSpeichern = async function(){
+  const titel = document.getElementById('af-titel').value.trim();
+  if(!titel){ showToast('Bitte einen Titel eingeben.'); return; }
+  const daten = {
+    lager: afDlgLager,
+    titel,
+    text: document.getElementById('af-text').value.trim(),
+    art: afArt
+  };
+  if(afArt==='wiederkehrend'){
+    daten.monate  = Number(document.getElementById('af-rhythmus').value)||1;
+    daten.tag     = Number(document.getElementById('af-tag').value)||1;
+    daten.vorlauf = Number(document.getElementById('af-vorlauf').value)||7;
+    daten.faellig = '';
+    const alt = afEditId ? aufgaben.find(x=>x.id===afEditId) : null;
+    daten.naechste = (alt && alt.art==='wiederkehrend' && alt.naechste && alt.naechste >= afHeute())
+      ? alt.naechste
+      : afNaechsterTermin(daten.monate, daten.tag, afHeute());
+  }else{
+    daten.faellig = document.getElementById('af-datum').value || '';
+    daten.naechste = ''; daten.monate = 0; daten.tag = 0; daten.vorlauf = 0;
+    if(!afEditId) daten.offen = true;
+  }
+  showSpinner();
+  try{
+    if(afEditId){
+      await db.collection('aufgaben').doc(afEditId).set(daten, {merge:true});
+      Object.assign(aufgaben.find(x=>x.id===afEditId), daten);
+      meldeAktion(daten.lager,'aufgabe','pack','Aufgabe geändert', titel);
+    }else{
+      daten.offen = daten.offen!==false;
+      daten.verlauf = [];
+      daten.erstelltAm = new Date().toISOString();
+      const ref = await db.collection('aufgaben').add(daten);
+      aufgaben.push({id:ref.id, ...daten});
+      meldeAktion(daten.lager,'aufgabe','add','Aufgabe angelegt', titel);
+    }
+    afLager = daten.lager;
+    localStorage.setItem('gg_aufgaben_lager', afLager);
+    closeAufgabeForm();
+    zeichneAufgaben();
+    showToast('Gespeichert ✓');
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
+
+window.afLoeschen = async function(){
+  if(!afEditId) return;
+  const a = aufgaben.find(x=>x.id===afEditId);
+  if(!confirm('Diese Aufgabe endgültig löschen?\n\n'+(a?a.titel:'')
+      +'\n\nAuch der Verlauf geht verloren.')) return;
+  showSpinner();
+  try{
+    await db.collection('aufgaben').doc(afEditId).delete();
+    aufgaben = aufgaben.filter(x=>x.id!==afEditId);
+    closeAufgabeForm();
+    zeichneAufgaben();
+    showToast('Gelöscht');
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+};
+
 /* ══ Neuigkeiten ══════════════════════════════════════════════════════
    Jede Handlung in der Planung wird in „lp_events" festgehalten. Handlungen
    derselben Person im selben Bereich sammeln sich fünf Minuten lang in einem
@@ -2717,8 +3224,10 @@ function zeitKurz(iso){
   if(d.toDateString() === gestern.toDateString()) return 'gestern, '+uhr;
   return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+', '+uhr;
 }
-const NEWS_BEREICH = (lager,mode) => mode==='einkauf'
-  ? 'Zentrallager · Einkauf' : (LAGER_NAMES[lager]||lager)+' · Lieferung';
+const NEWS_BEREICH = (lager,mode) =>
+    mode==='einkauf' ? 'Zentrallager · Einkauf'
+  : mode==='aufgabe' ? (LAGER_NAMES[lager]||lager)+' · Aufgaben'
+  : (LAGER_NAMES[lager]||lager)+' · Lieferung';
 
 // ── Handlung festhalten ───────────────────────────────────────────────
 async function meldeAktion(lager, mode, art, text, detail){
@@ -3960,6 +4469,7 @@ document.addEventListener('DOMContentLoaded', async function(){
   // Kacheln sollen schon beim Öffnen zeigen, was geplant ist — dafür reicht die
   // Planungs-Sammlung. Die schwere Bestandsrechnung läuft erst beim Öffnen einer Kachel.
   await ladePlanung();
+  ladeAufgaben();          // nur für den Zähler auf der Kachel
   ladeNews();
   // Gesammelte Meldungen werden erst nach fünf Minuten Ruhe sichtbar —
   // deshalb hin und wieder nachsehen, ohne die Seite neu zu laden.
