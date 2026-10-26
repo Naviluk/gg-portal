@@ -1501,7 +1501,7 @@ textarea.note:focus{border-color:var(--neon-cyan)}
       <button class="tab" id="ek-sort-artikel" onclick="switchEkSort('artikel')">Nach Artikeln</button>
     </div>
     <div class="ek-legend" id="ek-legend">
-      <span class="l-q">Gepl.</span><span class="l-t">✅</span>
+      <span class="l-q">Gepl.</span><span class="l-t">🛒</span><span class="l-t">✅</span>
     </div>
   </div>
   <div class="panel-body">
@@ -2149,14 +2149,21 @@ window.openEinkaeufe = async function(){
       const gueltig = {};
       let veraltet = 0;
       Object.keys(saved).forEach(id=>{
-        if(!saved[id]) return;
+        const w = saved[id];
+        if(!w) return;
+        // Früher stand hier nur `true` für den einen Haken. Mit den zwei Spalten
+        // gilt ein solcher Altwert als „bestellt" — „gekauft" bleibt leer.
+        const ordered = (w === true) ? true : !!w.ordered;
+        const bought  = (w === true) ? false : !!w.bought;
+        if(!ordered && !bought) return;
         if(Number(imPlan[id]) > 0){
-          if(!ekState[id]) ekState[id]={bought:false, shop:ekDefaultShops[id]||''};
-          ekState[id].bought = true;
-          gueltig[id] = true;
+          if(!ekState[id]) ekState[id]={ordered:false,bought:false, shop:ekDefaultShops[id]||''};
+          ekState[id].ordered = ordered || bought;   // gekauft heißt immer auch bestellt
+          ekState[id].bought  = bought;
+          gueltig[id] = {ordered:ekState[id].ordered, bought:ekState[id].bought};
         }else{
           veraltet++;                       // steht nicht mehr im Plan
-          if(ekState[id]) ekState[id].bought = false;
+          if(ekState[id]){ ekState[id].ordered = false; ekState[id].bought = false; }
         }
       });
       if(veraltet){
@@ -2209,7 +2216,7 @@ function ekCard(id, label, sumHtml, rows){
 }
 
 function buildEkRow(prod, gepl){
-  if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+  if(!ekState[prod.id]) ekState[prod.id]={ordered:false,bought:false,shop:ekDefaultShops[prod.id]||''};
   const st = ekState[prod.id];
   const price = getEinkaufspreis(prod.id);
   const label = ekGeplLabel(prod.id, gepl);
@@ -2229,7 +2236,10 @@ function buildEkRow(prod, gepl){
       <div class="chips">${chips}</div>
     </div>
     <div class="qty" ${open}>${label}<s>${sub}</s></div>
-    <div class="tick${st.bought?' on':''}" id="ek-chk-${prod.id}" onclick="toggleEkCheck('${prod.id}')">✓</div>
+    <div class="tick pack${st.ordered?' on':''}" id="ek-chk-ord-${prod.id}"
+      onclick="toggleEkCheck('${prod.id}','ordered')">✓</div>
+    <div class="tick${st.bought?' on':''}" id="ek-chk-${prod.id}"
+      onclick="toggleEkCheck('${prod.id}','bought')">✓</div>
   </div>`;
 }
 
@@ -2240,7 +2250,7 @@ function renderEkContent(){
   let total=0, count=0; const shopSet=new Set();
   PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
     const gepl=lgPlan[prod.id]||0; if(!gepl) return;
-    if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+    if(!ekState[prod.id]) ekState[prod.id]={ordered:false,bought:false,shop:ekDefaultShops[prod.id]||''};
     const p=getEinkaufspreis(prod.id);
     if(p!==null) total+=p*gepl;
     count++;
@@ -2267,7 +2277,7 @@ function renderEkContent(){
     const byShop = {};
     PRODUCTS.forEach(cat=>cat.items.forEach(prod=>{
       const gepl=lgPlan[prod.id]||0; if(!gepl)return;
-      if(!ekState[prod.id]) ekState[prod.id]={bought:false,shop:ekDefaultShops[prod.id]||''};
+      if(!ekState[prod.id]) ekState[prod.id]={ordered:false,bought:false,shop:ekDefaultShops[prod.id]||''};
       const shop=ekState[prod.id].shop||'Kein Shop';
       if(!byShop[shop]) byShop[shop]=[];
       byShop[shop].push({prod,gepl});
@@ -2302,30 +2312,48 @@ function updateEkCompleteBtn(){
 }
 
 window.setEkShop = async function(prodId, shop){
-  if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
+  if(!ekState[prodId]) ekState[prodId]={ordered:false,bought:false,shop:''};
   ekState[prodId].shop=shop;
   ekDefaultShops[prodId]=shop;
   try{ await db.collection('ek_defaults').doc('shops').set(ekDefaultShops,{merge:true}); }catch(e){}
   if(ekSort==='shops') renderEkContent();
 };
 
-window.toggleEkCheck = function(prodId){
-  if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
-  ekState[prodId].bought=!ekState[prodId].bought;
-  const el=document.getElementById('ek-chk-'+prodId);
-  if(el) el.className='tick'+(ekState[prodId].bought?' on':'');
+// art: 'ordered' = bestellt (erste Spalte), 'bought' = gekauft (zweite Spalte).
+// Wie bei der Lieferung setzt der zweite Haken den ersten automatisch mit.
+window.toggleEkCheck = function(prodId, art){
+  art = art || 'bought';
+  if(!ekState[prodId]) ekState[prodId]={ordered:false,bought:false,shop:''};
+  const st = ekState[prodId];
+  st[art] = !st[art];
+  if(art==='bought' && st.bought) st.ordered = true;
+
+  const ordEl = document.getElementById('ek-chk-ord-'+prodId);
+  const kaufEl = document.getElementById('ek-chk-'+prodId);
+  if(ordEl)  ordEl.className  = 'tick pack'+(st.ordered?' on':'');
+  if(kaufEl) kaufEl.className = 'tick'+(st.bought?' on':'');
+
   updateEkCompleteBtn();
+  ekStateSichern();
+
+  const info = artikelInfo(prodId);
+  const an = st[art];
+  meldeAktion('zentrallager','einkauf', art==='ordered'?'pack':'ok',
+    art==='ordered' ? (an?'Als bestellt markiert':'Haken „bestellt" entfernt')
+                    : (an?'Als gekauft markiert':'Haken „gekauft" entfernt'),
+    info.name + (info.unit?' '+info.unit:''));
+};
+
+// Haken sichern — nur für Artikel, die auch im Plan stehen
+function ekStateSichern(){
   const toSave={};
   const imPlan = planData['zentrallager'] || {};
   Object.entries(ekState).forEach(([id,st])=>{
-    if(st.bought && Number(imPlan[id]) > 0) toSave[id]=true;
+    if(!st || Number(imPlan[id]) <= 0) return;
+    if(st.ordered || st.bought) toSave[id] = {ordered:!!st.ordered, bought:!!st.bought};
   });
   db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
-  const info = artikelInfo(prodId);
-  meldeAktion('zentrallager','einkauf','ok',
-    ekState[prodId].bought ? 'Als gekauft markiert' : 'Haken entfernt',
-    info.name + (info.unit?' '+info.unit:''));
-};
+}
 
 window.openCompleteEinkauf = function(){
   weOpenFromAbschluss('zentrallager','einkauf');
@@ -2411,7 +2439,7 @@ window.confirmEkDetail = async function(){
   showSpinner();
   try{
     // 1) Shop merken (wird beim nächsten Öffnen vorausgewählt)
-    if(!ekState[prodId]) ekState[prodId]={bought:false,shop:''};
+    if(!ekState[prodId]) ekState[prodId]={ordered:false,bought:false,shop:''};
     ekState[prodId].shop = shop;
     ekDefaultShops[prodId] = shop;
     try{ await db.collection('ek_defaults').doc('shops').set(ekDefaultShops,{merge:true}); }catch(e){}
@@ -3329,7 +3357,8 @@ window.confirmWareneingang = async function(){
       const toSaveEk={};
       const restPlan = planData['zentrallager'] || {};
       Object.entries(ekState).forEach(([id,st])=>{
-        if(st.bought && Number(restPlan[id]) > 0) toSaveEk[id]=true;
+        if(!st || Number(restPlan[id]) <= 0) return;
+        if(st.ordered || st.bought) toSaveEk[id] = {ordered:!!st.ordered, bought:!!st.bought};
       });
       await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSaveEk).catch(()=>{});
       updateEkCompleteBtn();
