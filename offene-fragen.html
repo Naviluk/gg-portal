@@ -451,7 +451,7 @@ button.gross:hover{border-color:var(--acc)}
 .of-uk-kopf b{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
   color:var(--ink)}
 .of-uk-kopf .cnt{margin-left:auto;font-family:var(--mono);font-size:.72rem;font-weight:700;
-  color:#fff;border-radius:20px;padding:.1rem .52rem;background:var(--kat,#0891B2)}
+  color:var(--kat-txt,#fff);border-radius:20px;padding:.1rem .52rem;background:var(--kat,#0891B2)}
 .of-row{display:flex;align-items:flex-start;gap:.55rem;padding:.65rem .8rem;
   border-top:1px solid var(--glass-border)}
 .of-nr{width:22px;min-width:22px;text-align:right;font-family:var(--mono);font-size:.78rem;
@@ -519,6 +519,10 @@ button.gross:hover{border-color:var(--acc)}
   border:2px solid #fff;box-shadow:0 0 0 1.5px var(--glass-border);padding:0}
 .of-kat-zeile input{flex:1;border:none;outline:none;font-family:'Poppins',sans-serif;
   font-size:.86rem;font-weight:600;color:var(--text);min-width:0;background:transparent}
+.of-pfeil{width:24px;height:26px;min-width:24px;border-radius:7px;
+  border:1.3px solid var(--glass-border);background:#fff;color:var(--text-dim);
+  cursor:pointer;font-size:.6rem;line-height:1;padding:0}
+.of-pfeil[disabled]{opacity:.3;cursor:default}
 .of-weg{width:26px;height:26px;min-width:26px;border-radius:8px;border:1.3px solid #F3C9D4;
   background:#fff;color:var(--rot);cursor:pointer;font-size:.8rem;line-height:1;padding:0}
 .of-auf{padding:0 .2rem .7rem .3rem}
@@ -668,7 +672,8 @@ button.gross:hover{border-color:var(--acc)}
       </div>
       <div class="dlg-body">
         <p class="hinweis" style="margin-top:0">Ein Klick auf das Farbfeld öffnet die Farben und
-          die Unterkategorien. Löschen geht nur, solange keine Fragen daran hängen.</p>
+          die Unterkategorien, mit den Pfeilen änderst du die Reihenfolge in der Leiste.
+          Löschen geht nur, solange keine Fragen daran hängen.</p>
         <div id="kat-liste"></div>
         <button class="of-add-zeile" onclick="katNeu()">＋ Kategorie</button>
       </div>
@@ -761,7 +766,23 @@ function abmelden(){ localStorage.removeItem('gg_user'); window.location.href='g
 /* ══════════ OFFENE FRAGEN ══════════ */
 
 const OF_FARBEN = ['#0891B2','#0FA574','#2563EB','#7C3AED','#DB2777',
-                   '#E11D48','#EA580C','#B4530A','#334155'];
+                   '#E11D48','#EA580C','#B4530A','#334155',
+                   '#EAB308','#65A30D','#0D9488','#4F46E5','#9F1239'];
+// Helle Farben (Gelb) brauchen dunkle Schrift, sonst liest man nichts
+function hell(hex){
+  const c = String(hex||'').replace('#','');
+  if(c.length !== 6) return false;
+  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16);
+  return (0.299*r + 0.587*g + 0.114*b) > 165;
+}
+const aufFarbe = hex => hell(hex) ? '#1B2536' : '#fff';
+// Helle Farben als Schrift auf Weiß abdunkeln, sonst sieht man sie kaum
+function schriftFarbe(hex){
+  if(!hell(hex)) return hex;
+  const c = String(hex).replace('#','');
+  const d = n => Math.round(parseInt(c.substr(n,2),16) * 0.62).toString(16).padStart(2,'0');
+  return '#' + d(0) + d(2) + d(4);
+}
 const OF_STD = [
   {id:'k1', name:'Steuerberater', farbe:'#0891B2',
    uks:[{id:'u1',name:'Personal'},{id:'u2',name:'Gesamt'},{id:'u3',name:'Umsatzsteuer'}]}
@@ -823,7 +844,8 @@ function zeichneLeiste(){
     const n = offeneVon(k.id).length;
     const an = k.id === aktKat;
     h += '<button onclick="katWahl(\'' + k.id + '\')" class="' + (an?'on':'') + '" style="'
-       + (an ? 'background:'+k.farbe : 'border-color:'+k.farbe+';color:'+k.farbe) + '">'
+       + (an ? 'background:'+k.farbe+';color:'+aufFarbe(k.farbe)
+             : 'border-color:'+k.farbe+';color:'+schriftFarbe(k.farbe)) + '">'
        + esc(k.name) + ' <span class="z">' + n + '</span></button>';
   });
   h += '<button class="of-zahn" onclick="katKonfig()">'
@@ -845,7 +867,7 @@ function zeichneInhalt(){
   }
   document.getElementById('of-add').style.display = '';
   const offen = offeneVon(k.id);
-  let nr = 0, h = '<div style="--kat:' + k.farbe + '">';
+  let nr = 0, h = '<div style="--kat:' + k.farbe + ';--kat-txt:' + aufFarbe(k.farbe) + '">';
 
   if(!k.uks.length){
     h += '<div class="of-leer">Für <b>' + esc(k.name) + '</b> gibt es noch keine '
@@ -937,7 +959,8 @@ function frZeichneWahl(){
   kats.forEach(k=>{
     const an = k.id === frWahl.kat;
     h += '<button type="button" onclick="frKat(\'' + k.id + '\')" class="' + (an?'on':'')
-       + '" style="' + (an ? 'background:'+k.farbe : 'border-color:'+k.farbe+';color:'+k.farbe)
+       + '" style="' + (an ? 'background:'+k.farbe+';color:'+aufFarbe(k.farbe)
+                            : 'border-color:'+k.farbe+';color:'+schriftFarbe(k.farbe))
        + '">' + esc(k.name) + '</button>';
   });
   document.getElementById('fr-kat').innerHTML = h;
@@ -1026,6 +1049,10 @@ function katZeichne(){
        + '<button class="of-punkt" style="background:' + k.farbe + '" '
        + 'onclick="katAufUm(\'' + k.id + '\')" title="Farbe und Unterkategorien"></button>'
        + '<input value="' + esc(k.name) + '" oninput="katName(' + i + ',this.value)">'
+       + '<button class="of-pfeil" onclick="katSchieb(' + i + ',-1)" title="Nach oben"'
+       + (i === 0 ? ' disabled' : '') + '>▲</button>'
+       + '<button class="of-pfeil" onclick="katSchieb(' + i + ',1)" title="Nach unten"'
+       + (i === katEntw.length-1 ? ' disabled' : '') + '>▼</button>'
        + '<button class="of-weg" onclick="katWeg(' + i + ')" title="Kategorie löschen">✕</button>'
        + '</div>';
     if(k.id === katAuf){
@@ -1045,6 +1072,12 @@ function katZeichne(){
   });
   document.getElementById('kat-liste').innerHTML = h
     || '<p class="hinweis">Noch keine Kategorie.</p>';
+}
+function katSchieb(i, d){
+  const j = i + d;
+  if(j < 0 || j >= katEntw.length) return;
+  const x = katEntw[i]; katEntw[i] = katEntw[j]; katEntw[j] = x;
+  katZeichne();
 }
 function katAufUm(id){ katAuf = (katAuf === id) ? '' : id; katZeichne(); }
 function katName(i, v){ katEntw[i].name = v; }
