@@ -236,7 +236,7 @@ body[data-lg="nettetal"]{--acc:#2563EB;--acc-ink:#1D4FB8;--acc-bg:#E9F0FE;--acc-
 body[data-lg="brüggen"]{--acc:#E11D48;--acc-ink:#C4123E;--acc-bg:#FDE8EE;--acc-sh:rgba(225,29,72,.3)}
 body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-sh:rgba(234,88,12,.3)}
 
-.main-content{max-width:880px;margin:var(--header-h) auto 0;padding:1.3rem 1.2rem 3rem}
+.main-content{max-width:1180px;margin:var(--header-h) auto 0;padding:1.3rem 1.2rem 3rem}
 .view{display:none}
 .view.on{display:block}
 
@@ -454,8 +454,6 @@ button.gross:hover{border-color:var(--acc)}
   color:var(--kat-txt,#fff);border-radius:20px;padding:.1rem .52rem;background:var(--kat,#0891B2)}
 .of-row{display:flex;align-items:flex-start;gap:.55rem;padding:.65rem .8rem;
   border-top:1px solid var(--glass-border)}
-.of-nr{width:22px;min-width:22px;text-align:right;font-family:var(--mono);font-size:.78rem;
-  font-weight:700;color:#A9B4C4;margin-top:.15rem}
 .of-mid{flex:1;min-width:0}
 .of-titel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
 .of-titel b{font-size:.86rem;font-weight:600;line-height:1.25}
@@ -502,6 +500,75 @@ button.gross:hover{border-color:var(--acc)}
   text-decoration:line-through}
 .of-erl-mid s{display:block;text-decoration:none;font-size:.66rem;color:#9AA6B6;margin-top:.05rem}
 .of-erl-zeit{font-family:var(--mono);font-size:.66rem;color:#9AA6B6;white-space:nowrap}
+
+/* ── Umschalter, zwei Spalten, Kalender ── */
+.of-um{display:inline-flex;background:#E7ECF4;border-radius:11px;padding:.2rem;margin-bottom:.8rem}
+.of-um button{border:none;background:none;border-radius:9px;padding:.38rem .9rem;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;color:var(--text-dim)}
+.of-um button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,26,46,.12)}
+.of-spalten{display:flex;gap:1rem;align-items:flex-start}
+.of-links{flex:1;min-width:0}
+.of-rechts{width:278px;flex-shrink:0}
+
+.of-leiste.uk-wahl button{gap:.42rem}
+.of-leiste .hk{width:15px;height:15px;min-width:15px;border-radius:5px;border:1.6px solid #C3CDDA;
+  background:#fff;display:flex;align-items:center;justify-content:center;font-size:.58rem;
+  color:transparent}
+.of-leiste button.on .hk{background:#fff;border-color:#fff;color:var(--ink)}
+
+.of-firma{display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:800;
+  border-radius:20px;padding:.1rem .5rem .1rem .32rem;font-family:var(--mono);
+  background:var(--f-bg);color:var(--f-tx)}
+.of-firma i{width:8px;height:8px;border-radius:50%;background:var(--f);display:block}
+.of-kante{width:3px;align-self:stretch;border-radius:3px;background:var(--f);flex-shrink:0}
+
+.of-kal{border:1px solid var(--glass-border);border-radius:13px;overflow:hidden;background:#fff}
+.of-kal-kopf{display:flex;align-items:center;gap:.4rem;padding:.5rem .6rem;background:#F2F5F9;
+  border-bottom:1px solid var(--glass-border)}
+.of-kal-kopf b{flex:1;font-size:.76rem;font-weight:700;text-align:center}
+.of-kal-kopf button{width:24px;height:24px;border-radius:7px;border:1px solid var(--glass-border);
+  background:#fff;color:var(--text-dim);cursor:pointer;font-size:.68rem;line-height:1;padding:0}
+.of-kal-wt{display:grid;grid-template-columns:repeat(7,1fr);padding:.4rem .4rem 0}
+.of-kal-wt span{text-align:center;font-size:.56rem;font-weight:800;letter-spacing:.08em;
+  color:var(--text-dim);text-transform:uppercase}
+.of-kal-gitter{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:.3rem .4rem .5rem}
+.of-tag{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;font-family:var(--mono);font-size:.68rem;font-weight:600;
+  color:var(--text);border:1.5px solid transparent}
+.of-tag.leer{visibility:hidden}
+.of-tag.hat{cursor:pointer;background:#F5F8FC}
+.of-tag.heute{border-color:var(--acc);color:var(--acc);font-weight:700}
+.of-tag.sel{background:var(--ink);color:#fff}
+.of-punkte{display:flex;gap:2px;height:5px;align-items:center}
+.of-punkte i{width:5px;height:5px;border-radius:50%;display:block}
+.of-punkte em{font-style:normal;font-size:.5rem;font-weight:700;color:var(--text-dim)}
+.of-tag.sel .of-punkte em{color:#fff}
+.of-kal-liste{border-top:1px solid var(--glass-border);padding:.5rem .6rem .6rem;background:#FBFCFE}
+.of-kal-liste .nix{font-size:.7rem;color:var(--text-dim);text-align:center;padding:.3rem 0}
+.of-kal-eintrag{display:flex;gap:.45rem;align-items:stretch;padding:.4rem 0;cursor:pointer;
+  border-top:1px dashed var(--glass-border)}
+.of-kal-eintrag:first-child{border-top:none}
+.of-kal-eintrag b{font-size:.75rem;font-weight:600;display:block;line-height:1.25}
+.of-kal-eintrag s{text-decoration:none;font-size:.64rem;color:var(--text-dim);display:block}
+.of-kal-fuss{display:flex;gap:.5rem;flex-wrap:wrap;padding:.5rem .6rem;background:#fff;
+  border-top:1px solid var(--glass-border)}
+.of-kal-fuss span{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;
+  color:var(--text-dim);font-weight:700}
+.of-kal-fuss i{width:7px;height:7px;border-radius:50%;display:block}
+.of-kal-btn{display:none;width:100%;align-items:center;gap:.5rem;padding:.6rem .75rem;background:#fff;
+  border:1.5px solid var(--glass-border);border-radius:11px;font-family:'Poppins',sans-serif;
+  font-size:.78rem;font-weight:700;color:var(--text);cursor:pointer;margin-bottom:.6rem}
+.of-kal-btn svg{width:15px;height:15px;fill:none;stroke:var(--acc);stroke-width:1.8;
+  stroke-linecap:round}
+.of-kal-btn .z{margin-left:auto;font-family:var(--mono);font-size:.64rem;font-weight:700;
+  background:#EDF1F7;color:#5A6980;border-radius:20px;padding:.1rem .45rem}
+@media(max-width:980px){
+  .of-spalten{flex-direction:column}
+  .of-rechts{width:100%;order:-1}
+  .of-kal-btn{display:flex}
+  .of-kal{display:none;margin-bottom:.4rem}
+  .of-kal.auf{display:block}
+}
 
 /* Fenster: Auswahlknöpfe */
 .of-wahl{display:flex;gap:.3rem;flex-wrap:wrap}
@@ -619,9 +686,25 @@ button.gross:hover{border-color:var(--acc)}
 </script>
 <main class="main-content">
 
-  <div class="of-leiste" id="of-leiste"></div>
-  <div id="of-inhalt"></div>
-  <button class="of-add" id="of-add" onclick="frageNeu()">＋ Frage hinzufügen</button>
+  <div class="of-um" id="of-um">
+    <button onclick="modusWahl('firmen')">Nach Firmen</button>
+    <button onclick="modusWahl('alle')">Alle</button>
+  </div>
+
+  <div class="of-spalten">
+    <div class="of-links">
+      <div class="of-leiste" id="of-leiste"></div>
+      <div id="of-inhalt"></div>
+      <button class="of-add" id="of-add" onclick="frageNeu()">＋ Frage hinzufügen</button>
+    </div>
+    <div class="of-rechts">
+      <button class="of-kal-btn" onclick="kalUm()">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/>
+          <path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"/></svg>
+        Kalender<span class="z" id="of-kal-zahl">—</span></button>
+      <div class="of-kal" id="of-kal"></div>
+    </div>
+  </div>
 
   <!-- ══ Frage anlegen / bearbeiten ══ -->
   <div class="modal-overlay" id="m-frage" onclick="if(event.target===this)closeM('m-frage')">
@@ -839,7 +922,24 @@ function fristChip(f){
 /* ── Leiste ── */
 function zeichneLeiste(){
   const el = document.getElementById('of-leiste');
+  const um = document.getElementById('of-um').children;
+  um[0].classList.toggle('on', modus === 'firmen');
+  um[1].classList.toggle('on', modus === 'alle');
+  el.classList.toggle('uk-wahl', modus === 'alle');
   let h = '';
+  if(modus === 'alle'){
+    ukNamen().forEach(n=>{
+      const an = ukSel.indexOf(n) >= 0;
+      h += '<button class="' + (an?'on':'') + '" style="'
+         + (an ? 'background:#1B2536;border-color:transparent' : '') + '" '
+         + 'onclick="ukSelUm(' + JSON.stringify(n).replace(/"/g,'&quot;') + ')">'
+         + '<span class="hk">✓</span>' + esc(n)
+         + ' <span class="z">' + nachName(n).length + '</span></button>';
+    });
+    h += zahnKnopf();
+    el.innerHTML = h;
+    return;
+  }
   kats.forEach(k=>{
     const n = offeneVon(k.id).length;
     const an = k.id === aktKat;
@@ -848,27 +948,75 @@ function zeichneLeiste(){
              : 'border-color:'+k.farbe+';color:'+schriftFarbe(k.farbe)) + '">'
        + esc(k.name) + ' <span class="z">' + n + '</span></button>';
   });
-  h += '<button class="of-zahn" onclick="katKonfig()">'
+  h += zahnKnopf();
+  el.innerHTML = h;
+}
+function zahnKnopf(){
+  return '<button class="of-zahn" onclick="katKonfig()">'
      + '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/>'
      + '<path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7'
      + 'M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5"/></svg>Kategorien</button>';
-  el.innerHTML = h;
 }
 
 /* ── Inhalt ── */
+// Eine Fragezeile. In der Ansicht „Alle" steht zusätzlich die Firma daneben.
+function frageZeile(f, mitFirma){
+  const k = katVon(f.kat), c = (k && k.farbe) || '#334155';
+  let h = '<div class="of-row"' + (mitFirma ? ' style="--f:' + c + '"' : '') + '>'
+        + (mitFirma ? '<span class="of-kante"></span>' : '')
+        + '<div class="of-mid"><div class="of-titel"><b>' + esc(f.titel) + '</b>';
+  if(mitFirma){
+    h += '<span class="of-firma" style="--f:' + c + ';--f-bg:' + farbTon(c) + ';--f-tx:'
+       + schriftFarbe(c) + '"><i></i>' + esc(k ? k.name : '—') + '</span>';
+  }
+  h += '<button class="of-stift" onclick="frageEdit(\'' + f.id + '\')" title="Bearbeiten">'
+     + '<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/>'
+     + '<path d="M14.5 6.5l3 3"/></svg></button></div>'
+     + (f.text ? '<p>' + esc(f.text) + '</p>' : '')
+     + '<div class="of-chips">'
+     + (f.wichtig ? '<span class="of-chip wichtig">wichtig</span>' : '')
+     + fristChip(f) + '</div></div>'
+     + '<button class="of-tick" onclick="frageHaken(\'' + f.id + '\',true)" '
+     + 'title="Erledigt">✓</button></div>';
+  return h;
+}
+// Die graue Liste der erledigten Fragen
+function erledigtBlock(liste, mitFirma){
+  if(!liste.length) return '';
+  const erl = liste.slice().sort((a,b)=>(b.erledigtAm||'') < (a.erledigtAm||'') ? -1 : 1);
+  let h = '<button class="of-erl-btn' + (erlAuf?' auf':'') + '" onclick="erlUm()">Erledigte Fragen'
+        + ' <span class="n">' + erl.length + '</span><span class="of-pf">▾</span></button>'
+        + '<div class="of-erl-liste' + (erlAuf?' auf':'') + '">';
+  erl.forEach(f=>{
+    const k = katVon(f.kat);
+    const wo = (mitFirma && k ? k.name + ' · ' : '') + (ukName(f.kat, f.uk) || '—');
+    h += '<div class="of-erl-row">'
+       + '<button class="of-erl-hak" onclick="frageHaken(\'' + f.id + '\',false)" '
+       + 'title="Wieder öffnen">✓</button>'
+       + '<span class="of-erl-mid"><b>' + esc(f.titel) + '</b><s>' + esc(wo)
+       + (f.erledigtVon ? ' · ' + esc(f.erledigtVon) : '') + '</s></span>'
+       + '<span class="of-erl-zeit">' + dmy(f.erledigtAm) + '</span></div>';
+  });
+  return h + '</div>';
+}
+
 function zeichneInhalt(){
   const el = document.getElementById('of-inhalt');
-  const k  = katVon(aktKat);
-  if(!k){
+  document.getElementById('of-add').style.display = kats.length ? '' : 'none';
+  if(!kats.length){
     el.innerHTML = '<div class="of-leer">Noch keine Kategorie angelegt.<br>'
       + 'Über <b>Kategorien</b> oben rechts legst du die erste an.</div>';
-    document.getElementById('of-add').style.display = 'none';
     return;
   }
-  document.getElementById('of-add').style.display = '';
-  const offen = offeneVon(k.id);
-  let nr = 0, h = '<div style="--kat:' + k.farbe + ';--kat-txt:' + aufFarbe(k.farbe) + '">';
+  el.innerHTML = (modus === 'alle') ? inhaltAlle() : inhaltFirma();
+}
 
+// Ansicht „Nach Firmen": eine Kategorie, darin ihre Unterkategorien
+function inhaltFirma(){
+  const k = katVon(aktKat);
+  if(!k) return '<div class="of-leer">Keine Kategorie gewählt.</div>';
+  const offen = offeneVon(k.id);
+  let h = '<div style="--kat:' + k.farbe + ';--kat-txt:' + aufFarbe(k.farbe) + '">';
   if(!k.uks.length){
     h += '<div class="of-leer">Für <b>' + esc(k.name) + '</b> gibt es noch keine '
        + 'Unterkategorien.<br>Lege sie über <b>Kategorien</b> an.</div>';
@@ -880,44 +1028,39 @@ function zeichneInhalt(){
        + '<div class="of-uk-kopf" onclick="ukUm(\'' + k.id + '\',\'' + u.id + '\')">'
        + '<span class="of-pf">▾</span><b>' + esc(u.name) + '</b>'
        + '<span class="cnt">' + liste.length + '</span></div>';
-    liste.forEach(f=>{
-      nr++;
-      h += '<div class="of-row">'
-         + '<div class="of-nr">' + nr + '</div>'
-         + '<div class="of-mid"><div class="of-titel"><b>' + esc(f.titel) + '</b>'
-         + '<button class="of-stift" onclick="frageEdit(\'' + f.id + '\')" title="Bearbeiten">'
-         + '<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/>'
-         + '<path d="M14.5 6.5l3 3"/></svg></button></div>'
-         + (f.text ? '<p>' + esc(f.text) + '</p>' : '')
-         + '<div class="of-chips">'
-         + (f.wichtig ? '<span class="of-chip wichtig">wichtig</span>' : '')
-         + fristChip(f) + '</div></div>'
-         + '<button class="of-tick" onclick="frageHaken(\'' + f.id + '\',true)" '
-         + 'title="Erledigt">✓</button></div>';
-    });
+    liste.forEach(f=>{ h += frageZeile(f, false); });
     h += '</div>';
   });
-
-  const erl = fragen.filter(f=>f.kat===k.id && f.erledigt)
-                    .sort((a,b)=>(b.erledigtAm||'') < (a.erledigtAm||'') ? -1 : 1);
-  if(erl.length){
-    h += '<button class="of-erl-btn' + (erlAuf?' auf':'') + '" onclick="erlUm()">Erledigte Fragen'
-       + ' <span class="n">' + erl.length + '</span><span class="of-pf">▾</span></button>'
-       + '<div class="of-erl-liste' + (erlAuf?' auf':'') + '">';
-    erl.forEach(f=>{
-      h += '<div class="of-erl-row">'
-         + '<button class="of-erl-hak" onclick="frageHaken(\'' + f.id + '\',false)" '
-         + 'title="Wieder öffnen">✓</button>'
-         + '<span class="of-erl-mid"><b>' + esc(f.titel) + '</b><s>'
-         + esc(ukName(f.kat, f.uk) || '—')
-         + (f.erledigtVon ? ' · ' + esc(f.erledigtVon) : '') + '</s></span>'
-         + '<span class="of-erl-zeit">' + dmy(f.erledigtAm) + '</span></div>';
-    });
-    h += '</div>';
-  }
-  el.innerHTML = h + '</div>';
+  h += erledigtBlock(fragen.filter(f=>f.kat===k.id && f.erledigt), false);
+  return h + '</div>';
 }
-function zeichne(){ zeichneLeiste(); zeichneInhalt(); }
+
+// Ansicht „Alle": gleichnamige Unterkategorien aller Firmen in einer Karte
+function inhaltAlle(){
+  const namen = ukNamen().filter(n=>!ukSel.length || ukSel.indexOf(n) >= 0);
+  if(!namen.length) return '<div class="of-leer">Noch keine Unterkategorie angelegt.</div>';
+  let h = '<div style="--kat:#334155;--kat-txt:#fff">';
+  namen.forEach(n=>{
+    const liste = sortiere(nachName(n));
+    const zu = zuUk['alle|'+n] ? ' zu' : '';
+    h += '<div class="of-uk' + zu + '">'
+       + '<div class="of-uk-kopf" onclick="ukUm(\'alle\',' 
+       + JSON.stringify(n).replace(/"/g,'&quot;') + ')">'
+       + '<span class="of-pf">▾</span><b>' + esc(n) + '</b>'
+       + '<span class="cnt">' + liste.length + '</span></div>';
+    liste.forEach(f=>{ h += frageZeile(f, true); });
+    h += '</div>';
+  });
+  const erl = fragen.filter(f=>{
+    if(!f.erledigt) return false;
+    const n = ukName(f.kat, f.uk);
+    return !ukSel.length || ukSel.indexOf(n) >= 0;
+  });
+  h += erledigtBlock(erl, true);
+  return h + '</div>';
+}
+
+function zeichne(){ zeichneLeiste(); zeichneInhalt(); zeichneKal(); }
 
 function katWahl(id){ aktKat = id; erlAuf = false; zeichne(); }
 function ukUm(kid, uid){
@@ -1030,9 +1173,135 @@ async function frageHaken(id, erledigt){
     ? {erledigt:true,  erledigtAm:heute(), erledigtVon:(window.GG_USER||{}).name || ''}
     : {erledigt:false, erledigtAm:'', erledigtVon:''};
   Object.assign(f, d);
-  zeichneInhalt(); zeichneLeiste();
+  zeichne();
   try{ await db.collection('fragen').doc(id).set(d, {merge:true}); }
   catch(e){ showToast('Fehler: ' + e.message); }
+}
+
+
+/* ══ Ansicht: nach Firmen oder alle ══ */
+let modus  = localStorage.getItem('of_modus') === 'alle' ? 'alle' : 'firmen';
+let ukSel  = [];        // gewählte Unterkategorie-Namen in der Ansicht „Alle"
+let kalMon = '';        // angezeigter Monat im Kalender, YYYY-MM
+let kalTag = '';        // festgehaltener Tag, YYYY-MM-DD
+
+// helle Firmenfarbe für Marke und Kante
+function farbTon(hex){
+  const c = String(hex||'#334155').replace('#','');
+  const r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+  const m = (v,f) => Math.round(v + (255-v)*f);
+  return 'rgb(' + m(r,.86) + ',' + m(g,.86) + ',' + m(b,.86) + ')';
+}
+// alle Unterkategorie-Namen, in der Reihenfolge der Kategorien
+function ukNamen(){
+  const n = [];
+  kats.forEach(k=>k.uks.forEach(u=>{ if(n.indexOf(u.name) < 0) n.push(u.name); }));
+  return n;
+}
+const offenAlle = () => fragen.filter(f=>!f.erledigt);
+function nachName(name){
+  return offenAlle().filter(f=>ukName(f.kat, f.uk) === name);
+}
+// Fragen, die gerade sichtbar sind — danach richtet sich auch der Kalender
+function sichtbar(){
+  if(modus === 'firmen') return aktKat ? offeneVon(aktKat) : [];
+  const namen = ukSel.length ? ukSel : ukNamen();
+  return offenAlle().filter(f=>namen.indexOf(ukName(f.kat, f.uk)) >= 0);
+}
+
+function modusWahl(m){
+  modus = m; localStorage.setItem('of_modus', m);
+  kalTag = ''; erlAuf = false;
+  zeichne();
+}
+function ukSelUm(name){
+  const i = ukSel.indexOf(name);
+  if(i < 0) ukSel.push(name); else ukSel.splice(i,1);
+  kalTag = ''; zeichne();
+}
+
+/* ── Kalender ── */
+const KAL_WT = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+function kalBlaettern(d){
+  const [y,m] = kalMon.split('-').map(Number);
+  kalMon = monatKey(new Date(y, m-1+d, 1));
+  kalTag = ''; zeichneKal();
+}
+function zeichneKal(){
+  const el = document.getElementById('of-kal');
+  if(!kalMon) kalMon = monatKey(new Date());
+  const [jahr, mon] = kalMon.split('-').map(Number);
+  const erster = new Date(jahr, mon-1, 1);
+  const vor    = (erster.getDay() + 6) % 7;
+  const tage   = new Date(jahr, mon, 0).getDate();
+  const mit    = sichtbar().filter(f=>f.bis);
+  const proTag = {};
+  mit.forEach(f=>{ (proTag[f.bis] = proTag[f.bis] || []).push(f); });
+
+  let h = '<div class="of-kal-kopf"><button onclick="kalBlaettern(-1)" title="Monat zurück">‹</button>'
+        + '<b>' + monatText(kalMon) + '</b>'
+        + '<button onclick="kalBlaettern(1)" title="Monat vor">›</button></div>'
+        + '<div class="of-kal-wt">' + KAL_WT.map(w=>'<span>'+w+'</span>').join('') + '</div>'
+        + '<div class="of-kal-gitter">';
+  for(let i=0;i<vor;i++) h += '<div class="of-tag leer"></div>';
+  const heuteK = heute();
+  for(let d=1; d<=tage; d++){
+    const iso = kalMon + '-' + String(d).padStart(2,'0');
+    const dr  = proTag[iso] || [];
+    let p = '';
+    if(dr.length){
+      p = '<span class="of-punkte">'
+        + dr.slice(0,3).map(f=>{
+            const k = katVon(f.kat);
+            return '<i style="background:' + ((k&&k.farbe)||'#334155') + '"></i>';
+          }).join('')
+        + (dr.length > 3 ? '<em>+' + (dr.length-3) + '</em>' : '') + '</span>';
+    }
+    h += '<div class="of-tag' + (dr.length?' hat':'') + (iso===heuteK?' heute':'')
+       + (iso===kalTag?' sel':'') + '"'
+       + (dr.length ? ' onclick="kalTagWahl(\'' + iso + '\')"'
+                    + ' onmouseenter="kalZeige(\'' + iso + '\')"'
+                    + ' onmouseleave="kalZeige(\'\')"' : '')
+       + '>' + d + p + '</div>';
+  }
+  h += '</div><div class="of-kal-liste" id="of-kal-liste"></div>';
+  const benutzt = [];
+  mit.forEach(f=>{ if(benutzt.indexOf(f.kat) < 0) benutzt.push(f.kat); });
+  if(benutzt.length > 1 || modus === 'alle'){
+    h += '<div class="of-kal-fuss">' + benutzt.map(id=>{
+      const k = katVon(id); if(!k) return '';
+      return '<span><i style="background:' + k.farbe + '"></i>' + esc(k.name) + '</span>';
+    }).join('') + '</div>';
+  }
+  el.innerHTML = h;
+  kalListe(kalTag);
+  const z = document.getElementById('of-kal-zahl');
+  if(z) z.textContent = mit.length + ' mit Frist';
+}
+function kalListe(iso){
+  const el = document.getElementById('of-kal-liste');
+  if(!el) return;
+  const dr = iso ? sichtbar().filter(f=>f.bis === iso) : [];
+  if(!dr.length){
+    el.innerHTML = '<div class="nix">' + (iso ? 'keine Frist an diesem Tag'
+      : 'Tag antippen für die Fragen') + '</div>';
+    return;
+  }
+  el.innerHTML = sortiere(dr).map(f=>{
+    const k = katVon(f.kat), c = (k&&k.farbe)||'#334155';
+    return '<div class="of-kal-eintrag" style="--f:' + c + '" '
+      + 'onclick="frageEdit(\'' + f.id + '\')">'
+      + '<span class="of-kante"></span><span><b>' + esc(f.titel) + '</b><s>'
+      + esc((k?k.name:'—') + ' · ' + (ukName(f.kat, f.uk)||'—')) + '</s></span></div>';
+  }).join('');
+}
+function kalZeige(iso){ kalListe(iso || kalTag); }
+function kalTagWahl(iso){
+  kalTag = (kalTag === iso) ? '' : iso;
+  zeichneKal();
+}
+function kalUm(){
+  document.getElementById('of-kal').classList.toggle('auf');
 }
 
 /* ── Kategorien verwalten ── */
@@ -1129,6 +1398,7 @@ async function start(){
     await ladeKonfig();
     await ladeFragen();
     aktKat = kats.length ? kats[0].id : '';
+    kalMon = monatKey(new Date());
     zeichne();
   }catch(e){ showToast('Fehler beim Laden: ' + e.message); }
   hideSpinner();
