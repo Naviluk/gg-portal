@@ -1063,6 +1063,7 @@ function inhaltAlle(){
 function zeichne(){ zeichneLeiste(); zeichneInhalt(); zeichneKal(); }
 
 function katWahl(id){ aktKat = id; erlAuf = false; zeichne(); }
+// Der gewählte Tag bleibt beim Wechsel der Firma stehen, nur der Inhalt wechselt mit.
 function ukUm(kid, uid){
   const s = kid + '|' + uid;
   zuUk[s] = !zuUk[s];
@@ -1211,13 +1212,13 @@ function sichtbar(){
 
 function modusWahl(m){
   modus = m; localStorage.setItem('of_modus', m);
-  kalTag = ''; erlAuf = false;
+  erlAuf = false;           // der gewählte Kalendertag bleibt stehen
   zeichne();
 }
 function ukSelUm(name){
   const i = ukSel.indexOf(name);
   if(i < 0) ukSel.push(name); else ukSel.splice(i,1);
-  kalTag = ''; zeichne();
+  zeichne();
 }
 
 /* ── Kalender ── */
@@ -1264,15 +1265,8 @@ function zeichneKal(){
                     + ' onmouseleave="kalZeige(\'\')"' : '')
        + '>' + d + p + '</div>';
   }
-  h += '</div><div class="of-kal-liste" id="of-kal-liste"></div>';
-  const benutzt = [];
-  mit.forEach(f=>{ if(benutzt.indexOf(f.kat) < 0) benutzt.push(f.kat); });
-  if(benutzt.length > 1 || modus === 'alle'){
-    h += '<div class="of-kal-fuss">' + benutzt.map(id=>{
-      const k = katVon(id); if(!k) return '';
-      return '<span><i style="background:' + k.farbe + '"></i>' + esc(k.name) + '</span>';
-    }).join('') + '</div>';
-  }
+  h += '</div><div class="of-kal-liste" id="of-kal-liste"></div>'
+     + '<div class="of-kal-fuss" id="of-kal-fuss" style="display:none"></div>';
   el.innerHTML = h;
   kalListe(kalTag);
   const z = document.getElementById('of-kal-zahl');
@@ -1282,6 +1276,7 @@ function kalListe(iso){
   const el = document.getElementById('of-kal-liste');
   if(!el) return;
   const dr = iso ? sichtbar().filter(f=>f.bis === iso) : [];
+  kalLegende(dr);
   if(!dr.length){
     el.innerHTML = '<div class="nix">' + (iso ? 'keine Frist an diesem Tag'
       : 'Tag antippen für die Fragen') + '</div>';
@@ -1293,6 +1288,19 @@ function kalListe(iso){
       + 'onclick="frageEdit(\'' + f.id + '\')">'
       + '<span class="of-kante"></span><span><b>' + esc(f.titel) + '</b><s>'
       + esc((k?k.name:'—') + ' · ' + (ukName(f.kat, f.uk)||'—')) + '</s></span></div>';
+  }).join('');
+}
+// Unter dem Kalender nur die Firmen, die an diesem Tag wirklich vorkommen
+function kalLegende(liste){
+  const el = document.getElementById('of-kal-fuss');
+  if(!el) return;
+  const ids = [];
+  liste.forEach(f=>{ if(ids.indexOf(f.kat) < 0) ids.push(f.kat); });
+  if(ids.length < 2){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.style.display = '';
+  el.innerHTML = ids.map(id=>{
+    const k = katVon(id); if(!k) return '';
+    return '<span><i style="background:' + k.farbe + '"></i>' + esc(k.name) + '</span>';
   }).join('');
 }
 function kalZeige(iso){ kalListe(iso || kalTag); }
