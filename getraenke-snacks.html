@@ -250,6 +250,14 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none}
 .lager-table th.grp-h.grp-theke .expand-arrow{color:#F7CCEC}
 td.grp-c.grp-theke{background:#FAE3F5;color:#A3128B}
 td.grp-d.grp-theke{background:#FCEBF8;color:#A3128B}
+/* Abgelaufene Ware — Graphit, damit es bei keiner Filiale mit Gerät oder Theke kollidiert */
+.lager-table th.grp-h.grp-verfall{background:#3F4A5F;color:#D3DAE6}
+.lager-table th.grp-h.grp-verfall .expand-arrow{color:#D3DAE6}
+.lager-table th.detail-verfall-th{background:#36404F}
+td.grp-c.grp-verfall{background:#ECEFF4;color:#44506A}
+td.grp-d.grp-verfall{background:#F2F4F8;color:#44506A}
+.prod-row.zebra td.grp-c.grp-verfall{background:#E3E8EF}
+.prod-row.zebra td.grp-d.grp-verfall{background:#EAEEF4}
 .prod-row.zebra td.grp-c.grp-theke{background:#F5D8EF}
 .prod-row.zebra td.grp-d.grp-theke{background:#F8E1F3}
 
@@ -327,7 +335,7 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
   .seg-cell{flex:1;min-width:0}
   .seg-cell .ctrl-select{font-size:.82rem;padding:.05rem 1.1rem .05rem 0;background-position:right .1rem center}
   .ctrl-actions{width:100%;margin-left:0;display:flex;gap:.45rem}
-  .ctrl-actions .btn-geraet,.ctrl-actions .btn-theke{flex:1;width:auto;font-size:.68rem;padding:.75rem .5rem}
+  .ctrl-actions .btn-geraet,.ctrl-actions .btn-theke,.ctrl-actions .btn-verfall{flex:1;width:auto;font-size:.68rem;padding:.75rem .5rem}
   /* Größere Tippflächen auf dem Handy */
   .nav-item>.nav-link{padding:1rem 1.5rem;font-size:.75rem}
   .nav-sub li a{padding:.9rem 1.5rem .9rem 2.5rem;font-size:.9rem}
@@ -340,7 +348,7 @@ td.col-artikel::before{content:'';position:absolute;left:0;top:.28rem;bottom:.28
   .lager-table td:not(.col-artikel){min-width:58px;width:58px;text-align:center}
   .lager-table thead th .th-text,.lager-table thead th .th-text-mob{font-size:.56rem}
   .th-col-einkauf .th-text,.th-col-liefer .th-text,
-  .th-col-geraet .th-text,.th-col-theke .th-text,
+  .th-col-geraet .th-text,.th-col-theke .th-text,.th-col-verfall .th-text,
   .th-col-anfang .th-text,.th-col-bestand .th-text{display:none}
   .th-text-mob{display:inline}
   .th-icon{display:none}
@@ -723,7 +731,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 50%{opacity:1}
 }
 .hdr-left{display:flex;align-items:center}
-.btn-geraet,.btn-theke{
+.btn-verfall{background:linear-gradient(100deg,#3F4A5F,#5B6B86);color:#fff}
+.btn-geraet,.btn-theke,.btn-verfall{
   display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
   font-family:'Poppins',sans-serif;font-size:.74rem;letter-spacing:.04em;
   font-weight:700;border-radius:11px;padding:.62rem 1rem;cursor:pointer;
@@ -738,7 +747,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 .btn-save:hover{box-shadow:0 0 28px rgba(5,150,105,.6);transform:translateY(-1px)}
 
 @media(max-width:640px){
-  .btn-geraet,.btn-theke{font-size:.48rem;padding:.4rem .55rem}
+  .btn-geraet,.btn-theke,.btn-verfall{font-size:.48rem;padding:.4rem .55rem}
 }
 </style>
 </head>
@@ -856,6 +865,7 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
     <div class="ctrl-actions">
       <button class="btn-geraet" onclick="openForm('geraet')">&#xFF0B; Gerät</button>
       <button class="btn-theke" onclick="openForm('theke')">&#xFF0B; Theke</button>
+      <button class="btn-verfall" onclick="openForm('verfall')" title="Abgelaufene Ware ausbuchen">&#xFF0B; Abgel.</button>
     </div>
   </div>
   <div class="col-pager" id="col-pager"></div>
@@ -889,6 +899,10 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="field">
         <label class="field-label">Datum</label>
         <input type="date" id="form-date">
+      </div>
+      <div class="field we-hidden" id="form-bem-feld">
+        <label class="field-label">Bemerkung <span style="text-transform:none;letter-spacing:0;font-weight:500">(frei)</span></label>
+        <input type="text" id="form-bemerkung" placeholder="z. B. MHD 10/2026">
       </div>
       <div class="field">
         <label class="field-label">Waren auswählen</label>
@@ -995,9 +1009,9 @@ const NEON = {
 const LAGER_NAMES = {nettetal:'Nettetal',brüggen:'Brüggen',viersen:'Viersen',köln:'Köln'};
 
 let currentLager='brüggen', currentZeitraum='2026-06';
-let lieferungen=[], geraetEntries=[], thekeEntries=[];
+let lieferungen=[], geraetEntries=[], thekeEntries=[], verfallEntries=[];
 let anfangsbestand={}, endbestandData={};
-let liefer_expanded=false, geraet_expanded=false, theke_expanded=false;
+let liefer_expanded=false, geraet_expanded=false, theke_expanded=false, verfall_expanded=false;
 let formType='geraet', formItems={}, formEditId=null, currentAbProdId=null;
 
 function showSpinner(){document.getElementById('spinner').classList.add('show')}
@@ -1119,10 +1133,11 @@ async function loadData(){
   showSpinner();
   currentLager=document.getElementById('sel-lager').value;
   currentZeitraum=document.getElementById('sel-zeitraum').value;
-  lieferungen=[];geraetEntries=[];thekeEntries=[];anfangsbestand={};endbestandData={};
+  lieferungen=[];geraetEntries=[];thekeEntries=[];verfallEntries=[];anfangsbestand={};endbestandData={};
   try{const s=await db.collection('wareneingang').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>lieferungen.push({id:d.id,...d.data()}))}catch(e){}
   try{const s=await db.collection('gs_geraet').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>geraetEntries.push({id:d.id,...d.data()}));geraetEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const s=await db.collection('gs_theke').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>thekeEntries.push({id:d.id,...d.data()}));thekeEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
+  try{const s=await db.collection('gs_verfall').where('lager','==',currentLager).where('monat','==',currentZeitraum).get();s.forEach(d=>verfallEntries.push({id:d.id,...d.data()}));verfallEntries.sort((a,b)=>a.datum.localeCompare(b.datum))}catch(e){}
   try{const doc=await db.collection('anfangsbestand').doc(currentLager+'_'+currentZeitraum).get();if(doc.exists)anfangsbestand=doc.data()}catch(e){}
   // Ab Juli: Anfangsbestand kommt automatisch aus dem End Bestand des Vormonats
   // (alle Artikel hier sind Getränke/Snacks, daher ohne Kategorie-Filter).
@@ -1131,15 +1146,15 @@ async function loadData(){
       anfangsbestand = await computeGSAnfangsbestandChain(currentLager, currentZeitraum);
     }catch(e){ console.warn('GS-Anfangsbestand-Kette fehlgeschlagen:', e.message); }
   }
-  // End Bestand = dieselbe Formel wie auf lager.html für Getränke/Snacks:
-  // Anfangsbestand + Lieferungen − Gerät − Theke
+  // End Bestand = Anfangsbestand + Lieferungen − Gerät − Theke − Abgelaufen
   GS_PRODUCTS.forEach(catObj=>{
     catObj.items.forEach((prod,pIdx)=>{
       const abNum = Number(anfangsbestand[prod.id])||0;
       const liefNum = dedupedLiefSum(prod.id);
       const gerNum = geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const thkNum = thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
-      endbestandData[prod.id] = abNum + liefNum - gerNum - thkNum;
+      const vfNum  = verfallEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      endbestandData[prod.id] = abNum + liefNum - gerNum - thkNum - vfNum;
     });
   });
   hideSpinner();
@@ -1150,6 +1165,7 @@ function renderTable(){
   const cc=NEON[currentLager]||NEON['brüggen'];
   const geraet_dates=[...new Set(geraetEntries.map(e=>e.datum))].sort();
   const theke_dates=[...new Set(thekeEntries.map(e=>e.datum))].sort();
+  const verfall_dates=[...new Set(verfallEntries.map(e=>e.datum))].sort();
 
   let thHTML='<tr>';
   thHTML+='<th class="col-artikel">Artikel</th>';
@@ -1161,6 +1177,8 @@ function renderTable(){
   geraet_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-geraet-th geraet-date-th grp-h" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14.5 6.5l3 3"/></svg></span></th>`;});
   thHTML+=`<th class="num-cell col-einkauf-header th-col-theke grp-h grp-theke is-toggle" onclick="toggleThekeCols()" title="Details auf-/zuklappen"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon"><svg class="ui-i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span><span class="th-text">Theke</span><span class="th-text-mob">Theke</span></span><span class="expand-arrow" id="expand-theke-btn"><i class="arw-i"></i></span></div></th>`;
   theke_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';thHTML+=`<th class="num-cell detail-col detail-theke-th theke-date-th grp-h grp-theke" style="cursor:pointer" data-date="${d}">${l} <span class="th-pen"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14.5 6.5l3 3"/></svg></span></th>`;});
+  thHTML+=`<th class="num-cell col-einkauf-header th-col-verfall grp-h grp-verfall is-toggle" onclick="toggleVerfallCols()" title="Details auf-/zuklappen"><div class="col-einkauf-wrap"><span style="font-weight:800"><span class="th-icon"><svg class="ui-i" viewBox="0 0 24 24"><path d="M5 7.5h14l-1 12.5H6L5 7.5Z"/><path d="M9.5 7.5V5h5v2.5"/><path d="M10 11v5.5M14 11v5.5"/></svg></span><span class="th-text">Abgel.</span><span class="th-text-mob">Abgel.</span></span><span class="expand-arrow" id="expand-verfall-btn"><i class="arw-i"></i></span></div></th>`;
+  verfall_dates.forEach(d=>{const l=d.slice(8)+'.'+d.slice(5,7)+'.';const e=verfallEntries.find(x=>x.datum===d);const bem=(e&&e.bemerkung)?e.bemerkung.replace(/"/g,'&quot;'):'';thHTML+=`<th class="num-cell detail-col detail-verfall-th verfall-date-th grp-h grp-verfall" style="cursor:pointer" data-date="${d}"${bem?` title="${bem}"`:''}>${l} <span class="th-pen"><svg class="ui-i" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="M14.5 6.5l3 3"/></svg></span></th>`;});
   thHTML+='<th class="num-cell th-col-bestand"><span class="th-icon"><svg class="ui-i" viewBox="0 0 24 24"><path d="M3.5 6.5h6l2 2.5h9v9.5h-17V6.5Z"/></svg></span><span class="th-text">End-<br>bestand</span><span class="th-text-mob">End<br>Best.</span></th></tr>';
   document.getElementById('gs-thead').innerHTML=thHTML;
 
@@ -1175,7 +1193,9 @@ function renderTable(){
       const tG=geraetEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const tT=thekeEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
       const eb=endbestandData[prod.id]!==undefined?endbestandData[prod.id]:'—';
-      const ebS=eb!=='—'?'color:var(--neon-green)':'';
+      // Ein negativer Endbestand kann jetzt leichter entstehen (Abzug für Abgelaufenes)
+      // und soll nicht grün aussehen
+      const ebS=eb==='—' ? '' : (Number(eb)<0 ? 'color:#C4183C' : 'color:var(--neon-green)');
       tbHTML+=`<tr class="prod-row ${isFirst?'':'hidden'} ${pIdx%2?'zebra':''}" data-cat="${ci}">`;
       tbHTML+=`<td class="col-artikel"><div class="prod-info"><div class="prod-icon">${iconHTML(prod.icon,34)}</div><div><div class="prod-name">${prod.name}</div><div class="prod-unit">${prod.unit||'—'}</div></div></div></td>`;
       tbHTML+=`<td class="num-cell editable anfang-cell" data-prod-id="${prod.id}" data-prod-name="${prod.name.replace(/"/g,'&quot;')}"><span class="edit-val">${abD}</span></td>`;
@@ -1184,6 +1204,9 @@ function renderTable(){
       geraet_dates.forEach(d=>{const e=geraetEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-geraet-td grp-d">${q}</td>`;});
       tbHTML+=`<td class="num-cell grp-c grp-theke">${tT||'—'}</td>`;
       theke_dates.forEach(d=>{const e=thekeEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-theke-td grp-d grp-theke">${q}</td>`;});
+      const tV=verfallEntries.reduce((s,e)=>s+(Number(e.items&&e.items[prod.id])||0),0);
+      tbHTML+=`<td class="num-cell grp-c grp-verfall">${tV||'—'}</td>`;
+      verfall_dates.forEach(d=>{const e=verfallEntries.find(e=>e.datum===d);const q=e&&e.items&&e.items[prod.id]?e.items[prod.id]:'—';tbHTML+=`<td class="num-cell detail-col detail-verfall-td grp-d grp-verfall">${q}</td>`;});
       tbHTML+=`<td class="num-cell" style="${ebS}">${eb}</td></tr>`;
     });
   });
@@ -1211,9 +1234,11 @@ function renderTable(){
   if(liefer_expanded)applyDetailCols('liefer',true);
   if(geraet_expanded)applyDetailCols('geraet',true);
   if(theke_expanded)applyDetailCols('theke',true);
+  if(verfall_expanded)applyDetailCols('verfall',true);
 
   document.querySelectorAll('.we-date-th').forEach(th=>th.addEventListener('click',()=>openEditLieferung(th.dataset.date)));
   document.querySelectorAll('.geraet-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('geraet',th.dataset.date)));
+  document.querySelectorAll('.verfall-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('verfall',th.dataset.date)));
   document.querySelectorAll('.theke-date-th').forEach(th=>th.addEventListener('click',()=>openEditEntry('theke',th.dataset.date)));
 }
 
@@ -1235,7 +1260,7 @@ function buildColPager(){
     const t=th.querySelector('.th-text-mob')||th.querySelector('.th-text');
     let label=(t?t.innerText:th.innerText).replace(/\s+/g,' ').trim();
     const short={'Anfangsbestand':'Anfang','Anf.':'Anfang','Endbestand':'Ende','End Best.':'Ende',
-                 'Lieferungen':'Liefer.','Gerät':'Gerät','Theke':'Theke'};
+                 'Lieferungen':'Liefer.','Gerät':'Gerät','Theke':'Theke','Abgel.':'Abgel.'};
     label=short[label]||label;
     label=label.replace(/[\u25c0\u25b6\ufe0e✏️]/g,'').replace(/\s+/g,' ').trim();
     if(!label) label='•';
@@ -1265,6 +1290,7 @@ function applyDetailCols(type,show){
 window.toggleLieferCols=function(){liefer_expanded=!liefer_expanded;applyDetailCols('liefer',liefer_expanded)};
 window.toggleGeraetCols=function(){geraet_expanded=!geraet_expanded;applyDetailCols('geraet',geraet_expanded)};
 window.toggleThekeCols=function(){theke_expanded=!theke_expanded;applyDetailCols('theke',theke_expanded)};
+window.toggleVerfallCols=function(){verfall_expanded=!verfall_expanded;applyDetailCols('verfall',verfall_expanded)};
 
 window.openAnfangsbestandModal=function(prodId,prodName){
   if(currentZeitraum !== '2026-06'){
@@ -1282,7 +1308,10 @@ function formApplyAccent(){
   // Theke ist eine Rolle → Magenta; Gerät gehört zum Lager → Hausfarbe
   const a = formType==='theke'
     ? {accent:'#C2189B',head:'#8C1176',fg:'#F7CCEC',ink:'#A3128B',bg:'#FAE3F5'}
-    : (NEON[currentLager]||NEON['brüggen']);
+    : formType==='verfall'
+      // Abgelaufene Ware ist keine Filiale und keine Rolle → Graphit wie die Spalte
+      ? {accent:'#5B6B86',head:'#3F4A5F',fg:'#D3DAE6',ink:'#44506A',bg:'#ECEFF4'}
+      : (NEON[currentLager]||NEON['brüggen']);
   if(!m) return;
   m.style.setProperty('--we-acc',a.accent); m.style.setProperty('--we-ink',a.ink);
   m.style.setProperty('--we-fg',a.fg);      m.style.setProperty('--we-bg',a.bg);
@@ -1319,8 +1348,13 @@ function formUpdateCounters(){
 window.openForm=function(type,prefillItems,editId,prefillDate){
   formType=type;formItems=prefillItems?Object.assign({},prefillItems):{};formEditId=editId||null;
   const cc=NEON[currentLager]||{};
-  const isG=type==='geraet';
-  document.getElementById('form-title').textContent = isG?'Gerät':'Theke';
+  document.getElementById('form-title').textContent =
+    type==='geraet' ? 'Gerät' : (type==='verfall' ? 'Abgelaufene Ware' : 'Theke');
+  // Die Bemerkung gibt es nur beim Ausbuchen abgelaufener Ware
+  const bemFeld = document.getElementById('form-bem-feld');
+  if(bemFeld) bemFeld.classList.toggle('we-hidden', type!=='verfall');
+  const bemEin = document.getElementById('form-bemerkung');
+  if(bemEin) bemEin.value = '';
   const _pill=document.getElementById('form-lager-pill');
   if(_pill) _pill.textContent = LAGER_NAMES[currentLager]||currentLager;
   formApplyAccent();
@@ -1372,10 +1406,19 @@ window.backToFormEdit=function(){
   document.getElementById('form-step2').classList.add('we-hidden');
   formSetStep(1);
 };
-window.saveFormEntry=async function(){const date=document.getElementById('form-date').value;const monat=date.slice(0,7);const col=formType==='geraet'?'gs_geraet':'gs_theke';const entry={lager:currentLager,datum:date,monat,items:{...formItems},updatedAt:new Date().toISOString()};showSpinner();try{if(formEditId){await db.collection(col).doc(formEditId).update(entry);showToast('Eintrag aktualisiert ✓');}else{entry.createdAt=new Date().toISOString();await db.collection(col).add(entry);showToast('Eintrag gespeichert ✓');}closeForm();await loadData();}catch(e){hideSpinner();showToast('Fehler: '+e.message)}};
+window.saveFormEntry=async function(){const date=document.getElementById('form-date').value;const monat=date.slice(0,7);const col=formType==='geraet'?'gs_geraet':(formType==='verfall'?'gs_verfall':'gs_theke');const entry={lager:currentLager,datum:date,monat,items:{...formItems},updatedAt:new Date().toISOString()};if(formType==='verfall'){const _b=document.getElementById('form-bemerkung');entry.bemerkung=_b?_b.value.trim():'';}showSpinner();try{if(formEditId){await db.collection(col).doc(formEditId).update(entry);showToast('Eintrag aktualisiert ✓');}else{entry.createdAt=new Date().toISOString();await db.collection(col).add(entry);showToast('Eintrag gespeichert ✓');}closeForm();await loadData();}catch(e){hideSpinner();showToast('Fehler: '+e.message)}};
 
 window.openEditLieferung=function(date){const we=lieferungen.find(w=>w.datum===date);if(we)window.open('lager.html','_blank')};
-window.openEditEntry=function(type,date){const list=type==='geraet'?geraetEntries:thekeEntries;const entry=list.find(e=>e.datum===date);if(entry)openForm(type,entry.items,entry.id,entry.datum)};
+window.openEditEntry=function(type,date){
+  const list = type==='geraet' ? geraetEntries : (type==='verfall' ? verfallEntries : thekeEntries);
+  const entry = list.find(e=>e.datum===date);
+  if(!entry) return;
+  openForm(type,entry.items,entry.id,entry.datum);
+  if(type==='verfall'){
+    const b=document.getElementById('form-bemerkung');
+    if(b) b.value = entry.bemerkung||'';
+  }
+};
 
 document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('gs-tbody').addEventListener('click',e=>{const cell=e.target.closest('.anfang-cell');if(cell)openAnfangsbestandModal(cell.dataset.prodId,cell.dataset.prodName)});
