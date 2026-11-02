@@ -733,6 +733,20 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
 }
 .hdr-left{display:flex;align-items:center}
 .btn-verfall{background:linear-gradient(100deg,#3F4A5F,#5B6B86);color:#fff}
+/* Liste im Fenster Haltbarkeit */
+.mhd-kat{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
+  color:var(--text-dim);margin:.9rem 0 .3rem}
+.mhd-kat:first-child{margin-top:.1rem}
+.mhd-zeile{display:flex;align-items:center;gap:.7rem;padding:.3rem .2rem;
+  border-top:1px solid #EDF1F6}
+.mhd-zeile .nm{flex:1 1 auto;min-width:0;font-size:.84rem;font-weight:600;line-height:1.3}
+.mhd-zeile .nm i{font-style:normal;color:#9AA6B6;font-weight:500;white-space:nowrap}
+.mhd-zeile input[type=date]{width:146px;flex:0 0 146px;padding:.35rem .5rem;
+  font-family:var(--mono);font-size:.8rem;border-radius:9px}
+@media(max-width:480px){
+  .mhd-zeile{gap:.4rem}
+  .mhd-zeile input[type=date]{width:132px;flex:0 0 132px;font-size:.74rem;padding:.3rem .35rem}
+}
 .btn-mhd{width:2.6rem;height:2.6rem;flex-shrink:0;display:inline-flex;align-items:center;
   justify-content:center;background:#fff;border:1px solid var(--glass-border);border-radius:11px;
   cursor:pointer;transition:all .2s;box-shadow:0 1px 3px rgba(30,37,50,.06);padding:0}
@@ -1552,6 +1566,7 @@ async function negMelden(lager, monat, gefunden, seiteName){
       await db.collection('warnungen').doc('negativ').set({eintraege:liste});
     }
     negEintraege = liste;
+    if(typeof glockeZaehler === 'function') glockeZaehler();
     // Frisch ins Minus gerutscht oder noch tiefer gerutscht? Dann sofort melden.
     const frisch = neu.filter(n=>{
       const vorher = alt.find(a => negKey(a)===negKey(n));
@@ -1891,6 +1906,7 @@ async function mhdSetzen(lager, prodId, art, fuer){
 async function mhdPruefen(sofort){
   try{
     mhdFaellig = await mhdSammeln();
+    if(typeof glockeZaehler === 'function') glockeZaehler();
     if(!mhdFaellig.length) return;
     const letzte = Number(localStorage.getItem('gg_mhd_zuletzt')) || 0;
     const neueSitzung = !sessionStorage.getItem('gg_mhd_sitzung');
@@ -1931,17 +1947,12 @@ async function openMhd(){
   _ml.style.color = (NEON[currentLager]||{}).ink || '#66748C';
   let h = '';
   GS_PRODUCTS.forEach((catObj,ci)=>{
-    h += `<div style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
-      color:#66748C;margin:${ci?'.9rem':'.2rem'} 0 .35rem">${catObj.cat}</div>`;
+    h += `<div class="mhd-kat">${catObj.cat}</div>`;
     catObj.items.forEach(prod=>{
       const wert = mhdDaten[prod.id] || '';
-      h += `<div style="display:flex;align-items:center;gap:.5rem;padding:.3rem .45rem;
-        border-top:1px solid #EDF1F6">
-        <span style="flex:1;min-width:0;font-size:.82rem;font-weight:600">${prod.name}
-          ${prod.unit?`<span style="color:#9AA6B6;font-weight:500"> · ${prod.unit}</span>`:''}</span>
-        <input type="date" value="${wert}" data-mhd="${prod.id}"
-          style="border:1.5px solid #DCE3ED;border-radius:9px;padding:.3rem .45rem;
-          font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:#141B29">
+      h += `<div class="mhd-zeile">
+        <span class="nm">${prod.name}${prod.unit?` <i>· ${prod.unit}</i>`:''}</span>
+        <input type="date" value="${wert}" data-mhd="${prod.id}">
       </div>`;
     });
   });
@@ -1973,7 +1984,168 @@ async function saveMhd(){
   hideSpinner();
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{ negStart(); negPruefungAnstossen(); mhdStart(); });
+
+/* ══════════ Glocke: Meldungen jederzeit nachlesen ════════════════════
+   Oben rechts vor dem Benutzernamen, nur am Rechner und nur für Admin und
+   Einkaufsleiter. Dahinter stehen dieselben Meldungen wie in den Fenstern —
+   wer eines zu schnell weggeklickt hat, findet hier alles wieder.        */
+function glockeErlaubt(){
+  try{
+    const u = JSON.parse(localStorage.getItem('gg_user')||'{}');
+    return ['Admin','Einkaufsleiter'].indexOf(u.role||'') >= 0;
+  }catch(e){ return false; }
+}
+
+function glockeStil(){
+  if(document.getElementById('glocke-stil')) return;
+  const s = document.createElement('style');
+  s.id = 'glocke-stil';
+  s.textContent = `
+.glocke{position:relative;width:2.1rem;height:2.1rem;border:none;background:rgba(255,255,255,.08);
+  border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  padding:0;margin-right:.1rem;transition:background .15s}
+.glocke:hover{background:rgba(255,255,255,.16)}
+.glocke svg{width:17px;height:17px;fill:none;stroke:#CFE0F2;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.glocke .zahl{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:9px;background:#C4183C;color:#fff;font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.glocke .zahl.leer{display:none}
+.gl-panel{position:fixed;top:calc(var(--header-h,64px) + .4rem);right:1rem;width:380px;
+  max-width:calc(100vw - 2rem);max-height:76vh;background:#fff;border:1px solid #DCE3ED;
+  border-radius:14px;box-shadow:0 20px 50px rgba(16,26,46,.28);z-index:3000;display:none;
+  flex-direction:column;overflow:hidden;font-family:'Poppins',sans-serif}
+.gl-panel.auf{display:flex}
+.gl-kopf{display:flex;gap:.3rem;padding:.6rem .7rem;border-bottom:1px solid #E4E9F0;background:#F7F9FC}
+.gl-kopf button{flex:1;border:1px solid transparent;background:none;border-radius:9px;
+  padding:.4rem .5rem;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;
+  color:#66748C;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.35rem}
+.gl-kopf button.on{background:#fff;border-color:#DCE3ED;color:#141B29;
+  box-shadow:0 1px 3px rgba(16,26,46,.1)}
+.gl-kopf .n{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:700;
+  background:#EDF1F7;color:#5A6980;border-radius:20px;padding:.05rem .4rem}
+.gl-kopf button.on .n{background:#C4183C;color:#fff}
+.gl-body{overflow-y:auto;padding:.6rem .7rem .8rem}
+.gl-leer{text-align:center;color:#8B97A8;font-size:.8rem;padding:1.6rem .5rem}
+.gl-row{padding:.55rem .65rem;border:1px solid #E4E9F0;border-radius:11px;margin-bottom:.45rem;
+  background:#FBFCFE}
+.gl-row .top{display:flex;gap:.5rem;align-items:baseline}
+.gl-row .top b{flex:1;min-width:0;font-size:.84rem;font-weight:600;color:#141B29}
+.gl-row .frist{font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:700}
+.gl-row s{display:block;text-decoration:none;font-size:.7rem;color:#6B7A90;margin-top:.1rem}
+.gl-row .akt{display:flex;gap:.4rem;margin-top:.45rem}
+.gl-row .akt button{flex:1;border-radius:9px;padding:.35rem;font-family:'Poppins',sans-serif;
+  font-size:.7rem;font-weight:700;cursor:pointer}
+.gl-row .akt .sp{border:1.3px solid #C8D0DC;background:#fff;color:#44506A}
+.gl-row .akt .er{border:none;background:#0C9C77;color:#fff}
+.gl-wert{font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C4183C;min-width:42px;
+  text-align:right}
+@media(max-width:900px){ .glocke{display:none} .gl-panel{display:none!important} }
+`;
+  document.head.appendChild(s);
+}
+
+let glTab = 'mhd';
+function glockeBauen(){
+  if(!glockeErlaubt()) return;
+  const rechts = document.querySelector('.hdr-right');
+  if(!rechts || document.querySelector('.glocke')) return;
+  glockeStil();
+  const b = document.createElement('button');
+  b.className = 'glocke';
+  b.title = 'Meldungen';
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5c0 4-1.5 5.5-1.5 5.5h14s-1.5-1.5-1.5-5.5A5.5 5.5 0 0 0 12 3.5Z"/>'
+    + '<path d="M10.3 18a2 2 0 0 0 3.4 0"/></svg><span class="zahl leer">0</span>';
+  b.onclick = (e) => { e.stopPropagation(); glockeUm(); };
+  rechts.insertBefore(b, rechts.firstChild);
+
+  const p = document.createElement('div');
+  p.className = 'gl-panel';
+  p.id = 'gl-panel';
+  p.innerHTML = '<div class="gl-kopf">'
+    + '<button data-gl="mhd">Haltbarkeit <span class="n" id="gl-n-mhd">0</span></button>'
+    + '<button data-gl="neg">Negativer Bestand <span class="n" id="gl-n-neg">0</span></button>'
+    + '</div><div class="gl-body" id="gl-body"></div>';
+  document.body.appendChild(p);
+  p.onclick = e => e.stopPropagation();
+  p.querySelectorAll('[data-gl]').forEach(btn=>{
+    btn.onclick = () => { glTab = btn.dataset.gl; glockeZeichnen(); };
+  });
+  document.addEventListener('click', ()=>{ p.classList.remove('auf'); });
+  glockeZaehler();
+}
+
+async function glockeUm(){
+  const p = document.getElementById('gl-panel');
+  if(!p) return;
+  if(p.classList.contains('auf')){ p.classList.remove('auf'); return; }
+  p.classList.add('auf');
+  document.getElementById('gl-body').innerHTML =
+    '<div class="gl-leer">Wird geladen …</div>';
+  try{
+    await negLaden();
+    mhdFaellig = await mhdSammeln();
+  }catch(e){}
+  glockeZeichnen();
+}
+
+function glockeZaehler(){
+  const b = document.querySelector('.glocke .zahl');
+  if(!b) return;
+  const n = (negEintraege ? negEintraege.length : 0) + (mhdFaellig ? mhdFaellig.length : 0);
+  b.textContent = n > 99 ? '99+' : n;
+  b.classList.toggle('leer', !n);
+  const a = document.getElementById('gl-n-mhd'), c = document.getElementById('gl-n-neg');
+  if(a) a.textContent = mhdFaellig ? mhdFaellig.length : 0;
+  if(c) c.textContent = negEintraege ? negEintraege.length : 0;
+}
+
+function glockeZeichnen(){
+  const body = document.getElementById('gl-body');
+  if(!body) return;
+  document.querySelectorAll('.gl-kopf [data-gl]').forEach(b=>
+    b.classList.toggle('on', b.dataset.gl === glTab));
+  glockeZaehler();
+  if(glTab === 'mhd'){
+    const liste = mhdFaellig || [];
+    body.innerHTML = liste.length ? liste.map(e=>{
+      const wann = e.tage < 0 ? 'abgelaufen seit ' + mhdDmy(e.bis)
+                 : (e.tage === 0 ? 'läuft heute ab'
+                                 : 'noch ' + e.tage + ' Tage · ' + mhdDmy(e.bis));
+      const farbe = e.tage < 0 ? '#C4183C' : (e.tage <= 7 ? '#8F5208' : '#44506A');
+      return '<div class="gl-row" data-row="' + e.lager + '|' + e.prodId + '">'
+        + '<div class="top"><b>' + e.name + '</b>'
+        + '<span class="frist" style="color:' + farbe + '">' + wann + '</span></div>'
+        + '<s>' + (mhdName[e.lager]||e.lager) + '</s>'
+        + '<div class="akt"><button class="sp" data-akt="spaeter">In 1 Woche erinnern</button>'
+        + '<button class="er" data-akt="erledigt">Erledigt</button></div></div>';
+    }).join('') : '<div class="gl-leer">Keine Haltbarkeit läuft demnächst ab.</div>';
+    body.querySelectorAll('[data-akt]').forEach(btn=>{
+      btn.onclick = async () => {
+        const reihe = btn.closest('[data-row]');
+        const [lager, prodId] = reihe.dataset.row.split('|');
+        const e = (mhdFaellig||[]).find(x=>x.lager===lager && x.prodId===prodId);
+        btn.disabled = true;
+        await mhdSetzen(lager, prodId, btn.dataset.akt, e ? e.bis : '');
+        mhdFaellig = (mhdFaellig||[]).filter(x=>!(x.lager===lager && x.prodId===prodId));
+        glockeZeichnen();
+      };
+    });
+  }else{
+    const liste = negEintraege || [];
+    body.innerHTML = liste.length ? liste.map(e=>{
+      const wo = (negName[e.lager]||e.lager) + (e.monat ? ' · ' + negMonatText(e.monat) : '')
+               + ' · ' + (e.seite||'');
+      return '<div class="gl-row"><div class="top"><b>' + (e.name||e.prodId) + '</b>'
+        + '<span class="gl-wert">' + e.wert + '</span></div>'
+        + '<s>' + wo + (e.aktion ? ' · nach: ' + e.aktion : '') + '</s></div>';
+    }).join('') : '<div class="gl-leer">Kein Bestand im Minus.</div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  negStart(); negPruefungAnstossen(); mhdStart(); glockeBauen();
+});
 </script>
 </body>
 </html>
