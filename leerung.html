@@ -3202,6 +3202,11 @@ function tauschSaldo(doc){
 }
 
 /* ══ Bank geplant ════════════════════════════════════════════════════ */
+// Jede Kreditzeile einer Planung oder Einzahlung bekommt eine feste Kennung.
+// Daran hängt später genau ein Kredit-Eintrag — so wird kein alter, längst
+// getilgter Kredit noch einmal aufgemacht, nur weil Geber und Betrag passen.
+const neueKid = () => 'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
 let planZeilen=[], planArtWert='scheine', planIndex=null;
 function openPlan(i){
   planIndex = (i===null||i===undefined) ? null : i;
@@ -3256,8 +3261,12 @@ function planPlus(){ planZeilen.push({betrag:'',herkunft:'kasse',geber:''}); ren
 
 async function savePlan(){
   const zeilen=planZeilen.filter(z=>parseNum(z.betrag)>0)
-    .map(z=>({betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
-              geber:z.herkunft==='kredit'?z.geber:''}));
+    .map(z=>{
+      const r={betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
+               geber:z.herkunft==='kredit'?z.geber:''};
+      if(r.herkunft==='kredit') r.kid = z.kid || neueKid();
+      return r;
+    });
   if(!zeilen.length){ showToast('Bitte einen Betrag eintragen.'); return; }
   const fehlt=zeilen.find(z=>z.herkunft==='kredit'&&!z.geber);
   if(fehlt){ showToast('Bei einem Kredit fehlt der Geldgeber.'); return; }
@@ -3282,6 +3291,7 @@ async function savePlan(){
 async function deletePlan(){
   if(planIndex===null) return;
   const plan=(monatDoc.bankPlan||[]).slice();
+  const alt=plan[planIndex];
   plan.splice(planIndex,1);
   showSpinner();
   try{
@@ -3419,8 +3429,12 @@ async function saveEin(){
   const ein=[];
   for(const e of einListe){
     const zeilen=e.zeilen.filter(z=>parseNum(z.betrag)>0)
-      .map(z=>({betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
-                geber:z.herkunft==='kredit'?z.geber:''}));
+      .map(z=>{
+        const r={betrag:parseNum(z.betrag),herkunft:z.herkunft||'kasse',
+                 geber:z.herkunft==='kredit'?z.geber:''};
+        if(r.herkunft==='kredit') r.kid = z.kid || neueKid();
+        return r;
+      });
     if(!zeilen.length) continue;
     if(zeilen.find(z=>z.herkunft==='kredit'&&!z.geber)){
       showToast('Bei einem Kredit fehlt der Geldgeber.'); return;
@@ -3449,27 +3463,53 @@ async function saveEin(){
 async function syncBankKredite(){
   const soll=[];
   (monatDoc.bankPlan||[]).forEach(p=>(p.zeilen||[]).forEach(z=>{
-    if(z.herkunft==='kredit'&&z.geber) soll.push({geber:z.geber,betrag:z.betrag,datum:heute()});
+    if(z.herkunft==='kredit'&&z.geber)
+      soll.push({geber:z.geber,betrag:z.betrag,datum:heute(),kid:z.kid||''});
   }));
   (monatDoc.bankEin||[]).forEach(b=>(b.zeilen||[]).forEach(z=>{
-    if(z.herkunft==='kredit'&&z.geber) soll.push({geber:z.geber,betrag:z.betrag,datum:b.datum||heute()});
+    if(z.herkunft==='kredit'&&z.geber)
+      soll.push({geber:z.geber,betrag:z.betrag,datum:b.datum||heute(),kid:z.kid||''});
   }));
-  const bank = kredite.filter(k=>k.nehmer===lg&&k.monat===monat&&k.zweck==='bank');
-  const getilgt = bank.filter(k=>k.getilgtAm);
-  const offen   = bank.filter(k=>!k.getilgtAm);
-  // Was schon getilgt ist, zählt als abgedeckt und wird nicht neu angelegt
-  const rest=[];
-  const benutzt=new Set();
-  soll.forEach(z=>{
-    const treffer=getilgt.findIndex((k,ix)=>!benutzt.has(ix)&&k.geber===z.geber&&
-      Math.abs(Number(k.betrag)-z.betrag)<0.01);
-    if(treffer>=0) benutzt.add(treffer); else rest.push(z);
-  });
-  for(const k of offen) await db.collection('leerung_kredit').doc(k.id).delete();
-  for(const z of rest){
+
+  // Alle Bank-Kredite dieser Filiale, auch aus früheren Monaten: ein getilgter
+  // Kredit aus dem Vormonat darf nicht als neuer offener wieder auftauchen.
+  const bank = kredite.filter(k=>k.nehmer===lg && k.zweck==='bank');
+  const behalten = new Set();
+  const neu = [];
+
+  for(const z of soll){
+    let d = z.kid ? bank.find(k=>k.bankRef===z.kid) : null;
+    if(!d){
+      // Altbestand ohne Kennung: gleicher Geber, gleiche ursprüngliche Summe.
+      // Getilgte zuerst — sie gelten als erledigt und werden nur übernommen.
+      const passt = k => !behalten.has(k.id) && !k.bankRef && k.geber===z.geber
+        && Math.abs(urspruenglich(k) - z.betrag) < 0.01;
+      d = bank.find(k=>k.getilgtAm && passt(k)) || bank.find(k=>!k.getilgtAm && passt(k));
+    }
+    if(d){
+      behalten.add(d.id);
+      if(z.kid && d.bankRef !== z.kid){
+        await db.collection('leerung_kredit').doc(d.id).set({bankRef:z.kid},{merge:true});
+      }
+    }else{
+      neu.push(z);
+    }
+  }
+
+  // Offene Bank-Kredite dieses Monats, zu denen es keine Zeile mehr gibt,
+  // fallen weg. Getilgte und Kredite mit Teilzahlungen bleiben unangetastet.
+  for(const k of bank){
+    if(k.getilgtAm || behalten.has(k.id)) continue;
+    if(k.monat !== monat) continue;
+    if(kredite.some(x=>x.teilVon===k.id)) continue;
+    await db.collection('leerung_kredit').doc(k.id).delete();
+  }
+
+  for(const z of neu){
     await db.collection('leerung_kredit').add({
       geber:z.geber, nehmer:lg, betrag:z.betrag, datum:z.datum,
-      monat, zweck:'bank', art:'scheine', getilgtAm:null, getilgtArt:null
+      monat, zweck:'bank', art:'scheine', getilgtAm:null, getilgtArt:null,
+      bankRef: z.kid || neueKid()
     });
   }
 }
