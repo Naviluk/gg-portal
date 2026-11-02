@@ -3455,6 +3455,24 @@ function krArt(v,b){
   b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
 }
+// Wie viel war ursprünglich vergeben? Teilzahlungen hängen als eigene Einträge
+// am Kredit, der offene Rest steht im Kredit selbst — zusammen ergibt das die
+// ursprüngliche Summe.
+function urspruenglich(k){
+  const wurzel = k.teilVon || k.id;
+  const haupt = kredite.find(x=>x.id===wurzel);
+  let su = haupt ? (Number(haupt.betrag)||0) : 0;
+  kredite.forEach(x=>{ if(x.teilVon===wurzel) su += Number(x.betrag)||0; });
+  return Math.round(su*100)/100;
+}
+// Was ist von diesem Kredit noch offen?
+function nochOffen(k){
+  const wurzel = k.teilVon || k.id;
+  const haupt = kredite.find(x=>x.id===wurzel);
+  if(!haupt || haupt.getilgtAm) return 0;
+  return Number(haupt.betrag)||0;
+}
+
 function openKredit(id){
   const k=kredite.find(x=>x.id===id); if(!k) return;
   kreditId=id;
@@ -3466,6 +3484,7 @@ function openKredit(id){
     ${eigen
       ? `<div>Verwendet für<b>${ZWECK[k.zweck]||'Kasse'}</b></div>`
       : `<div>Empfänger<b>${NAMEN[k.nehmer]||k.nehmer}</b></div>`}
+    <div>${eigen?'Aufgenommen über':'Vergeben über'}<b>${eur(urspruenglich(k))}</b></div>
     <div>${eigen?'Offener Betrag':'Noch offen'}<b>${eur(k.betrag)}</b></div>
     <div>Monat<b>${monatText(k.monat)}</b></div>`;
   document.getElementById('kr-hint').textContent = eigen
@@ -3551,11 +3570,14 @@ function openGetilgt(id){
   const eigen = k.nehmer===lg;
   document.getElementById('gt-titel').textContent =
     eigen ? 'Schuld an '+(NAMEN[k.geber]||k.geber) : 'Kredit an '+(NAMEN[k.nehmer]||k.nehmer);
+  const offenRest = nochOffen(k);
   document.getElementById('gt-det').innerHTML = `
     <div>${eigen?'Aufgenommen am':'Vergeben am'}<b>${dmy(k.datum)}</b></div>
+    <div>${eigen?'Aufgenommen über':'Vergeben über'}<b>${eur(urspruenglich(k))}</b></div>
     <div>Kredit aus<b>${monatText(k.monat)}</b></div>
     <div>Gezählt im Monat<b>${monatText((k.getilgtAm||'').slice(0,7))}</b></div>
-    ${k.teilVon?'<div>Art<b>Teilzahlung</b></div>':''}`;
+    ${k.teilVon?'<div>Art<b>Teilzahlung</b></div>':''}
+    ${offenRest?`<div>Davon noch offen<b>${eur(offenRest)}</b></div>`:''}`;
   gtArtWahl = (k.getilgtArt||k.art)==='muenzen' ? 'muenzen' : 'scheine';
   document.querySelectorAll('#gt-art button').forEach((b,ix)=>
     b.classList.toggle('on', (ix===0)===(gtArtWahl==='scheine')));
@@ -3563,7 +3585,7 @@ function openGetilgt(id){
   document.getElementById('gt-betrag').value = zahl(k.betrag);
   document.getElementById('gt-hint').textContent = k.teilVon
     ? 'Teilzahlung: ändert sich der Betrag, wandert die Differenz zurück in den offenen Rest des Kredits. „Tilgung zurücknehmen" löscht diese Zahlung und schlägt sie dem offenen Kredit wieder zu.'
-    : 'Das Datum bestimmt den Monat, in dem die Tilgung in der Kasse erscheint. Der Betrag gilt hier für Kredit und Tilgung zugleich — war die Rückzahlung kleiner, nimm die Tilgung zurück und erfasse sie neu als Teilzahlung. „Tilgung zurücknehmen" stellt den Kredit wieder als offen ein.';
+    : 'Das Datum bestimmt den Monat, in dem die Tilgung in der Kasse erscheint. Ein kleinerer Betrag wird als Teilzahlung verbucht — der Rest bleibt als offener Kredit stehen. „Tilgung zurücknehmen" stellt den ganzen Kredit wieder als offen ein.';
   openM('modal-getilgt');
 }
 async function saveGetilgt(){
@@ -3580,6 +3602,26 @@ async function saveGetilgt(){
   const diff = Math.round((alt-neu)*100)/100;
   showSpinner();
   try{
+    // Volle Tilgung auf einen kleineren Betrag geändert: daraus wird eine
+    // Teilzahlung, und der Rest hängt weiter als offener Kredit.
+    if(!k.teilVon && diff > 0.001){
+      await db.collection('leerung_kredit').add({
+        geber:k.geber, nehmer:k.nehmer, betrag:neu, datum:k.datum, monat:k.monat,
+        zweck:k.zweck, art:k.art, getilgtAm:tag, getilgtArt:gtArtWahl, teilVon:gtId
+      });
+      await db.collection('leerung_kredit').doc(gtId).set({
+        betrag: diff,
+        getilgtAm:  firebase.firestore.FieldValue.delete(),
+        getilgtArt: firebase.firestore.FieldValue.delete()
+      },{merge:true});
+      await melde('geld','Tilgung in Teilzahlung geändert',
+        (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
+                       : 'von '+(NAMEN[k.nehmer]||k.nehmer))
+        + ' · gezahlt '+zahl(neu)+' · offen '+zahl(diff)+' · '+dmy(tag), neu);
+      closeM('modal-getilgt');
+      showToast('Teilzahlung erfasst — Rest bleibt offen ✓');
+      await ladeFiliale(); hideSpinner(); return;
+    }
     // Bei einer Teilzahlung geht der Unterschied an den offenen Rest zurück
     if(k.teilVon && Math.abs(diff) > 0.001){
       const ref = db.collection('leerung_kredit').doc(k.teilVon);
