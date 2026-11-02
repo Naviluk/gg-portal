@@ -470,7 +470,8 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
    dazwischen scrollt statt unten aus dem Bild zu laufen. */
 #modal-leerung .modal,#modal-eintraege .modal,#modal-news .modal,#modal-wechsler .modal,
 #modal-neukredit .modal,#modal-tausch .modal,#modal-geber .modal,#modal-plan .modal,
-#modal-bank .modal,#modal-ein .modal,#modal-kredit .modal,#modal-vormonat .modal{
+#modal-bank .modal,#modal-ein .modal,#modal-kredit .modal,#modal-vormonat .modal,
+#modal-getilgt .modal{
   padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
 /* Sicherheitsnetz für später hinzukommende Fenster — ältere Browser überspringen die Regel */
 .modal-overlay .modal:has(> .dlg-head){padding:0;overflow:hidden;display:flex;
@@ -493,6 +494,9 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 .b-ghost{background:#fff;border:1px solid var(--glass-border)!important;color:var(--text-dim)}
 .b-acc{background:linear-gradient(100deg,var(--acc-d2),var(--acc-d1));color:#fff}
 .b-green{background:linear-gradient(100deg,#0A7D5F,#12B487);color:#fff}
+.b-rot{background:#fff;border:1.4px solid #C4183C!important;color:#C4183C}
+button.drow{width:100%;cursor:pointer;text-align:left;font-family:'Poppins',sans-serif}
+button.drow:hover{background:#E3E8EF}
 .fl{display:block;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);
   font-weight:800;margin:.9rem 0 .35rem}
 .fl:first-child{margin-top:0}
@@ -1320,6 +1324,8 @@ textarea.note:focus{border-color:var(--acc)}
     </div>
     <div class="dlg-body">
       <div class="det" id="kr-det"></div>
+      <label class="fl">Rückzahlung am</label>
+      <input type="date" class="num" id="kr-datum">
       <label class="fl">Rückgabe in</label>
       <div class="seg2" id="kr-art">
         <button onclick="krArt('scheine',this)">Scheine</button>
@@ -1332,6 +1338,35 @@ textarea.note:focus{border-color:var(--acc)}
     <div class="dlg-foot">
       <button class="btn b-ghost" onclick="closeM('modal-kredit')">Schließen</button>
       <button class="btn b-green" id="kr-btn" onclick="tilgen()">✓ Kredit tilgen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: getilgten Kredit ändern ══ -->
+<div class="modal-overlay" id="modal-getilgt" onclick="if(event.target===this)closeM('modal-getilgt')">
+  <div class="modal" style="max-width:420px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-getilgt')">✕</button>
+      <div class="dlg-eyebrow">Kredit</div>
+      <div class="dlg-title" id="gt-titel">—</div>
+    </div>
+    <div class="dlg-body">
+      <div class="det" id="gt-det"></div>
+      <label class="fl">Getilgt am</label>
+      <input type="date" class="num" id="gt-datum">
+      <label class="fl">Rückgabe in</label>
+      <div class="seg2" id="gt-art">
+        <button onclick="gtArt('scheine',this)">Scheine</button>
+        <button onclick="gtArt('muenzen',this)">Münzen</button>
+      </div>
+      <label class="fl">Betrag</label>
+      <input class="num" id="gt-betrag" inputmode="decimal" autocomplete="off">
+      <p class="hint" id="gt-hint"></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-rot" onclick="tilgungZurueck()">Tilgung zurücknehmen</button>
+      <button class="btn b-ghost" onclick="closeM('modal-getilgt')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveGetilgt()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -2073,8 +2108,8 @@ async function renderMain(){
         const eigen=k.nehmer===lg;
         const art=(k.getilgtArt||k.art)==='muenzen'?'Münzen':'Scheine';
         const teil=k.teilVon?' · Teilzahlung':'';
-        return `<div class="drow"><span class="nm">${eigen?'Schuld an '+(NAMEN[k.geber]||k.geber):'Kredit an '+(NAMEN[k.nehmer]||k.nehmer)} · ${eigen?'getilgt':'zurück'} am ${dmy(k.getilgtAm)} · ${art}${teil}</span>
-          <span class="val">${eur(k.betrag)}</span></div>`;
+        return `<button class="drow" onclick="openGetilgt('${k.id}')" title="Datum oder Betrag ändern"><span class="nm">${eigen?'Schuld an '+(NAMEN[k.geber]||k.geber):'Kredit an '+(NAMEN[k.nehmer]||k.nehmer)} · ${eigen?'getilgt':'zurück'} am ${dmy(k.getilgtAm)} · ${art}${teil}</span>
+          <span class="val">${eur(k.betrag)}</span></button>`;
       }).join('')
     : '';
 }
@@ -3442,8 +3477,20 @@ function openKredit(id){
   document.querySelectorAll('#kr-art button').forEach((b,ix)=>
     b.classList.toggle('on', (ix===0)===(kreditArt==='scheine')));
   document.getElementById('kr-betrag').value = zahl(k.betrag);
+  document.getElementById('kr-datum').value = standardTilgDatum();
   openM('modal-kredit');
 }
+// Vorschlag für das Tilgungsdatum: heute, wenn der laufende Monat offen ist,
+// sonst der letzte Tag des angezeigten Monats — die Tilgung gehört ja dorthin.
+function letzterTag(m){
+  const [y,mm]=m.split('-').map(Number);
+  return m+'-'+String(new Date(y,mm,0).getDate()).padStart(2,'0');
+}
+function standardTilgDatum(){
+  const jetzt = monatKey(new Date());
+  return monat === jetzt ? heute() : letzterTag(monat);
+}
+
 async function tilgen(){
   if(!kreditId) return;
   const k=kredite.find(x=>x.id===kreditId);
@@ -3452,22 +3499,27 @@ async function tilgen(){
   let zahl_ = parseNum(document.getElementById('kr-betrag').value);
   if(!zahl_ || zahl_<=0){ showToast('Bitte einen Betrag eintragen.'); return; }
   if(zahl_ > offen + 0.001){ showToast('Mehr als offen ist nicht möglich.'); return; }
+  const tag = document.getElementById('kr-datum').value;
+  if(!tag){ showToast('Bitte ein Datum für die Rückzahlung wählen.'); return; }
+  if(k.datum && tag < k.datum){
+    showToast('Die Rückzahlung kann nicht vor dem Kredit liegen.'); return;
+  }
   showSpinner();
   try{
     if(Math.abs(zahl_-offen) < 0.01){
       // vollständig
       await db.collection('leerung_kredit').doc(kreditId)
-        .set({getilgtAm:heute(), getilgtArt:kreditArt},{merge:true});
+        .set({getilgtAm:tag, getilgtArt:kreditArt},{merge:true});
       await melde('geld','Kredit getilgt',
         (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
-                       : 'von '+(NAMEN[k.nehmer]||k.nehmer))+' · vollständig', zahl_);
+                       : 'von '+(NAMEN[k.nehmer]||k.nehmer))+' · vollständig · '+dmy(tag), zahl_);
       showToast('Kredit erledigt ✓');
     }else{
       // Teilzahlung: der gezahlte Anteil wird als eigener, erledigter Eintrag
       // festgehalten, der Rest bleibt als offener Kredit stehen.
       await db.collection('leerung_kredit').add({
         geber:k.geber, nehmer:k.nehmer, betrag:zahl_, datum:k.datum, monat:k.monat,
-        zweck:k.zweck, art:k.art, getilgtAm:heute(), getilgtArt:kreditArt, teilVon:kreditId
+        zweck:k.zweck, art:k.art, getilgtAm:tag, getilgtArt:kreditArt, teilVon:kreditId
       });
       await db.collection('leerung_kredit').doc(kreditId)
         .set({betrag: Math.round((offen-zahl_)*100)/100},{merge:true});
@@ -3478,6 +3530,112 @@ async function tilgen(){
       showToast('Teilzahlung erfasst ✓');
     }
     closeM('modal-kredit');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Getilgten Kredit nachträglich ändern ════════════════════════════ */
+// Datum und Betrag einer schon erledigten Tilgung lassen sich korrigieren.
+// Das Datum entscheidet, in welchem Monat die Tilgung zählt.
+let gtId = null, gtArtWahl = 'scheine';
+
+function gtArt(a, btn){
+  gtArtWahl = a;
+  document.querySelectorAll('#gt-art button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function openGetilgt(id){
+  const k = kredite.find(x=>x.id===id); if(!k) return;
+  gtId = id;
+  const eigen = k.nehmer===lg;
+  document.getElementById('gt-titel').textContent =
+    eigen ? 'Schuld an '+(NAMEN[k.geber]||k.geber) : 'Kredit an '+(NAMEN[k.nehmer]||k.nehmer);
+  document.getElementById('gt-det').innerHTML = `
+    <div>${eigen?'Aufgenommen am':'Vergeben am'}<b>${dmy(k.datum)}</b></div>
+    <div>Kredit aus<b>${monatText(k.monat)}</b></div>
+    <div>Gezählt im Monat<b>${monatText((k.getilgtAm||'').slice(0,7))}</b></div>
+    ${k.teilVon?'<div>Art<b>Teilzahlung</b></div>':''}`;
+  gtArtWahl = (k.getilgtArt||k.art)==='muenzen' ? 'muenzen' : 'scheine';
+  document.querySelectorAll('#gt-art button').forEach((b,ix)=>
+    b.classList.toggle('on', (ix===0)===(gtArtWahl==='scheine')));
+  document.getElementById('gt-datum').value  = k.getilgtAm || '';
+  document.getElementById('gt-betrag').value = zahl(k.betrag);
+  document.getElementById('gt-hint').textContent = k.teilVon
+    ? 'Teilzahlung: ändert sich der Betrag, wandert die Differenz zurück in den offenen Rest des Kredits. „Tilgung zurücknehmen" löscht diese Zahlung und schlägt sie dem offenen Kredit wieder zu.'
+    : 'Das Datum bestimmt den Monat, in dem die Tilgung in der Kasse erscheint. Der Betrag gilt hier für Kredit und Tilgung zugleich — war die Rückzahlung kleiner, nimm die Tilgung zurück und erfasse sie neu als Teilzahlung. „Tilgung zurücknehmen" stellt den Kredit wieder als offen ein.';
+  openM('modal-getilgt');
+}
+async function saveGetilgt(){
+  if(!gtId) return;
+  const k = kredite.find(x=>x.id===gtId); if(!k) return;
+  const tag = document.getElementById('gt-datum').value;
+  const neu = parseNum(document.getElementById('gt-betrag').value);
+  if(!tag){ showToast('Bitte ein Datum wählen.'); return; }
+  if(!neu || neu<=0){ showToast('Bitte einen Betrag eintragen.'); return; }
+  if(k.datum && tag < k.datum){
+    showToast('Die Tilgung kann nicht vor dem Kredit liegen.'); return;
+  }
+  const alt = Number(k.betrag)||0;
+  const diff = Math.round((alt-neu)*100)/100;
+  showSpinner();
+  try{
+    // Bei einer Teilzahlung geht der Unterschied an den offenen Rest zurück
+    if(k.teilVon && Math.abs(diff) > 0.001){
+      const ref = db.collection('leerung_kredit').doc(k.teilVon);
+      const eltern = await ref.get();
+      if(eltern.exists){
+        const rest = Math.round(((Number(eltern.data().betrag)||0) + diff)*100)/100;
+        if(rest < -0.001){ hideSpinner(); showToast('So viel war nicht offen.'); return; }
+        if(rest < 0.01) await ref.delete();
+        else await ref.set({betrag:rest},{merge:true});
+      }
+    }
+    await db.collection('leerung_kredit').doc(gtId)
+      .set({getilgtAm:tag, getilgtArt:gtArtWahl, betrag:neu},{merge:true});
+    await melde('geld','Tilgung geändert',
+      (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
+                     : 'von '+(NAMEN[k.nehmer]||k.nehmer))
+      + ' · ' + dmy(k.getilgtAm) + ' → ' + dmy(tag), neu);
+    closeM('modal-getilgt');
+    showToast('Tilgung geändert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function tilgungZurueck(){
+  if(!gtId) return;
+  const k = kredite.find(x=>x.id===gtId); if(!k) return;
+  if(!confirm('Diese Tilgung zurücknehmen? Der Kredit steht danach wieder offen.')) return;
+  showSpinner();
+  try{
+    if(k.teilVon){
+      const ref = db.collection('leerung_kredit').doc(k.teilVon);
+      const eltern = await ref.get();
+      if(eltern.exists){
+        const rest = Math.round(((Number(eltern.data().betrag)||0) + (Number(k.betrag)||0))*100)/100;
+        await ref.set({betrag:rest},{merge:true});
+        await db.collection('leerung_kredit').doc(gtId).delete();
+      }else{
+        // Der ursprüngliche Kredit ist weg — die Teilzahlung wird selbst zum offenen Kredit
+        await db.collection('leerung_kredit').doc(gtId).set({
+          getilgtAm: firebase.firestore.FieldValue.delete(),
+          getilgtArt: firebase.firestore.FieldValue.delete(),
+          teilVon: firebase.firestore.FieldValue.delete()
+        },{merge:true});
+      }
+    }else{
+      await db.collection('leerung_kredit').doc(gtId).set({
+        getilgtAm: firebase.firestore.FieldValue.delete(),
+        getilgtArt: firebase.firestore.FieldValue.delete()
+      },{merge:true});
+    }
+    await melde('geld','Tilgung zurückgenommen',
+      (k.nehmer===lg ? 'Schuld an '+(NAMEN[k.geber]||k.geber)
+                     : 'von '+(NAMEN[k.nehmer]||k.nehmer))
+      + ' · war ' + dmy(k.getilgtAm), Number(k.betrag)||0);
+    closeM('modal-getilgt');
+    showToast('Tilgung zurückgenommen');
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
