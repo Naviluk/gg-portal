@@ -1179,6 +1179,7 @@ function renderTable(){
 function renderTableActual(){
   const isZentral = currentLager === 'zentrallager';
   const lager = currentLager;
+  const negFunde = [];   // Artikel, deren End Bestand im Minus steht
 
   const thead = document.getElementById('lager-thead');
   const tbody = document.getElementById('lager-tbody');
@@ -1355,11 +1356,17 @@ function renderTableActual(){
         }
       }
       const bestandVal = endBestand===null ? '—' : endBestand;
-      const bestandStyle = bestandVal !== '—' ? 'color:var(--neon-cyan)' : '';
+      if(typeof endBestand==='number' && endBestand<0){
+        negFunde.push({prodId:prod.id, name:prod.name, wert:endBestand});
+      }
+      const bestandStyle = bestandVal === '—' ? ''
+        : (Number(bestandVal)<0 ? 'color:var(--neon-magenta)' : 'color:var(--neon-cyan)');
       tbHTML += `<td class="num-cell" style="${bestandStyle}">${bestandVal}</td>`;
       tbHTML += `</tr>`;
     });
   });
+
+  negMelden(currentLager, currentZeitraum, negFunde);
 
   // ── SHOPS SECTION (Zentrallager only) ──
   if(isZentral){
@@ -1506,22 +1513,26 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
       });
       abGS = endBestandGS;
     } else {
-      const [weSnap, gSnap, tSnap] = await Promise.all([
+      const [weSnap, gSnap, tSnap, vSnap] = await Promise.all([
         db.collection('wareneingang').where('lager','==',lager).where('monat','==',mo).get(),
         db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
         db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
+        db.collection('gs_verfall').where('lager','==',lager).where('monat','==',mo).get(),
       ]);
       const liefSum = dedupSumFromSnap(weSnap);
       const gerSum = {};
       gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
       const thkSum = {};
       tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thkSum[pid]=(thkSum[pid]||0)+(Number(items[pid])||0); }); });
+      // Abgelaufene Ware zählt wie ein Abgang, sonst wäre der Übertrag zu hoch
+      const vfSum = {};
+      vSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ vfSum[pid]=(vfSum[pid]||0)+(Number(items[pid])||0); }); });
 
       const endBestandGS = {};
       PRODUCTS.forEach(catObj=>{
         if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
         catObj.items.forEach(prod=>{
-          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0);
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0) - (Number(vfSum[prod.id])||0);
         });
       });
       abGS = endBestandGS;
@@ -2328,6 +2339,8 @@ window.backToEdit = function(){
 window.confirmWareneingang = async function(){
   showSpinner();
   const date=document.getElementById('we-date').value;
+  window.LETZTE_AKTION = (currentLager==='zentrallager' ? 'Wareneingang' : 'Lieferung')
+    + ' vom ' + (date ? date.split('-').reverse().join('.') : '');
   const monat=date.slice(0,7);
   const activeShops=weShopRows.filter(s=>s&&!s.removed&&s.shop);
   const entry={
@@ -2522,6 +2535,424 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 
+
+const NEG_SEITE = 'Bestände';
+
+/* ══════════ Warnung bei negativem Bestand ══════════════════════════════
+   Eine Seite meldet, was sie gerade als negativ errechnet; die Liste liegt in
+   Firestore (warnungen/negativ), damit die Warnung auch nach dem Abmelden
+   bestehen bleibt. Sie verschwindet erst, wenn dieselbe Seite den Artikel
+   nicht mehr im Minus sieht. Gezeigt wird sie beim ersten Öffnen einer
+   Lager-Seite in einer Sitzung, danach stündlich und sofort, sobald eine
+   Eingabe einen Bestand ins Minus zieht.                                */
+let negEintraege = [];
+let negTimer = null;
+let negStill = false;   // während der Hintergrundprüfung: erst am Ende ein Fenster
+window.LETZTE_AKTION = '';
+
+const negKey = e => [e.lager, e.monat, e.prodId].join('|');
+const negName = {zentrallager:'Zentrallager', nettetal:'Nettetal', 'brüggen':'Brüggen',
+                 viersen:'Viersen', 'köln':'Köln'};
+function negMonatText(m){
+  const M=['Januar','Februar','März','April','Mai','Juni','Juli','August',
+           'September','Oktober','November','Dezember'];
+  if(!m || m.length<7) return '';
+  return M[Number(m.slice(5,7))-1]+' '+m.slice(0,4);
+}
+
+async function negLaden(){
+  try{
+    const d = await db.collection('warnungen').doc('negativ').get();
+    negEintraege = (d.exists && Array.isArray(d.data().eintraege)) ? d.data().eintraege : [];
+  }catch(e){ negEintraege = []; }
+  return negEintraege;
+}
+
+// Was diese Seite gerade sieht, ersetzt die früheren Meldungen derselben
+// Seite für dieselbe Filiale und denselben Monat.
+async function negMelden(lager, monat, gefunden, seiteName){
+  const SEITE = seiteName || NEG_SEITE;
+  const aktion = window.LETZTE_AKTION || '';
+  window.LETZTE_AKTION = '';
+  try{
+    await negLaden();
+    const alt = negEintraege.filter(e =>
+      e.seite===SEITE && e.lager===lager && e.monat===monat);
+    const altKeys = new Set(alt.map(negKey));
+    const rest = negEintraege.filter(e =>
+      !(e.seite===SEITE && e.lager===lager && e.monat===monat));
+    const neu = gefunden.map(g => Object.assign({
+      seite:SEITE, lager, monat, gemeldet:new Date().toISOString()
+    }, g));
+    // schon bekannte Einträge behalten ihre ursprüngliche Beschreibung
+    neu.forEach(n=>{
+      const vorher = alt.find(a => negKey(a)===negKey(n));
+      n.aktion = vorher ? (vorher.aktion||'') : aktion;
+      if(vorher) n.gemeldet = vorher.gemeldet || n.gemeldet;
+    });
+    const liste = rest.concat(neu);
+    const gleich = liste.length===negEintraege.length
+      && liste.every((x,i)=>negKey(x)===negKey(negEintraege[i]) && x.wert===negEintraege[i].wert);
+    if(!gleich){
+      await db.collection('warnungen').doc('negativ').set({eintraege:liste});
+    }
+    negEintraege = liste;
+    // Frisch ins Minus gerutscht oder noch tiefer gerutscht? Dann sofort melden.
+    const frisch = neu.filter(n=>{
+      const vorher = alt.find(a => negKey(a)===negKey(n));
+      return !vorher || Number(n.wert) < Number(vorher.wert);
+    });
+    if(frisch.length && !negStill) negFenster(frisch, aktion);
+  }catch(e){ console.warn('Negativ-Meldung:', e.message); }
+}
+
+function negFenster(liste, aktion){
+  if(!liste || !liste.length) return;
+  document.getElementById('neg-warnung')?.remove();
+  const zeilen = liste.map(e=>{
+    const wo = (negName[e.lager]||e.lager) + (e.monat ? ' · '+negMonatText(e.monat) : '');
+    return '<div style="display:flex;gap:.6rem;align-items:flex-start;padding:.55rem .7rem;'
+      + 'border-top:1px solid #F3D5DD">'
+      + '<span style="font-family:\'IBM Plex Mono\',monospace;font-weight:700;color:#C4183C;'
+      + 'min-width:46px;text-align:right">' + e.wert + '</span>'
+      + '<span style="flex:1;min-width:0"><b style="font-size:.86rem;font-weight:600">'
+      + (e.name||e.prodId) + '</b>'
+      + '<s style="display:block;text-decoration:none;font-size:.72rem;color:#6B7A90">'
+      + wo + ' · ' + (e.seite||'') + (e.aktion ? ' · nach: '+e.aktion : '') + '</s></span></div>';
+  }).join('');
+  const kopf = aktion
+    ? 'Achtung! Nach der Eingabe <b>' + aktion + '</b> ist der Bestand negativ geworden.'
+    : 'Achtung! Bei diesen Artikeln ist der Bestand negativ.';
+  const el = document.createElement('div');
+  el.id = 'neg-warnung';
+  el.style.cssText = 'position:fixed;inset:0;z-index:4000;background:rgba(20,27,41,.5);'
+    + 'display:flex;align-items:center;justify-content:center;padding:1rem;'
+    + "font-family:'Poppins',sans-serif";
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;overflow:hidden;'
+    + 'box-shadow:0 24px 60px rgba(16,26,46,.4);max-height:88vh;display:flex;flex-direction:column">'
+    + '<div style="background:#C4183C;color:#fff;padding:.85rem 1rem">'
+    + '<div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;'
+    + 'color:#FFD1DD">Bestand</div>'
+    + '<div style="font-size:1rem;font-weight:700">Negativer Bestand</div></div>'
+    + '<div style="padding:.9rem 1rem;overflow-y:auto">'
+    + '<p style="font-size:.84rem;line-height:1.5;color:#1B2536;margin:0 0 .6rem">' + kopf
+    + (aktion ? ' Die Eingabe bleibt erhalten — bitte prüfen und Maßnahmen ergreifen.'
+              : ' Bitte prüfen und Maßnahmen ergreifen.') + '</p>'
+    + '<div style="border:1px solid #F3D5DD;border-radius:11px;overflow:hidden;background:#FFF7F9">'
+    + zeilen.replace('border-top:1px solid #F3D5DD','border-top:none') + '</div>'
+    + '<p style="font-size:.72rem;color:#6B7A90;margin-top:.7rem">Solange der Bestand im Minus '
+    + 'bleibt, erscheint dieser Hinweis stündlich und bei jeder neuen Anmeldung.</p></div>'
+    + '<div style="padding:.7rem 1rem .9rem;background:#F7F9FC;border-top:1px solid #DCE3ED">'
+    + '<button id="neg-ok" style="width:100%;border:none;border-radius:12px;padding:.75rem;'
+    + "font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700;background:#C4183C;"
+    + 'color:#fff;cursor:pointer">Verstanden</button></div></div>';
+  document.body.appendChild(el);
+  const zu = () => { el.remove(); localStorage.setItem('gg_neg_zuletzt', String(Date.now())); };
+  el.querySelector('#neg-ok').onclick = zu;
+  el.onclick = ev => { if(ev.target===el) zu(); };
+  localStorage.setItem('gg_neg_zuletzt', String(Date.now()));
+  sessionStorage.setItem('gg_neg_sitzung', '1');
+}
+
+// Beim Öffnen einer Lager-Seite: in einer neuen Sitzung sofort, sonst stündlich
+async function negStart(){
+  await negLaden();
+  const zeigen = () => {
+    if(!negEintraege.length || einFensterOffen()) return;
+    const letzte = Number(localStorage.getItem('gg_neg_zuletzt')) || 0;
+    const neueSitzung = !sessionStorage.getItem('gg_neg_sitzung');
+    if(neueSitzung || Date.now()-letzte >= 3600000) negFenster(negEintraege, '');
+  };
+  zeigen();
+  if(negTimer) clearInterval(negTimer);
+  negTimer = setInterval(async ()=>{ await negLaden(); zeigen(); }, 600000);
+}
+
+
+// Hintergrundprüfung: alle Filialen im laufenden Monat, ohne sie zu öffnen.
+// Läuft einmal je Sitzung, erst wenn die Seite fertig und der Browser
+// unbeschäftigt ist, und holt jede Sammlung genau einmal am Stück statt
+// Monat für Monat — damit bleibt die Seite flüssig.
+const NEG_FILIALEN = ['nettetal','brüggen','viersen','köln'];
+
+function negMonatJetzt(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function negMonatsKette(bis){
+  const [by,bm] = bis.split('-').map(Number);
+  const k = []; let y=2026, m=6;
+  while(k.length<60){
+    k.push(y+'-'+String(m).padStart(2,'0'));
+    if(y===by && m===bm) break;
+    m++; if(m>12){ m=1; y++; }
+  }
+  return k;
+}
+// Lieferungen: je Datum zählt nur ein Eintrag — wie auf den Seiten
+function negSummeLief(docs){
+  const proDatum = {};
+  docs.forEach(d=>{ if(d.datum && !proDatum[d.datum]) proDatum[d.datum]=d; });
+  const su = {};
+  Object.values(proDatum).forEach(d=>{
+    const it = d.items||{};
+    Object.keys(it).forEach(pid=>{ su[pid]=(su[pid]||0)+(Number(it[pid])||0); });
+  });
+  return su;
+}
+function negSumme(docs){
+  const su = {};
+  docs.forEach(d=>{ const it=d.items||{};
+    Object.keys(it).forEach(pid=>{ su[pid]=(su[pid]||0)+(Number(it[pid])||0); }); });
+  return su;
+}
+
+async function negPruefeAlle(){
+  if(sessionStorage.getItem('gg_neg_geprueft')) return;
+  sessionStorage.setItem('gg_neg_geprueft','1');
+  negStill = true;
+  try{
+    const monat = negMonatJetzt();
+    const kette = negMonatsKette(monat);
+    const [pSnap, abSnap, weSnap, gSnap, tSnap, vSnap] = await Promise.all([
+      db.collection('produkte').get(),
+      db.collection('anfangsbestand').get(),
+      db.collection('wareneingang').get(),
+      db.collection('gs_geraet').get(),
+      db.collection('gs_theke').get(),
+      db.collection('gs_verfall').get()
+    ]);
+    // nur Getränke und Snacks — bei den übrigen Kategorien kommt der Bestand
+    // aus der Inventur und lässt sich hier nicht nachrechnen
+    const artikel = {};
+    pSnap.forEach(d=>{ const p=d.data();
+      if(p.cat==='Getränke' || p.cat==='Snacks') artikel[d.id] = p.name||d.id; });
+    const start = {};
+    abSnap.forEach(d=>{ start[d.id] = d.data(); });
+    const nach = (snap) => {
+      const o = {};
+      snap.forEach(d=>{ const x=d.data();
+        const k=(x.lager||'')+'|'+(x.monat||'');
+        (o[k]=o[k]||[]).push(x); });
+      return o;
+    };
+    const liefD = nach(weSnap), gerD = nach(gSnap), thkD = nach(tSnap), vfD = nach(vSnap);
+
+    for(const lager of NEG_FILIALEN){
+      let bestand = Object.assign({}, start[lager+'_2026-06']||{});
+      for(let i=1;i<kette.length;i++){
+        const mo = kette[i-1], k = lager+'|'+mo;
+        const li = negSummeLief(liefD[k]||[]), ge = negSumme(gerD[k]||[]),
+              th = negSumme(thkD[k]||[]),      vf = negSumme(vfD[k]||[]);
+        const neu = {};
+        Object.keys(artikel).forEach(pid=>{
+          neu[pid] = (Number(bestand[pid])||0) + (Number(li[pid])||0)
+                   - (Number(ge[pid])||0) - (Number(th[pid])||0) - (Number(vf[pid])||0);
+        });
+        bestand = neu;
+      }
+      // Bestand am Ende des laufenden Monats
+      const k = lager+'|'+monat;
+      const li = negSummeLief(liefD[k]||[]), ge = negSumme(gerD[k]||[]),
+            th = negSumme(thkD[k]||[]),      vf = negSumme(vfD[k]||[]);
+      const funde = [];
+      Object.keys(artikel).forEach(pid=>{
+        const w = (Number(bestand[pid])||0) + (Number(li[pid])||0)
+                - (Number(ge[pid])||0) - (Number(th[pid])||0) - (Number(vf[pid])||0);
+        if(w < 0) funde.push({prodId:pid, name:artikel[pid], wert:w});
+      });
+      await negMelden(lager, monat, funde, 'Getränke & Snacks');
+    }
+    negStill = false;
+    await negLaden();
+    // ein Fenster für alle Filialen zusammen
+    const letzte = Number(localStorage.getItem('gg_neg_zuletzt')) || 0;
+    const frischeSitzung = !sessionStorage.getItem('gg_neg_sitzung');
+    if(negEintraege.length && !einFensterOffen()
+       && (frischeSitzung || Date.now()-letzte >= 3600000)){
+      negFenster(negEintraege, '');
+    }
+  }catch(e){ negStill = false; console.warn('Bestandsprüfung:', e.message); }
+}
+
+// erst laufen lassen, wenn die Seite steht und nichts Wichtiges ansteht
+function negPruefungAnstossen(){
+  const los = () => { if(!document.hidden) negPruefeAlle(); };
+  if(window.requestIdleCallback) requestIdleCallback(los, {timeout:8000});
+  else setTimeout(los, 4000);
+}
+
+
+/* ══════════ Erinnerung: Haltbarkeit läuft ab ═════════════════════════
+   Einen Monat vor dem eingetragenen Datum meldet sich das Programm — nach
+   derselben Regel wie beim negativen Bestand: beim ersten Öffnen einer
+   Lager-Seite in einer Sitzung und danach stündlich. Je Artikel lässt sich
+   die Erinnerung um eine Woche verschieben oder ganz abhaken.           */
+const MHD_FILIALEN = ['nettetal','brüggen','viersen','köln'];
+// Über ein geöffnetes Fenster legt sich keine Erinnerung — sie kommt später wieder
+function einFensterOffen(){
+  return !!document.querySelector('.modal-overlay.show, .modal.show, #neg-warnung, #mhd-warnung');
+}
+const MHD_VORLAUF = 30;      // Tage
+let mhdFaellig = [];
+let mhdTimer = null;
+
+const mhdHeute = () => {
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
+function mhdTageBis(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const ziel = new Date(y,m-1,d);
+  const jetzt = new Date(); jetzt.setHours(0,0,0,0);
+  return Math.round((ziel-jetzt)/86400000);
+}
+function mhdPlus(tage){
+  const d = new Date(); d.setDate(d.getDate()+tage);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+const mhdDmy = iso => iso ? iso.split('-').reverse().join('.') : '—';
+const mhdName = {zentrallager:'Zentrallager', nettetal:'Nettetal', 'brüggen':'Brüggen',
+                 viersen:'Viersen', 'köln':'Köln'};
+
+async function mhdSammeln(){
+  const treffer = [];
+  const heute = mhdHeute();
+  const snap = await db.collection('gs_mhd').get();
+  // Artikelnamen: auf der Seite Getränke & Snacks liegen sie schon vor
+  let namen = {};
+  if(typeof GS_PRODUCTS !== 'undefined' && GS_PRODUCTS.length){
+    GS_PRODUCTS.forEach(c=>c.items.forEach(p=>{ namen[p.id]=p.name; }));
+  }else{
+    try{
+      const ps = await db.collection('produkte').get();
+      ps.forEach(d=>{ namen[d.id] = (d.data().name)||d.id; });
+    }catch(e){}
+  }
+  snap.forEach(doc=>{
+    const x = doc.data();
+    const lager = x.lager || doc.id;
+    const daten = x.daten || {}, zustand = x.zustand || {};
+    Object.keys(daten).forEach(pid=>{
+      const bis = daten[pid];
+      if(!bis) return;
+      const tage = mhdTageBis(bis);
+      if(tage > MHD_VORLAUF) return;                 // noch weit hin
+      const z = zustand[pid];
+      if(z && z.fuer === bis){
+        if(z.art === 'erledigt') return;             // abgehakt
+        if(z.art === 'spaeter' && z.bis && z.bis > heute) return;  // vertagt
+      }
+      treffer.push({lager, prodId:pid, name:namen[pid]||pid, bis, tage});
+    });
+  });
+  treffer.sort((a,b)=>a.tage-b.tage);
+  return treffer;
+}
+
+function mhdFenster(liste){
+  if(!liste || !liste.length) return;
+  document.getElementById('mhd-warnung')?.remove();
+  const zeile = e => {
+    const wann = e.tage < 0 ? 'abgelaufen seit ' + mhdDmy(e.bis)
+               : (e.tage === 0 ? 'läuft heute ab' : 'noch ' + e.tage + ' Tage · ' + mhdDmy(e.bis));
+    const farbe = e.tage < 0 ? '#C4183C' : (e.tage <= 7 ? '#8F5208' : '#44506A');
+    return '<div data-mhd-row="' + e.lager + '|' + e.prodId + '" style="padding:.6rem .7rem;'
+      + 'border-top:1px solid #E4E9F0">'
+      + '<div style="display:flex;gap:.5rem;align-items:baseline">'
+      + '<b style="flex:1;min-width:0;font-size:.86rem;font-weight:600">' + e.name + '</b>'
+      + '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.72rem;font-weight:700;'
+      + 'color:' + farbe + '">' + wann + '</span></div>'
+      + '<s style="display:block;text-decoration:none;font-size:.72rem;color:#6B7A90;margin-top:.1rem">'
+      + (mhdName[e.lager]||e.lager) + '</s>'
+      + '<div style="display:flex;gap:.4rem;margin-top:.45rem">'
+      + '<button data-mhd-akt="spaeter" style="flex:1;border:1.4px solid #C8D0DC;background:#fff;'
+      + "border-radius:9px;padding:.4rem;font-family:'Poppins',sans-serif;font-size:.72rem;"
+      + 'font-weight:700;color:#44506A;cursor:pointer">In 1 Woche erinnern</button>'
+      + '<button data-mhd-akt="erledigt" style="flex:1;border:none;background:#0C9C77;'
+      + "border-radius:9px;padding:.4rem;font-family:'Poppins',sans-serif;font-size:.72rem;"
+      + 'font-weight:700;color:#fff;cursor:pointer">Erledigt</button></div></div>';
+  };
+  const el = document.createElement('div');
+  el.id = 'mhd-warnung';
+  el.style.cssText = 'position:fixed;inset:0;z-index:4000;background:rgba(20,27,41,.5);'
+    + "display:flex;align-items:center;justify-content:center;padding:1rem;font-family:'Poppins',sans-serif";
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;overflow:hidden;'
+    + 'box-shadow:0 24px 60px rgba(16,26,46,.4);max-height:88vh;display:flex;flex-direction:column">'
+    + '<div style="background:#8F5208;color:#fff;padding:.85rem 1rem">'
+    + '<div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;'
+    + 'color:#FBE6C2">Haltbarkeit</div>'
+    + '<div style="font-size:1rem;font-weight:700">Mindesthaltbarkeit läuft ab</div></div>'
+    + '<div style="padding:.9rem 1rem;overflow-y:auto">'
+    + '<p style="font-size:.84rem;line-height:1.5;color:#1B2536;margin:0 0 .6rem">'
+    + 'Bei diesen Artikeln endet die Haltbarkeit in weniger als einem Monat. '
+    + 'Bitte prüfen und Maßnahmen ergreifen.</p>'
+    + '<div id="mhd-rows" style="border:1px solid #E4E9F0;border-radius:11px;overflow:hidden;'
+    + 'background:#FBFCFE">' + liste.map(zeile).join('') + '</div>'
+    + '<p style="font-size:.72rem;color:#6B7A90;margin-top:.7rem">„In 1 Woche erinnern" meldet '
+    + 'sich in sieben Tagen wieder. „Erledigt" beendet die Erinnerung; ein neues Datum unter '
+    + '<b>Haltbarkeit</b> startet sie von Neuem.</p></div>'
+    + '<div style="padding:.7rem 1rem .9rem;background:#F7F9FC;border-top:1px solid #DCE3ED">'
+    + '<button id="mhd-zu" style="width:100%;border:none;border-radius:12px;padding:.75rem;'
+    + "font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700;background:#3F4A5F;"
+    + 'color:#fff;cursor:pointer">Schließen</button></div></div>';
+  document.body.appendChild(el);
+  const zu = () => { el.remove(); localStorage.setItem('gg_mhd_zuletzt', String(Date.now())); };
+  el.querySelector('#mhd-zu').onclick = zu;
+  el.onclick = ev => { if(ev.target===el) zu(); };
+  el.querySelectorAll('[data-mhd-akt]').forEach(btn=>{
+    btn.onclick = async () => {
+      const reihe = btn.closest('[data-mhd-row]');
+      const [lager, prodId] = reihe.dataset.mhdRow.split('|');
+      const eintrag = liste.find(x=>x.lager===lager && x.prodId===prodId);
+      btn.disabled = true;
+      await mhdSetzen(lager, prodId, btn.dataset.mhdAkt, eintrag ? eintrag.bis : '');
+      reihe.remove();
+      if(!el.querySelector('[data-mhd-row]')) zu();
+    };
+  });
+  localStorage.setItem('gg_mhd_zuletzt', String(Date.now()));
+  sessionStorage.setItem('gg_mhd_sitzung', '1');
+}
+
+async function mhdSetzen(lager, prodId, art, fuer){
+  try{
+    const ref = db.collection('gs_mhd').doc(lager);
+    const d = await ref.get();
+    const x = d.exists ? d.data() : {};
+    const zustand = Object.assign({}, x.zustand||{});
+    zustand[prodId] = art==='spaeter'
+      ? {art:'spaeter', bis:mhdPlus(7), fuer}
+      : {art:'erledigt', am:mhdHeute(), fuer};
+    await ref.set({lager, daten:x.daten||{}, zustand}, {merge:true});
+    if(typeof mhdZustand === 'object' && lager === (typeof currentLager!=='undefined' ? currentLager : '')){
+      mhdZustand = zustand;
+    }
+  }catch(e){ console.warn('Haltbarkeit:', e.message); }
+}
+
+async function mhdPruefen(sofort){
+  try{
+    mhdFaellig = await mhdSammeln();
+    if(!mhdFaellig.length) return;
+    const letzte = Number(localStorage.getItem('gg_mhd_zuletzt')) || 0;
+    const neueSitzung = !sessionStorage.getItem('gg_mhd_sitzung');
+    if(!sofort && einFensterOffen()) return;
+    if(sofort || neueSitzung || Date.now()-letzte >= 3600000) mhdFenster(mhdFaellig);
+  }catch(e){ console.warn('Haltbarkeit:', e.message); }
+}
+
+function mhdStart(){
+  const los = () => { if(!document.hidden) mhdPruefen(false); };
+  if(window.requestIdleCallback) requestIdleCallback(los, {timeout:9000});
+  else setTimeout(los, 5000);
+  if(mhdTimer) clearInterval(mhdTimer);
+  mhdTimer = setInterval(los, 600000);
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{ negStart(); negPruefungAnstossen(); mhdStart(); });
 </script>
 </body>
 </html>
