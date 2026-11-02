@@ -1163,6 +1163,7 @@ textarea.note:focus{border-color:var(--acc)}
     <div class="dlg-body">
       <label class="fl">An wen</label>
       <input class="num" id="nk-name" placeholder="Name des Mitarbeiters"
+        oninput="nkNameGetippt()"
         style="font-family:'Poppins',sans-serif;font-weight:600">
       <div class="geber" id="nk-geber" style="margin-top:.45rem"></div>
       <label class="fl">Betrag</label>
@@ -1424,6 +1425,20 @@ const FARBEN = {
 };
 const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
 const ZWECK = {bank:'Bank-Einzahlung', wechsler:'Wechsler-Einlage', kasse:'In die Kasse'};
+// Früher wurde bei „Kredit vergeben" der Anzeigename gespeichert („Brüggen"
+// statt „brüggen"). Beim Laden wird das auf den Schlüssel zurückgeführt,
+// damit der Kredit auch in der empfangenden Filiale erscheint.
+function schluessel(v){
+  const s = String(v||'').trim();
+  if(!s) return s;
+  const k = Object.keys(NAMEN).find(x => x===s || NAMEN[x].toLowerCase()===s.toLowerCase());
+  return k || s;
+}
+function normKredit(k){
+  k.geber  = schluessel(k.geber);
+  k.nehmer = schluessel(k.nehmer);
+  return k;
+}
 // Geräte je Filiale. Nettetal hat zusätzlich 14–17 (eine 13 gibt es nicht) —
 // die stehen fett, damit sie sich von den ersten zwölf abheben.
 const GERAETE = {
@@ -1609,7 +1624,7 @@ async function ladeFiliale(){
     leerungen = snapL.docs.map(d=>({id:d.id,...d.data()}))
                           .sort((a,b)=>(a.datum||'').localeCompare(b.datum||''));
     monatDoc = docM.exists ? docM.data() : {};
-    kredite = snapK.docs.map(d=>({id:d.id,...d.data()}))
+    kredite = snapK.docs.map(d=>normKredit({id:d.id,...d.data()}))
                         .filter(k=>k.geber===lg || k.nehmer===lg);
   }catch(e){
     console.error('Leerung laden:', e);
@@ -1633,7 +1648,7 @@ let kreditCache = null;
 async function alleKredite(){
   if(kreditCache) return kreditCache;
   const snap = await mitZeitlimit(db.collection('leerung_kredit').get(), 8);
-  kreditCache = snap.docs.map(d=>d.data());
+  kreditCache = snap.docs.map(d=>normKredit(d.data()));
   return kreditCache;
 }
 
@@ -3071,10 +3086,12 @@ function nkArt(v,b){
   b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
 }
+let nkZiel = '';   // Schlüssel der gewählten Filiale, leer bei freiem Namen
 function openNeuKredit(){
   document.getElementById('nk-lg').textContent=NAMEN[lg];
   document.getElementById('nk-name').value='';
   document.getElementById('nk-betrag').value='';
+  nkZiel='';
   document.getElementById('nk-datum').value=heute();
   nkArtWert='scheine';
   document.querySelectorAll('#nk-art button').forEach((b,i)=>b.classList.toggle('on', i===0));
@@ -3088,7 +3105,13 @@ function openNeuKredit(){
 function nkNameSetzen(b){
   b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
+  nkZiel = b.dataset.v || '';
   document.getElementById('nk-name').value = b.textContent.trim();
+}
+// Wer von Hand einen Namen tippt, meint keine Filiale mehr
+function nkNameGetippt(){
+  nkZiel = '';
+  document.querySelectorAll('#nk-geber button').forEach(x=>x.classList.remove('on'));
 }
 async function saveNeuKredit(){
   const name=(document.getElementById('nk-name').value||'').trim();
@@ -3099,12 +3122,15 @@ async function saveNeuKredit(){
   showSpinner();
   try{
     // Wir geben das Geld heraus: Geber ist die Filiale, Nehmer der Empfänger.
+    // Ist eine Filiale der Empfänger, wird ihr Schlüssel gespeichert — nur so
+    // taucht der Kredit dort als Schuld auf und verändert ihre Kasse.
+    const ziel = nkZiel || schluessel(name);
     await db.collection('leerung_kredit').add({
-      geber:lg, nehmer:name, betrag, datum, monat:datum.slice(0,7),
+      geber:lg, nehmer:ziel, betrag, datum, monat:datum.slice(0,7),
       zweck:'kasse', art:nkArtWert, getilgtAm:null, getilgtArt:null
     });
     await melde('minus','Kredit vergeben',
-      'an '+name+' · '+(nkArtWert==='muenzen'?'Münzen':'Scheine'), betrag);
+      'an '+(NAMEN[ziel]||name)+' · '+(nkArtWert==='muenzen'?'Münzen':'Scheine'), betrag);
     closeM('modal-neukredit');
     showToast('Kredit erfasst ✓');
     await ladeFiliale();
