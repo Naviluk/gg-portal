@@ -1459,14 +1459,13 @@ function renderTableActual(){
 // Eintrag pro Datum (wie manuell erfasst) — verhindert doppelte Zählung, falls für
 // dasselbe Datum aus Versehen mehrere Wareneingang-Dokumente existieren.
 function dedupSumFromSnap(snap){
-  const byDate = {};
-  snap.forEach(d=>{
-    const data = d.data();
-    const dt = data.datum;
-    if(dt && !byDate[dt]) byDate[dt] = data;
-  });
+  // Zu einem Datum kann es mehrere Einträge geben — eine zweite abgeschlossene
+  // Lieferung desselben Tages legt einen weiteren an. Alle werden gezählt,
+  // genau wie in der Tabelle auf lager.html.
+  const alle = [];
+  snap.forEach(d=>{ if(d.data().datum) alle.push(d.data()); });
   const sum = {};
-  Object.values(byDate).forEach(data=>{
+  alle.forEach(data=>{
     const items = data.items||{};
     Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
   });

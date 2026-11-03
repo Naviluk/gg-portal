@@ -1872,14 +1872,13 @@ function toggleUserDropdown(){document.getElementById('user-dropdown').classList
 // Summiert Firestore-Dokumente PRO ARTIKEL, dedupliziert nach Datum — genau EIN
 // Eintrag pro Datum (wie manuell erfasst), damit Summen mit lager.html übereinstimmen.
 function dedupSumFromSnap(snap){
-  const byDate = {};
-  snap.forEach(d=>{
-    const data = d.data();
-    const dt = data.datum;
-    if(dt && !byDate[dt]) byDate[dt] = data; // erste Eintragung pro Datum behalten
-  });
+  // Zu einem Datum kann es mehrere Einträge geben — eine zweite abgeschlossene
+  // Lieferung desselben Tages legt einen weiteren an. Alle werden gezählt,
+  // genau wie in der Tabelle auf lager.html.
+  const alle = [];
+  snap.forEach(d=>{ if(d.data().datum) alle.push(d.data()); });
   const sum = {};
-  Object.values(byDate).forEach(data=>{
+  alle.forEach(data=>{
     const items = data.items||{};
     Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
   });
@@ -2323,6 +2322,40 @@ function findProdById(id){
   return null;
 }
 
+/* Die Haken (bestellt/gekauft, gepackt/geliefert) hingen bisher am Monat:
+   ek_state/zentrallager_2026-10, lief_state/nettetal_2026-10. Der Plan selbst
+   läuft dagegen über den Monatswechsel weiter — am Monatsersten standen die
+   Artikel also wieder ohne Haken da. Jetzt liegen die Haken wie der Plan je
+   Filiale in einem Dokument ohne Monat; die alten Monatsdokumente werden beim
+   ersten Laden übernommen.                                                   */
+function vormonatKey(m){
+  const [y,mm] = String(m||'').split('-').map(Number);
+  if(!y || !mm) return '';
+  const d = new Date(y, mm-2, 1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+async function ladeHaken(coll, lg){
+  const ref = db.collection(coll).doc(lg);
+  try{
+    const d = await ref.get();
+    if(d.exists) return d.data() || {};
+    // noch nichts da → die alten Monatsdokumente übernehmen
+    const alt = {};
+    const v1 = vormonatKey(currentZeitraum), v2 = vormonatKey(v1), v3 = vormonatKey(v2);
+    for(const m of [v3, v2, v1, currentZeitraum]){
+      if(!m) continue;
+      try{
+        const a = await db.collection(coll).doc(lg+'_'+m).get();
+        if(a.exists) Object.assign(alt, a.data()||{});
+      }catch(e){}
+    }
+    if(Object.keys(alt).length) await ref.set(alt).catch(()=>{});
+    return alt;
+  }catch(e){ return {}; }
+}
+const speichereHaken = (coll, lg, daten) =>
+  db.collection(coll).doc(lg).set(daten).catch(()=>{});
+
 window.openEinkaeufe = async function(){
   try{
     const doc = await db.collection('ek_defaults').doc('shops').get();
@@ -2334,10 +2367,12 @@ window.openEinkaeufe = async function(){
   // genommen waren; wurde derselbe Artikel später neu geplant, war er plötzlich
   // wieder abgehakt. Veraltete Einträge werden dabei gleich aufgeräumt.
   try{
-    const doc2 = await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).get();
-    if(doc2.exists){
-      const saved = doc2.data() || {};
+    const saved = await ladeHaken('ek_state', 'zentrallager');
+    {
       const imPlan = planData['zentrallager'] || {};
+      // Ist der Plan noch nicht geladen, wird nichts aufgeräumt — sonst würden
+      // alle Haken gelöscht, nur weil die Liste gerade leer ist.
+      const planDa = Object.keys(imPlan).length > 0;
       const gueltig = {};
       let veraltet = 0;
       Object.keys(saved).forEach(id=>{
@@ -2348,7 +2383,7 @@ window.openEinkaeufe = async function(){
         const ordered = (w === true) ? true : !!w.ordered;
         const bought  = (w === true) ? false : !!w.bought;
         if(!ordered && !bought) return;
-        if(Number(imPlan[id]) > 0){
+        if(!planDa || Number(imPlan[id]) > 0){
           if(!ekState[id]) ekState[id]={ordered:false,bought:false, shop:ekDefaultShops[id]||''};
           ekState[id].ordered = ordered || bought;   // gekauft heißt immer auch bestellt
           ekState[id].bought  = bought;
@@ -2358,10 +2393,7 @@ window.openEinkaeufe = async function(){
           if(ekState[id]){ ekState[id].ordered = false; ekState[id].bought = false; }
         }
       });
-      if(veraltet){
-        db.collection('ek_state').doc('zentrallager_'+currentZeitraum)
-          .set(gueltig).catch(()=>{});
-      }
+      if(veraltet && planDa) speichereHaken('ek_state', 'zentrallager', gueltig);
     }
   }catch(e){}
   document.getElementById('einkaeufe-panel').classList.add('open');
@@ -2540,11 +2572,13 @@ window.toggleEkCheck = function(prodId, art){
 function ekStateSichern(){
   const toSave={};
   const imPlan = planData['zentrallager'] || {};
+  const planDa = Object.keys(imPlan).length > 0;
   Object.entries(ekState).forEach(([id,st])=>{
-    if(!st || Number(imPlan[id]) <= 0) return;
+    if(!st) return;
+    if(planDa && Number(imPlan[id]) <= 0) return;   // steht nicht mehr im Plan
     if(st.ordered || st.bought) toSave[id] = {ordered:!!st.ordered, bought:!!st.bought};
   });
-  db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSave).catch(()=>{});
+  speichereHaken('ek_state', 'zentrallager', toSave);
 }
 
 window.openCompleteEinkauf = function(){
@@ -2733,13 +2767,11 @@ function updateLiefPanelTitle(lg){
 async function loadLiefState(lg){
   if(!liefState[lg]) liefState[lg]={};
   try{
-    const doc = await db.collection('lief_state').doc(lg+'_'+currentZeitraum).get();
-    if(doc.exists){
-      const saved = doc.data();
-      Object.keys(saved).forEach(id=>{
-        liefState[lg][id] = { packed: !!saved[id].packed, delivered: !!saved[id].delivered };
-      });
-    }
+    const saved = await ladeHaken('lief_state', lg);
+    Object.keys(saved).forEach(id=>{
+      if(!saved[id]) return;
+      liefState[lg][id] = { packed: !!saved[id].packed, delivered: !!saved[id].delivered };
+    });
   }catch(e){}
 }
 
@@ -2851,7 +2883,7 @@ window.toggleLiefCheck = function(lg, prodId, type){
   // Speichern, damit die Galken beim Verlassen/Wiederöffnen der Form erhalten bleiben
   const toSave={};
   Object.entries(liefState[lg]).forEach(([id,st])=>{ if(st.packed||st.delivered) toSave[id]={packed:!!st.packed,delivered:!!st.delivered}; });
-  db.collection('lief_state').doc(lg+'_'+currentZeitraum).set(toSave).catch(()=>{});
+  speichereHaken('lief_state', lg, toSave);
 };
 
 function updateCompleteBtn(lg){
@@ -3881,7 +3913,7 @@ window.confirmWareneingang = async function(){
         if(!st || Number(restPlan[id]) <= 0) return;
         if(st.ordered || st.bought) toSaveEk[id] = {ordered:!!st.ordered, bought:!!st.bought};
       });
-      await db.collection('ek_state').doc('zentrallager_'+currentZeitraum).set(toSaveEk).catch(()=>{});
+      await speichereHaken('ek_state', 'zentrallager', toSaveEk);
       updateEkCompleteBtn();
       closeEinkaeufe();
       showToast('Einkauf abgeschlossen ✓');
@@ -3904,7 +3936,7 @@ window.confirmWareneingang = async function(){
       if(liefState[lager]){ ids.forEach(id=>{ delete liefState[lager][id]; }); }
       const toSaveState={};
       Object.entries(liefState[lager]||{}).forEach(([id,st])=>{ if(st.packed||st.delivered) toSaveState[id]={packed:!!st.packed,delivered:!!st.delivered}; });
-      await db.collection('lief_state').doc(lager+'_'+currentZeitraum).set(toSaveState).catch(()=>{});
+      await speichereHaken('lief_state', lager, toSaveState);
       updateCompleteBtn(lager);
       closeLieferungen();
       showToast('Lieferung abgeschlossen ✓');

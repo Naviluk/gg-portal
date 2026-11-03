@@ -1065,14 +1065,13 @@ function toggleUserDropdown(){document.getElementById('user-dropdown').classList
 // Eintrag pro Datum (wie manuell erfasst) — verhindert doppelte Zählung, falls für
 // dasselbe Datum aus Versehen mehrere Wareneingang-Dokumente existieren.
 function dedupSumFromSnapChain(snap){
-  const byDate = {};
-  snap.forEach(d=>{
-    const data = d.data();
-    const dt = data.datum;
-    if(dt && !byDate[dt]) byDate[dt] = data;
-  });
+  // Zu einem Datum kann es mehrere Einträge geben — eine zweite abgeschlossene
+  // Lieferung desselben Tages legt einen weiteren an. Alle werden gezählt,
+  // genau wie in der Tabelle auf lager.html.
+  const alle = [];
+  snap.forEach(d=>{ if(d.data().datum) alle.push(d.data()); });
   const sum = {};
-  Object.values(byDate).forEach(data=>{
+  alle.forEach(data=>{
     const items = data.items||{};
     Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
   });
@@ -1124,11 +1123,10 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
 // Lieferungen-Summe pro Artikel — dedupliziert (genau 1 Eintrag pro Datum, wie manuell
 // erfasst) — identisch mit der Logik auf lager.html, damit die Summen übereinstimmen.
 function dedupedLiefSum(prodId){
-  const liefDatesGS = [...new Set(lieferungen.map(w=>w.datum))];
-  return liefDatesGS.reduce((s,d)=>{
-    const we = lieferungen.find(w=>w.datum===d);
-    return s + (we&&we.items&&we.items[prodId] ? Number(we.items[prodId])||0 : 0);
-  },0);
+  // Alle Einträge zählen, nicht nur den ersten je Datum: wird eine Lieferung in
+  // zwei Teilen am selben Tag abgeschlossen, gibt es zwei Einträge.
+  return lieferungen.reduce((s,w)=>
+    s + (w && w.items && w.items[prodId] ? Number(w.items[prodId])||0 : 0), 0);
 }
 
 // Lädt die (auf allen Seiten gemeinsame) Artikelliste aus Firestore — gefiltert auf die
