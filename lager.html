@@ -967,6 +967,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
         <button class="btn-add-shop" onclick="addShopRow()">＋ Shop hinzufügen</button>
       </div>
       <div class="modal-btn-row we-foot">
+        <button class="btn btn-danger we-hidden" id="btn-we-loeschen"
+          onclick="weEintragLoeschen()">Löschen</button>
         <button class="btn btn-ghost" onclick="closeWareneingang()">Abbrechen</button>
         <button class="btn btn-primary btn-acc" id="btn-check-list" onclick="checkListAction()">Liste prüfen →</button>
       </div>
@@ -978,6 +980,8 @@ input:focus,.m-select:focus{border-color:var(--neon-cyan)}
       <div class="confirm-list" id="confirm-list"></div>
       <div class="confirm-shops" id="confirm-shops" style="display:none"></div>
       <div class="modal-btn-row we-foot">
+        <button class="btn btn-danger we-hidden" id="btn-we-loeschen2"
+          onclick="weEintragLoeschen()">Löschen</button>
         <button class="btn btn-ghost" onclick="backToEdit()">← Zurück</button>
         <button class="btn btn-primary btn-acc" id="btn-confirm-save" onclick="confirmWareneingang()">✓ Speichern</button>
       </div>
@@ -2058,6 +2062,10 @@ window.openWareneingang = function(prefillDate){
   // Восстанавливаем текст кнопки для новой записи
   const _sb=document.getElementById('btn-confirm-save');
   if(_sb) _sb.textContent='✓ Bestätigen';
+  ['btn-we-loeschen','btn-we-loeschen2'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b) b.classList.add('we-hidden');     // nur beim Bearbeiten sichtbar
+  });
 
   const isZentral = currentLager==='zentrallager';
   const lagerColors = {
@@ -2336,6 +2344,28 @@ window.backToEdit = function(){
 }
 
 window.confirmWareneingang = async function(){
+  const _date0 = document.getElementById('we-date').value;
+  // Beim Bearbeiten alles auf null gesetzt? Dann ist der Eintrag gegenstandslos —
+  // er wird entfernt, damit keine leere Spalte stehen bleibt.
+  if(currentEditWeId){
+    const summe = Object.values(weSelectedItems)
+      .reduce((s,v)=>s+(Number(v)||0), 0);
+    const shopSumme = (weShopRows||[]).filter(s=>s&&!s.removed&&s.shop)
+      .reduce((s,x)=>s+(Number(x.betrag)||0), 0);
+    if(summe <= 0 && shopSumme <= 0){
+      const alle = weAlleFuerDatum(_date0);
+      showSpinner();
+      try{
+        for(const w of alle){ await db.collection('wareneingang').doc(w.id).delete(); }
+        currentEditWeId = null; weDoppelIds = [];
+        hideSpinner();
+        document.getElementById('modal-we').classList.remove('show');
+        showToast('Eintrag war leer — Spalte entfernt');
+        await loadData();
+      }catch(e){ hideSpinner(); showToast('Fehler: '+(e.message||e)); }
+      return;
+    }
+  }
   showSpinner();
   const date=document.getElementById('we-date').value;
   window.LETZTE_AKTION = (currentLager==='zentrallager' ? 'Wareneingang' : 'Lieferung')
@@ -2456,6 +2486,10 @@ function weOeffneZumBearbeiten(date, istLieferung){
   });
   weRebuildShopRowsDom();
   updateSelectedPreview();
+  ['btn-we-loeschen','btn-we-loeschen2'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(b) b.classList.remove('we-hidden');
+  });
 
   if(istLieferung){
     document.getElementById('we-title').textContent='Lieferung bearbeiten';
@@ -2468,6 +2502,33 @@ function weOeffneZumBearbeiten(date, istLieferung){
 
   if(istLieferung) buildConfirmLieferung(); else buildConfirm(true);
 }
+
+// Eine Spalte verschwindet erst, wenn es zu diesem Datum keinen Eintrag mehr gibt.
+// Deshalb löscht der Knopf alle Einträge des Tages für diese Filiale.
+window.weEintragLoeschen = async function(){
+  const date = document.getElementById('we-date').value;
+  const alle = weAlleFuerDatum(date);
+  if(!alle.length){ closeWareneingang(); return; }
+  const was = currentLager==='zentrallager' ? 'Wareneingang' : 'Lieferung';
+  const tag = date.split('-').reverse().join('.');
+  if(!confirm(was+' vom '+tag+' wirklich löschen?'
+      + (alle.length>1 ? '\n\nEs sind '+alle.length+' Einträge zu diesem Tag.' : '')
+      + '\nDie Spalte verschwindet aus der Tabelle.')) return;
+  showSpinner();
+  try{
+    for(const w of alle){
+      await db.collection('wareneingang').doc(w.id).delete();
+    }
+    currentEditWeId = null; weDoppelIds = [];
+    hideSpinner();
+    document.getElementById('modal-we').classList.remove('show');
+    showToast(was+' gelöscht');
+    await loadData();
+  }catch(e){
+    hideSpinner();
+    showToast('Fehler beim Löschen: '+(e.message||e));
+  }
+};
 
 window.openEditLieferung    = function(date){ weOeffneZumBearbeiten(date, true); };
 window.openEditWareneingang = function(date){ weOeffneZumBearbeiten(date, false); };
@@ -2483,6 +2544,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   window.toggleCategory        = toggleCategory;
   window.toggleDetailCols      = toggleDetailCols;
   window.openWareneingang      = openWareneingang;
+  window.weEintragLoeschen     = weEintragLoeschen;
   window.closeWareneingang     = closeWareneingang;
   window.addShopRow            = addShopRow;
   window.buildConfirm          = buildConfirm;
