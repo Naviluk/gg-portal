@@ -1280,17 +1280,14 @@ const HEISSGETRAENKE_IDS = ['tee_100','tee_20','susstoff','zucker','kaffee','cap
 
 let lieferungenPerBranch = {}; // {branch: {prodId: qty}}
 
-// Summiert Firestore-Dokumente PRO ARTIKEL, dedupliziert nach Datum — genau EIN
-// Eintrag pro Datum (wie manuell erfasst) — identisch mit der Logik auf lager.html.
+// Summiert Firestore-Dokumente PRO ARTIKEL. Jeder Eintrag zählt — auch ein zweiter
+// am selben Tag, etwa wenn eine Lieferung in zwei Teilen abgeschlossen wurde.
+// Dieselbe Regel gilt auf lager.html und in den Beständen.
 function dedupSumFromSnap(snap){
-  const byDate = {};
-  snap.forEach(d=>{
-    const data = d.data();
-    const dt = data.datum;
-    if(dt && !byDate[dt]) byDate[dt] = data;
-  });
   const sum = {};
-  Object.values(byDate).forEach(data=>{
+  snap.forEach(doc=>{
+    const data = doc.data();
+    if(!data.datum) return;
     const items = data.items||{};
     Object.keys(items).forEach(pid=>{ sum[pid]=(sum[pid]||0)+(Number(items[pid])||0); });
   });

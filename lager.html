@@ -1954,9 +1954,10 @@ async function loadData(){
   }
 
   // Für Zentrallager: „Lieferungen" = Summe der Lieferungen aller 4 Filialen (aus deren wareneingang).
-  // WICHTIG: pro Filiale und Datum wird dedupliziert (genau 1 Eintrag pro Datum, wie
-  // manuell erfasst) — identisch mit der Berechnung der Lieferungen-Spalte jeder Filiale,
-  // damit die Summe hier exakt mit der Summe der einzelnen Filial-Spalten übereinstimmt.
+  // Gezählt wird JEDER Eintrag — auch ein zweiter am selben Tag, etwa wenn eine Lieferung
+  // in zwei Teilen abgeschlossen wurde. Genauso rechnen die Spalte „Einkäufe" und der
+  // Übertrag in den Folgemonat; früher wurde hier je Datum nur der erste Eintrag gezählt,
+  // dadurch stimmte der End Bestand nicht mit dem Anfangsbestand des nächsten Monats überein.
   window._zentralLieferSum = {};
   if(currentLager === 'zentrallager'){
     const branches = ['nettetal','brüggen','viersen','köln'];
@@ -1964,13 +1965,9 @@ async function loadData(){
       for(const br of branches){
         for(const mo of months){
           const bs = await db.collection('wareneingang').where('lager','==',br).where('monat','==',mo).get();
-          const byDate = {};
-          bs.forEach(d=>{
-            const data = d.data();
-            const dt = data.datum;
-            if(dt && !byDate[dt]) byDate[dt] = data; // erste Eintragung pro Datum behalten
-          });
-          Object.values(byDate).forEach(data=>{
+          bs.forEach(doc=>{
+            const data = doc.data();
+            if(!data.datum) return;
             const items = data.items||{};
             Object.keys(items).forEach(pid=>{
               window._zentralLieferSum[pid] = (window._zentralLieferSum[pid]||0) + (Number(items[pid])||0);

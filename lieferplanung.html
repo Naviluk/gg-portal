@@ -4197,7 +4197,7 @@ async function loadPrevMonatVerbrauch(lager){
 }
 
 // Verbr. für Zentrallager (Neuer Einkauf): einfache Kopie der Zentrallager-„Lieferungen"
-// (Summe der 4 Filialen, dedupliziert nach Datum — wie auf lager.html) für den VORMONAT.
+// (Summe der 4 Filialen — jeder Eintrag zählt, wie auf lager.html) für den VORMONAT.
 async function loadPrevMonatZentralLieferungen(){
   const zeit = currentZeitraum;
   if(!zeit || zeit.length!==7) return {};
@@ -4209,13 +4209,9 @@ async function loadPrevMonatZentralLieferungen(){
     const result = {};
     await Promise.all(LAGERS.map(async br=>{
       const snap = await db.collection('wareneingang').where('lager','==',br).where('monat','==',prevMonat).get();
-      const byDate = {};
-      snap.forEach(d=>{
-        const data = d.data();
-        const dt = data.datum;
-        if(dt && !byDate[dt]) byDate[dt] = data;
-      });
-      Object.values(byDate).forEach(data=>{
+      snap.forEach(doc=>{
+        const data = doc.data();
+        if(!data.datum) return;
         const items = data.items||{};
         Object.keys(items).forEach(pid=>{ result[pid]=(result[pid]||0)+(Number(items[pid])||0); });
       });
