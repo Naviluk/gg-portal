@@ -618,7 +618,8 @@ button.gross:hover{border-color:var(--acc)}
     </div>
     <p class="hinweis">Die erste Prüfung steht zwei Jahre nach Beginn der Zulassung an, jede
       weitere zwei Jahre nach der zuletzt eingetragenen Prüfung — höchstens jedoch bis zum Ende
-      der Zulassung.</p>
+      der Zulassung. Schon erfolgte Prüfungen trägst du einfach der Reihe nach ein: jedes Datum
+      wird sofort übernommen, und die nächste Zeile entsteht daraus.</p>
   </div>
 
   <!-- ══ Checkliste Halle ══ -->
@@ -675,6 +676,9 @@ button.gross:hover{border-color:var(--acc)}
           <input type="date" class="eing mono tv-feld" id="tv-bis"></div>
       </div>
       <label class="fl">Prüfungen</label>
+      <p class="hinweis" style="margin:-.1rem 0 .4rem">Datum eintragen — damit ist die Prüfung
+        erledigt und die nächste Zeile erscheint. So lassen sich auch frühere Prüfungen
+        nacheinander nachtragen.</p>
       <div id="tv-pruef"></div>
       <div id="tv-alt"></div>
       <div class="zwei" style="margin-top:.9rem">
@@ -1155,7 +1159,7 @@ function tvZeichnePruefungen(){
       <button class="tv-hak" onclick="tvHakenSetzen()" title="Prüfung eintragen"></button>
       <span class="lbl"><b>Prüfung ${dmy(naechste)}</b>
         <s>${liste.length ? 'zwei Jahre nach der letzten Prüfung' : 'zwei Jahre nach Beginn der Zulassung'}</s></span>
-      <input type="date" class="tv-dat" id="tv-neu-datum">
+      <input type="date" class="tv-dat" id="tv-neu-datum" onchange="tvHakenSetzen()">
     </div>`;
   }else{
     h += '<div class="tv-row"><span class="lbl"><b>Zulassung ausgelaufen</b>'
@@ -1198,7 +1202,12 @@ function tvAltZeigen(i){
 async function tvHakenSetzen(){
   const feld = document.getElementById('tv-neu-datum');
   const datum = feld ? feld.value : '';
-  if(!datum){ showToast('Bitte das Datum der Prüfung eintragen.'); if(feld) feld.focus(); return; }
+  if(!datum){
+    // Ohne Datum gibt es nichts einzutragen — also gleich das Feld öffnen
+    showToast('Bitte das Datum der Prüfung eintragen.');
+    if(feld){ feld.focus(); if(feld.showPicker) try{ feld.showPicker(); }catch(e){} }
+    return;
+  }
   const d = tvDoc(tvNr);
   if(d.von && datum < d.von){ showToast('Die Prüfung kann nicht vor der Zulassung liegen.'); return; }
   const liste = (d.pruefungen||[]).slice();
