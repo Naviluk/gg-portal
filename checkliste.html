@@ -342,6 +342,11 @@ table.tb tr.tv-gelb td{background:#FFFBF2}
 .tv-hak.on{background:var(--gruen);border-color:var(--gruen);color:#fff}
 .tv-dat{width:140px;flex:0 0 140px;border:1px solid var(--glass-border);border-radius:9px;
   padding:.32rem .5rem;font-family:var(--mono);font-size:.78rem;text-align:center;background:#fff}
+.tv-feld{min-height:46px;padding:.7rem .75rem;font-size:.95rem}
+.tv-knopf{flex:1;min-height:46px;border:1px solid var(--glass-border);background:#fff;
+  border-radius:12px;padding:.75rem .6rem;font-family:'Poppins',sans-serif;font-size:.84rem;
+  font-weight:700;color:var(--text-dim);cursor:pointer}
+.tv-knopf:hover{border-color:var(--acc);color:var(--acc-ink)}
 .tv-hinweis{font-size:.76rem;color:var(--text-dim);background:#fff;border:1px dashed var(--glass-border);
   border-radius:12px;padding:.7rem;text-align:center}
 .tv-alt-row{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:#F2F5F9;
@@ -385,7 +390,10 @@ table.tb tr.tv-gelb td{background:#FFFBF2}
 .ab .pf{color:#B7C2D2;font-size:.9rem}
 @media(max-width:700px){
   .tv-weg{display:none}
-  .tv-dat{width:124px;flex:0 0 124px}
+  .tv-dat{width:124px;flex:0 0 124px;min-height:40px}
+  #m-tuev .zwei, #m-tuev-neu .zwei{flex-direction:column;gap:.2rem}
+  #m-tuev .zwei > div, #m-tuev-neu .zwei > div{width:100%}
+  .tv-knopf{min-height:48px}
 }
 
 .back{display:inline-flex;align-items:center;gap:.4rem;background:none;border:none;cursor:pointer;
@@ -660,17 +668,18 @@ button.gross:hover{border-color:var(--acc)}
       <div class="dlg-title"><span id="tv-titel">Gerät</span><span class="dlg-pill" id="tv-pill">—</span></div>
     </div>
     <div class="dlg-body">
-      <label class="fl">Zulassung</label>
       <div class="zwei">
-        <div><input type="date" class="eing mono" id="tv-von"></div>
-        <div><input type="date" class="eing mono" id="tv-bis"></div>
+        <div><label class="fl" style="margin-top:0">Zulassung von</label>
+          <input type="date" class="eing mono tv-feld" id="tv-von"></div>
+        <div><label class="fl" style="margin-top:0">bis</label>
+          <input type="date" class="eing mono tv-feld" id="tv-bis"></div>
       </div>
       <label class="fl">Prüfungen</label>
       <div id="tv-pruef"></div>
       <div id="tv-alt"></div>
       <div class="zwei" style="margin-top:.9rem">
-        <button class="btn b-ghost" onclick="tvNeuOeffnen('paket')">Neues Spielpaket</button>
-        <button class="btn b-ghost" onclick="tvNeuOeffnen('geraet')">Neues Gerät</button>
+        <button class="tv-knopf" onclick="tvNeuOeffnen('paket')">Neues Spielpaket</button>
+        <button class="tv-knopf" onclick="tvNeuOeffnen('geraet')">Neues Gerät</button>
       </div>
     </div>
     <div class="dlg-foot">
@@ -689,10 +698,11 @@ button.gross:hover{border-color:var(--acc)}
       <div class="dlg-title" id="tvn-titel">Neues Spielpaket</div>
     </div>
     <div class="dlg-body">
-      <label class="fl">Neue Zulassung</label>
       <div class="zwei">
-        <div><input type="date" class="eing mono" id="tvn-von"></div>
-        <div><input type="date" class="eing mono" id="tvn-bis"></div>
+        <div><label class="fl" style="margin-top:0">Neue Zulassung von</label>
+          <input type="date" class="eing mono tv-feld" id="tvn-von"></div>
+        <div><label class="fl" style="margin-top:0">bis</label>
+          <input type="date" class="eing mono tv-feld" id="tvn-bis"></div>
       </div>
       <label class="fl">Bemerkung</label>
       <input class="eing" id="tvn-bem" placeholder="z. B. Paket „Merkur 2026“">
