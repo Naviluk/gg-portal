@@ -310,6 +310,83 @@ table.tb tr:nth-child(even) td{background:var(--zebra)}
 table.tb tr.klick{cursor:pointer}
 table.tb tr.klick:hover td{background:var(--acc-bg)}
 .tb-huelle{overflow-x:auto}
+/* TÜV Geräte */
+.tv-nr{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:8px;background:var(--acc-bg);color:var(--acc-ink);font-family:var(--mono);
+  font-weight:700;font-size:.78rem}
+.tv-leer{color:#B7C2D2}
+table.tb tr.tv-rot td{background:#FFF5F8}
+table.tb tr.tv-gelb td{background:#FFFBF2}
+.lage{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:700;
+  border-radius:20px;padding:.1rem .5rem;font-family:var(--mono);white-space:nowrap}
+.lage.gruen{background:#E8F7F1;color:#0A7A5A}
+.lage.gelb{background:#FDF2E2;color:#8F5208}
+.lage.rot{background:#FDE8EE;color:#A5103A}
+.lage.offen{background:#EDF1F7;color:#5A6980}
+.pille.gruen-p{background:#E8F7F1;border-color:#B9E3D4;color:#0A7A5A}
+.tv-stift{width:26px;height:26px;border-radius:8px;border:1.3px solid var(--glass-border);
+  background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.tv-stift svg{width:12px;height:12px;fill:none;stroke:var(--text-dim);stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.tv-liste{background:#fff;border:1px solid var(--glass-border);border-radius:12px;overflow:hidden}
+.tv-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-top:1px solid #EDF1F6}
+.tv-row:first-child{border-top:none}
+.tv-row .lbl{flex:1;min-width:0;font-size:.82rem;font-weight:600}
+.tv-row .lbl s{display:block;text-decoration:none;font-size:.68rem;color:var(--text-dim);font-weight:500}
+.tv-row.offen{background:#FFFBF2}
+.tv-row.fertig .lbl{color:#7E8A9C}
+.tv-row.fertig .lbl b{text-decoration:line-through}
+.tv-hak{width:24px;height:24px;min-width:24px;border-radius:7px;border:1.6px solid var(--glass-border);
+  background:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;
+  color:transparent;cursor:pointer;padding:0}
+.tv-hak.on{background:var(--gruen);border-color:var(--gruen);color:#fff}
+.tv-dat{width:140px;flex:0 0 140px;border:1px solid var(--glass-border);border-radius:9px;
+  padding:.32rem .5rem;font-family:var(--mono);font-size:.78rem;text-align:center;background:#fff}
+.tv-hinweis{font-size:.76rem;color:var(--text-dim);background:#fff;border:1px dashed var(--glass-border);
+  border-radius:12px;padding:.7rem;text-align:center}
+.tv-alt-row{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;background:#F2F5F9;
+  border:1px solid var(--glass-border);border-radius:10px;margin-top:.4rem;color:#8B97A8;font-size:.76rem}
+.tv-i{width:20px;height:20px;min-width:20px;border-radius:50%;background:#fff;
+  border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.7rem;color:var(--acc-ink);cursor:pointer;padding:0}
+.tv-alt-row .wann{margin-left:auto;font-family:var(--mono);font-size:.72rem}
+.tv-det{display:flex;gap:.5rem;padding:.4rem 0;border-bottom:1px solid #EDF1F6;font-size:.82rem}
+.tv-det span{color:var(--text-dim)}
+.tv-det b{margin-left:auto;font-family:var(--mono);font-weight:700}
+/* Einstieg: Meldungen und Bereiche */
+.melde{display:flex;align-items:center;gap:.55rem;border:1px solid var(--glass-border);
+  border-radius:12px;padding:.5rem .7rem;margin-bottom:.4rem;font-size:.8rem;background:#fff;
+  width:100%;text-align:left;font-family:'Poppins',sans-serif;cursor:pointer;color:var(--text)}
+.melde .punkt{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.melde .txt{flex:1;min-width:0}
+.melde .txt b{display:block;font-weight:700}
+.melde .txt s{display:block;text-decoration:none;font-size:.7rem;color:var(--text-dim)}
+.melde.rot{background:#FDE8EE;border-color:#F6C6D4;color:#A5103A}
+.melde.rot .txt s{color:#B4517A}
+.melde.gelb{background:#FFF8EC;border-color:#F0D9A8;color:#8F5208}
+.melde.gelb .txt s{color:#A3803F}
+.melde.gut{background:#E8F7F1;border-color:#B9E3D4;color:#0A7A5A;cursor:default}
+.melde.gut .txt s{color:#4E9B82}
+.ab{display:flex;align-items:center;gap:.7rem;border:1px solid var(--glass-border);border-radius:12px;
+  padding:.75rem .8rem;margin-top:.45rem;background:#fff;cursor:pointer;width:100%;text-align:left;
+  font-family:'Poppins',sans-serif;color:var(--text)}
+.ab:hover{border-color:var(--acc);background:var(--acc-bg)}
+.ab .sym{width:34px;height:34px;border-radius:11px;background:var(--acc-bg);border:1px solid #CBDCF8;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ab .sym svg{width:17px;height:17px;fill:none;stroke:var(--acc-ink);stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.ab .txt{flex:1;min-width:0}
+.ab .txt b{display:block;font-size:.88rem;font-weight:700}
+.ab .txt s{display:block;text-decoration:none;font-size:.72rem;color:var(--text-dim)}
+.ab .zahl{font-family:var(--mono);font-size:.74rem;font-weight:700;background:var(--rot);color:#fff;
+  border-radius:20px;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  padding:0 .4rem}
+.ab .zahl.null{background:#E8F7F1;color:#0A7A5A}
+.ab .pf{color:#B7C2D2;font-size:.9rem}
+@media(max-width:700px){
+  .tv-weg{display:none}
+  .tv-dat{width:124px;flex:0 0 124px}
+}
 
 .back{display:inline-flex;align-items:center;gap:.4rem;background:none;border:none;cursor:pointer;
   color:var(--acc);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:700;padding:.3rem 0;
@@ -508,15 +585,39 @@ button.gross:hover{border-color:var(--acc)}
   <!-- ══ Startseite des Bereichs ══ -->
   <div class="view on" id="v-start">
     <div class="fil-wahl" id="fil-wahl"></div>
-    <div id="drei"></div>
+    <div id="meldungen"></div>
+    <div id="bereiche"></div>
+  </div>
 
-    <div class="karte" style="margin-top:.9rem">
+  <!-- ══ Fristen und Nachweise ══ -->
+  <div class="view" id="v-fristen">
+    <button class="back" onclick="show('v-start')">← Zurück</button>
+    <div class="karte">
       <div class="k-kopf">Fristen und Nachweise
         <span class="rechts"><button class="mini-btn" onclick="neueFrist()" title="Frist anlegen">+</button></span></div>
       <div class="tb-huelle"><table class="tb" id="tb-fristen"></table></div>
     </div>
+  </div>
 
+  <!-- ══ TÜV Geräte ══ -->
+  <div class="view" id="v-tuev">
+    <button class="back" onclick="show('v-start')">← Zurück</button>
+    <div class="pillen" id="tv-pillen"></div>
     <div class="karte">
+      <div class="k-kopf">TÜV Geräte · <span id="tv-fil">—</span>
+        <span class="rechts" id="tv-anz"></span></div>
+      <div class="tb-huelle"><table class="tb" id="tb-tuev"></table></div>
+    </div>
+    <p class="hinweis">Die erste Prüfung steht zwei Jahre nach Beginn der Zulassung an, jede
+      weitere zwei Jahre nach der zuletzt eingetragenen Prüfung — höchstens jedoch bis zum Ende
+      der Zulassung.</p>
+  </div>
+
+  <!-- ══ Checkliste Halle ══ -->
+  <div class="view" id="v-halle">
+    <button class="back" onclick="show('v-start')">← Zurück</button>
+    <div id="drei"></div>
+    <div class="karte" style="margin-top:.9rem">
       <div class="k-kopf">Frühere Prüfungen
         <span class="rechts"><button class="mini-btn voll" onclick="openKonfig()" title="Prüfpunkte verwalten">⚙</button></span></div>
       <div class="tb-huelle"><table class="tb" id="tb-pruef"></table></div>
@@ -525,7 +626,7 @@ button.gross:hover{border-color:var(--acc)}
 
   <!-- ══ Offene Punkte ══ -->
   <div class="view" id="v-offen">
-    <button class="back" onclick="show('v-start')">← Zurück</button>
+    <button class="back" onclick="show('v-halle')">← Zurück</button>
     <div class="sub-titel">Offene Punkte · <span id="off-fil">—</span></div>
     <div id="liste-offen"></div>
     <p class="hinweis">Ein Haken schließt den Punkt; das Datum der Erledigung wird festgehalten.</p>
@@ -549,6 +650,75 @@ button.gross:hover{border-color:var(--acc)}
       <button class="btn b-acc" onclick="savePruefung()">✓ Prüfung speichern</button>
     </div>
   </div>
+
+<!-- ══ Fenster: TÜV Gerät ══ -->
+<div class="modal-overlay" id="m-tuev" onclick="if(event.target===this)closeM('m-tuev')">
+  <div class="modal" style="max-width:470px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('m-tuev')">✕</button>
+      <div class="dlg-eyebrow">TÜV Geräte</div>
+      <div class="dlg-title"><span id="tv-titel">Gerät</span><span class="dlg-pill" id="tv-pill">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Zulassung</label>
+      <div class="zwei">
+        <div><input type="date" class="eing mono" id="tv-von"></div>
+        <div><input type="date" class="eing mono" id="tv-bis"></div>
+      </div>
+      <label class="fl">Prüfungen</label>
+      <div id="tv-pruef"></div>
+      <div id="tv-alt"></div>
+      <div class="zwei" style="margin-top:.9rem">
+        <button class="btn b-ghost" onclick="tvNeuOeffnen('paket')">Neues Spielpaket</button>
+        <button class="btn b-ghost" onclick="tvNeuOeffnen('geraet')">Neues Gerät</button>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('m-tuev')">Abbrechen</button>
+      <button class="btn b-acc" onclick="tvSpeichern()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: neues Spielpaket / neues Gerät ══ -->
+<div class="modal-overlay" id="m-tuev-neu" onclick="if(event.target===this)closeM('m-tuev-neu')">
+  <div class="modal" style="max-width:430px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('m-tuev-neu')">✕</button>
+      <div class="dlg-eyebrow" id="tvn-eyebrow">Gerät</div>
+      <div class="dlg-title" id="tvn-titel">Neues Spielpaket</div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Neue Zulassung</label>
+      <div class="zwei">
+        <div><input type="date" class="eing mono" id="tvn-von"></div>
+        <div><input type="date" class="eing mono" id="tvn-bis"></div>
+      </div>
+      <label class="fl">Bemerkung</label>
+      <input class="eing" id="tvn-bem" placeholder="z. B. Paket „Merkur 2026“">
+      <p class="hinweis" id="tvn-hinweis" style="margin-top:.6rem"></p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-rot" onclick="closeM('m-tuev-neu')">Anlegen abbrechen</button>
+      <button class="btn b-acc" onclick="tvNeuUebernehmen()">✓ Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: frühere Daten ══ -->
+<div class="modal-overlay" id="m-tuev-alt" onclick="if(event.target===this)closeM('m-tuev-alt')">
+  <div class="modal" style="max-width:430px">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('m-tuev-alt')">✕</button>
+      <div class="dlg-eyebrow">Vorgeschichte</div>
+      <div class="dlg-title" id="tva-titel">—</div>
+    </div>
+    <div class="dlg-body" id="tva-body"></div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" onclick="closeM('m-tuev-alt')">Schließen</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ Fenster: Kreuz ══ -->
 <div class="modal-overlay" id="m-nok" onclick="if(event.target===this)abbruchNok()">
@@ -754,6 +924,7 @@ async function laden(){
     pruefungen = p.docs.map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>(b.datum||'').localeCompare(a.datum||''));
     fristen = f.docs.map(d=>({id:d.id,...d.data()}));
+    await ladeTuev();
   }catch(e){ showToast('Daten nicht geladen: '+e.message); }
   hideSpinner();
   zeichne();
@@ -813,6 +984,9 @@ function zeichne(){
     <button class="knopf-gr" onclick="neuePruefung()">+ Neue Prüfung</button></div>`;
   document.getElementById('drei').innerHTML = h;
 
+  zeichneEinstieg();
+  zeichneTuev();
+
   // Fristen
   const fr = fristen.slice().sort((a,b)=>(a.bis||'9').localeCompare(b.bis||'9'));
   document.getElementById('tb-fristen').innerHTML =
@@ -836,6 +1010,342 @@ function zeichne(){
           <td>${esc(p.pruefer||'—')}</td><td class="num">${e.length}</td>
           <td>${o?`<span class="warn gelb">${o} offen</span>`:'<span class="warn gruen">alles erledigt</span>'}</td></tr>`;
       }).join('') : '<tr><td colspan="4" class="leer">Noch keine Prüfung.</td></tr>');
+}
+
+
+/* ══ TÜV Geräte ══════════════════════════════════════════════════════
+   Je Gerät ein Dokument check_tuev/<filiale>_<nr>:
+   { lager, nr, von, bis, bem, pruefungen:[{datum}], vorher:[…] }
+   Gerechnet wird nicht gespeichert: der Plantermin ergibt sich immer neu —
+   zwei Jahre nach Beginn der Zulassung, danach zwei Jahre nach der jeweils
+   letzten eingetragenen Prüfung, höchstens bis zum Ende der Zulassung.   */
+const TV_GERAETE = {
+  nettetal: [1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17],
+  'brüggen':[1,2,3,4,5,6,7,8,9,10,11,12],
+  viersen:  [1,2,3,4,5,6,7,8,9,10,11,12],
+};
+const TV_VORLAUF = 30;      // Tage, ab wann gewarnt wird
+let tuev = {};              // nr -> Dokument der gewählten Filiale
+let tvNr = null;            // gerade geöffnetes Gerät
+let tvNeuArt = null;        // 'paket' | 'geraet' während der Neuanlage
+
+function plusJahre(iso, n){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-').map(Number);
+  return tagKey(new Date(y+n, m-1, d));
+}
+// Plantermin der nächsten Prüfung — null, wenn keine Zulassung hinterlegt ist
+function tvNaechste(doc){
+  if(!doc || !doc.von) return null;
+  const liste = (doc.pruefungen||[]).filter(x=>x && x.datum)
+    .sort((a,b)=>a.datum.localeCompare(b.datum));
+  const letzte = liste.length ? liste[liste.length-1].datum : null;
+  let plan = plusJahre(letzte || doc.von, 2);
+  if(doc.bis && plan > doc.bis) plan = doc.bis;
+  return plan;
+}
+// Plantermin der i-ten Prüfung (für die Beschriftung der erledigten Zeilen)
+function tvPlanFuer(doc, i){
+  const liste = (doc.pruefungen||[]).filter(x=>x && x.datum)
+    .sort((a,b)=>a.datum.localeCompare(b.datum));
+  const basis = i === 0 ? doc.von : liste[i-1].datum;
+  let plan = plusJahre(basis, 2);
+  if(doc.bis && plan > doc.bis) plan = doc.bis;
+  return plan;
+}
+function tvLage(doc){
+  const n = tvNaechste(doc);
+  if(!n) return {art:'offen', text:'offen', tage:null, plan:null};
+  const t = tageBis(n);
+  if(t === null) return {art:'offen', text:'offen', tage:null, plan:n};
+  if(t < 0)   return {art:'rot',  text:'überfällig seit '+(-t)+' T.', tage:t, plan:n};
+  if(t <= 60) return {art:'gelb', text:'in '+t+' Tagen', tage:t, plan:n};
+  return {art:'gruen', text:'in Ordnung', tage:t, plan:n};
+}
+const tvDoc = nr => tuev[nr] || {lager:lg, nr, von:'', bis:'', pruefungen:[], vorher:[]};
+
+async function ladeTuev(){
+  tuev = {};
+  try{
+    const s = await db.collection('check_tuev').where('lager','==',lg).get();
+    s.forEach(d=>{ const x = d.data(); tuev[Number(x.nr)] = Object.assign({id:d.id}, x); });
+  }catch(e){}
+}
+
+/* ── Liste ── */
+function zeichneTuev(){
+  const nummern = TV_GERAETE[lg] || [];
+  document.getElementById('tv-fil').textContent = NAMEN[lg];
+  document.getElementById('tv-anz').textContent =
+    nummern.length + ' Geräte · ' + nummern[0] + '–' + nummern[nummern.length-1];
+  let rot=0, gelb=0, gut=0, offen=0;
+  const zeilen = nummern.map(nr=>{
+    const d = tvDoc(nr), l = tvLage(d);
+    if(l.art==='rot') rot++; else if(l.art==='gelb') gelb++;
+    else if(l.art==='gruen') gut++; else offen++;
+    const liste = (d.pruefungen||[]).filter(x=>x&&x.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+    const letzte = liste.length ? dmy(liste[liste.length-1].datum) : '—';
+    const zul = d.von ? dmy(d.von)+' — '+(d.bis?dmy(d.bis):'offen')
+                      : '<span class="tv-leer">noch nichts hinterlegt</span>';
+    const kl = l.art==='rot' ? ' class="tv-rot"' : (l.art==='gelb' ? ' class="tv-gelb"' : '');
+    return `<tr${kl} onclick="tvOeffnen(${nr})" style="cursor:pointer">
+      <td><span class="tv-nr">${nr}</span></td>
+      <td class="mono">${zul}</td>
+      <td class="mono tv-weg">${letzte}</td>
+      <td class="mono">${l.plan ? dmy(l.plan) : '—'}</td>
+      <td><span class="lage ${l.art}">${l.text}</span></td>
+      <td style="width:44px"><button class="tv-stift" title="Bearbeiten">
+        <svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/>
+        <path d="M14.5 6.5l3 3"/></svg></button></td></tr>`;
+  }).join('');
+  document.getElementById('tb-tuev').innerHTML =
+    '<tr><th style="width:62px">Gerät</th><th>Zulassung</th><th class="tv-weg">Letzte Prüfung</th>'
+    + '<th>Nächste Prüfung</th><th>Status</th><th></th></tr>' + zeilen;
+  document.getElementById('tv-pillen').innerHTML =
+      (rot  ? `<span class="pille rot">Überfällig <b>${rot}</b></span>` : '')
+    + (gelb ? `<span class="pille warn">Bald fällig <b>${gelb}</b></span>` : '')
+    + (gut  ? `<span class="pille gruen-p">In Ordnung <b>${gut}</b></span>` : '')
+    + (offen? `<span class="pille">Ohne Angaben <b>${offen}</b></span>` : '');
+}
+
+/* ── Fenster je Gerät ── */
+function tvOeffnen(nr){
+  tvNr = nr;
+  const d = tvDoc(nr);
+  document.getElementById('tv-titel').textContent = 'Gerät ' + nr;
+  document.getElementById('tv-pill').textContent = NAMEN[lg];
+  document.getElementById('tv-von').value = d.von || '';
+  document.getElementById('tv-bis').value = d.bis || '';
+  tvZeichnePruefungen();
+  openM('m-tuev');
+}
+function tvZeichnePruefungen(){
+  const d = tvDoc(tvNr);
+  const box = document.getElementById('tv-pruef');
+  if(!d.von){
+    box.innerHTML = '<div class="tv-hinweis">Erst die Zulassung eintragen — die erste Prüfung '
+      + 'ergibt sich daraus von selbst.</div>';
+    document.getElementById('tv-alt').innerHTML = tvVorgeschichte(d);
+    return;
+  }
+  const liste = (d.pruefungen||[]).filter(x=>x&&x.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+  let h = '<div class="tv-liste">';
+  liste.forEach((pr,i)=>{
+    h += `<div class="tv-row fertig">
+      <button class="tv-hak on" onclick="tvHakenWeg(${i})" title="Haken entfernen">✓</button>
+      <span class="lbl"><b>Prüfung ${dmy(tvPlanFuer(d,i))}</b>
+        <s>${i===0 ? 'zwei Jahre nach Beginn der Zulassung' : 'zwei Jahre nach der vorigen Prüfung'}</s></span>
+      <input type="date" class="tv-dat" value="${pr.datum}" onchange="tvDatumAendern(${i},this.value)">
+    </div>`;
+  });
+  const naechste = tvNaechste(d);
+  const fertigBis = d.bis && liste.length && liste[liste.length-1].datum >= d.bis;
+  if(!fertigBis){
+    h += `<div class="tv-row offen">
+      <button class="tv-hak" onclick="tvHakenSetzen()" title="Prüfung eintragen"></button>
+      <span class="lbl"><b>Prüfung ${dmy(naechste)}</b>
+        <s>${liste.length ? 'zwei Jahre nach der letzten Prüfung' : 'zwei Jahre nach Beginn der Zulassung'}</s></span>
+      <input type="date" class="tv-dat" id="tv-neu-datum">
+    </div>`;
+  }else{
+    h += '<div class="tv-row"><span class="lbl"><b>Zulassung ausgelaufen</b>'
+       + '<s>eine neue Zulassung legst du unten an</s></span></div>';
+  }
+  box.innerHTML = h + '</div>';
+  document.getElementById('tv-alt').innerHTML = tvVorgeschichte(d);
+}
+function tvVorgeschichte(d){
+  const v = d.vorher || [];
+  if(!v.length) return '';
+  return '<label class="fl">Früher</label>' + v.map((x,i)=>`
+    <div class="tv-alt-row">
+      <button class="tv-i" onclick="tvAltZeigen(${i})" title="Einzelheiten">i</button>
+      ${x.art==='geraet' ? 'Gerät vor dem Tausch' : 'Vorheriges Spielpaket'} ·
+      Zulassung ${dmy(x.von)} — ${x.bis?dmy(x.bis):'offen'}
+      <span class="wann">${(x.pruefungen||[]).length} Prüfungen</span>
+    </div>`).join('');
+}
+function tvAltZeigen(i){
+  const d = tvDoc(tvNr), x = (d.vorher||[])[i];
+  if(!x) return;
+  document.getElementById('tva-titel').textContent =
+    (x.art==='geraet' ? 'Früheres Gerät' : 'Früheres Spielpaket') + ' · Gerät ' + tvNr;
+  const pr = (x.pruefungen||[]).filter(y=>y&&y.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+  document.getElementById('tva-body').innerHTML =
+      `<div class="tv-det"><span>Zulassung</span><b>${dmy(x.von)} — ${x.bis?dmy(x.bis):'offen'}</b></div>`
+    + (x.bem ? `<div class="tv-det"><span>Bemerkung</span><b>${esc(x.bem)}</b></div>` : '')
+    + (x.ersetztAm ? `<div class="tv-det"><span>Ersetzt am</span><b>${dmy(x.ersetztAm)}</b></div>` : '')
+    + '<label class="fl">Prüfungen</label>'
+    + (pr.length ? '<div class="tv-liste">' + pr.map(y=>
+        `<div class="tv-row fertig"><span class="tv-hak on">✓</span>
+         <span class="lbl"><b>Prüfung</b></span>
+         <span class="tv-dat">${dmy(y.datum)}</span></div>`).join('') + '</div>'
+      : '<div class="tv-hinweis">Keine Prüfung eingetragen.</div>');
+  openM('m-tuev-alt');
+}
+
+/* ── Eingaben ── */
+async function tvHakenSetzen(){
+  const feld = document.getElementById('tv-neu-datum');
+  const datum = feld ? feld.value : '';
+  if(!datum){ showToast('Bitte das Datum der Prüfung eintragen.'); if(feld) feld.focus(); return; }
+  const d = tvDoc(tvNr);
+  if(d.von && datum < d.von){ showToast('Die Prüfung kann nicht vor der Zulassung liegen.'); return; }
+  const liste = (d.pruefungen||[]).slice();
+  liste.push({datum});
+  await tvSichern({pruefungen:liste});
+}
+async function tvHakenWeg(i){
+  const d = tvDoc(tvNr);
+  const liste = (d.pruefungen||[]).filter(x=>x&&x.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+  if(i !== liste.length-1){
+    showToast('Erst die neueste Prüfung entfernen.'); return;
+  }
+  if(!confirm('Diese Prüfung wieder entfernen?')) return;
+  liste.splice(i,1);
+  await tvSichern({pruefungen:liste});
+}
+async function tvDatumAendern(i, wert){
+  if(!wert) return;
+  const d = tvDoc(tvNr);
+  const liste = (d.pruefungen||[]).filter(x=>x&&x.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+  if(!liste[i]) return;
+  liste[i] = {datum:wert};
+  await tvSichern({pruefungen:liste});
+}
+async function tvSpeichern(){
+  const von = document.getElementById('tv-von').value;
+  const bis = document.getElementById('tv-bis').value;
+  if(bis && von && bis < von){ showToast('Das Ende der Zulassung liegt vor dem Beginn.'); return; }
+  await tvSichern({von, bis}, true);
+}
+// Schreibt die Änderung und zeichnet alles neu
+async function tvSichern(felder, schliessen){
+  const d = tvDoc(tvNr);
+  const neu = Object.assign({}, d, felder, {lager:lg, nr:tvNr});
+  delete neu.id;
+  showSpinner();
+  try{
+    await db.collection('check_tuev').doc(lg+'_'+tvNr).set(neu);
+    tuev[tvNr] = Object.assign({id:lg+'_'+tvNr}, neu);
+    if(schliessen){ closeM('m-tuev'); showToast('Gespeichert ✓'); }
+    else tvZeichnePruefungen();
+    zeichneTuev(); zeichne();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ── Neues Spielpaket / neues Gerät ── */
+function tvNeuOeffnen(art){
+  tvNeuArt = art;
+  document.getElementById('tvn-eyebrow').textContent = 'Gerät ' + tvNr + ' · ' + NAMEN[lg];
+  document.getElementById('tvn-titel').textContent =
+    art==='geraet' ? 'Neues Gerät' : 'Neues Spielpaket';
+  document.getElementById('tvn-von').value = '';
+  document.getElementById('tvn-bis').value = '';
+  document.getElementById('tvn-bem').value = '';
+  document.getElementById('tvn-hinweis').textContent =
+    'Die erste Prüfung wird zwei Jahre nach Beginn der neuen Zulassung angesetzt. '
+    + 'Die bisherigen Daten bleiben erhalten und rutschen als graue Zeile in die Vorgeschichte.';
+  openM('m-tuev-neu');
+}
+async function tvNeuUebernehmen(){
+  const von = document.getElementById('tvn-von').value;
+  const bis = document.getElementById('tvn-bis').value;
+  const bem = document.getElementById('tvn-bem').value.trim();
+  if(!von){ showToast('Bitte den Beginn der neuen Zulassung eintragen.'); return; }
+  if(bis && bis < von){ showToast('Das Ende der Zulassung liegt vor dem Beginn.'); return; }
+  const d = tvDoc(tvNr);
+  const vorher = (d.vorher||[]).slice();
+  if(d.von || (d.pruefungen||[]).length){
+    vorher.unshift({art:tvNeuArt, von:d.von, bis:d.bis, bem:d.bem||'',
+                    pruefungen:(d.pruefungen||[]), ersetztAm:heute()});
+  }
+  closeM('m-tuev-neu');
+  await tvSichern({von, bis, bem, pruefungen:[], vorher});
+  tvZeichnePruefungen();
+  document.getElementById('tv-von').value = von;
+  document.getElementById('tv-bis').value = bis;
+  showToast(tvNeuArt==='geraet' ? 'Neues Gerät übernommen ✓' : 'Neues Spielpaket übernommen ✓');
+}
+
+/* ── Meldungen für diese Filiale ── */
+function tvMeldungen(){
+  return (TV_GERAETE[lg]||[]).map(nr=>({nr, d:tvDoc(nr), l:tvLage(tvDoc(nr))}))
+    .filter(x=>x.l.art==='rot' || (x.l.tage!==null && x.l.tage<=TV_VORLAUF))
+    .sort((a,b)=>(a.l.tage||0)-(b.l.tage||0));
+}
+
+/* ══ Einstieg: Meldungen und die drei Bereiche ═══════════════════════ */
+// Fristen, die abgelaufen sind oder binnen zwei Monaten ablaufen
+function fristMeldungen(){
+  return fristen.map(x=>({x, t:tageBis(x.bis)}))
+    .filter(o=>o.t!==null && o.t<=60)
+    .sort((a,b)=>a.t-b.t);
+}
+function zeichneEinstieg(){
+  const off = offenePunkte();
+  const tv  = tvMeldungen();
+  const fr  = fristMeldungen();
+
+  let m = '';
+  if(off.length){
+    m += `<button class="melde rot" onclick="zeigeOffen()">
+      <span class="punkt" style="background:#C4183C"></span>
+      <span class="txt"><b>${off.length} offene ${off.length===1?'Punkt':'Punkte'} Checkliste</b>
+        <s>aus der Prüfung vom ${[...new Set(off.map(o=>dmy(o.pruefung.datum)))].join(', ')}</s></span>
+      </button>`;
+  }
+  tv.forEach(o=>{
+    const rot = o.l.art==='rot';
+    m += `<button class="melde ${rot?'rot':'gelb'}" onclick="zeigeTuev(${o.nr})">
+      <span class="punkt" style="background:${rot?'#C4183C':'#C2700B'}"></span>
+      <span class="txt"><b>TÜV ${rot?'überfällig':'fällig'} · Gerät ${o.nr}</b>
+        <s>Prüfung bis ${dmy(o.l.plan)} · ${rot ? 'seit '+(-o.l.tage)+' Tagen' : 'in '+o.l.tage+' Tagen'}</s></span>
+      </button>`;
+  });
+  fr.forEach(o=>{
+    const rot = o.t < 0;
+    m += `<button class="melde ${rot?'rot':'gelb'}" onclick="zeigeFristen('${o.x.id}')">
+      <span class="punkt" style="background:${rot?'#C4183C':'#C2700B'}"></span>
+      <span class="txt"><b>${esc(o.x.name||'Frist')}</b>
+        <s>gültig bis ${dmy(o.x.bis)} · ${rot ? 'seit '+(-o.t)+' Tagen abgelaufen' : 'in '+o.t+' Tagen'}</s></span>
+      </button>`;
+  });
+  if(!m){
+    m = `<div class="melde gut"><span class="punkt" style="background:#0C9C77"></span>
+      <span class="txt"><b>Alles in Ordnung</b><s>nichts offen, keine Frist läuft demnächst ab</s></span></div>`;
+  }
+  document.getElementById('meldungen').innerHTML = m;
+
+  const zahl = n => `<span class="zahl${n?'':' null'}">${n}</span>`;
+  const nummern = TV_GERAETE[lg] || [];
+  const letzte = pruefungen[0];
+  document.getElementById('bereiche').innerHTML = `
+    <button class="ab" onclick="zeigeFristen()">
+      <span class="sym"><svg viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4v-17Z"/><path d="M9 8h6M9 12h6"/></svg></span>
+      <span class="txt"><b>Fristen und Nachweise</b>
+        <s>${fristen.length ? fristen.length+' Einträge' : 'noch nichts hinterlegt'}</s></span>
+      ${zahl(fr.length)}<span class="pf">›</span></button>
+    <button class="ab" onclick="zeigeTuev()">
+      <span class="sym"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="13" rx="2.5"/><circle cx="12" cy="10" r="2.2"/><path d="M6 20.5h12"/></svg></span>
+      <span class="txt"><b>TÜV Geräte</b>
+        <s>${nummern.length} Geräte · Zulassung und Prüftermine</s></span>
+      ${zahl(tv.length)}<span class="pf">›</span></button>
+    <button class="ab" onclick="show('v-halle')">
+      <span class="sym"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5V2.5h6v1"/><path d="M8.5 9l1.6 1.6L14 7"/><path d="M8.5 15l1.6 1.6L14 13"/></svg></span>
+      <span class="txt"><b>Checkliste Halle</b>
+        <s>${letzte ? 'zuletzt geprüft '+dmy(letzte.datum) : 'noch keine Prüfung'}</s></span>
+      ${zahl(off.length)}<span class="pf">›</span></button>`;
+}
+function zeigeFristen(id){
+  show('v-fristen');
+  if(id) oeffneFrist(id);
+}
+function zeigeTuev(nr){
+  zeichneTuev();
+  show('v-tuev');
+  if(nr) tvOeffnen(nr);
 }
 
 /* ══ Offene Punkte ═══════════════════════════════════════════════════ */
@@ -1058,6 +1568,287 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   start();
 });
+
+/* ══════════ Meldungen im Bereich Daten ═══════════════════════════════
+   Zwei Quellen: die TÜV-Termine der Geräte (check_tuev) und das Personal
+   (Verträge und Schulungen). Gezeigt wird beides als Fenster — beim ersten
+   Öffnen einer Daten-Seite in einer Sitzung und danach stündlich — und
+   jederzeit über die Glocke oben rechts.                                */
+const DM_VORLAUF   = 30;   // Tage vor der TÜV-Prüfung
+const DM_SCHULUNG  = 90;   // Tage vor Ablauf einer Schulung
+const DM_NAMEN = {nettetal:'Nettetal', 'brüggen':'Brüggen', viersen:'Viersen', 'köln':'Köln'};
+let dmTuev = [], dmPersonal = [], dmTimer = null, dmTab = 'tuev';
+
+const dmHeute = () => { const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+function dmTage(iso){
+  if(!iso) return null;
+  const [y,m,d] = String(iso).split('-').map(Number);
+  if(!y||!m||!d) return null;
+  const ziel = new Date(y,m-1,d), jetzt = new Date(); jetzt.setHours(0,0,0,0);
+  return Math.round((ziel-jetzt)/86400000);
+}
+const dmDmy = iso => iso ? String(iso).split('-').reverse().join('.') : '—';
+function dmPlusJahre(iso, n){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-').map(Number);
+  const z = new Date(y+n, m-1, d);
+  return z.getFullYear()+'-'+String(z.getMonth()+1).padStart(2,'0')+'-'+String(z.getDate()).padStart(2,'0');
+}
+function dmNaechstePruefung(x){
+  if(!x || !x.von) return null;
+  const liste = (x.pruefungen||[]).filter(p=>p&&p.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+  const letzte = liste.length ? liste[liste.length-1].datum : null;
+  let plan = dmPlusJahre(letzte || x.von, 2);
+  if(x.bis && plan > x.bis) plan = x.bis;
+  return plan;
+}
+function dmText(t){
+  if(t === null) return '';
+  if(t < 0) return 'überfällig seit ' + (-t) + ' Tagen';
+  if(t === 0) return 'heute fällig';
+  return 'in ' + t + ' Tagen';
+}
+
+async function dmSammeln(){
+  const tv = [], pe = [];
+  try{
+    const s = await db.collection('check_tuev').get();
+    s.forEach(d=>{
+      const x = d.data();
+      const plan = dmNaechstePruefung(x);
+      if(!plan) return;
+      const t = dmTage(plan);
+      if(t === null || t > DM_VORLAUF) return;
+      tv.push({nr:x.nr, lager:x.lager, plan, bis:x.bis||'', tage:t});
+    });
+  }catch(e){}
+  try{
+    const s = await db.collection('personal').get();
+    s.forEach(d=>{
+      const p = d.data();
+      if(p.austritt) return;
+      const name = p.name || '—';
+      const v = (p.vertraege||[]).slice().sort((a,b)=>(b.von||'').localeCompare(a.von||''))[0];
+      if(v && !v.unbefristet && v.bis){
+        const t = dmTage(v.bis);
+        if(t !== null && t <= 30) pe.push({name, was:'Vertrag', frist:v.bis, tage:t});
+      }
+      const schul = (p.schulungen||[]).filter(x=>x && x.name);
+      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0 && !schul.length){
+        pe.push({name, was:'Schulung fehlt', frist:'', tage:-1});
+      }
+      schul.forEach(x=>{
+        const t = dmTage(x.bis);
+        if(t !== null && t <= DM_SCHULUNG) pe.push({name, was:'Schulung '+(x.name||''), frist:x.bis, tage:t});
+      });
+    });
+  }catch(e){}
+  tv.sort((a,b)=>a.tage-b.tage);
+  pe.sort((a,b)=>a.tage-b.tage);
+  dmTuev = tv; dmPersonal = pe;
+  dmZaehler();
+  return tv.length + pe.length;
+}
+
+/* ── Fenster ── */
+function dmOffen(){
+  return !!document.querySelector('.modal-overlay.show, #dm-warnung');
+}
+function dmFarbe(t){ return t < 0 ? '#C4183C' : (t <= 7 ? '#8F5208' : '#44506A'); }
+
+function dmFenster(){
+  if(!dmTuev.length && !dmPersonal.length) return;
+  document.getElementById('dm-warnung')?.remove();
+  const zeile = (titel, unten, t, ersatz) =>
+    '<div style="padding:.55rem .7rem;border-top:1px solid #E4E9F0">'
+    + '<div style="display:flex;gap:.5rem;align-items:baseline">'
+    + '<b style="flex:1;min-width:0;font-size:.85rem;font-weight:600">' + titel + '</b>'
+    + '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:.72rem;font-weight:700;'
+    + 'color:' + dmFarbe(t===null?-1:t) + '">' + (ersatz || dmText(t)) + '</span></div>'
+    + '<s style="display:block;text-decoration:none;font-size:.71rem;color:#6B7A90">' + unten + '</s></div>';
+  let inhalt = '';
+  if(dmTuev.length){
+    inhalt += '<div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;'
+      + 'font-weight:800;color:#66748C;margin:.2rem 0 .3rem">TÜV Geräte</div>'
+      + '<div style="border:1px solid #E4E9F0;border-radius:11px;overflow:hidden;background:#FBFCFE">'
+      + dmTuev.map(x=>zeile('Gerät ' + x.nr,
+          (DM_NAMEN[x.lager]||x.lager) + ' · Prüfung bis ' + dmDmy(x.plan), x.tage)).join('')
+      + '</div>';
+  }
+  if(dmPersonal.length){
+    inhalt += '<div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;'
+      + 'font-weight:800;color:#66748C;margin:.8rem 0 .3rem">Personal</div>'
+      + '<div style="border:1px solid #E4E9F0;border-radius:11px;overflow:hidden;background:#FBFCFE">'
+      + dmPersonal.map(x=>zeile(x.name, x.was + (x.frist ? ' · bis ' + dmDmy(x.frist) : ''),
+          x.frist ? x.tage : null, x.frist ? '' : 'fehlt')).join('')
+      + '</div>';
+  }
+  const el = document.createElement('div');
+  el.id = 'dm-warnung';
+  el.style.cssText = 'position:fixed;inset:0;z-index:4000;background:rgba(20,27,41,.5);display:flex;'
+    + "align-items:center;justify-content:center;padding:1rem;font-family:'Poppins',sans-serif";
+  el.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:460px;width:100%;overflow:hidden;'
+    + 'box-shadow:0 24px 60px rgba(16,26,46,.4);max-height:88vh;display:flex;flex-direction:column">'
+    + '<div style="background:#C4183C;color:#fff;padding:.85rem 1rem">'
+    + '<div style="font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;font-weight:800;'
+    + 'color:#FFD1DD">Daten</div>'
+    + '<div style="font-size:1rem;font-weight:700">Fristen laufen ab</div></div>'
+    + '<div style="padding:.9rem 1rem;overflow-y:auto">'
+    + '<p style="font-size:.84rem;line-height:1.5;color:#1B2536;margin:0 0 .6rem">Diese Termine '
+    + 'stehen in weniger als einem Monat an oder sind schon vorbei. Bitte kümmern.</p>'
+    + inhalt
+    + '<p style="font-size:.72rem;color:#6B7A90;margin-top:.7rem">Der Hinweis erscheint stündlich '
+    + 'und bei jeder neuen Anmeldung, solange etwas offen ist. Über die Glocke oben rechts '
+    + 'lässt er sich jederzeit nachlesen.</p></div>'
+    + '<div style="padding:.7rem 1rem .9rem;background:#F7F9FC;border-top:1px solid #DCE3ED">'
+    + '<button id="dm-zu" style="width:100%;border:none;border-radius:12px;padding:.75rem;'
+    + "font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:700;background:#3F4A5F;"
+    + 'color:#fff;cursor:pointer">Schließen</button></div></div>';
+  document.body.appendChild(el);
+  const zu = () => { el.remove(); localStorage.setItem('gg_dm_zuletzt', String(Date.now())); };
+  el.querySelector('#dm-zu').onclick = zu;
+  el.onclick = ev => { if(ev.target===el) zu(); };
+  localStorage.setItem('gg_dm_zuletzt', String(Date.now()));
+  sessionStorage.setItem('gg_dm_sitzung', '1');
+}
+
+async function dmPruefen(sofort){
+  try{
+    await dmSammeln();
+    if(!dmTuev.length && !dmPersonal.length) return;
+    if(!sofort && dmOffen()) return;
+    const letzte = Number(localStorage.getItem('gg_dm_zuletzt')) || 0;
+    const neueSitzung = !sessionStorage.getItem('gg_dm_sitzung');
+    if(sofort || neueSitzung || Date.now()-letzte >= 3600000) dmFenster();
+  }catch(e){ console.warn('Daten-Meldungen:', e.message); }
+}
+
+/* ── Glocke ── */
+function dmDarfGlocke(){
+  try{
+    const u = JSON.parse(localStorage.getItem('gg_user')||'{}');
+    return ['Admin','Einkaufsleiter'].indexOf(u.role||'') >= 0;
+  }catch(e){ return false; }
+}
+function dmStil(){
+  if(document.getElementById('dm-stil')) return;
+  const s = document.createElement('style');
+  s.id = 'dm-stil';
+  s.textContent = `
+.dm-glocke{position:relative;width:2.1rem;height:2.1rem;border:none;background:rgba(255,255,255,.08);
+  border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  margin-right:.1rem}
+.dm-glocke:hover{background:rgba(255,255,255,.16)}
+.dm-glocke svg{width:17px;height:17px;fill:none;stroke:#CFE0F2;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.dm-glocke .zahl{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:9px;background:#C4183C;color:#fff;font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.dm-glocke .zahl.leer{display:none}
+.dm-panel{position:fixed;top:calc(var(--header-h,64px) + .4rem);right:1rem;width:380px;
+  max-width:calc(100vw - 2rem);max-height:76vh;background:#fff;border:1px solid #DCE3ED;
+  border-radius:14px;box-shadow:0 20px 50px rgba(16,26,46,.28);z-index:3000;display:none;
+  flex-direction:column;overflow:hidden;font-family:'Poppins',sans-serif}
+.dm-panel.auf{display:flex}
+.dm-kopf{display:flex;gap:.3rem;padding:.6rem .7rem;border-bottom:1px solid #E4E9F0;background:#F7F9FC}
+.dm-kopf button{flex:1;border:1px solid transparent;background:none;border-radius:9px;padding:.4rem .5rem;
+  font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;color:#66748C;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:.35rem}
+.dm-kopf button.on{background:#fff;border-color:#DCE3ED;color:#141B29;box-shadow:0 1px 3px rgba(16,26,46,.1)}
+.dm-kopf .n{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:700;background:#EDF1F7;
+  color:#5A6980;border-radius:20px;padding:.05rem .4rem}
+.dm-kopf button.on .n{background:#C4183C;color:#fff}
+.dm-body{overflow-y:auto;padding:.6rem .7rem .8rem}
+.dm-leer{text-align:center;color:#8B97A8;font-size:.8rem;padding:1.6rem .5rem}
+.dm-row{padding:.55rem .65rem;border:1px solid #E4E9F0;border-radius:11px;margin-bottom:.45rem;
+  background:#FBFCFE}
+.dm-row .top{display:flex;gap:.5rem;align-items:baseline}
+.dm-row .top b{flex:1;min-width:0;font-size:.84rem;font-weight:600;color:#141B29}
+.dm-row .frist{font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:700}
+.dm-row s{display:block;text-decoration:none;font-size:.7rem;color:#6B7A90;margin-top:.1rem}
+@media(max-width:900px){ .dm-glocke{display:none} .dm-panel{display:none!important} }`;
+  document.head.appendChild(s);
+}
+function dmGlockeBauen(){
+  if(!dmDarfGlocke()) return;
+  const rechts = document.querySelector('.hdr-right');
+  if(!rechts || document.querySelector('.dm-glocke')) return;
+  dmStil();
+  const b = document.createElement('button');
+  b.className = 'dm-glocke';
+  b.title = 'Meldungen';
+  b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5c0 4-1.5 5.5-1.5 5.5h14s-1.5-1.5-1.5-5.5A5.5 5.5 0 0 0 12 3.5Z"/>'
+    + '<path d="M10.3 18a2 2 0 0 0 3.4 0"/></svg><span class="zahl leer">0</span>';
+  b.onclick = e => { e.stopPropagation(); dmPanelUm(); };
+  rechts.insertBefore(b, rechts.firstChild);
+  const p = document.createElement('div');
+  p.className = 'dm-panel'; p.id = 'dm-panel';
+  p.innerHTML = '<div class="dm-kopf">'
+    + '<button data-dm="tuev">TÜV Geräte <span class="n" id="dm-n-tuev">0</span></button>'
+    + '<button data-dm="personal">Personal <span class="n" id="dm-n-personal">0</span></button>'
+    + '</div><div class="dm-body" id="dm-body"></div>';
+  document.body.appendChild(p);
+  p.onclick = e => e.stopPropagation();
+  p.querySelectorAll('[data-dm]').forEach(btn=>{
+    btn.onclick = () => { dmTab = btn.dataset.dm; dmZeichnen(); };
+  });
+  document.addEventListener('click', ()=>{ p.classList.remove('auf'); });
+  dmZaehler();
+}
+async function dmPanelUm(){
+  const p = document.getElementById('dm-panel');
+  if(!p) return;
+  if(p.classList.contains('auf')){ p.classList.remove('auf'); return; }
+  p.classList.add('auf');
+  document.getElementById('dm-body').innerHTML = '<div class="dm-leer">Wird geladen …</div>';
+  await dmSammeln();
+  dmZeichnen();
+}
+function dmZaehler(){
+  const b = document.querySelector('.dm-glocke .zahl');
+  if(b){
+    const n = dmTuev.length + dmPersonal.length;
+    b.textContent = n > 99 ? '99+' : n;
+    b.classList.toggle('leer', !n);
+  }
+  const a = document.getElementById('dm-n-tuev'), c = document.getElementById('dm-n-personal');
+  if(a) a.textContent = dmTuev.length;
+  if(c) c.textContent = dmPersonal.length;
+}
+function dmZeichnen(){
+  const body = document.getElementById('dm-body');
+  if(!body) return;
+  document.querySelectorAll('.dm-kopf [data-dm]').forEach(b=>
+    b.classList.toggle('on', b.dataset.dm === dmTab));
+  dmZaehler();
+  if(dmTab === 'tuev'){
+    body.innerHTML = dmTuev.length ? dmTuev.map(x=>
+      '<div class="dm-row"><div class="top"><b>Gerät ' + x.nr + '</b>'
+      + '<span class="frist" style="color:' + dmFarbe(x.tage) + '">' + dmText(x.tage)
+      + ' · ' + dmDmy(x.plan) + '</span></div><s>' + (DM_NAMEN[x.lager]||x.lager)
+      + (x.bis ? ' · Zulassung bis ' + dmDmy(x.bis) : '') + '</s></div>').join('')
+      : '<div class="dm-leer">Keine TÜV-Prüfung steht demnächst an.</div>';
+  }else{
+    body.innerHTML = dmPersonal.length ? dmPersonal.map(x=>
+      '<div class="dm-row"><div class="top"><b>' + x.name + '</b>'
+      + '<span class="frist" style="color:' + dmFarbe(x.tage) + '">'
+      + (x.frist ? dmText(x.tage) : 'fehlt') + '</span></div><s>' + x.was
+      + (x.frist ? ' · bis ' + dmDmy(x.frist) : '') + '</s></div>').join('')
+      : '<div class="dm-leer">Beim Personal ist nichts offen.</div>';
+  }
+}
+function dmStart(){
+  dmGlockeBauen();
+  const los = () => { if(!document.hidden) dmPruefen(false); };
+  if(window.requestIdleCallback) requestIdleCallback(los, {timeout:9000});
+  else setTimeout(los, 5000);
+  if(dmTimer) clearInterval(dmTimer);
+  dmTimer = setInterval(los, 600000);
+}
+
+document.addEventListener('DOMContentLoaded', dmStart);
 </script>
 </body>
 </html>

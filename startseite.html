@@ -438,10 +438,10 @@ function darf(href, rolle){
 // für Admin und Einkaufsleiter bleibt die Lieferplanung oben.
 async function ladeStatus(){
   const box=document.getElementById('status');
-  const [lp, ck, pe] = await Promise.all([
-    ladeLieferStatus(), ladeCheckStatus(), ladePersonalStatus()
+  const [lp, ck, pe, tv] = await Promise.all([
+    ladeLieferStatus(), ladeCheckStatus(), ladePersonalStatus(), ladeTuevStatus()
   ]);
-  const teile = window.GG_ROLLE === 'Kollege' ? [pe, ck, lp] : [lp, ck, pe];
+  const teile = window.GG_ROLLE === 'Kollege' ? [pe, ck, tv, lp] : [lp, ck, tv, pe];
   const html = teile.filter(Boolean).join('');
   box.innerHTML = html || '<span class="st-pill" style="cursor:default">Nichts offen — alles erledigt</span>';
   ladeLeerungBadge();
@@ -480,6 +480,37 @@ async function ladeLieferStatus(){
 }
 
 // Offene Punkte aus der Checkliste — eine Zeile je Filiale
+// TÜV der Geräte: einen Monat vor der Prüfung und danach, bis sie eingetragen ist
+async function ladeTuevStatus(){
+  if(!darf('checkliste.html', window.GG_ROLLE)) return '';
+  const plusJahre=(iso,n)=>{ const [y,m,d]=iso.split('-').map(Number);
+    const z=new Date(y+n,m-1,d);
+    return z.getFullYear()+'-'+String(z.getMonth()+1).padStart(2,'0')+'-'+String(z.getDate()).padStart(2,'0'); };
+  const tage=iso=>{ const [y,m,d]=String(iso).split('-').map(Number);
+    if(!y) return null; const z=new Date(y,m-1,d), jetzt=new Date(); jetzt.setHours(0,0,0,0);
+    return Math.round((z-jetzt)/86400000); };
+  try{
+    const snap=await db.collection('check_tuev').get();
+    const treffer=[];
+    snap.forEach(doc=>{
+      const x=doc.data();
+      if(!x.von) return;
+      const liste=(x.pruefungen||[]).filter(p=>p&&p.datum).sort((a,b)=>a.datum.localeCompare(b.datum));
+      const letzte=liste.length?liste[liste.length-1].datum:null;
+      let plan=plusJahre(letzte||x.von,2);
+      if(x.bis && plan>x.bis) plan=x.bis;
+      const t=tage(plan);
+      if(t===null || t>30) return;
+      treffer.push({nr:x.nr, lager:x.lager, t});
+    });
+    treffer.sort((a,b)=>a.t-b.t);
+    return treffer.map(o=>`<a class="st-pill" href="checkliste.html">
+      <span class="st-dot" style="background:${o.t<0?'#F0325C':'#F5C451'}"></span>
+      TÜV ${o.t<0?'überfällig':'in '+o.t+' Tg.'}
+      <s>Gerät ${o.nr} · ${LAGER_NAMEN[o.lager]||o.lager}</s></a>`).join('');
+  }catch(e){ return ''; }
+}
+
 async function ladeCheckStatus(){
   const badge=document.getElementById('badge-check');
   if(!darf('checkliste.html', window.GG_ROLLE)){ if(badge) badge.remove(); return ''; }
