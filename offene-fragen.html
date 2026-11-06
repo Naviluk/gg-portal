@@ -502,7 +502,17 @@ button.gross:hover{border-color:var(--acc)}
 .of-erl-zeit{font-family:var(--mono);font-size:.66rem;color:#9AA6B6;white-space:nowrap}
 
 /* ── Umschalter, zwei Spalten, Kalender ── */
-.of-um{display:inline-flex;background:#E7ECF4;border-radius:11px;padding:.2rem;margin-bottom:.8rem}
+.of-kopfzeile{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.of-um{display:inline-flex;background:#E7ECF4;border-radius:11px;padding:.2rem}
+.of-wichtig{display:inline-flex;align-items:center;gap:.4rem;border:1.5px solid #F3C9D4;
+  background:#fff;color:#A5103A;border-radius:11px;padding:.42rem .8rem;
+  font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer}
+.of-wichtig .st{font-size:.82rem;line-height:1}
+.of-wichtig .z{font-family:var(--mono);font-size:.68rem;font-weight:700;background:#FDE8EE;
+  color:#A5103A;border-radius:20px;padding:.05rem .4rem}
+.of-wichtig.on{background:var(--rot);border-color:var(--rot);color:#fff}
+.of-wichtig.on .z{background:rgba(255,255,255,.25);color:#fff}
+.of-wichtig[disabled]{opacity:.45;cursor:default}
 .of-um button{border:none;background:none;border-radius:9px;padding:.38rem .9rem;cursor:pointer;
   font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;color:var(--text-dim)}
 .of-um button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,26,46,.12)}
@@ -686,9 +696,13 @@ button.gross:hover{border-color:var(--acc)}
 </script>
 <main class="main-content">
 
-  <div class="of-um" id="of-um">
-    <button onclick="modusWahl('firmen')">Nach Firmen</button>
-    <button onclick="modusWahl('alle')">Alle</button>
+  <div class="of-kopfzeile">
+    <div class="of-um" id="of-um">
+      <button onclick="modusWahl('firmen')">Nach Firmen</button>
+      <button onclick="modusWahl('alle')">Alle</button>
+    </div>
+    <button class="of-wichtig" id="of-wichtig" onclick="wichtigUm()">
+      <span class="st">★</span>Nur wichtig<span class="z" id="of-wichtig-z">0</span></button>
   </div>
 
   <div class="of-spalten">
@@ -923,8 +937,18 @@ function fristChip(f){
 function zeichneLeiste(){
   const el = document.getElementById('of-leiste');
   const um = document.getElementById('of-um').children;
-  um[0].classList.toggle('on', modus === 'firmen');
-  um[1].classList.toggle('on', modus === 'alle');
+  um[0].classList.toggle('on', modus === 'firmen' && !nurWichtig);
+  um[1].classList.toggle('on', modus === 'alle' && !nurWichtig);
+  const wk = document.getElementById('of-wichtig');
+  const anzahl = wichtigeFragen().length;
+  document.getElementById('of-wichtig-z').textContent = anzahl;
+  wk.classList.toggle('on', nurWichtig);
+  wk.disabled = !anzahl && !nurWichtig;
+  if(nurWichtig){
+    el.classList.remove('uk-wahl');
+    el.innerHTML = zahnKnopf();
+    return;
+  }
   el.classList.toggle('uk-wahl', modus === 'alle');
   let h = '';
   if(modus === 'alle'){
@@ -1008,7 +1032,31 @@ function zeichneInhalt(){
       + 'Über <b>Kategorien</b> oben rechts legst du die erste an.</div>';
     return;
   }
-  el.innerHTML = (modus === 'alle') ? inhaltAlle() : inhaltFirma();
+  el.innerHTML = nurWichtig ? inhaltWichtig()
+               : (modus === 'alle' ? inhaltAlle() : inhaltFirma());
+}
+
+// Ansicht „Nur wichtig": alle als wichtig markierten Fragen, nach Firma geordnet
+function inhaltWichtig(){
+  const liste = wichtigeFragen();
+  if(!liste.length){
+    return '<div class="of-leer">Keine Frage ist als <b>wichtig</b> markiert.</div>';
+  }
+  let h = '';
+  kats.forEach(k=>{
+    const dazu = sortiere(liste.filter(f=>f.kat===k.id));
+    if(!dazu.length) return;
+    h += '<div style="--kat:' + k.farbe + ';--kat-txt:' + aufFarbe(k.farbe) + '">'
+       + '<div class="of-uk"><div class="of-uk-kopf" style="cursor:default">'
+       + '<b>' + esc(k.name) + '</b>'
+       + '<span class="cnt">' + dazu.length + '</span></div>';
+    dazu.forEach(f=>{
+      h += frageZeile(f, false).replace('<div class="of-chips">',
+        '<div class="of-chips"><span class="of-chip">' + esc(ukName(f.kat, f.uk) || '—') + '</span>');
+    });
+    h += '</div></div>';
+  });
+  return h;
 }
 
 // Ansicht „Nach Firmen": eine Kategorie, darin ihre Unterkategorien
@@ -1183,6 +1231,7 @@ async function frageHaken(id, erledigt){
 /* ══ Ansicht: nach Firmen oder alle ══ */
 let modus  = localStorage.getItem('of_modus') === 'alle' ? 'alle' : 'firmen';
 let ukSel  = [];        // gewählte Unterkategorie-Namen in der Ansicht „Alle"
+let nurWichtig = false; // zeigt quer über alle Firmen nur die wichtigen Fragen
 let kalMon = '';        // angezeigter Monat im Kalender, YYYY-MM
 let kalTag = '';        // festgehaltener Tag, YYYY-MM-DD
 
@@ -1210,7 +1259,16 @@ function sichtbar(){
   return offenAlle().filter(f=>namen.indexOf(ukName(f.kat, f.uk)) >= 0);
 }
 
+// Nur die wichtigen Fragen — unabhängig davon, welche Firma gerade gewählt ist
+function wichtigUm(){
+  nurWichtig = !nurWichtig;
+  erlAuf = false;
+  zeichne();
+}
+const wichtigeFragen = () => offenAlle().filter(f=>f.wichtig);
+
 function modusWahl(m){
+  if(nurWichtig) nurWichtig = false;   // der Filter gilt für sich allein
   modus = m; localStorage.setItem('of_modus', m);
   erlAuf = false;           // der gewählte Kalendertag bleibt stehen
   zeichne();
