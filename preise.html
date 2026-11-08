@@ -1360,8 +1360,19 @@ function iconQuelle(icon){
   if(teile.length > 1 && /(^|,)(w|h|c|q|f|g|dpr|e|b|r|a)_/.test(teile[0])) teile.shift();
   return icon.slice(0, t + 8) + ICON_ABBILD + '/' + teile.join('/');
 }
-// Scheitert ein Bild doch, tritt das Emoji an seine Stelle — kein leeres Feld mehr
+/* Zwei Rettungsstufen, falls ein Bild nicht kommt:
+   1. Die umgerechnete Kachel klappt nicht (z. B. weil das Cloudinary-Konto nur
+      freigegebene Umrechnungen ausliefert) — dann wird das Original geladen,
+      genau die Adresse, die beim Hochladen gespeichert wurde. Es ist größer,
+      aber es ist da.
+   2. Auch das Original fehlt — erst dann das Emoji.                        */
 function iconFehler(img){
+  const roh = img.getAttribute('data-roh');
+  if(roh && img.getAttribute('data-stufe') !== '2'){
+    img.setAttribute('data-stufe', '2');
+    img.src = roh;
+    return;
+  }
   const gr = Number(img.getAttribute('width')) || 34;
   const sp = document.createElement('span');
   sp.textContent = '📦';
@@ -1374,7 +1385,7 @@ function iconHTML(icon, sizePx){
     // Foto-Symbole tragen dieselbe abgerundete Kachelform wie die Emoji-Plättchen —
     // der Radius wächst mit der Größe (rund 30 %), damit 20px und 34px gleich wirken.
     const rad = Math.max(6, Math.round(sizePx*0.3));
-    return `<img src="${iconQuelle(icon)}" width="${sizePx}" height="${sizePx}" loading="lazy" decoding="async" onerror="iconFehler(this)" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
+    return `<img src="${iconQuelle(icon)}" data-roh="${icon}" width="${sizePx}" height="${sizePx}" loading="lazy" decoding="async" onerror="iconFehler(this)" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
   }
   return icon || '📦';
 }
