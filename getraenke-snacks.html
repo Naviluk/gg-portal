@@ -1078,6 +1078,44 @@ function dedupSumFromSnapChain(snap){
   return sum;
 }
 
+/* Der Übertrag von Monat zu Monat holte bisher für jeden Monat und jede Filiale
+   eigene Abfragen — bei vier Filialen und einem halben Jahr waren das schnell
+   achtzig Anfragen nacheinander, und die Seite stand. Jetzt werden die vier
+   Sammlungen EINMAL geladen, nach Filiale und Monat sortiert und danach nur noch
+   im Speicher gerechnet. Nach jedem Speichern wird der Vorrat verworfen.        */
+let ketteVorrat = null;
+function ketteLeeren(){ ketteVorrat = null; }
+async function ketteDaten(){
+  if(ketteVorrat) return ketteVorrat;
+  const sortiere = snap => {
+    const o = {};
+    snap.forEach(d=>{
+      const x = d.data();
+      const k = (x.lager||'') + '|' + (x.monat||'');
+      (o[k] = o[k] || []).push(x);
+    });
+    return o;
+  };
+  const [we, ger, the, vf] = await Promise.all([
+    db.collection('wareneingang').get(),
+    db.collection('gs_geraet').get(),
+    db.collection('gs_theke').get(),
+    db.collection('gs_verfall').get()
+  ]);
+  ketteVorrat = {we:sortiere(we), ger:sortiere(ger), the:sortiere(the), vf:sortiere(vf)};
+  return ketteVorrat;
+}
+// Summe über eine Liste von Einträgen — jeder zählt, auch ein zweiter am selben Tag
+function ketteSumme(liste){
+  const su = {};
+  (liste||[]).forEach(x=>{
+    if(!x.datum) return;
+    const items = x.items||{};
+    Object.keys(items).forEach(pid=>{ su[pid]=(su[pid]||0)+(Number(items[pid])||0); });
+  });
+  return su;
+}
+
 async function computeGSAnfangsbestandChain(lager, targetMonat){
   const [ty, tmM] = targetMonat.split('-').map(Number);
   const monthsChain = [];
@@ -1086,36 +1124,48 @@ async function computeGSAnfangsbestandChain(lager, targetMonat){
     monthsChain.push(y+'-'+(m<10?'0':'')+m);
     if(y===ty && m===tmM) break;
     m++; if(m>12){m=1;y++;}
-    if(monthsChain.length>60) break;
+    if(monthsChain.length>60) break; // Sicherheitslimit
   }
 
   const juniDoc = await db.collection('anfangsbestand').doc(lager+'_2026-06').get();
   let abGS = juniDoc.exists ? {...juniDoc.data()} : {};
+  const branches = ['nettetal','brüggen','viersen','köln'];
+  const v = await ketteDaten();
 
   for(let i=1;i<monthsChain.length;i++){
-    const mo = monthsChain[i-1];
-    const [weSnap, gSnap, tSnap, vSnap] = await Promise.all([
-      db.collection('wareneingang').where('lager','==',lager).where('monat','==',mo).get(),
-      db.collection('gs_geraet').where('lager','==',lager).where('monat','==',mo).get(),
-      db.collection('gs_theke').where('lager','==',lager).where('monat','==',mo).get(),
-      db.collection('gs_verfall').where('lager','==',lager).where('monat','==',mo).get(),
-    ]);
-    const liefSum = dedupSumFromSnapChain(weSnap);
-    const gerSum = {};
-    gSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ gerSum[pid]=(gerSum[pid]||0)+(Number(items[pid])||0); }); });
-    const thkSum = {};
-    tSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ thkSum[pid]=(thkSum[pid]||0)+(Number(items[pid])||0); }); });
-    // Abgelaufene Ware zählt wie ein Abgang, sonst wäre der Übertrag zu hoch
-    const vfSum = {};
-    vSnap.forEach(d=>{ const items=d.data().items||{}; Object.keys(items).forEach(pid=>{ vfSum[pid]=(vfSum[pid]||0)+(Number(items[pid])||0); }); });
+    const mo = monthsChain[i-1]; // Monat, dessen End Bestand berechnet wird
 
-    const endBestandGS = {};
-    GS_PRODUCTS.forEach(catObj=>{
-      catObj.items.forEach((prod,pIdx)=>{
-        endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0) - (Number(vfSum[prod.id])||0);
+    if(lager==='zentrallager'){
+      const einkSum = ketteSumme(v.we['zentrallager|'+mo]);
+      const lieferSumZ = {};
+      branches.forEach(br=>{
+        const s = ketteSumme(v.we[br+'|'+mo]);
+        Object.keys(s).forEach(pid=>{ lieferSumZ[pid]=(lieferSumZ[pid]||0)+s[pid]; });
       });
-    });
-    abGS = endBestandGS;
+      const endBestandGS = {};
+      GS_PRODUCTS.forEach(catObj=>{
+        // Für Zentrallager gilt die Formel für ALLE Kategorien (keine Einschränkung
+        // auf Getränke/Snacks) — die Zentrallager-Formel ist kategorieunabhängig.
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(einkSum[prod.id])||0) - (Number(lieferSumZ[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    } else {
+      const liefSum = ketteSumme(v.we[lager+'|'+mo]);
+      const gerSum  = ketteSumme(v.ger[lager+'|'+mo]);
+      const thkSum  = ketteSumme(v.the[lager+'|'+mo]);
+      // Abgelaufene Ware zählt wie ein Abgang, sonst wäre der Übertrag zu hoch
+      const vfSum   = ketteSumme(v.vf[lager+'|'+mo]);
+      const endBestandGS = {};
+      GS_PRODUCTS.forEach(catObj=>{
+        if(catObj.cat!=='Getränke' && catObj.cat!=='Snacks') return;
+        catObj.items.forEach(prod=>{
+          endBestandGS[prod.id] = (Number(abGS[prod.id])||0) + (Number(liefSum[prod.id])||0) - (Number(gerSum[prod.id])||0) - (Number(thkSum[prod.id])||0) - (Number(vfSum[prod.id])||0);
+        });
+      });
+      abGS = endBestandGS;
+    }
   }
   return abGS;
 }
@@ -1134,14 +1184,38 @@ function dedupedLiefSum(prodId){
 // (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
 // Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
 function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+/* Foto-Symbole: EIN einziges Abbild für alle Seiten und alle Größen.
+   Bisher bekam jede Stelle ihre eigene Rechengröße (20, 26, 28, 32, 34 px) —
+   Cloudinary musste daraus pro Bild fünf verschiedene Ableitungen erzeugen, und
+   solange eine davon noch nicht fertig war, blieb der Platz leer: auf einem Lager
+   war das Foto da, auf dem nächsten nicht. Jetzt wird immer dasselbe 96er-Quadrat
+   geholt — einmal erzeugt, danach aus dem Zwischenspeicher, rund 3 bis 6 KB.
+   g_auto ist absichtlich entfallen: die automatische Bildmitte ist eine
+   kostenpflichtige Zusatzfunktion und kam teils als Fehler zurück.          */
+const ICON_ABBILD = 'w_96,h_96,c_fill,q_auto,f_auto';
+function iconQuelle(icon){
+  const t = icon.indexOf('/upload/');
+  if(t < 0) return icon;
+  const teile = icon.slice(t + 8).split('/');
+  // eine schon im Link stehende Umrechnung ersetzen, sonst stapeln sie sich
+  if(teile.length > 1 && /(^|,)(w|h|c|q|f|g|dpr|e|b|r|a)_/.test(teile[0])) teile.shift();
+  return icon.slice(0, t + 8) + ICON_ABBILD + '/' + teile.join('/');
+}
+// Scheitert ein Bild doch, tritt das Emoji an seine Stelle — kein leeres Feld mehr
+function iconFehler(img){
+  const gr = Number(img.getAttribute('width')) || 34;
+  const sp = document.createElement('span');
+  sp.textContent = '📦';
+  sp.style.cssText = 'font-size:' + Math.round(gr*0.8) + 'px;line-height:' + gr + 'px;display:block';
+  img.replaceWith(sp);
+}
 function iconHTML(icon, sizePx){
   sizePx = sizePx || 34;
   if(isImageIcon(icon)){
-    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
     // Foto-Symbole tragen dieselbe abgerundete Kachelform wie die Emoji-Plättchen —
     // der Radius wächst mit der Größe (rund 30 %), damit 20px und 34px gleich wirken.
     const rad = Math.max(6, Math.round(sizePx*0.3));
-    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
+    return `<img src="${iconQuelle(icon)}" width="${sizePx}" height="${sizePx}" loading="lazy" decoding="async" onerror="iconFehler(this)" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
   }
   return icon || '📦';
 }
@@ -1169,6 +1243,7 @@ async function loadProducts(){
 }
 
 async function loadData(){
+  ketteLeeren();   // nach jedem Speichern frisch rechnen
   showSpinner();
   currentLager=document.getElementById('sel-lager').value;
   currentZeitraum=document.getElementById('sel-zeitraum').value;
@@ -1683,13 +1758,16 @@ async function negPruefeAlle(){
   try{
     const monat = negMonatJetzt();
     const kette = negMonatsKette(monat);
+    // Die vier Bewegungs-Sammlungen hat der Übertrag meist schon geladen —
+    // dann werden sie nicht ein zweites Mal geholt.
+    const vorrat = (typeof ketteDaten === 'function') ? await ketteDaten() : null;
     const [pSnap, abSnap, weSnap, gSnap, tSnap, vSnap] = await Promise.all([
       db.collection('produkte').get(),
       db.collection('anfangsbestand').get(),
-      db.collection('wareneingang').get(),
-      db.collection('gs_geraet').get(),
-      db.collection('gs_theke').get(),
-      db.collection('gs_verfall').get()
+      vorrat ? null : db.collection('wareneingang').get(),
+      vorrat ? null : db.collection('gs_geraet').get(),
+      vorrat ? null : db.collection('gs_theke').get(),
+      vorrat ? null : db.collection('gs_verfall').get()
     ]);
     // nur Getränke und Snacks — bei den übrigen Kategorien kommt der Bestand
     // aus der Inventur und lässt sich hier nicht nachrechnen
@@ -1705,7 +1783,10 @@ async function negPruefeAlle(){
         (o[k]=o[k]||[]).push(x); });
       return o;
     };
-    const liefD = nach(weSnap), gerD = nach(gSnap), thkD = nach(tSnap), vfD = nach(vSnap);
+    const liefD = vorrat ? vorrat.we  : nach(weSnap);
+    const gerD  = vorrat ? vorrat.ger : nach(gSnap);
+    const thkD  = vorrat ? vorrat.the : nach(tSnap);
+    const vfD   = vorrat ? vorrat.vf  : nach(vSnap);
 
     for(const lager of NEG_FILIALEN){
       let bestand = Object.assign({}, start[lager+'_2026-06']||{});

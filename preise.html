@@ -1343,14 +1343,38 @@ window.toggleCategory = function(row){
 // Konfiguration (umbenennen/sortieren/hinzufügen) passiert auf lager.html.
 // Icon eines Artikels: entweder ein Emoji (Text) oder eine Foto-URL (Cloudinary).
 function isImageIcon(icon){ return typeof icon === 'string' && /^https?:\/\//.test(icon); }
+/* Foto-Symbole: EIN einziges Abbild für alle Seiten und alle Größen.
+   Bisher bekam jede Stelle ihre eigene Rechengröße (20, 26, 28, 32, 34 px) —
+   Cloudinary musste daraus pro Bild fünf verschiedene Ableitungen erzeugen, und
+   solange eine davon noch nicht fertig war, blieb der Platz leer: auf einem Lager
+   war das Foto da, auf dem nächsten nicht. Jetzt wird immer dasselbe 96er-Quadrat
+   geholt — einmal erzeugt, danach aus dem Zwischenspeicher, rund 3 bis 6 KB.
+   g_auto ist absichtlich entfallen: die automatische Bildmitte ist eine
+   kostenpflichtige Zusatzfunktion und kam teils als Fehler zurück.          */
+const ICON_ABBILD = 'w_96,h_96,c_fill,q_auto,f_auto';
+function iconQuelle(icon){
+  const t = icon.indexOf('/upload/');
+  if(t < 0) return icon;
+  const teile = icon.slice(t + 8).split('/');
+  // eine schon im Link stehende Umrechnung ersetzen, sonst stapeln sie sich
+  if(teile.length > 1 && /(^|,)(w|h|c|q|f|g|dpr|e|b|r|a)_/.test(teile[0])) teile.shift();
+  return icon.slice(0, t + 8) + ICON_ABBILD + '/' + teile.join('/');
+}
+// Scheitert ein Bild doch, tritt das Emoji an seine Stelle — kein leeres Feld mehr
+function iconFehler(img){
+  const gr = Number(img.getAttribute('width')) || 34;
+  const sp = document.createElement('span');
+  sp.textContent = '📦';
+  sp.style.cssText = 'font-size:' + Math.round(gr*0.8) + 'px;line-height:' + gr + 'px;display:block';
+  img.replaceWith(sp);
+}
 function iconHTML(icon, sizePx){
   sizePx = sizePx || 34;
   if(isImageIcon(icon)){
-    const thumb = icon.replace('/upload/', `/upload/w_${sizePx*2},h_${sizePx*2},c_fill,g_auto,q_auto,f_auto/`);
     // Foto-Symbole tragen dieselbe abgerundete Kachelform wie die Emoji-Plättchen —
     // der Radius wächst mit der Größe (rund 30 %), damit 20px und 34px gleich wirken.
     const rad = Math.max(6, Math.round(sizePx*0.3));
-    return `<img src="${thumb}" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
+    return `<img src="${iconQuelle(icon)}" width="${sizePx}" height="${sizePx}" loading="lazy" decoding="async" onerror="iconFehler(this)" style="width:${sizePx}px;height:${sizePx}px;border-radius:${rad}px;object-fit:cover;display:block">`;
   }
   return icon || '📦';
 }

@@ -294,6 +294,9 @@ button.zeile:hover{background:var(--zebra)}
 .warn.rot{background:#FDE8EE;color:#A5103A}
 .warn.gelb{background:#FFF8EC;color:#8F5208}
 .warn.gruen{background:#E7F7F1;color:#0A7D5F}
+/* Keine Warnung, nur ein Hinweis: in der Einarbeitung steht hier das Datum,
+   ab dem die fehlende Schulung gemeldet wird. */
+.warn.grau{background:#EDF1F7;color:#5A6980;font-weight:600}
 .betrag{font-family:var(--mono);font-weight:700;white-space:nowrap}
 .betrag.offen{color:var(--gelb)}
 .akt-btn{border:1.4px solid var(--gruen);color:var(--gruen);background:#fff;border-radius:9px;
@@ -740,7 +743,7 @@ function warnungen(p){
   }
   const schul = (p.schulungen||[]).filter(s=>s && s.name);
   // Gar keine Schulung hinterlegt, obwohl der Vertrag eine verlangt
-  if(v && SCHULUNG_PFLICHT.indexOf(v.typ) >= 0 && !schul.length){
+  if(v && SCHULUNG_PFLICHT.indexOf(v.typ) >= 0 && !schul.length && !schulungSchonzeit(p)){
     w.push(['rot','keine Schulung hinterlegt','fehlt']);
   }
   schul.forEach(s=>{
@@ -777,7 +780,11 @@ function zeichne(){
   // Mitarbeiter
   document.getElementById('liste-ma').innerHTML = aktiv.length ? aktiv.map(p=>{
     const v = aktVertrag(p);
-    const w = warnungen(p).map(([a,t])=>`<span class="warn ${a}">${esc(t)}</span>`).join('');
+    let w = warnungen(p).map(([a,t])=>`<span class="warn ${a}">${esc(t)}</span>`).join('');
+    // Noch in der Einarbeitung: statt der Warnung steht da, ab wann sie kommt
+    if(!(p.schulungen||[]).filter(s=>s && s.name).length && schulungSchonzeit(p)){
+      w = `<span class="warn grau">Schulung ab ${dmy(schulungFaelligAb(p)).slice(0,6)}</span>` + w;
+    }
     return `<button class="zeile" onclick="oeffneMitarbeiter('${p.id}')">
       <span class="ava">${esc((p.name||'?').charAt(0).toUpperCase())}</span>
       <span class="nm"><b>${esc(p.name)}</b><s>${vertragText(v)}</s></span>
@@ -1029,6 +1036,33 @@ document.addEventListener('DOMContentLoaded', function(){
    Öffnen einer Daten-Seite in einer Sitzung und danach stündlich — und
    jederzeit über die Glocke oben rechts.                                */
 const DM_VORLAUF   = 30;   // Tage vor der TÜV-Prüfung
+/* Wer neu anfängt und zuerst in Vollzeit kommt, hat fünf Monate Zeit für die
+   Schulung — vorher wird nicht gemeldet, dass sie fehlt. Gezählt wird ab dem
+   Beginn des ERSTEN Vertrags, nicht ab dem gerade gültigen; Vollzeit und
+   Teilzeit haben dieselbe Frist.                                           */
+const SCHULUNG_SCHONMONATE = 5;
+function schulungFaelligAb(p){
+  const erst = ((p && p.vertraege) || []).filter(v => v && v.von)
+    .sort((a,b) => (a.von||'').localeCompare(b.von||''))[0];
+  if(!erst || ['Vollzeit','Teilzeit'].indexOf(erst.typ) < 0) return '';
+  const teile = (erst.von||'').split('-').map(Number);
+  const j = teile[0], m = teile[1], t = teile[2];
+  if(!j || !m || !t) return '';
+  let jz = j, mz = m + SCHULUNG_SCHONMONATE;
+  while(mz > 12){ mz -= 12; jz++; }
+  // kürzere Monate abfangen: 31.01. + 5 Monate ist der 30.06., nicht der 31.
+  const letzter = new Date(jz, mz, 0).getDate();
+  const tz = Math.min(t, letzter);
+  return jz + '-' + String(mz).padStart(2,'0') + '-' + String(tz).padStart(2,'0');
+}
+function schulungSchonzeit(p){
+  const ab = schulungFaelligAb(p);
+  if(!ab) return false;
+  const n = new Date();
+  const heuteStr = n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0')
+    + '-' + String(n.getDate()).padStart(2,'0');
+  return heuteStr < ab;
+}
 const DM_SCHULUNG  = 90;   // Tage vor Ablauf einer Schulung
 const DM_NAMEN = {nettetal:'Nettetal', 'brüggen':'Brüggen', viersen:'Viersen', 'köln':'Köln'};
 let dmTuev = [], dmPersonal = [], dmTimer = null, dmTab = 'tuev';
@@ -1089,7 +1123,7 @@ async function dmSammeln(){
         if(t !== null && t <= 30) pe.push({name, was:'Vertrag', frist:v.bis, tage:t});
       }
       const schul = (p.schulungen||[]).filter(x=>x && x.name);
-      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0 && !schul.length){
+      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0 && !schul.length && !schulungSchonzeit(p)){
         pe.push({name, was:'Schulung fehlt', frist:'', tage:-1});
       }
       schul.forEach(x=>{

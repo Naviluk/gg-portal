@@ -671,9 +671,9 @@ button.gross:hover{border-color:var(--acc)}
     <div class="dlg-body">
       <div class="zwei">
         <div><label class="fl" style="margin-top:0">Zulassung von</label>
-          <input type="date" class="eing mono tv-feld" id="tv-von"></div>
+          <input type="date" class="eing mono tv-feld" id="tv-von" onchange="tvZulassungGeaendert()"></div>
         <div><label class="fl" style="margin-top:0">bis</label>
-          <input type="date" class="eing mono tv-feld" id="tv-bis"></div>
+          <input type="date" class="eing mono tv-feld" id="tv-bis" onchange="tvZulassungGeaendert()"></div>
       </div>
       <label class="fl">Prüfungen</label>
       <p class="hinweis" style="margin:-.1rem 0 .4rem">Datum eintragen — damit ist die Prüfung
@@ -1133,6 +1133,14 @@ function tvOeffnen(nr){
   tvZeichnePruefungen();
   openM('m-tuev');
 }
+// Zulassung getippt → Prüfliste sofort danach ausrichten, ohne Speichern abzuwarten
+function tvZulassungGeaendert(){
+  const d = tvDoc(tvNr);
+  d.von = document.getElementById('tv-von').value || '';
+  d.bis = document.getElementById('tv-bis').value || '';
+  tuev[tvNr] = Object.assign({}, d, {lager:lg, nr:tvNr});
+  tvZeichnePruefungen();
+}
 function tvZeichnePruefungen(){
   const d = tvDoc(tvNr);
   const box = document.getElementById('tv-pruef');
@@ -1208,8 +1216,15 @@ async function tvHakenSetzen(){
     if(feld){ feld.focus(); if(feld.showPicker) try{ feld.showPicker(); }catch(e){} }
     return;
   }
+  const vonFeld = document.getElementById('tv-von');
+  const von = vonFeld ? vonFeld.value : '';
+  if(!von){
+    showToast('Bitte zuerst den Beginn der Zulassung eintragen.');
+    if(vonFeld){ vonFeld.focus(); if(vonFeld.showPicker) try{ vonFeld.showPicker(); }catch(e){} }
+    return;
+  }
+  if(datum < von){ showToast('Die Prüfung kann nicht vor der Zulassung liegen.'); return; }
   const d = tvDoc(tvNr);
-  if(d.von && datum < d.von){ showToast('Die Prüfung kann nicht vor der Zulassung liegen.'); return; }
   const liste = (d.pruefungen||[]).slice();
   liste.push({datum});
   await tvSichern({pruefungen:liste});
@@ -1238,17 +1253,23 @@ async function tvSpeichern(){
   if(bis && von && bis < von){ showToast('Das Ende der Zulassung liegt vor dem Beginn.'); return; }
   await tvSichern({von, bis}, true);
 }
-// Schreibt die Änderung und zeichnet alles neu
+// Schreibt die Änderung und zeichnet alles neu.
+// Was oben in den Feldern steht, zählt mit — sonst ginge eine eben erst
+// eingetippte Zulassung verloren, sobald eine Prüfung eingetragen wird.
 async function tvSichern(felder, schliessen){
   const d = tvDoc(tvNr);
-  const neu = Object.assign({}, d, felder, {lager:lg, nr:tvNr});
+  const vonFeld = document.getElementById('tv-von');
+  const bisFeld = document.getElementById('tv-bis');
+  const offen = document.getElementById('m-tuev').classList.contains('show');
+  const aktuell = offen ? {von: vonFeld.value || '', bis: bisFeld.value || ''} : {};
+  const neu = Object.assign({}, d, aktuell, felder, {lager:lg, nr:tvNr});
   delete neu.id;
   showSpinner();
   try{
     await db.collection('check_tuev').doc(lg+'_'+tvNr).set(neu);
     tuev[tvNr] = Object.assign({id:lg+'_'+tvNr}, neu);
     if(schliessen){ closeM('m-tuev'); showToast('Gespeichert ✓'); }
-    else tvZeichnePruefungen();
+    else { tvZeichnePruefungen(); showToast('Prüfung eingetragen ✓'); }
     zeichneTuev(); zeichne();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
@@ -1594,6 +1615,33 @@ document.addEventListener('DOMContentLoaded', function(){
    Öffnen einer Daten-Seite in einer Sitzung und danach stündlich — und
    jederzeit über die Glocke oben rechts.                                */
 const DM_VORLAUF   = 30;   // Tage vor der TÜV-Prüfung
+/* Wer neu anfängt und zuerst in Vollzeit kommt, hat fünf Monate Zeit für die
+   Schulung — vorher wird nicht gemeldet, dass sie fehlt. Gezählt wird ab dem
+   Beginn des ERSTEN Vertrags, nicht ab dem gerade gültigen; Vollzeit und
+   Teilzeit haben dieselbe Frist.                                           */
+const SCHULUNG_SCHONMONATE = 5;
+function schulungFaelligAb(p){
+  const erst = ((p && p.vertraege) || []).filter(v => v && v.von)
+    .sort((a,b) => (a.von||'').localeCompare(b.von||''))[0];
+  if(!erst || ['Vollzeit','Teilzeit'].indexOf(erst.typ) < 0) return '';
+  const teile = (erst.von||'').split('-').map(Number);
+  const j = teile[0], m = teile[1], t = teile[2];
+  if(!j || !m || !t) return '';
+  let jz = j, mz = m + SCHULUNG_SCHONMONATE;
+  while(mz > 12){ mz -= 12; jz++; }
+  // kürzere Monate abfangen: 31.01. + 5 Monate ist der 30.06., nicht der 31.
+  const letzter = new Date(jz, mz, 0).getDate();
+  const tz = Math.min(t, letzter);
+  return jz + '-' + String(mz).padStart(2,'0') + '-' + String(tz).padStart(2,'0');
+}
+function schulungSchonzeit(p){
+  const ab = schulungFaelligAb(p);
+  if(!ab) return false;
+  const n = new Date();
+  const heuteStr = n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0')
+    + '-' + String(n.getDate()).padStart(2,'0');
+  return heuteStr < ab;
+}
 const DM_SCHULUNG  = 90;   // Tage vor Ablauf einer Schulung
 const DM_NAMEN = {nettetal:'Nettetal', 'brüggen':'Brüggen', viersen:'Viersen', 'köln':'Köln'};
 let dmTuev = [], dmPersonal = [], dmTimer = null, dmTab = 'tuev';
@@ -1654,7 +1702,7 @@ async function dmSammeln(){
         if(t !== null && t <= 30) pe.push({name, was:'Vertrag', frist:v.bis, tage:t});
       }
       const schul = (p.schulungen||[]).filter(x=>x && x.name);
-      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0 && !schul.length){
+      if(v && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0 && !schul.length && !schulungSchonzeit(p)){
         pe.push({name, was:'Schulung fehlt', frist:'', tage:-1});
       }
       schul.forEach(x=>{
