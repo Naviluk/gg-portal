@@ -1682,20 +1682,30 @@ async function loadShops(){
         SHOPS_DATA.push({id:d.id, name:s.name, icon:s.icon||'🏪', group:s.group||'primary', order:Number(s.order)||0});
       });
     }
+    window._shopsAusDb = true;
     SHOPS_DATA.sort((a,b)=>a.order-b.order);
     SHOPS_PRIMARY = SHOPS_DATA.filter(s=>s.group==='primary').map(s=>s.name);
     SHOPS_SECONDARY = SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>s.name);
   }catch(e){
     console.warn('Shops laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    window._shopsAusDb = false;
     SHOPS_PRIMARY = DEFAULT_SHOPS_PRIMARY;
     SHOPS_SECONDARY = DEFAULT_SHOPS_SECONDARY;
     SHOPS_DATA = [];
   }
 }
 
+/* Kam die Artikelliste wirklich aus Firestore? Nur dann darf die Konfiguration
+   gespeichert werden. Schlägt das Laden fehl, zeigt die Seite ersatzweise die
+   fest eingebaute Standardliste — die trägt nur Emoji. Würde man in diesem
+   Zustand "Speichern" drücken, würden die hochgeladenen Fotos durch Emoji
+   überschrieben. Genau das darf nicht mehr passieren.                        */
+window._produkteAusDb = false;
+window._shopsAusDb = false;
 async function loadProducts(){
   try{
     const snap = await db.collection('produkte').get();
+    window._produkteAusDb = true;
     if(snap.empty){
       const batch = db.batch();
       DEFAULT_PRODUCTS.forEach(catObj=>{
@@ -1724,6 +1734,7 @@ async function loadProducts(){
     }));
   }catch(e){
     console.warn('Produkte laden fehlgeschlagen, nutze Standard-Liste:', e.message);
+    window._produkteAusDb = false;
     PRODUCTS = DEFAULT_PRODUCTS;
   }
 }
@@ -1735,14 +1746,17 @@ let _scfgData = null;
 let _scfgOpenGroups = {primary:true, secondary:false};
 
 window.openProductConfigModal = function(){
-  _pcfgData = PRODUCTS.map(c=>({cat:c.cat, items:c.items.map(p=>({...p}))}));
+  // _iconStart hält fest, welches Symbol beim Öffnen galt. Beim Speichern wird
+  // das Symbol nur dann geschrieben, wenn es hier im Fenster geändert wurde —
+  // alles andere bleibt unangetastet in der Datenbank stehen.
+  _pcfgData = PRODUCTS.map(c=>({cat:c.cat, items:c.items.map(p=>({...p, _iconStart:p.icon}))}));
   _pcfgOpenCats = {};
   _pcfgData.forEach((c,i)=>{ _pcfgOpenCats[c.cat] = i===0; });
   renderProductConfig();
 
   _scfgData = {
-    primary:   SHOPS_DATA.filter(s=>s.group==='primary').map(s=>({...s})),
-    secondary: SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>({...s})),
+    primary:   SHOPS_DATA.filter(s=>s.group==='primary').map(s=>({...s, _iconStart:s.icon})),
+    secondary: SHOPS_DATA.filter(s=>s.group==='secondary').map(s=>({...s, _iconStart:s.icon})),
   };
   renderShopsConfig();
 
@@ -1927,6 +1941,13 @@ window.scfgUploadIcon = async function(group, idx, inputEl){
 };
 
 window.saveAllConfig = async function(){
+  // Sperre: wurde die Liste gar nicht aus Firestore geladen, steht hier die
+  // Standardliste mit Emoji — Speichern würde die echten Daten überschreiben.
+  if(!window._produkteAusDb || !window._shopsAusDb){
+    showToast('Die Artikelliste konnte nicht aus der Datenbank geladen werden — '
+      + 'es wird nichts gespeichert. Bitte die Seite neu laden und noch einmal versuchen.');
+    return;
+  }
   showSpinner();
   try{
     const batch = db.batch();
@@ -1946,9 +1967,13 @@ window.saveAllConfig = async function(){
         }
         const item = {id, name, unit:(p.unit||'').trim(), icon:p.icon||'📦'};
         validItems.push(item);
-        // merge:true, sonst fallen Felder weg, die andere Seiten pflegen (z. B. Kolli)
-        batch.set(db.collection('produkte').doc(id),
-          {name:item.name, unit:item.unit, icon:item.icon, cat:catObj.cat, order:idx}, {merge:true});
+        // merge:true, sonst fallen Felder weg, die andere Seiten pflegen (z. B. Kolli).
+        // Das Symbol wird nur mitgeschrieben, wenn es hier wirklich geändert wurde;
+        // sonst bleibt das in der Datenbank gespeicherte Foto unberührt.
+        const satz = {name:item.name, unit:item.unit, cat:catObj.cat, order:idx};
+        const neuerArtikel = p._isNew || String(p.id||'').startsWith('__new_');
+        if(neuerArtikel || item.icon !== p._iconStart) satz.icon = item.icon;
+        batch.set(db.collection('produkte').doc(id), satz, {merge:true});
       });
       validData.push({cat:catObj.cat, items:validItems});
     });
@@ -1966,7 +1991,10 @@ window.saveAllConfig = async function(){
         }
         const shopItem = {id, name, icon:s.icon||'🏪', group, order:idx};
         newShopsData.push(shopItem);
-        batch.set(db.collection('shops').doc(id), {name:shopItem.name, icon:shopItem.icon, group, order:idx});
+        const sSatz = {name:shopItem.name, group, order:idx};
+        const neuerShop = s._isNew || String(s.id||'').startsWith('__newshop_');
+        if(neuerShop || shopItem.icon !== s._iconStart) sSatz.icon = shopItem.icon;
+        batch.set(db.collection('shops').doc(id), sSatz, {merge:true});
       });
     });
 
