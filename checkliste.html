@@ -1621,9 +1621,13 @@ const DM_VORLAUF   = 30;   // Tage vor der TÜV-Prüfung
    Teilzeit haben dieselbe Frist.                                           */
 const SCHULUNG_SCHONMONATE = 5;
 function schulungFaelligAb(p){
-  const erst = ((p && p.vertraege) || []).filter(v => v && v.von)
+  // Maßgeblich ist der erste Vertrag, der überhaupt eine Schulung verlangt.
+  // Wer vorher als Minijob oder Aushilfe gearbeitet hat, fängt die fünf Monate
+  // erst mit dem Wechsel auf Vollzeit oder Teilzeit an.
+  const erst = ((p && p.vertraege) || [])
+    .filter(v => v && v.von && ['Vollzeit','Teilzeit'].indexOf(v.typ) >= 0)
     .sort((a,b) => (a.von||'').localeCompare(b.von||''))[0];
-  if(!erst || ['Vollzeit','Teilzeit'].indexOf(erst.typ) < 0) return '';
+  if(!erst) return '';
   const teile = (erst.von||'').split('-').map(Number);
   const j = teile[0], m = teile[1], t = teile[2];
   if(!j || !m || !t) return '';
