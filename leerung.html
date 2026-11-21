@@ -312,6 +312,38 @@ body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-f
 .split.dark{background:var(--ink2);border-top-color:rgba(255,255,255,.15)}
 .split.dark div{color:#9FB2CE}
 .split.dark div b{color:#fff}
+/* Zwischenüberschrift innerhalb einer Aufklappung (Aus Vormonat / Sonstige Einnahmen) */
+.split .zw{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;
+  opacity:.8;border-top:1px dashed var(--glass-border);margin-top:.35rem;padding-top:.55rem}
+.split .zw.erste{border-top:none;margin-top:0;padding-top:.3rem}
+/* Einlagen sind Zufluss von außen — grün, wie jedes Plus im Portal */
+.split .ein,.split .ein b,.split .zw.ein,.split .zw.ein b{color:#0A7D5F}
+.split button.e-zeile{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;
+  width:100%;background:none;border:none;text-align:left;cursor:pointer;
+  font-family:'Poppins',sans-serif;font-size:.8rem;padding:.32rem 0;color:var(--text-dim)}
+.split button.e-zeile:hover{opacity:.7}
+.split button.e-zeile b{font-family:var(--mono);font-weight:700;color:var(--text);white-space:nowrap}
+.split button.e-zeile.ein,.split button.e-zeile.ein b{color:#0A7D5F}
+.split button.ein-add{display:flex;align-items:center;gap:.45rem;width:100%;background:none;
+  border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:.76rem;font-weight:700;
+  color:#0A7D5F;padding:.4rem 0 .1rem}
+.split button.ein-add i{font-style:normal;width:20px;height:20px;border-radius:7px;flex-shrink:0;
+  border:1.5px dashed #0A7D5F;background:#E7F7F1;display:flex;align-items:center;
+  justify-content:center;font-size:.9rem;line-height:1}
+.seg2.gruen button.on{border-color:#0A7D5F;background:#E7F7F1;color:#0A7D5F}
+/* Kostenzeilen im eigenen Block, gleiche Form wie „Geld tauschen" */
+.k-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;width:100%;text-align:left;
+  background:none;border:none;border-top:1px solid var(--glass-border);cursor:pointer;
+  font-family:'Poppins',sans-serif}
+.k-zeile .wann{color:var(--text-dim);font-family:var(--mono);font-size:.76rem}
+.k-zeile .val{margin-left:auto;font-family:var(--mono);font-weight:700;font-size:.92rem}
+.k-art{font-size:.56rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  border-radius:20px;padding:.14rem .5rem;white-space:nowrap}
+.k-art.halle{background:#E9F0FE;color:#1D4FB8}
+.k-art.getraenke{background:#E7F7F1;color:#0A7D5F}
+.k-art.sonstiges{background:#EDF1F7;color:#5A6980}
+.k-kredit{font-size:.56rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  border-radius:20px;padding:.14rem .5rem;background:#FDE8EE;color:#A5103A;white-space:nowrap}
 .edit-link{background:none;border:none;color:var(--acc);font-family:'Poppins',sans-serif;
   font-size:.7rem;font-weight:700;cursor:pointer;text-decoration:underline;padding:0}
 
@@ -471,7 +503,7 @@ table.lt tr.diff td:first-child{font-size:.62rem;letter-spacing:.16em;text-trans
 #modal-leerung .modal,#modal-eintraege .modal,#modal-news .modal,#modal-wechsler .modal,
 #modal-neukredit .modal,#modal-tausch .modal,#modal-geber .modal,#modal-plan .modal,
 #modal-bank .modal,#modal-ein .modal,#modal-kredit .modal,#modal-vormonat .modal,
-#modal-getilgt .modal{
+#modal-getilgt .modal,#modal-einlage .modal,#modal-kosten .modal{
   padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh}
 /* Sicherheitsnetz für später hinzukommende Fenster — ältere Browser überspringen die Regel */
 .modal-overlay .modal:has(> .dlg-head){padding:0;overflow:hidden;display:flex;
@@ -950,16 +982,14 @@ textarea.note:focus{border-color:var(--acc)}
 
     <div class="vm-wrap">
       <div class="vormonat">
-        <s>Von Vormonat</s>
+        <s>Vormonat &amp; Einlagen</s>
         <button class="i-btn" onclick="tog('s0',this)">i</button>
         <b id="vm-sum">—</b>
         <button class="edit-link" onclick="openVormonat()">ändern</button>
       </div>
-      <div class="split" id="s0" style="padding-left:.9rem">
-        <div>Scheine<b id="vm-s">—</b></div>
-        <div>Münzen<b id="vm-m">—</b></div>
-        <div id="vm-hinweis" style="color:var(--neon-yellow)"></div>
-      </div>
+      <!-- Inhalt kommt aus renderMain: Übertrag aus dem Vormonat und darunter
+           die Einlagen, also Geld, das von außen in die Kasse gekommen ist -->
+      <div class="split" id="s0" style="padding-left:.9rem"></div>
     </div>
 
     <div class="box">
@@ -1013,6 +1043,7 @@ textarea.note:focus{border-color:var(--acc)}
     <div class="list" id="liste"></div>
     <div class="plan" id="planung"></div>
     <div class="plan" id="kredit-block"></div>
+    <div class="plan" id="kosten-block"></div>
     <div class="plan" id="tausch-block"></div>
     <div class="done" id="getilgt"></div>
   </div>
@@ -1216,6 +1247,84 @@ textarea.note:focus{border-color:var(--acc)}
         style="display:none;flex:0 0 auto;padding:.8rem 1rem">Löschen</button>
       <button class="btn b-ghost" onclick="closeM('modal-tausch')">Abbrechen</button>
       <button class="btn b-acc" onclick="saveTausch()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Sonstige Einnahme ══ -->
+<div class="modal-overlay" id="modal-einlage" onclick="if(event.target===this)closeM('modal-einlage')">
+  <div class="modal" style="max-width:440px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-einlage')">✕</button>
+      <div class="dlg-eyebrow">Kasse</div>
+      <div class="dlg-title">Einnahme eintragen <span class="dlg-pill" id="el-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="el-datum">
+      <label class="fl">Wofür</label>
+      <input class="num" id="el-text" autocomplete="off" placeholder="z. B. Rechnung Fa. Krämer">
+      <label class="fl">Form</label>
+      <div class="seg2 gruen" id="el-form">
+        <button class="on" onclick="elForm('scheine',this)">Scheine</button>
+        <button onclick="elForm('muenzen',this)">Münzen</button>
+      </div>
+      <label class="fl">Betrag</label>
+      <input class="num" id="el-betrag" inputmode="decimal" autocomplete="off" placeholder="0,00">
+      <p class="hint">Geld, das von außen in die Kasse kommt — etwa eine bezahlte Rechnung.
+        Es zählt wie der Übertrag aus dem Vormonat zum Anfangsbestand und wird sonst
+        nirgends verrechnet.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" id="el-del" onclick="einlageLoeschen()"
+        style="display:none;flex:0 0 auto;padding:.8rem 1rem">Löschen</button>
+      <button class="btn b-ghost" onclick="closeM('modal-einlage')">Abbrechen</button>
+      <button class="btn b-green" onclick="saveEinlage()">✓ Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Fenster: Kosten erfassen ══ -->
+<div class="modal-overlay" id="modal-kosten" onclick="if(event.target===this)closeM('modal-kosten')">
+  <div class="modal" style="max-width:460px;width:100%">
+    <div class="dlg-head">
+      <button class="dlg-close" onclick="closeM('modal-kosten')">✕</button>
+      <div class="dlg-eyebrow">Kasse</div>
+      <div class="dlg-title">Kosten erfassen <span class="dlg-pill" id="ko-lg">—</span></div>
+    </div>
+    <div class="dlg-body">
+      <label class="fl">Datum</label>
+      <input type="date" class="num" id="ko-datum">
+      <label class="fl">Art</label>
+      <div class="seg2" id="ko-art">
+        <button onclick="koArt('halle',this)">Hallenbedarf</button>
+        <button onclick="koArt('getraenke',this)">Getränke</button>
+        <button class="on" onclick="koArt('sonstiges',this)">Sonstiges</button>
+      </div>
+      <label class="fl">Bemerkung · freiwillig</label>
+      <input class="num" id="ko-bem" autocomplete="off" placeholder="z. B. Ersatzschlüssel">
+      <label class="fl">Form</label>
+      <div class="seg2" id="ko-form">
+        <button class="on" onclick="koForm('scheine',this)">Scheine</button>
+        <button onclick="koForm('muenzen',this)">Münzen</button>
+      </div>
+      <label class="fl">Betrag</label>
+      <input class="num" id="ko-betrag" inputmode="decimal" autocomplete="off" placeholder="0,00">
+      <label class="fl">Woher das Geld</label>
+      <div class="seg2" id="ko-herkunft">
+        <button class="on" onclick="koHerkunft('kasse',this)">Aus der Kasse</button>
+        <button onclick="koHerkunft('kredit',this)">Kredit</button>
+      </div>
+      <div id="ko-geber"></div>
+      <p class="hint">Bei „Kredit" wandert der Betrag als Schuld in die Kreditliste und wird
+        dort wie jeder andere Kredit getilgt. In die Formel gehen alle Kosten als eine
+        Summe ein — die Aufteilung sieht man nur hinter dem i.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn b-ghost" id="ko-del" onclick="kostenLoeschen()"
+        style="display:none;flex:0 0 auto;padding:.8rem 1rem">Löschen</button>
+      <button class="btn b-ghost" onclick="closeM('modal-kosten')">Abbrechen</button>
+      <button class="btn b-acc" onclick="saveKostenEintrag()">✓ Speichern</button>
     </div>
   </div>
 </div>
@@ -1424,7 +1533,13 @@ const FARBEN = {
   viersen:{t1:'#EE8A2B',t2:'#A64A0B',sh:'rgba(234,88,12,.35)',dot:'#EE8A2B'},
 };
 const EXTERN = ['LL','VL'];            // Geldgeber außerhalb der Filialen
-const ZWECK = {bank:'Bank-Einzahlung', wechsler:'Wechsler-Einlage', kasse:'In die Kasse'};
+// Freitext aus einem Eingabefeld darf die Seite nicht durcheinanderbringen
+function esc(t){
+  return String(t==null?'':t).replace(/[&<>"]/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+const ZWECK = {bank:'Bank-Einzahlung', wechsler:'Wechsler-Einlage', kasse:'In die Kasse',
+               kosten:'Sonstige Kosten'};
 // Früher wurde bei „Kredit vergeben" der Anzeigename gespeichert („Brüggen"
 // statt „brüggen"). Beim Laden wird das auf den Schlüssel zurückgeführt,
 // damit der Kredit auch in der empfangenden Filiale erscheint.
@@ -1585,6 +1700,39 @@ function summen(liste){
           gesamt:gerS+gerM+(aus-ein)+getr,
           scheine:gerS+aus-einS, muenzen:gerM+getr-einM};
 }
+/* Einlagen — Geld, das von außen in die Kasse kommt (bezahlte Rechnung, Rückgabe
+   eines Vorschusses). Es zählt wie der Übertrag aus dem Vormonat zum Anfangsbestand
+   und wird sonst nirgends verrechnet: weder bei den Geräten noch beim Soll-Ist.   */
+function einlagenSummen(doc){
+  let s=0,m=0;
+  (((doc||monatDoc).einlagen)||[]).forEach(e=>{
+    const b=Number(e.betrag)||0;
+    if(e.form==='muenzen') m+=b; else s+=b;
+  });
+  return {s,m,gesamt:s+m};
+}
+
+const KOSTEN_ART = {halle:'Hallenbedarf', getraenke:'Getränke', sonstiges:'Sonstiges'};
+/* Früher stand für den ganzen Monat eine einzige Summe im Feld „sonstige".
+   Damit die alten Monate ihre Beträge behalten, wird diese Summe hier wie ein
+   einzelner Eintrag behandelt, solange noch keine Liste angelegt wurde. Geschrieben
+   wird nichts — erst wenn jemand in dem Monat eine Kostenzeile anfasst.        */
+function kostenListe(doc){
+  const d = doc||monatDoc;
+  if(Array.isArray(d.kosten)) return d.kosten;
+  const alt = Number(d.sonstige)||0;
+  return alt ? [{id:'alt', datum:'', art:'sonstiges', form:'scheine',
+                 betrag:alt, herkunft:'kasse', alt:true}] : [];
+}
+function kostenSummen(doc){
+  let s=0,m=0;
+  kostenListe(doc).forEach(k=>{
+    const b=Number(k.betrag)||0;
+    if(k.form==='muenzen') m+=b; else s+=b;
+  });
+  return {s,m,gesamt:s+m};
+}
+
 function bankSummen(doc){
   let s=0,m=0;
   (doc.bankEin||[]).forEach(b=>{ if(b.art==='muenzen') m+=Number(b.betrag)||0; else s+=Number(b.betrag)||0; });
@@ -1682,11 +1830,14 @@ async function monatsRest(mk, tiefe){
     const su = summen(li);
     const bk = bankSummen(md);
     const kb = kreditBewegung(mk, kr.filter(k=>k.geber===lg||k.nehmer===lg));
-    const kosten = Number(md.sonstige)||0;
+    const ko = kostenSummen(md);
+    const ei = einlagenSummen(md);
     const tw = tauschSaldo(md);
+    // Genau dieselbe Rechnung wie auf der Hauptseite — sonst wiche der Übertrag
+    // vom angezeigten Rest ab.
     const wert = {
-      s: start.s + su.scheine - bk.s - kosten + kb.s + tw.s,
-      m: start.m + su.muenzen - bk.m + kb.m + tw.m,
+      s: start.s + ei.s + su.scheine - bk.s - ko.s + kb.s + tw.s,
+      m: start.m + ei.m + su.muenzen - bk.m - ko.m + kb.m + tw.m,
       berechnet:true
     };
     vmCache[key] = wert;
@@ -2016,21 +2167,35 @@ async function renderMain(){
   document.getElementById('ges-m').textContent=eur(su.muenzen);
 
   const vm=await vormonatWert();
-  document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0));
-  document.getElementById('vm-s').textContent=eur(vm.s);
-  document.getElementById('vm-m').textContent=eur(vm.m);
-  document.getElementById('vm-hinweis').textContent =
-    vm.manuell ? 'Von Hand erfasst.' :
-    vm.leer ? 'Kein Vormonat vorhanden — bitte einmalig von Hand erfassen.' :
-    'Aus dem Vormonat übernommen.';
 
   const bk=bankSummen(monatDoc);
-  const kosten=Number(monatDoc.sonstige)||0;
+  const einl=einlagenSummen(monatDoc);
+  const ko=kostenSummen(monatDoc);
   const kb=kreditBewegung(monat);
   const tw=tauschSaldo();
-  const restS=(vm.s||0)+suMonat.scheine-bk.s-kosten+kb.s+tw.s;
-  const restM=(vm.m||0)+suMonat.muenzen-bk.m+kb.m+tw.m;
+  // Anfangsbestand ist jetzt Übertrag + Einlagen; Kosten gehen seit der Aufteilung
+  // in Scheine und Münzen von der Form ab, in der sie bezahlt wurden.
+  const restS=(vm.s||0)+einl.s+suMonat.scheine-bk.s-ko.s+kb.s+tw.s;
+  const restM=(vm.m||0)+einl.m+suMonat.muenzen-bk.m-ko.m+kb.m+tw.m;
   const rest=restS+restM;
+
+  // Aufklappung über dem Monat: Übertrag, darunter die Einlagen
+  document.getElementById('vm-sum').textContent=eur((vm.s||0)+(vm.m||0)+einl.gesamt);
+  let vh=`<div class="zw erste">Aus Vormonat<b>${eur((vm.s||0)+(vm.m||0))}</b></div>
+    <div>Scheine<b>${eur(vm.s)}</b></div>
+    <div>Münzen<b>${eur(vm.m)}</b></div>
+    <div style="color:var(--neon-yellow)">${
+      vm.manuell ? 'Von Hand erfasst.' :
+      vm.leer ? 'Kein Vormonat vorhanden — bitte einmalig von Hand erfassen.' :
+      'Aus dem Vormonat übernommen.'}</div>
+    <div class="zw ein">Sonstige Einnahmen<b>${einl.gesamt?'+'+eur(einl.gesamt):'—'}</b></div>`;
+  (monatDoc.einlagen||[]).forEach((e,i)=>{
+    vh+=`<button class="e-zeile ein" onclick="openEinlage(${i})" title="Ändern oder löschen">
+      <span>${e.datum?dmy(e.datum)+' · ':''}${esc(e.text||'Einnahme')} · ${
+        e.form==='muenzen'?'Münzen':'Scheine'}</span><b>+${eur(e.betrag)}</b></button>`;
+  });
+  vh+=`<button class="ein-add" onclick="openEinlage(null)"><i>+</i>Einnahme eintragen</button>`;
+  document.getElementById('s0').innerHTML=vh;
 
   // Liste der echten Beträge
   let html='';
@@ -2043,9 +2208,17 @@ async function renderMain(){
         ? (monatDoc.bankEin||[]).map(b=>`<div>${dmy(b.datum)} · ${b.art==='muenzen'?'Münzen':'Scheine'}<b>${eur(b.betrag)}</b></div>`).join('')
         : '<div>Noch nichts eingezahlt<b>—</b></div>'}</div>`;
 
+  // Sonstige Kosten verhalten sich jetzt wie „Bank eingezahlt": Summe in der Zeile,
+  // alle Einzelposten hinter dem i. Erfasst werden sie unten im eigenen Block.
+  const kListe=kostenListe(monatDoc);
   html+=`<div class="lrow"><span class="nm">Sonstige Kosten</span>
-    <input class="euro-in" id="in-kosten" value="${kosten?zahl(kosten):''}" placeholder="0,00"
-      onchange="saveKosten(this.value)"></div>`;
+    <button class="i-btn" onclick="tog('s6',this)">i</button>
+    <span class="val">${eur(ko.gesamt)}</span></div>
+    <div class="split" id="s6" style="padding-left:.9rem">${
+      kListe.length
+        ? kListe.map(k=>`<div>${k.datum?dmy(k.datum)+' · ':''}${KOSTEN_ART[k.art]||'Sonstiges'} · ${
+            k.form==='muenzen'?'Münzen':'Scheine'}<b>${eur(k.betrag)}</b></div>`).join('')
+        : '<div>Noch nichts erfasst<b>—</b></div>'}</div>`;
 
   // Offene Kredite aus Sicht des angezeigten Monats: Der Kredit muss zu diesem
   // Zeitpunkt schon bestanden haben, und er darf bis zum Monatsende noch nicht
@@ -2066,8 +2239,9 @@ async function renderMain(){
       <span class="val ${eigen?'plus':'minus'}">${eigen?'+':'−'}${eur(k.betrag)}</span></button>`;
   });
 
-  const teile=[`Vormonat ${zahl((vm.s||0)+(vm.m||0))}`,`Gesamt ${zahl(suMonat.gesamt)}`,
-               `− Bank ${zahl(bk.gesamt)}`,`− Kosten ${zahl(kosten)}`];
+  const teile=[`Vormonat & Einlagen ${zahl((vm.s||0)+(vm.m||0)+einl.gesamt)}`,
+               `Gesamt ${zahl(suMonat.gesamt)}`,
+               `− Bank ${zahl(bk.gesamt)}`,`− Kosten ${zahl(ko.gesamt)}`];
   if(kb.gesamt) teile.push((kb.gesamt>0?'+ ':'− ')+'Kredite '+zahl(Math.abs(kb.gesamt)));
   html+=`<div class="formel">Rest = ${teile.join(' ')}</div>`;
   html+=`<div class="lrow rest"><span class="nm">Rest in der Kasse</span>
@@ -2102,6 +2276,18 @@ async function renderMain(){
     `<div class="plan-head"><s>Kredit vergeben</s>
       <button class="mini-add" onclick="openNeuKredit()">+</button></div>
      <div class="leer">Kredite der Filiale an Dritte.</div>`;
+
+  // Kosten erfassen
+  let kh=`<div class="plan-head"><s>Kosten erfassen</s>
+    <button class="mini-add" onclick="openKosten(null)">+</button></div>`;
+  kh += kListe.length
+    ? kListe.map((k,i)=>`<button class="k-zeile" onclick="openKosten(${i})">
+        <span class="k-art ${k.art||'sonstiges'}">${KOSTEN_ART[k.art]||'Sonstiges'}</span>
+        <span class="wann">${k.datum?dmy(k.datum):'ohne Datum'}</span>
+        ${k.herkunft==='kredit'?'<span class="k-kredit">Kredit</span>':''}
+        <span class="val">${eur(k.betrag)}</span></button>`).join('')
+    : `<div class="leer">Noch nichts erfasst.</div>`;
+  document.getElementById('kosten-block').innerHTML = kh;
 
   // Geld tauschen
   const tl=(monatDoc.tausch||[]);
@@ -2339,7 +2525,8 @@ function wexPlus(i){
 function openGeber(ziel,index,unterIndex){
   geberZiel={ziel,index,unterIndex:(unterIndex===undefined?null:unterIndex)};
   let schon='';
-  if(ziel==='wechsler') schon = (index!==null&&wexZeilen[index]) ? wexZeilen[index].geber : '';
+  if(ziel==='kosten') schon = kostenGeber;
+  else if(ziel==='wechsler') schon = (index!==null&&wexZeilen[index]) ? wexZeilen[index].geber : '';
   else if(ziel==='wf') schon = (index!==null&&wfZeilen[index]) ? wfZeilen[index].geber : '';
   else if(ziel==='plan') schon = (index!==null&&planZeilen[index]) ? planZeilen[index].geber : '';
   else if(ziel==='ein'){
@@ -2361,6 +2548,9 @@ function confirmGeber(){
   const sel=document.querySelector('#geber-list button.on');
   if(!sel){ showToast('Bitte einen Geldgeber wählen.'); return; }
   const v=sel.dataset.v;
+  if(geberZiel.ziel==='kosten'){
+    kostenGeber=v; zeigeKostenGeber(); closeM('modal-geber'); return;
+  }
   if(geberZiel.ziel==='wechsler'){
     if(geberZiel.index===null) wexZeilen.forEach(z=>{ if(z.herkunft==='kredit') z.geber=v; });
     else wexZeilen[geberZiel.index].geber=v;
@@ -2623,14 +2813,16 @@ async function zeichneBlatt(){
   const bistro = alle.filter(n=>n>12);
   const su = summen(leerungen);
   const bk = bankSummen(monatDoc);
-  const kosten = Number(monatDoc.sonstige)||0;
+  const ko = kostenSummen(monatDoc);
+  const kosten = ko.gesamt;
+  const ei = einlagenSummen(monatDoc);
   const kb = kreditBewegung(monat);
   const tw = tauschSaldo();
   // Übertrag aus dem Vormonat: derselbe Wert wie auf der Hauptseite
   const vmQ = await vormonatWert();
-  const vmS = Number(vmQ.s)||0, vmM = Number(vmQ.m)||0;
-  const restS = vmS + su.scheine - bk.s - kosten + kb.s + tw.s;
-  const restM = vmM + su.muenzen - bk.m + kb.m + tw.m;
+  const vmS = (Number(vmQ.s)||0) + ei.s, vmM = (Number(vmQ.m)||0) + ei.m;
+  const restS = vmS + su.scheine - bk.s - ko.s + kb.s + tw.s;
+  const restM = vmM + su.muenzen - bk.m - ko.m + kb.m + tw.m;
   const sys = monatDoc.system||{};
   const sysS = Number(sys.s)||0, sysM = Number(sys.m)||0;
   const dS = su.gerS-sysS, dM = su.gerM-sysM;
@@ -3136,6 +3328,197 @@ async function saveNeuKredit(){
     await ladeFiliale();
   }catch(e){ showToast('Fehler: '+e.message); }
   hideSpinner();
+}
+
+/* ══ Sonstige Einnahmen ════════════════════════════════════════
+   Geld von außen. Liegt im Monatsdokument unter einlagen[] und zählt zum
+   Anfangsbestand — deshalb steht es auch im Block ganz oben.              */
+let einlageIndex=null, einlageForm='scheine';
+function elForm(v,b){
+  einlageForm=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function openEinlage(i){
+  einlageIndex = (i===null||i===undefined) ? null : i;
+  const e = einlageIndex===null ? null : (monatDoc.einlagen||[])[einlageIndex];
+  document.getElementById('el-lg').textContent=NAMEN[lg];
+  document.getElementById('el-datum').value  = e ? (e.datum||heute()) : heute();
+  document.getElementById('el-text').value   = e ? (e.text||'') : '';
+  document.getElementById('el-betrag').value = e ? zahl(e.betrag) : '';
+  einlageForm = e ? (e.form||'scheine') : 'scheine';
+  document.getElementById('el-form').querySelectorAll('button').forEach((b,n)=>
+    b.classList.toggle('on', (n===0) === (einlageForm!=='muenzen')));
+  document.getElementById('el-del').style.display = einlageIndex===null ? 'none' : '';
+  openM('modal-einlage');
+}
+async function saveEinlage(){
+  const betrag=parseNum(document.getElementById('el-betrag').value);
+  if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
+  const eintrag={
+    datum: document.getElementById('el-datum').value||heute(),
+    text:  (document.getElementById('el-text').value||'').trim(),
+    form:  einlageForm, betrag
+  };
+  const liste=(monatDoc.einlagen||[]).slice();
+  if(einlageIndex===null) liste.push(eintrag); else liste[einlageIndex]=eintrag;
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({einlagen:liste},{merge:true});
+    monatDoc.einlagen=liste;
+    await melde('geld', einlageIndex===null?'Einnahme erfasst':'Einnahme geändert',
+      (eintrag.text||'Sonstige Einnahme')+' · '+(eintrag.form==='muenzen'?'Münzen':'Scheine'), betrag);
+    closeM('modal-einlage');
+    showToast('Einnahme gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function einlageLoeschen(){
+  if(einlageIndex===null) return;
+  const liste=(monatDoc.einlagen||[]).slice();
+  const weg=liste.splice(einlageIndex,1)[0];
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat).set({einlagen:liste},{merge:true});
+    monatDoc.einlagen=liste;
+    await melde('minus','Einnahme gelöscht', weg?(weg.text||''):'', weg?weg.betrag:null);
+    closeM('modal-einlage');
+    showToast('Eintrag entfernt');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+
+/* ══ Sonstige Kosten ═════════════════════════════════════════
+   Eine Liste statt einer einzigen Monatssumme. Wurde das Geld geliehen, hängt
+   an der Zeile genau ein Kredit — erkennbar an kostenRef, damit beim Ändern
+   nicht der falsche erwischt wird.                                          */
+let kostenIndex=null, kostenArt='sonstiges', kostenForm='scheine',
+    kostenHerkunft='kasse', kostenGeber='';
+function koArt(v,b){
+  kostenArt=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function koForm(v,b){
+  kostenForm=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}
+function koHerkunft(v,b){
+  kostenHerkunft=v;
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  if(v==='kredit' && !kostenGeber){ zeigeKostenGeber(); openGeber('kosten',null); }
+  else zeigeKostenGeber();
+}
+function zeigeKostenGeber(){
+  const feld=document.getElementById('ko-geber');
+  if(!feld) return;
+  feld.innerHTML = kostenHerkunft==='kredit'
+    ? `<div class="kredit-line"><s>Geldgeber: <b>${kostenGeber?(NAMEN[kostenGeber]||kostenGeber):'noch offen'}</b></s>
+        <button class="edit-link" style="margin-left:auto" onclick="openGeber('kosten',null)">ändern</button></div>`
+    : '';
+}
+function openKosten(i){
+  const liste=kostenListe(monatDoc);
+  kostenIndex = (i===null||i===undefined) ? null : i;
+  const k = kostenIndex===null ? null : liste[kostenIndex];
+  document.getElementById('ko-lg').textContent=NAMEN[lg];
+  document.getElementById('ko-datum').value  = k ? (k.datum||'') : heute();
+  document.getElementById('ko-bem').value    = k ? (k.bem||'') : '';
+  document.getElementById('ko-betrag').value = k ? zahl(k.betrag) : '';
+  kostenArt       = k ? (k.art||'sonstiges') : 'sonstiges';
+  kostenForm      = k ? (k.form||'scheine') : 'scheine';
+  kostenHerkunft  = k ? (k.herkunft||'kasse') : 'kasse';
+  kostenGeber     = k ? (k.geber||'') : '';
+  document.getElementById('ko-art').querySelectorAll('button').forEach(b=>
+    b.classList.toggle('on', b.getAttribute('onclick').indexOf("'"+kostenArt+"'")>=0));
+  document.getElementById('ko-form').querySelectorAll('button').forEach((b,n)=>
+    b.classList.toggle('on', (n===0) === (kostenForm!=='muenzen')));
+  document.getElementById('ko-herkunft').querySelectorAll('button').forEach((b,n)=>
+    b.classList.toggle('on', (n===0) === (kostenHerkunft!=='kredit')));
+  zeigeKostenGeber();
+  document.getElementById('ko-del').style.display = kostenIndex===null ? 'none' : '';
+  openM('modal-kosten');
+}
+// Die alte Monatssumme wird erst hier zu einem echten Eintrag — vorher wird
+// nichts in die Datenbank geschrieben.
+function kostenFestschreiben(){
+  return kostenListe(monatDoc).map(k=>{
+    const n={...k}; if(n.alt){ delete n.alt; n.id=neueKid(); } return n;
+  });
+}
+async function saveKostenEintrag(){
+  const betrag=parseNum(document.getElementById('ko-betrag').value);
+  if(!betrag){ showToast('Bitte einen Betrag eintragen.'); return; }
+  if(kostenHerkunft==='kredit' && !kostenGeber){
+    showToast('Bitte eintragen, von wem das Geld geliehen wurde.'); openGeber('kosten',null); return; }
+  const liste=kostenFestschreiben();
+  const eintrag={
+    id: (kostenIndex!==null && liste[kostenIndex] && liste[kostenIndex].id) || neueKid(),
+    datum: document.getElementById('ko-datum').value||'',
+    art: kostenArt, bem:(document.getElementById('ko-bem').value||'').trim(),
+    form: kostenForm, betrag,
+    herkunft: kostenHerkunft, geber: kostenHerkunft==='kredit' ? kostenGeber : ''
+  };
+  if(kostenIndex===null) liste.push(eintrag); else liste[kostenIndex]=eintrag;
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat)
+      .set({kosten:liste, sonstige:0},{merge:true});
+    monatDoc.kosten=liste; monatDoc.sonstige=0;
+    await syncKostenKredit(eintrag);
+    await melde('geld', kostenIndex===null?'Kosten erfasst':'Kosten geändert',
+      (KOSTEN_ART[eintrag.art]||'Sonstiges')+(eintrag.bem?' · '+eintrag.bem:''), betrag);
+    closeM('modal-kosten');
+    showToast('Kosten gespeichert ✓');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+async function kostenLoeschen(){
+  if(kostenIndex===null) return;
+  const liste=kostenFestschreiben();
+  const weg=liste.splice(kostenIndex,1)[0];
+  showSpinner();
+  try{
+    await db.collection('leerung_monat').doc(lg+'_'+monat)
+      .set({kosten:liste, sonstige:0},{merge:true});
+    monatDoc.kosten=liste; monatDoc.sonstige=0;
+    if(weg) await syncKostenKredit({id:weg.id, herkunft:'kasse'});
+    await melde('minus','Kosten gelöscht',
+      weg?(KOSTEN_ART[weg.art]||'Sonstiges'):'', weg?weg.betrag:null);
+    closeM('modal-kosten');
+    showToast('Eintrag entfernt');
+    await ladeFiliale();
+  }catch(e){ showToast('Fehler: '+e.message); }
+  hideSpinner();
+}
+/* Genau ein Kredit je Kostenzeile. Gefunden wird er über kostenRef und nicht
+   über Datum oder Betrag — so überlebt er jede Änderung der Zeile.          */
+async function syncKostenKredit(eintrag){
+  const dran = kredite.filter(k=>k.kostenRef===eintrag.id);
+  if(eintrag.herkunft==='kredit' && eintrag.geber){
+    const daten={geber:eintrag.geber, nehmer:lg, betrag:eintrag.betrag,
+      datum:eintrag.datum||heute(), monat, zweck:'kosten', art:eintrag.form,
+      kostenRef:eintrag.id};
+    const offen = dran.find(k=>!k.getilgtAm);
+    if(offen){
+      await db.collection('leerung_kredit').doc(offen.id).set(daten,{merge:true});
+    }else if(!dran.length){
+      await db.collection('leerung_kredit').add(
+        Object.assign({}, daten, {getilgtAm:null, getilgtArt:null}));
+    }
+    return;
+  }
+  // Keine Schuld mehr: offene, noch nicht angezahlte Kredite dieser Zeile entfernen
+  for(const k of dran){
+    if(k.getilgtAm) continue;
+    if(kredite.some(x=>x.teilVon===k.id)) continue;
+    await db.collection('leerung_kredit').doc(k.id).delete();
+  }
 }
 
 /* ══ Geld tauschen: Münzen ↔ Scheine ═════════════════════════════════ */
@@ -3750,17 +4133,9 @@ async function tilgungZurueck(){
 }
 
 /* ══ Kleinkram ═══════════════════════════════════════════════════════ */
-async function saveKosten(v){
-  const n=parseNum(v);
-  const vorher=Number(monatDoc.sonstige)||0;
-  try{
-    await db.collection('leerung_monat').doc(lg+'_'+monat).set({sonstige:n},{merge:true});
-    monatDoc.sonstige=n;
-    if(Math.abs(n-vorher)>0.001)
-      await melde('geld','Sonstige Kosten geändert','von '+zahl(vorher)+' auf '+zahl(n), n);
-    renderMain();
-  }catch(e){ showToast('Fehler: '+e.message); }
-}
+// Früher hing hier das einzelne Eingabefeld für die Monatssumme. Erfasst wird
+// jetzt über „Kosten erfassen"; die Funktion bleibt nur als Brücke stehen.
+async function saveKosten(v){ openKosten(null); }
 async function saveSystem(feld,v){
   const sys={...(monatDoc.system||{})};
   sys[feld]=parseNum(v);
