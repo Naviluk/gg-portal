@@ -341,7 +341,16 @@ body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-f
   border-radius:20px;padding:.14rem .5rem;white-space:nowrap}
 .k-art.halle{background:#E9F0FE;color:#1D4FB8}
 .k-art.getraenke{background:#E7F7F1;color:#0A7D5F}
+.k-art.kasse{background:#FDF1E3;color:#8F5208}
+/* Hinweiszeile unter der Gesamtsumme eines Automaten — nur zur Information */
+.bt tfoot tr.auf td{font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;
+  color:var(--text-dim);text-align:left;padding-top:.1rem;border-top:none;background:none}
 .k-art.sonstiges{background:#EDF1F7;color:#5A6980}
+/* Vier Arten passen nebeneinander nicht aufs Handy — sie brechen in zwei Reihen um */
+.seg2.vier{flex-wrap:wrap}
+.seg2.vier button{flex:1 1 44%}
+.seg2.vier button:nth-child(3){border-left:none}
+.seg2.vier button:nth-child(n+3){border-top:1px solid var(--glass-border)}
 .k-kredit{font-size:.56rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
   border-radius:20px;padding:.14rem .5rem;background:#FDE8EE;color:#A5103A;white-space:nowrap}
 .edit-link{background:none;border:none;color:var(--acc);font-family:'Poppins',sans-serif;
@@ -545,7 +554,8 @@ input[type=date]{-webkit-appearance:none;appearance:none;min-width:0;max-width:1
 .grid-h{display:grid;gap:.35rem;align-items:center}
 .g-ger{grid-template-columns:auto 1fr 1fr}
 .g-w{grid-template-columns:56px 46px 46px 1fr 30px}
-.g-get{grid-template-columns:auto 1fr}
+/* Getränke haben jetzt zwei Betragsspalten, genau wie die Geräte */
+.g-get{grid-template-columns:auto 1fr 1fr}
 .ein-block{border:1px solid var(--glass-border);border-radius:13px;padding:.6rem;margin-bottom:.7rem;
   background:var(--zebra)}
 .ein-kopf{display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap}
@@ -1296,9 +1306,10 @@ textarea.note:focus{border-color:var(--acc)}
       <label class="fl">Datum</label>
       <input type="date" class="num" id="ko-datum">
       <label class="fl">Art</label>
-      <div class="seg2" id="ko-art">
+      <div class="seg2 vier" id="ko-art">
         <button onclick="koArt('halle',this)">Hallenbedarf</button>
         <button onclick="koArt('getraenke',this)">Getränke</button>
+        <button onclick="koArt('kasse',this)">Kasse</button>
         <button class="on" onclick="koArt('sonstiges',this)">Sonstiges</button>
       </div>
       <label class="fl">Bemerkung · freiwillig</label>
@@ -1682,8 +1693,17 @@ function vorMonat(m){
 //   Sonstige Kosten gehen zu Lasten der Scheine.
 //   Kredite zählen in der Form, in der sie geflossen sind: ein Kredit aus
 //   2-€-Stücken verändert nur die Münzen (siehe kreditBewegung).
+/* Getränke werden seit November nach Scheinen und Münzen erfasst. Bis dahin
+   stand dort eine einzige Zahl — die zählt weiter vollständig als Münzen,
+   damit kein alter Monat nachträglich anders ausfällt.                      */
+function getrWert(eintrag, feld){
+  const w = ((eintrag||{}).getraenke||{})[feld];
+  if(w && typeof w === 'object') return {s:Number(w.s)||0, m:Number(w.m)||0};
+  return {s:0, m:Number(w)||0};
+}
 function summen(liste){
   let gerS=0,gerM=0,aus=0,ein=0,einS=0,einM=0,getr=0,kaffee=0,getrA=0,snack=0;
+  let getrS=0,getrM=0;
   liste.forEach(l=>{
     Object.values(l.geraete||{}).forEach(g=>{ gerS+=Number(g.s)||0; gerM+=Number(g.m)||0; });
     aus += Number(l.wechslerAus)||0;
@@ -1691,14 +1711,16 @@ function summen(liste){
       const b=Number(w.betrag)||0; ein+=b;
       if(Number(w.wert)>=10) einS+=b; else einM+=b;
     });
-    const g=l.getraenke||{};
-    kaffee+=Number(g.kaffee)||0; getrA+=Number(g.getraenke)||0; snack+=Number(g.snack)||0;
+    const gk=getrWert(l,'kaffee'), gg=getrWert(l,'getraenke'), gsn=getrWert(l,'snack');
+    kaffee+=gk.s+gk.m; getrA+=gg.s+gg.m; snack+=gsn.s+gsn.m;
+    getrS+=gk.s+gg.s+gsn.s; getrM+=gk.m+gg.m+gsn.m;
   });
   getr = kaffee+getrA+snack;
   return {gerS,gerM,ger:gerS+gerM,aus,ein,einS,einM,wex:aus-ein,
-          getr,kaffee,getrA,snack,
+          getr,kaffee,getrA,snack,getrS,getrM,
           gesamt:gerS+gerM+(aus-ein)+getr,
-          scheine:gerS+aus-einS, muenzen:gerM+getr-einM};
+          // Scheine aus den Automaten zählen jetzt zu den Scheinen, nicht mehr zu den Münzen
+          scheine:gerS+aus-einS+getrS, muenzen:gerM+getrM-einM};
 }
 /* Einlagen — Geld, das von außen in die Kasse kommt (bezahlte Rechnung, Rückgabe
    eines Vorschusses). Es zählt wie der Übertrag aus dem Vormonat zum Anfangsbestand
@@ -1712,7 +1734,8 @@ function einlagenSummen(doc){
   return {s,m,gesamt:s+m};
 }
 
-const KOSTEN_ART = {halle:'Hallenbedarf', getraenke:'Getränke', sonstiges:'Sonstiges'};
+const KOSTEN_ART = {halle:'Hallenbedarf', getraenke:'Getränke', kasse:'Kasse',
+                    sonstiges:'Sonstiges'};
 /* Früher stand für den ganzen Monat eine einzige Summe im Feld „sonstige".
    Damit die alten Monate ihre Beträge behalten, wird diese Summe hier wie ein
    einzelner Eintrag behandelt, solange noch keine Liste angelegt wurde. Geschrieben
@@ -2468,10 +2491,13 @@ function openLeerung(id){
       <input id="ge-m-${i}" inputmode="decimal" autocomplete="off" placeholder="—">`;
   });
   document.getElementById('le-geraete').innerHTML=g;
-  document.getElementById('le-getraenke').innerHTML=`
-    <span class="gn">Kaffeeautomat</span><input id="ge-kaffee" inputmode="decimal" autocomplete="off" placeholder="—">
-    <span class="gn">Getränkeautomat</span><input id="ge-getr" inputmode="decimal" autocomplete="off" placeholder="—">
-    <span class="gn">Snack</span><input id="ge-snack" inputmode="decimal" autocomplete="off" placeholder="—">`;
+  // Getränke nach Scheinen und Münzen — dasselbe Raster wie bei den Geräten
+  document.getElementById('le-getraenke').innerHTML=
+    '<span></span><span class="hd2">Scheine</span><span class="hd2">Münzen</span>'
+    + [['Kaffeeautomat','kaffee'],['Getränkeautomat','getr'],['Snack','snack']]
+        .map(([name,id])=>`<span class="gn">${name}</span>
+          <input id="ge-${id}-s" inputmode="decimal" autocomplete="off" placeholder="—">
+          <input id="ge-${id}-m" inputmode="decimal" autocomplete="off" placeholder="—">`).join('');
   if(alt){
     // Vorhandene Werte in die Felder zurückschreiben
     Object.entries(alt.geraete||{}).forEach(([nr,w])=>{
@@ -2479,10 +2505,12 @@ function openLeerung(id){
       if(fs && w.s) fs.value=zahl(w.s);
       if(fm && w.m) fm.value=zahl(w.m);
     });
-    const gt=alt.getraenke||{};
-    if(gt.kaffee) document.getElementById('ge-kaffee').value=zahl(gt.kaffee);
-    if(gt.getraenke) document.getElementById('ge-getr').value=zahl(gt.getraenke);
-    if(gt.snack) document.getElementById('ge-snack').value=zahl(gt.snack);
+    // Eine alte Leerung trägt nur eine Zahl — die erscheint bei den Münzen
+    [['kaffee','kaffee'],['getr','getraenke'],['snack','snack']].forEach(([id,feld])=>{
+      const w=getrWert(alt,feld);
+      if(w.s) document.getElementById('ge-'+id+'-s').value=zahl(w.s);
+      if(w.m) document.getElementById('ge-'+id+'-m').value=zahl(w.m);
+    });
   }
   wexZeilen = (alt && (alt.wechslerIn||[]).length)
     ? mitAllenNominalen(alt.wechslerIn)
@@ -2618,9 +2646,12 @@ async function saveLeerung(){
     wechslerAus:parseNum(document.getElementById('le-aus').value),
     wechslerIn:wIn,
     getraenke:{
-      kaffee:parseNum(document.getElementById('ge-kaffee').value),
-      getraenke:parseNum(document.getElementById('ge-getr').value),
-      snack:parseNum(document.getElementById('ge-snack').value)
+      kaffee:   {s:parseNum(document.getElementById('ge-kaffee-s').value),
+                 m:parseNum(document.getElementById('ge-kaffee-m').value)},
+      getraenke:{s:parseNum(document.getElementById('ge-getr-s').value),
+                 m:parseNum(document.getElementById('ge-getr-m').value)},
+      snack:    {s:parseNum(document.getElementById('ge-snack-s').value),
+                 m:parseNum(document.getElementById('ge-snack-m').value)}
     },
     erstellt:new Date().toISOString()
   };
@@ -2787,14 +2818,20 @@ function blattAutomaten(tage){
     let zeilen='', summe=0;
     tage.forEach(t=>{
       let b=0;
-      t.eintraege.forEach(l=>b += Number((l.getraenke||{})[feld])||0);
+      t.eintraege.forEach(l=>{ const w=getrWert(l,feld); b += w.s+w.m; });
       if(b){ summe+=b; zeilen += `<tr><td class="l d">${dmy(t.datum)}</td><td>${bz(b)}</td></tr>`; }
     });
     if(!zeilen) zeilen = '<tr><td class="l nix" colspan="2">Nichts erfasst</td></tr>';
+    // Unter der Gesamtsumme steht grau, wie viel davon Scheine und wie viel Münzen sind
+    let sS=0, sM=0;
+    tage.forEach(t=>t.eintraege.forEach(l=>{ const w=getrWert(l,feld); sS+=w.s; sM+=w.m; }));
+    const auf = summe
+      ? `<tr class="auf"><td class="l" colspan="2">Scheine ${zahl(sS)} € · Münzen ${zahl(sM)} €</td></tr>`
+      : '';
     spalten += `<div class="autom"><div class="bl">${name}</div><table class="bt">`
       + '<thead><tr><th class="l">Datum</th><th>Betrag</th></tr></thead>'
       + `<tbody>${zeilen}</tbody>`
-      + `<tfoot><tr><td class="l">Gesamt</td><td>${bz(summe)}</td></tr></tfoot></table></div>`;
+      + `<tfoot><tr><td class="l">Gesamt</td><td>${bz(summe)}</td></tr>${auf}</tfoot></table></div>`;
   });
   return `<div class="autom-reihe">${spalten}</div>`;
 }
@@ -3243,7 +3280,8 @@ async function saveWechslerForm(){
     const daten = {
       lager:lg, datum, monat:datum.slice(0,7), nurWechsler:true,
       geraete:{}, wechslerAus:aus, wechslerIn:wIn,
-      getraenke:{kaffee:0,getraenke:0,snack:0}, erstellt:new Date().toISOString()
+      getraenke:{kaffee:{s:0,m:0}, getraenke:{s:0,m:0}, snack:{s:0,m:0}},
+      erstellt:new Date().toISOString()
     };
     if(wfEditId){
       await db.collection('leerung').doc(wfEditId).set(daten);
