@@ -342,9 +342,6 @@ body[data-lg="viersen"]{--acc:#EA580C;--acc-ink:#B4520C;--acc-bg:#FDEEE1;--acc-f
 .k-art.halle{background:#E9F0FE;color:#1D4FB8}
 .k-art.getraenke{background:#E7F7F1;color:#0A7D5F}
 .k-art.kasse{background:#FDF1E3;color:#8F5208}
-/* Hinweiszeile unter der Gesamtsumme eines Automaten — nur zur Information */
-.bt tfoot tr.auf td{font-family:'Poppins',sans-serif;font-size:.66rem;font-weight:600;
-  color:var(--text-dim);text-align:left;padding-top:.1rem;border-top:none;background:none}
 .k-art.sonstiges{background:#EDF1F7;color:#5A6980}
 /* Vier Arten passen nebeneinander nicht aufs Handy — sie brechen in zwei Reihen um */
 .seg2.vier{flex-wrap:wrap}
@@ -479,6 +476,12 @@ table.lt tr.zeb td{background:var(--zebra)}
 table.lt tfoot td{background:var(--acc-bg);border-top:2px solid var(--acc);font-weight:700;
   font-size:1.02rem;color:var(--acc-ink)}
 table.lt tfoot td:first-child{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800}
+/* Hinweiszeile unter der Gesamtsumme der Getränke — nur zur Information, deshalb
+   grau und in normaler Schreibweise statt in Versalien wie die Fußzeile darüber */
+table.lt tfoot tr.auf td,table.lt tfoot tr.auf td:first-child{
+  font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:600;color:var(--text-dim);
+  text-align:right;background:var(--bg2);border-top:none;letter-spacing:0;
+  text-transform:none;padding:.35rem .9rem .6rem}
 table.lt tr.system td{background:#FFF8EC;border-top:1px solid #F0D9A8}
 table.lt tr.system td:first-child{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
   font-weight:800;color:var(--neon-yellow)}
@@ -2449,7 +2452,9 @@ function renderGetraenke(){
       <tr class="zeb"><td>Getränkeautomat</td><td>${zahl(su.getrA)}</td></tr>
       <tr><td>Snack</td><td>${zahl(su.snack)}</td></tr>
     </tbody>
-    <tfoot><tr><td>Gesamt</td><td>${zahl(su.getr)}</td></tr></tfoot></table></div>`;
+    <tfoot><tr><td>Gesamt</td><td>${zahl(su.getr)}</td></tr>
+      <tr class="auf"><td colspan="2">davon Scheine ${zahl(su.getrS)} €
+        · Münzen ${zahl(su.getrM)} €</td></tr></tfoot></table></div>`;
 }
 
 /* ══ Ansicht wechseln ════════════════════════════════════════════════ */
@@ -2822,16 +2827,10 @@ function blattAutomaten(tage){
       if(b){ summe+=b; zeilen += `<tr><td class="l d">${dmy(t.datum)}</td><td>${bz(b)}</td></tr>`; }
     });
     if(!zeilen) zeilen = '<tr><td class="l nix" colspan="2">Nichts erfasst</td></tr>';
-    // Unter der Gesamtsumme steht grau, wie viel davon Scheine und wie viel Münzen sind
-    let sS=0, sM=0;
-    tage.forEach(t=>t.eintraege.forEach(l=>{ const w=getrWert(l,feld); sS+=w.s; sM+=w.m; }));
-    const auf = summe
-      ? `<tr class="auf"><td class="l" colspan="2">Scheine ${zahl(sS)} € · Münzen ${zahl(sM)} €</td></tr>`
-      : '';
     spalten += `<div class="autom"><div class="bl">${name}</div><table class="bt">`
       + '<thead><tr><th class="l">Datum</th><th>Betrag</th></tr></thead>'
       + `<tbody>${zeilen}</tbody>`
-      + `<tfoot><tr><td class="l">Gesamt</td><td>${bz(summe)}</td></tr>${auf}</tfoot></table></div>`;
+      + `<tfoot><tr><td class="l">Gesamt</td><td>${bz(summe)}</td></tr></tfoot></table></div>`;
   });
   return `<div class="autom-reihe">${spalten}</div>`;
 }
